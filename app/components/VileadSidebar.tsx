@@ -270,28 +270,6 @@ export default function VileadSidebar({
             );
           })}
         </nav>
-
-        {/* Footer */}
-        {!isCollapsed && (
-          <div className="p-4 border-t border-gray-200 bg-gray-50">
-            <div className="space-y-3">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span className="text-xs text-gray-600">Đang hoạt động</span>
-              </div>
-              <p className="text-xs text-gray-500">{currentTime}</p>
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
-                  <span className="text-gray-600 font-medium text-xs">NA</span>
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-gray-900">Nguyễn Văn Anh</p>
-                  <p className="text-xs text-gray-500">Sales Manager</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </>
   );

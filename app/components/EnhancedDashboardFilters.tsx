@@ -27,24 +27,99 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
   const [timeFilter, setTimeFilter] = useState('thisMonth')
   const [compareTimeFilter, setCompareTimeFilter] = useState('lastMonth')
   const [teamFilter, setTeamFilter] = useState('')
+  const [viewType, setViewType] = useState('all') // 'all', 'department', 'team', 'individual'
   const [productFilter, setProductFilter] = useState('')
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
   const [showComparison, setShowComparison] = useState(false)
   const [showAIInsights, setShowAIInsights] = useState(false)
+  const [showCustomDateModal, setShowCustomDateModal] = useState(false)
+  const [customStartDate, setCustomStartDate] = useState('')
+  const [customEndDate, setCustomEndDate] = useState('')
+  const [showLeadsList, setShowLeadsList] = useState(false)
+  const [showEmailComposer, setShowEmailComposer] = useState(false)
+  const [showAnalytics, setShowAnalytics] = useState(false)
+  const [showRevenueReport, setShowRevenueReport] = useState(false)
 
   const handleTimeChange = (value: string) => {
-    setTimeFilter(value)
-    notifyFilterChange({ time: value, compareTime: compareTimeFilter, team: teamFilter, product: productFilter })
+    if (value === 'custom') {
+      setShowCustomDateModal(true)
+    } else {
+      setTimeFilter(value)
+      notifyFilterChange({ time: value, compareTime: compareTimeFilter, team: teamFilter, viewType: viewType, product: productFilter })
+    }
+  }
+
+  const handleCustomDateSubmit = () => {
+    if (customStartDate && customEndDate) {
+      setTimeFilter('custom')
+      setShowCustomDateModal(false)
+      notifyFilterChange({ 
+        time: 'custom', 
+        customStartDate, 
+        customEndDate, 
+        compareTime: compareTimeFilter, 
+        team: teamFilter, 
+        viewType: viewType,
+        product: productFilter 
+      })
+    }
+  }
+
+  const formatCustomDateDisplay = () => {
+    if (timeFilter === 'custom' && customStartDate && customEndDate) {
+      const startDate = new Date(customStartDate).toLocaleDateString('vi-VN')
+      const endDate = new Date(customEndDate).toLocaleDateString('vi-VN')
+      return `${startDate} - ${endDate}`
+    }
+    return ''
+  }
+
+  const getFilterOptions = () => {
+    switch (viewType) {
+      case 'department':
+        return [
+          { value: 'phong_kinh_doanh', label: 'Phòng Kinh doanh' },
+          { value: 'phong_marketing', label: 'Phòng Marketing' },
+          { value: 'phong_cskh', label: 'Phòng CSKH' },
+          { value: 'phong_ke_toan', label: 'Phòng Kế toán' },
+        ]
+      case 'team':
+        return [
+          { value: 'team_sales_1', label: 'Team Sales 1' },
+          { value: 'team_sales_2', label: 'Team Sales 2' },
+          { value: 'team_marketing_digital', label: 'Team Marketing Digital' },
+          { value: 'team_marketing_content', label: 'Team Marketing Content' },
+          { value: 'team_cskh_online', label: 'Team CSKH Online' },
+          { value: 'team_cskh_offline', label: 'Team CSKH Offline' },
+        ]
+      case 'individual':
+        return [
+          { value: 'nguyen_van_a', label: 'Nguyễn Văn A' },
+          { value: 'tran_thi_b', label: 'Trần Thị B' },
+          { value: 'le_van_c', label: 'Lê Văn C' },
+          { value: 'pham_thi_d', label: 'Phạm Thị D' },
+          { value: 'hoang_van_e', label: 'Hoàng Văn E' },
+          { value: 'vu_thi_f', label: 'Vũ Thị F' },
+        ]
+      default:
+        return []
+    }
   }
 
   const handleCompareTimeChange = (value: string) => {
     setCompareTimeFilter(value)
-    notifyFilterChange({ time: timeFilter, compareTime: value, team: teamFilter, product: productFilter })
+    notifyFilterChange({ time: timeFilter, compareTime: value, team: teamFilter, viewType: viewType, product: productFilter })
   }
 
   const handleTeamChange = (value: string) => {
     setTeamFilter(value)
-    notifyFilterChange({ time: timeFilter, compareTime: compareTimeFilter, team: value, product: productFilter })
+    notifyFilterChange({ time: timeFilter, compareTime: compareTimeFilter, team: value, viewType: viewType, product: productFilter })
+  }
+
+  const handleViewTypeChange = (value: string) => {
+    setViewType(value)
+    setTeamFilter('') // Reset team filter when changing view type
+    notifyFilterChange({ time: timeFilter, compareTime: compareTimeFilter, team: '', viewType: value, product: productFilter })
   }
 
   const handleProductChange = (value: string) => {
@@ -118,46 +193,53 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                 <ChevronDown className="w-3 h-3" />
               </div>
             </div>
+            {timeFilter === 'custom' && customStartDate && customEndDate && (
+              <div className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                {formatCustomDateDisplay()}
+              </div>
+            )}
           </div>
 
-          {/* Team Filter */}
+          {/* View Type & Team Filter */}
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-400" />
-            <select 
-              value={teamFilter}
-              onChange={(e) => handleTeamChange(e.target.value)}
-              className="border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Toàn bộ</option>
-              <option value="nhom_a">Nhóm A</option>
-              <option value="nhom_b">Nhóm B</option>
-              <option value="nhom_c">Nhóm C</option>
-              <option value="nhom_d">Nhóm D</option>
-              <option value="nhom_e">Nhóm E</option>
-            </select>
+            <div className="flex items-center gap-2">
+              {/* View Type Selector */}
+              <select 
+                value={viewType}
+                onChange={(e) => handleViewTypeChange(e.target.value)}
+                className="border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="all">Toàn bộ</option>
+                <option value="department">Theo phòng ban</option>
+                <option value="team">Theo team</option>
+                <option value="individual">Theo cá nhân</option>
+              </select>
+              
+              {/* Specific Filter (only show when view type is not 'all') */}
+              {viewType !== 'all' && (
+                <select 
+                  value={teamFilter}
+                  onChange={(e) => handleTeamChange(e.target.value)}
+                  className="border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="">Tất cả {viewType === 'department' ? 'phòng ban' : viewType === 'team' ? 'team' : 'nhân viên'}</option>
+                  {getFilterOptions().map(option => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              )}
+            </div>
           </div>
 
-          {/* Product Filter */}
-          <div className="flex items-center gap-2">
-            <Package className="w-4 h-4 text-gray-400" />
-            <select 
-              value={productFilter}
-              onChange={(e) => handleProductChange(e.target.value)}
-              className="border border-gray-300 rounded px-2.5 py-1.5 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
-            >
-              <option value="">Tất cả sản phẩm</option>
-              <option value="product1">Sản phẩm A</option>
-              <option value="product2">Sản phẩm B</option>
-              <option value="product3">Sản phẩm C</option>
-              <option value="product4">Sản phẩm D</option>
-              <option value="product5">Sản phẩm E</option>
-            </select>
-          </div>
 
-          {/* Advanced Filter Button */}
+
+          {/* Advanced Filter Button - Hidden */}
           <button 
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-blue-600 hover:bg-blue-50 rounded text-sm font-medium transition-colors"
+            className="hidden"
           >
             <Filter className="w-4 h-4" />
             <span>Lọc nâng cao</span>
@@ -337,8 +419,11 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">Thời gian dự kiến: <span className="font-medium">2-3 giờ</span></div>
-                    <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 rounded-md px-3 bg-red-500 hover:bg-red-600 text-white">
-                      Bắt đầu gọi
+                    <button 
+                      onClick={() => setShowLeadsList(true)}
+                      className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 rounded-md px-3 bg-red-500 hover:bg-red-600 text-white"
+                    >
+                      Xem danh sách
                       <ChevronDown className="w-4 h-4 ml-1 rotate-[-90deg]" />
                     </button>
                   </div>
@@ -384,7 +469,10 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">Thời gian dự kiến: <span className="font-medium">1 giờ</span></div>
-                    <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 rounded-md px-3 bg-orange-500 hover:bg-orange-600 text-white">
+                    <button 
+                      onClick={() => setShowEmailComposer(true)}
+                      className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 rounded-md px-3 bg-orange-500 hover:bg-orange-600 text-white"
+                    >
                       Soạn email
                       <ChevronDown className="w-4 h-4 ml-1 rotate-[-90deg]" />
                     </button>
@@ -433,7 +521,10 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">Thời gian dự kiến: <span className="font-medium">30 phút</span></div>
-                    <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-green-300 text-green-600 hover:bg-green-50">
+                    <button 
+                      onClick={() => setShowAnalytics(true)}
+                      className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-green-300 text-green-600 hover:bg-green-50"
+                    >
                       Phân tích
                       <ChevronDown className="w-4 h-4 ml-1 rotate-[-90deg]" />
                     </button>
@@ -483,7 +574,10 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="text-xs text-gray-500">Thời gian dự kiến: <span className="font-medium">1 giờ</span></div>
-                    <button className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-blue-300 text-blue-600 hover:bg-blue-50">
+                    <button 
+                      onClick={() => setShowRevenueReport(true)}
+                      className="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border bg-background hover:text-accent-foreground h-9 rounded-md px-3 border-blue-300 text-blue-600 hover:bg-blue-50"
+                    >
                       Xem báo cáo
                       <ChevronDown className="w-4 h-4 ml-1 rotate-[-90deg]" />
                     </button>
@@ -578,6 +672,553 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
             <button className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors">
               Áp dụng bộ lọc
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Custom Date Picker Modal */}
+      {showCustomDateModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 shadow-2xl">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Chọn khoảng thời gian tùy chỉnh</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Từ ngày
+                </label>
+                <input
+                  type="date"
+                  value={customStartDate}
+                  onChange={(e) => setCustomStartDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Đến ngày
+                </label>
+                <input
+                  type="date"
+                  value={customEndDate}
+                  onChange={(e) => setCustomEndDate(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button 
+                onClick={() => {
+                  setShowCustomDateModal(false)
+                  setTimeFilter('thisMonth') // Reset to default if cancelled
+                }}
+                className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+              >
+                Hủy
+              </button>
+              <button 
+                onClick={handleCustomDateSubmit}
+                disabled={!customStartDate || !customEndDate}
+                className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+              >
+                Áp dụng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leads List Modal */}
+      {showLeadsList && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                📋 Danh sách leads cần liên hệ ưu tiên
+                <span className="ml-2 bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">67 leads</span>
+              </h3>
+              <button 
+                onClick={() => setShowLeadsList(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <svg className="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                </svg>
+                <span className="font-medium text-yellow-800">Cảnh báo thời gian phản hồi</span>
+              </div>
+              <p className="text-sm text-yellow-700">Các leads này đã quá 2 giờ chưa được liên hệ. Tỷ lệ chuyển đổi sẽ giảm 50% nếu không xử lý ngay.</p>
+            </div>
+
+            <div className="overflow-y-auto max-h-96">
+              <table className="w-full">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Lead</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Nguồn</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Thời gian nhận</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Độ ưu tiên</th>
+                    <th className="text-left py-3 px-4 font-medium text-gray-700">Điểm chất lượng</th>
+                    <th className="text-center py-3 px-4 font-medium text-gray-700">Hành động</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { name: 'Nguyễn Văn A', phone: '0901234567', source: 'Facebook', time: '3.2h', priority: 'Cao', quality: '9.2', email: 'nguyenvana@email.com' },
+                    { name: 'Trần Thị B', phone: '0912345678', source: 'Website', time: '2.8h', priority: 'Cao', quality: '8.9', email: 'tranthib@email.com' },
+                    { name: 'Lê Văn C', phone: '0923456789', source: 'Zalo', time: '2.5h', priority: 'Trung bình', quality: '7.8', email: 'levanc@email.com' },
+                    { name: 'Phạm Thị D', phone: '0934567890', source: 'Google Ads', time: '2.1h', priority: 'Cao', quality: '9.0', email: 'phamthid@email.com' },
+                    { name: 'Hoàng Văn E', phone: '0945678901', source: 'Referral', time: '4.1h', priority: 'Rất cao', quality: '9.5', email: 'hoangvane@email.com' },
+                  ].map((lead, index) => (
+                    <tr key={index} className="border-b hover:bg-gray-50">
+                      <td className="py-3 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{lead.name}</span>
+                          <span className="text-sm text-gray-500">{lead.phone}</span>
+                          <span className="text-xs text-gray-400">{lead.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+                          {lead.source}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`font-medium ${
+                          parseFloat(lead.time) > 3 ? 'text-red-600' : 
+                          parseFloat(lead.time) > 2 ? 'text-yellow-600' : 'text-green-600'
+                        }`}>
+                          {lead.time} trước
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2 py-1 text-xs rounded-full ${
+                          lead.priority === 'Rất cao' ? 'bg-red-100 text-red-800' :
+                          lead.priority === 'Cao' ? 'bg-orange-100 text-orange-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {lead.priority}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-1">
+                          <span className={`font-bold ${
+                            parseFloat(lead.quality) >= 9 ? 'text-green-600' :
+                            parseFloat(lead.quality) >= 8 ? 'text-blue-600' : 'text-yellow-600'
+                          }`}>
+                            {lead.quality}
+                          </span>
+                          <span className="text-gray-400">/10</span>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button className="px-3 py-1 bg-green-500 hover:bg-green-600 text-white text-xs rounded transition-colors">
+                            📞 Gọi ngay
+                          </button>
+                          <button className="px-3 py-1 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded transition-colors">
+                            💬 SMS
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between pt-4 border-t">
+              <div className="text-sm text-gray-600">
+                Hiển thị 5 trong số 67 leads. Sắp xếp theo độ ưu tiên.
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowLeadsList(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Đóng
+                </button>
+                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                  Xuất Excel
+                </button>
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  Phân bổ hàng loạt
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Email Composer Modal */}
+      {showEmailComposer && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-3xl max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                📧 Soạn email follow-up
+                <span className="ml-2 bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded-full">12 khách hàng</span>
+              </h3>
+              <button 
+                onClick={() => setShowEmailComposer(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              <div className="bg-orange-50 p-3 rounded-lg border border-orange-200">
+                <div className="flex items-center gap-2 mb-2">
+                  <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                  </svg>
+                  <span className="font-medium text-orange-800">Email template được AI tối ưu</span>
+                </div>
+                <p className="text-sm text-orange-700">AI đã phân tích lịch sử tương tác và tạo email cá nhân hóa cho từng khách hàng.</p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Chủ đề email</label>
+                  <input 
+                    type="text" 
+                    defaultValue="🎯 Cập nhật quan trọng cho [Tên khách hàng] - Ưu đãi đặc biệt"
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Độ ưu tiên</label>
+                  <select className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                    <option>Cao - Gửi ngay</option>
+                    <option>Trung bình - Gửi trong ngày</option>
+                    <option>Thấp - Gửi trong tuần</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung email</label>
+                <textarea 
+                  rows={8}
+                  defaultValue={`Chào [Tên khách hàng],
+
+Cảm ơn bạn đã quan tâm đến sản phẩm của chúng tôi. Qua việc phân tích nhu cầu của bạn, chúng tôi có một số cập nhật quan trọng:
+
+✅ Sản phẩm [Tên sản phẩm] hiện có ưu đãi đặc biệt 15% (chỉ áp dụng đến cuối tháng)
+✅ Chúng tôi đã chuẩn bị demo cá nhân hóa dựa trên yêu cầu của bạn
+✅ Đội ngũ kỹ thuật sẵn sàng hỗ trợ setup miễn phí
+
+Bạn có 15 phút để trao đổi trực tiếp không? Tôi tin rằng giải pháp này sẽ giúp [công ty/dự án] của bạn tiết kiệm đáng kể chi phí và thời gian.
+
+Trân trọng,
+[Tên sales]`}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-4 border-t">
+                <div className="text-sm text-gray-600">
+                  📊 Tỷ lệ mở email dự kiến: <span className="font-semibold text-green-600">78%</span> | 
+                  Click rate: <span className="font-semibold text-blue-600">23%</span>
+                </div>
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => setShowEmailComposer(false)}
+                    className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors">
+                    📧 Gửi ngay (12 emails)
+                  </button>
+                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    ⏰ Lên lịch gửi
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Analytics Modal */}
+      {showAnalytics && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-5xl max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                📈 Phân tích tỷ lệ chuyển đổi chi tiết
+                <span className="ml-2 bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">+18.5%</span>
+              </h3>
+              <button 
+                onClick={() => setShowAnalytics(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-3">📊 Kênh conversion cao nhất</h4>
+                  <div className="space-y-2">
+                    {[
+                      { channel: 'Facebook Ads', rate: '24.3%', trend: '+3.2%', leads: 156 },
+                      { channel: 'Google Ads', rate: '21.7%', trend: '+1.8%', leads: 134 },
+                      { channel: 'Website Organic', rate: '19.2%', trend: '+2.1%', leads: 98 },
+                      { channel: 'Referral', rate: '31.5%', trend: '+5.4%', leads: 43 },
+                    ].map((item, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                        <div>
+                          <div className="font-medium text-sm">{item.channel}</div>
+                          <div className="text-xs text-gray-500">{item.leads} leads</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-green-600">{item.rate}</div>
+                          <div className="text-xs text-green-500">{item.trend}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-3">⏱️ Conversion theo thời gian</h4>
+                  <div className="space-y-2">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Trong 24h đầu</span>
+                      <span className="font-bold text-blue-600">45%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Trong 3 ngày</span>
+                      <span className="font-bold text-blue-600">73%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Trong 1 tuần</span>
+                      <span className="font-bold text-blue-600">89%</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm">Sau 1 tuần</span>
+                      <span className="font-bold text-gray-500">11%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h4 className="font-semibold text-purple-800 mb-3">🎯 Gợi ý tối ưu</h4>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-white rounded border-l-4 border-green-400">
+                      <div className="font-medium text-sm text-green-800">Tăng budget Referral</div>
+                      <div className="text-xs text-green-600">Conversion rate cao nhất (31.5%) nhưng volume thấp</div>
+                    </div>
+                    <div className="p-2 bg-white rounded border-l-4 border-blue-400">
+                      <div className="font-medium text-sm text-blue-800">Tối ưu Facebook Ads</div>
+                      <div className="text-xs text-blue-600">Volume cao nhưng có thể cải thiện chất lượng leads</div>
+                    </div>
+                    <div className="p-2 bg-white rounded border-l-4 border-orange-400">
+                      <div className="font-medium text-sm text-orange-800">Follow-up nhanh hơn</div>
+                      <div className="text-xs text-orange-600">45% conversion trong 24h đầu</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t mt-6">
+              <div className="text-sm text-gray-600">
+                Dữ liệu cập nhật: 5 phút trước | Độ tin cậy: <span className="font-semibold text-green-600">95%</span>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowAnalytics(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Đóng
+                </button>
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  📊 Xuất báo cáo
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revenue Report Modal */}
+      {showRevenueReport && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-full max-w-4xl max-h-[80vh] overflow-hidden shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 flex items-center">
+                💰 Báo cáo doanh thu chi tiết
+                <span className="ml-2 bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">2.4M VNĐ</span>
+              </h3>
+              <button 
+                onClick={() => setShowRevenueReport(false)}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="lg:col-span-2 space-y-4">
+                <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                  <h4 className="font-semibold text-blue-800 mb-3">📈 Tiến độ mục tiêu tháng</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="text-sm font-medium">Đã đạt được</span>
+                        <span className="text-sm font-bold text-blue-600">2.4M / 2.8M VNĐ</span>
+                      </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div className="bg-blue-600 h-2 rounded-full" style={{width: '85%'}}></div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">85% hoàn thành</div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="text-center p-2 bg-white rounded border">
+                        <div className="text-lg font-bold text-green-600">0.4M</div>
+                        <div className="text-xs text-gray-500">Còn lại</div>
+                      </div>
+                      <div className="text-center p-2 bg-white rounded border">
+                        <div className="text-lg font-bold text-blue-600">5 ngày</div>
+                        <div className="text-xs text-gray-500">Thời hạn</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                  <h4 className="font-semibold text-green-800 mb-3">🎯 Top 5 deals lớn nhất</h4>
+                  <div className="space-y-2">
+                    {[
+                      { company: 'Công ty TNHH ABC', value: '180M', probability: '90%', stage: 'Closing' },
+                      { company: 'Doanh nghiệp XYZ', value: '120M', probability: '75%', stage: 'Negotiation' },
+                      { company: 'Startup DEF', value: '85M', probability: '60%', stage: 'Proposal' },
+                      { company: 'Tập đoàn GHI', value: '95M', probability: '85%', stage: 'Demo' },
+                      { company: 'Company JKL', value: '70M', probability: '50%', stage: 'Discovery' },
+                    ].map((deal, index) => (
+                      <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                        <div>
+                          <div className="font-medium text-sm">{deal.company}</div>
+                          <div className="text-xs text-gray-500">{deal.stage}</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="font-bold text-green-600">{deal.value}</div>
+                          <div className="text-xs text-blue-600">{deal.probability}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                  <h4 className="font-semibold text-purple-800 mb-3">🔮 Dự báo AI</h4>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-white rounded border">
+                      <div className="text-sm font-medium text-green-800">Khả năng đạt mục tiêu</div>
+                      <div className="text-2xl font-bold text-green-600">92%</div>
+                      <div className="text-xs text-green-500">Dựa trên pipeline hiện tại</div>
+                    </div>
+                    <div className="p-2 bg-white rounded border">
+                      <div className="text-sm font-medium text-blue-800">Doanh thu dự kiến</div>
+                      <div className="text-lg font-bold text-blue-600">2.75M VNĐ</div>
+                      <div className="text-xs text-blue-500">±0.2M (độ tin cậy 90%)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h4 className="font-semibold text-yellow-800 mb-3">⚡ Hành động ưu tiên</h4>
+                  <div className="space-y-2">
+                    <div className="p-2 bg-white rounded border-l-4 border-red-400">
+                      <div className="font-medium text-sm text-red-800">Urgency: Deal ABC 180M</div>
+                      <div className="text-xs text-red-600">Closing trong 2 ngày</div>
+                    </div>
+                    <div className="p-2 bg-white rounded border-l-4 border-orange-400">
+                      <div className="font-medium text-sm text-orange-800">Follow-up: Deal XYZ</div>
+                      <div className="text-xs text-orange-600">Scheduled demo tomorrow</div>
+                    </div>
+                    <div className="p-2 bg-white rounded border-l-4 border-blue-400">
+                      <div className="font-medium text-sm text-blue-800">Nurture: 3 deals nhỏ</div>
+                      <div className="text-xs text-blue-600">Tổng 65M backup plans</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                  <h4 className="font-semibold text-gray-800 mb-3">📊 Thống kê nhanh</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span>Deals active:</span>
+                      <span className="font-bold">23</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Avg deal size:</span>
+                      <span className="font-bold">104M</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Close rate:</span>
+                      <span className="font-bold text-green-600">68%</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>Sales cycle:</span>
+                      <span className="font-bold">21 ngày</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between pt-4 border-t mt-6">
+              <div className="text-sm text-gray-600">
+                Cập nhật realtime | Độ chính xác dự báo: <span className="font-semibold text-green-600">90%</span>
+              </div>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => setShowRevenueReport(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+                >
+                  Đóng
+                </button>
+                <button 
+                  onClick={() => {
+                    setShowRevenueReport(false)
+                    // Navigate to detailed reports page
+                    window.location.href = '/reports/detailed'
+                  }}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  � Xem báo cáo chi tiết
+                </button>
+                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                  📊 Xuất báo cáo Excel
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

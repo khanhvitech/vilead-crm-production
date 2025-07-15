@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { 
   Settings,
   Users,
@@ -104,7 +105,6 @@ interface User {
   email: string
   fullName: string
   role: string
-  customRoles: string[]
   department: string
   team: string
   status: 'active' | 'inactive' | 'locked'
@@ -360,7 +360,6 @@ const sampleUsers: User[] = [
     email: 'admin@company.com',
     fullName: 'Quản trị viên',
     role: 'admin',
-    customRoles: [],
     department: 'IT',
     team: 'Hệ thống',
     status: 'active',
@@ -389,7 +388,6 @@ const sampleUsers: User[] = [
     email: 'sales01@company.com',
     fullName: 'Nguyễn Văn An',
     role: 'sales',
-    customRoles: ['team_lead'],
     department: 'Sales',
     team: 'Team A',
     status: 'active',
@@ -614,7 +612,7 @@ const sampleTags: CustomTag[] = [
 ]
 
 export default function SettingsManagement() {
-  const [activeTab, setActiveTab] = useState('users')
+  const [activeTab, setActiveTab] = useState('company')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showUserModal, setShowUserModal] = useState(false)
@@ -1265,9 +1263,11 @@ export default function SettingsManagement() {
                   <div className="flex items-center space-x-4">
                     <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
                       {interfaceSettings.logo.url ? (
-                        <img 
+                        <Image 
                           src={interfaceSettings.logo.url} 
                           alt="Logo" 
+                          width={64}
+                          height={64}
                           className="max-w-full max-h-full object-contain"
                         />
                       ) : (
@@ -1658,11 +1658,6 @@ export default function SettingsManagement() {
                            user.role === 'manager' ? 'Quản lý' :
                            user.role === 'sales' ? 'Sales' : 'Hỗ trợ'}
                         </Badge>
-                        {user.customRoles.map((role, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
-                            {role}
-                          </Badge>
-                        ))}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -2511,182 +2506,19 @@ export default function SettingsManagement() {
     )
   }
 
-  // Custom Role Management Component
+  // Custom Role Management Component - Disabled
   const CustomRoleManagement = () => {
-    const [customRoles, setCustomRoles] = useState([
-      {
-        id: 1,
-        name: 'Trưởng nhóm Sales',
-        description: 'Quản lý nhóm sales với quyền hạn mở rộng',
-        permissions: {
-          leads: { view: 'team', create: true, edit: true, delete: false, export: true },
-          deals: { view: 'team', create: true, edit: true, delete: false, export: true },
-          customers: { view: 'team', create: true, edit: true, delete: false, export: false },
-          reports: { view: 'team', create: true, export: true, customReports: true }
-        },
-        assignedUsers: 3,
-        createdAt: '2025-06-01',
-        updatedAt: '2025-06-10'
-      },
-      {
-        id: 2,
-        name: 'Nhân viên Marketing',
-        description: 'Tập trung vào lead generation và marketing campaigns',
-        permissions: {
-          leads: { view: 'all', create: true, edit: true, delete: false, export: true },
-          deals: { view: 'none', create: false, edit: false, delete: false, export: false },
-          customers: { view: 'own', create: false, edit: false, delete: false, export: false },
-          reports: { view: 'own', create: false, export: false, customReports: false }
-        },
-        assignedUsers: 2,
-        createdAt: '2025-05-15',
-        updatedAt: '2025-06-05'
-      }
-    ])
-    const [showCreateRoleModal, setShowCreateRoleModal] = useState(false)
-    const [selectedRole, setSelectedRole] = useState<any>(null)
-
     return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Vai trò Tùy chỉnh</h2>
-            <p className="text-gray-600">Tạo và quản lý vai trò với quyền hạn tùy chỉnh</p>
-          </div>
-          <Button onClick={() => setShowCreateRoleModal(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Tạo vai trò mới
-          </Button>
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <h3 className="text-lg font-medium text-gray-900 mb-2">Chức năng Vai trò không khả dụng</h3>
+          <p className="text-gray-500">Chức năng quản lý vai trò đã được tắt.</p>
         </div>
-
-        {/* Custom Roles Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {customRoles.map((role) => (
-            <Card key={role.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="text-lg">{role.name}</CardTitle>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="sm">
-                        <MoreVertical className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent>
-                      <DropdownMenuItem onClick={() => setSelectedRole(role)}>
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Chỉnh sửa
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-600">
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Xóa vai trò
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <CardDescription>{role.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Permissions Summary */}
-                <div className="space-y-2">
-                  <h4 className="font-medium text-sm">Quyền hạn:</h4>
-                  <div className="grid grid-cols-2 gap-2 text-xs">
-                    <div className="flex items-center space-x-1">
-                      <Users className="w-3 h-3" />
-                      <span>Leads: {role.permissions.leads.view}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Target className="w-3 h-3" />
-                      <span>Deals: {role.permissions.deals.view}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <UserCog className="w-3 h-3" />
-                      <span>Khách hàng: {role.permissions.customers.view}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <BarChart3 className="w-3 h-3" />
-                      <span>Báo cáo: {role.permissions.reports.view}</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Assigned Users */}
-                <div className="flex items-center justify-between pt-4 border-t">
-                  <div className="flex items-center space-x-2">
-                    <Users className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-600">
-                      {role.assignedUsers} người dùng
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    Cập nhật: {formatDate(role.updatedAt)}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-
-        {/* Permissions Matrix */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Ma trận Phân quyền</CardTitle>
-            <CardDescription>Tổng quan quyền hạn của các vai trò</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-2">Vai trò</th>
-                    <th className="text-center py-2">Leads</th>
-                    <th className="text-center py-2">Deals</th>
-                    <th className="text-center py-2">Khách hàng</th>
-                    <th className="text-center py-2">Báo cáo</th>
-                    <th className="text-center py-2">Xuất dữ liệu</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {customRoles.map((role) => (
-                    <tr key={role.id} className="border-b">
-                      <td className="py-2 font-medium">{role.name}</td>
-                      <td className="text-center py-2">
-                        <Badge variant={role.permissions.leads.view === 'all' ? 'default' : 'secondary'}>
-                          {role.permissions.leads.view}
-                        </Badge>
-                      </td>
-                      <td className="text-center py-2">
-                        <Badge variant={role.permissions.deals.view === 'all' ? 'default' : 'secondary'}>
-                          {role.permissions.deals.view}
-                        </Badge>
-                      </td>
-                      <td className="text-center py-2">
-                        <Badge variant={role.permissions.customers.view === 'all' ? 'default' : 'secondary'}>
-                          {role.permissions.customers.view}
-                        </Badge>
-                      </td>
-                      <td className="text-center py-2">
-                        <Badge variant={role.permissions.reports.view === 'all' ? 'default' : 'secondary'}>
-                          {role.permissions.reports.view}
-                        </Badge>
-                      </td>
-                      <td className="text-center py-2">
-                        {(role.permissions.leads.export || role.permissions.deals.export || role.permissions.reports.export) ? 
-                          <CheckCircle className="w-4 h-4 text-green-500 mx-auto" /> : 
-                          <X className="w-4 h-4 text-red-500 mx-auto" />
-                        }
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     )
   }
+
+
 
   // Data Template Management Component
   const DataTemplateManagement = () => {
@@ -3958,27 +3790,20 @@ export default function SettingsManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-12">
+        <TabsList className="grid w-full grid-cols-9">
           <TabsTrigger value="company">Công ty</TabsTrigger>
-          <TabsTrigger value="users">Người dùng</TabsTrigger>
           <TabsTrigger value="workflow">Quy trình</TabsTrigger>
           <TabsTrigger value="security">Bảo mật</TabsTrigger>
           <TabsTrigger value="interface">Giao diện</TabsTrigger>
           <TabsTrigger value="integrations">Tích hợp</TabsTrigger>
           <TabsTrigger value="tags">Nhãn</TabsTrigger>
-          <TabsTrigger value="roles">Vai trò</TabsTrigger>
           <TabsTrigger value="templates">Mẫu dữ liệu</TabsTrigger>
-          <TabsTrigger value="access">Truy cập</TabsTrigger>
           <TabsTrigger value="activity">Hoạt động</TabsTrigger>
           <TabsTrigger value="history">Lịch sử</TabsTrigger>
         </TabsList>
 
         <TabsContent value="company" className="mt-6">
           <CompanyManagement />
-        </TabsContent>
-
-        <TabsContent value="users" className="mt-6">
-          <UserManagement />
         </TabsContent>
 
         {/* Other tabs content will be implemented */}
@@ -4002,16 +3827,8 @@ export default function SettingsManagement() {
           <TagsManagement />
         </TabsContent>
 
-        <TabsContent value="roles" className="mt-6">
-          <CustomRoleManagement />
-        </TabsContent>
-
         <TabsContent value="templates" className="mt-6">
           <DataTemplateManagement />
-        </TabsContent>
-
-        <TabsContent value="access" className="mt-6">
-          <AccessControlManagement />
         </TabsContent>
 
         <TabsContent value="activity" className="mt-6">

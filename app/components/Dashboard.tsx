@@ -24,6 +24,62 @@ export default function Dashboard() {
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
   
+  // Tooltip state
+  const [hoveredBottleneck, setHoveredBottleneck] = useState<string | null>(null)
+  const [showCalculationGuide, setShowCalculationGuide] = useState(false)
+  
+  // Bottleneck explanations
+  const bottleneckExplanations = {
+    'response_time': {
+      title: 'Thời gian phản hồi leads',
+      explanation: 'Thời gian trung bình từ khi nhận lead đến khi có phản hồi đầu tiên',
+      causes: [
+        '• Thiếu nhân sự xử lý leads',
+        '• Quy trình phản hồi chưa tự động',
+        '• Leads đến ngoài giờ hành chính',
+        '• Phân bổ leads không đều'
+      ],
+      solutions: [
+        '• Thiết lập auto-response',
+        '• Tăng cường đội ngũ',
+        '• Phân ca xử lý 24/7',
+        '• Sử dụng chatbot hỗ trợ'
+      ]
+    },
+    'negotiation': {
+      title: 'Giai đoạn "Đàm phán"',
+      explanation: 'Số lượng leads tồn đọng ở giai đoạn đàm phán quá lâu',
+      causes: [
+        '• Khách hàng chưa sẵn sàng quyết định',
+        '• Giá cả chưa phù hợp',
+        '• Thiếu thông tin sản phẩm',
+        '• Competitor can thiệp'
+      ],
+      solutions: [
+        '• Follow up định kỳ',
+        '• Cung cấp thêm ưu đãi',
+        '• Demo sản phẩm chi tiết',
+        '• Tạo sense of urgency'
+      ]
+    },
+    'assignment': {
+      title: 'Phân bổ leads',
+      explanation: 'Leads chưa được phân bổ cho nhân viên phụ trách',
+      causes: [
+        '• Thiếu quy trình phân bổ tự động',
+        '• Nhân viên đã quá tải',
+        '• Leads chất lượng thấp',
+        '• Thông tin leads không đầy đủ'
+      ],
+      solutions: [
+        '• Thiết lập auto-assignment',
+        '• Cân bằng workload',
+        '• Lọc leads chất lượng',
+        '• Hoàn thiện thông tin leads'
+      ]
+    }
+  }
+  
   // Sample data for different periods
   const revenueDataThisMonth = [
     { month: '01/07', revenue: 0.12, target: 0.15 },
@@ -551,48 +607,7 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2">
-              <button 
-                onClick={() => setSelectedPeriod('thismonth')}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 ${
-                  selectedPeriod === 'thismonth' 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                Tháng này
-              </button>
-              <button 
-                onClick={() => setSelectedPeriod('6months')}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 ${
-                  selectedPeriod === '6months' 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                6 tháng
-              </button>
-              <button 
-                onClick={() => setSelectedPeriod('12months')}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 ${
-                  selectedPeriod === '12months' 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                12 tháng
-              </button>
-              <button 
-                onClick={handleCustomPeriod}
-                className={`px-5 py-2.5 text-sm font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 ${
-                  selectedPeriod === 'custom' 
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-blue-200' 
-                    : 'text-gray-700 bg-white hover:bg-gray-50 border border-gray-200'
-                }`}
-              >
-                Tùy chỉnh
-              </button>
-            </div>
+
           </div>
           
           {/* Enhanced Summary Cards */}
@@ -1022,14 +1037,163 @@ export default function Dashboard() {
 
           {/* Bottleneck Analysis */}
           <div className="border-t pt-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-              <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
-              Điểm tắc nghẽn
+            <h4 className="font-semibold text-gray-900 mb-3 flex items-center justify-between">
+              <div className="flex items-center">
+                <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+                Điểm tắc nghẽn
+              </div>
+              <button 
+                onClick={() => setShowCalculationGuide(!showCalculationGuide)}
+                className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Cách tính
+              </button>
             </h4>
+            
+            {/* Calculation Guide */}
+            {showCalculationGuide && (
+              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
+                  <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                  </svg>
+                  Hướng dẫn tính điểm tắc nghẽn
+                </h5>
+                
+                <div className="space-y-4 text-sm">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Response Time Calculation */}
+                    <div className="bg-white p-3 rounded border border-red-100">
+                      <h6 className="font-medium text-red-700 mb-2 flex items-center">
+                        <div className="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                        Thời gian phản hồi
+                      </h6>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <div className="bg-blue-50 p-2 rounded mb-2 border-l-2 border-blue-400">
+                          <p className="font-medium text-blue-800 mb-1">📋 Định nghĩa:</p>
+                          <p className="text-blue-700">Thời gian từ khi <strong>nhận lead</strong> cho tới khi <strong>liên hệ</strong> (gọi điện, nhắn tin, email) lần đầu tiên</p>
+                        </div>
+                        <p><strong>Công thức:</strong></p>
+                        <p>Tổng thời gian phản hồi ÷ Số leads</p>
+                        <div className="bg-gray-50 p-2 rounded mt-2">
+                          <p><strong>Ví dụ:</strong></p>
+                          <p>• Lead A: Nhận 9:00 → Gọi 11:30 = 2.5h</p>
+                          <p>• Lead B: Nhận 14:00 → SMS 17:00 = 3h</p>
+                          <p>• Lead C: Nhận 16:00 → Gọi 18:30 = 2.5h</p>
+                          <p className="mt-1 font-medium">➜ Trung bình: 8h ÷ 3 = 2.67h</p>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-red-600"><strong>Mức độ nghiêm trọng:</strong></p>
+                          <p>🟢 &lt; 1 giờ: Tốt</p>
+                          <p>🟡 1-3 giờ: Chấp nhận</p>
+                          <p>🔴 &gt; 3 giờ: Nghiêm trọng</p>
+                        </div>
+                        <div className="mt-2 text-xs bg-yellow-50 p-2 rounded border border-yellow-200">
+                          <p className="font-medium text-yellow-800">⚠️ Lưu ý:</p>
+                          <p className="text-yellow-700">Chỉ tính trong giờ làm việc (8:00-17:30). Leads cuối tuần được tính từ thứ 2.</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Negotiation Stage Calculation */}
+                    <div className="bg-white p-3 rounded border border-yellow-100">
+                      <h6 className="font-medium text-yellow-700 mb-2 flex items-center">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                        Giai đoạn đàm phán
+                      </h6>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p><strong>Công thức:</strong></p>
+                        <p>Số leads tồn đọng × Số ngày trung bình</p>
+                        <div className="bg-gray-50 p-2 rounded mt-2">
+                          <p><strong>Ví dụ:</strong></p>
+                          <p>124 leads × 5 ngày = 620 điểm tắc nghẽn</p>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-yellow-600"><strong>Mức độ nghiêm trọng:</strong></p>
+                          <p>🟢 &lt; 200: Tốt</p>
+                          <p>🟡 200-500: Chú ý</p>
+                          <p>🔴 &gt; 500: Nghiêm trọng</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Assignment Calculation */}
+                    <div className="bg-white p-3 rounded border border-blue-100">
+                      <h6 className="font-medium text-blue-700 mb-2 flex items-center">
+                        <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                        Phân bổ leads
+                      </h6>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p><strong>Công thức:</strong></p>
+                        <p>(Leads chưa assign ÷ Tổng leads) × 100%</p>
+                        <div className="bg-gray-50 p-2 rounded mt-2">
+                          <p><strong>Ví dụ:</strong></p>
+                          <p>(67 ÷ 335) × 100% = 20%</p>
+                        </div>
+                        <div className="mt-2">
+                          <p className="text-blue-600"><strong>Mức độ nghiêm trọng:</strong></p>
+                          <p>🟢 &lt; 5%: Tốt</p>
+                          <p>🟡 5-15%: Chấp nhận</p>
+                          <p>🔴 &gt; 15%: Nghiêm trọng</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Overall Scoring */}
+                  <div className="border-t pt-3">
+                    <h6 className="font-medium text-gray-800 mb-2">📊 Tính điểm tổng thể:</h6>
+                    <div className="bg-gray-50 p-3 rounded">
+                      <p className="text-xs text-gray-600 mb-2">
+                        <strong>Điểm tắc nghẽn tổng thể</strong> = (Điểm phản hồi × 40%) + (Điểm đàm phán × 35%) + (Điểm phân bổ × 25%)
+                      </p>
+                      <div className="grid grid-cols-4 gap-2 text-xs">
+                        <div className="text-center p-2 bg-green-100 rounded">
+                          <div className="font-semibold text-green-700">Tốt</div>
+                          <div className="text-green-600">0-30 điểm</div>
+                        </div>
+                        <div className="text-center p-2 bg-yellow-100 rounded">
+                          <div className="font-semibold text-yellow-700">Chú ý</div>
+                          <div className="text-yellow-600">31-60 điểm</div>
+                        </div>
+                        <div className="text-center p-2 bg-orange-100 rounded">
+                          <div className="font-semibold text-orange-700">Cảnh báo</div>
+                          <div className="text-orange-600">61-80 điểm</div>
+                        </div>
+                        <div className="text-center p-2 bg-red-100 rounded">
+                          <div className="font-semibold text-red-700">Nghiêm trọng</div>
+                          <div className="text-red-600">81-100 điểm</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tips */}
+                  <div className="border-t pt-3">
+                    <h6 className="font-medium text-gray-800 mb-2 flex items-center">
+                      💡 Mẹo tối ưu hóa:
+                    </h6>
+                    <ul className="text-xs text-gray-600 space-y-1">
+                      <li>• <strong>Theo dõi hàng ngày:</strong> Kiểm tra điểm tắc nghẽn mỗi sáng để phát hiện sớm vấn đề</li>
+                      <li>• <strong>Thiết lập cảnh báo:</strong> Tự động thông báo khi điểm vượt ngưỡng cho phép</li>
+                      <li>• <strong>Phân tích xu hướng:</strong> So sánh với tuần/tháng trước để đánh giá cải thiện</li>
+                      <li>• <strong>Hành động nhanh:</strong> Ưu tiên xử lý các tắc nghẽn có điểm cao nhất trước</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            )}
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+              <div 
+                className="relative flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-red-100"
+                onMouseEnter={() => setHoveredBottleneck('response_time')}
+                onMouseLeave={() => setHoveredBottleneck(null)}
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-red-500 rounded-full"></div>
                   <span className="text-sm font-medium text-red-900">Thời gian phản hồi leads</span>
@@ -1038,9 +1202,40 @@ export default function Dashboard() {
                   <div className="text-sm font-bold text-red-900">3.2 giờ</div>
                   <div className="text-xs text-red-600">+25% so với tháng trước</div>
                 </div>
+                
+                {/* Tooltip */}
+                {hoveredBottleneck === 'response_time' && (
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                    <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.response_time.title}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.response_time.explanation}</p>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <h5 className="font-medium text-red-700 text-xs mb-1">Nguyên nhân:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.response_time.causes.map((cause, index) => (
+                            <li key={index}>{cause}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-green-700 text-xs mb-1">Giải pháp:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.response_time.solutions.map((solution, index) => (
+                            <li key={index}>{solution}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+              <div 
+                className="relative flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-yellow-100"
+                onMouseEnter={() => setHoveredBottleneck('negotiation')}
+                onMouseLeave={() => setHoveredBottleneck(null)}
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
                   <span className="text-sm font-medium text-yellow-900">Giai đoạn &quot;Đàm phán&quot;</span>
@@ -1049,9 +1244,40 @@ export default function Dashboard() {
                   <div className="text-sm font-bold text-yellow-900">124 leads</div>
                   <div className="text-xs text-yellow-600">Tồn đọng 5 ngày</div>
                 </div>
+                
+                {/* Tooltip */}
+                {hoveredBottleneck === 'negotiation' && (
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                    <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.negotiation.title}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.negotiation.explanation}</p>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <h5 className="font-medium text-red-700 text-xs mb-1">Nguyên nhân:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.negotiation.causes.map((cause, index) => (
+                            <li key={index}>{cause}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-green-700 text-xs mb-1">Giải pháp:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.negotiation.solutions.map((solution, index) => (
+                            <li key={index}>{solution}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200">
+              <div 
+                className="relative flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-blue-100"
+                onMouseEnter={() => setHoveredBottleneck('assignment')}
+                onMouseLeave={() => setHoveredBottleneck(null)}
+              >
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
                   <span className="text-sm font-medium text-blue-900">Phân bổ leads</span>
@@ -1060,21 +1286,38 @@ export default function Dashboard() {
                   <div className="text-sm font-bold text-blue-900">67 leads</div>
                   <div className="text-xs text-blue-600">Chưa assign</div>
                 </div>
+                
+                {/* Tooltip */}
+                {hoveredBottleneck === 'assignment' && (
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                    <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.assignment.title}</h4>
+                    <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.assignment.explanation}</p>
+                    
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <h5 className="font-medium text-red-700 text-xs mb-1">Nguyên nhân:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.assignment.causes.map((cause, index) => (
+                            <li key={index}>{cause}</li>
+                          ))}
+                        </ul>
+                      </div>
+                      <div>
+                        <h5 className="font-medium text-green-700 text-xs mb-1">Giải pháp:</h5>
+                        <ul className="text-xs text-gray-600 space-y-0.5">
+                          {bottleneckExplanations.assignment.solutions.map((solution, index) => (
+                            <li key={index}>{solution}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Quick Actions */}
-          <div className="mt-4 pt-4 border-t">
-            <div className="grid grid-cols-2 gap-2">
-              <button className="px-3 py-2 text-xs bg-blue-100 text-blue-700 rounded-lg hover:bg-blue-200 transition-colors">
-                Phân bổ leads
-              </button>
-              <button className="px-3 py-2 text-xs bg-green-100 text-green-700 rounded-lg hover:bg-green-200 transition-colors">
-                Tối ưu phản hồi
-              </button>
-            </div>
-          </div>
+
         </div>
       </div>
 
