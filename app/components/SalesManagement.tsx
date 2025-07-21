@@ -26,7 +26,8 @@ import {
   Activity,
   Bot,
   Table,
-  LayoutGrid
+  LayoutGrid,
+  HelpCircle
 } from 'lucide-react'
 
 import AISuggestionsTab from './AISuggestionsTab'
@@ -78,6 +79,41 @@ export default function SalesManagement() {
   const [draggedLead, setDraggedLead] = useState<Lead | null>(null)
   const [showAutoAssignModal, setShowAutoAssignModal] = useState(false)
   const [selectedPipelineStage, setSelectedPipelineStage] = useState<string | null>(null)
+  const [showTooltip, setShowTooltip] = useState<string | null>(null)
+  const [showAutoAssignTooltip, setShowAutoAssignTooltip] = useState<string | null>(null)
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false)
+  const [newLead, setNewLead] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    company: '',
+    jobTitle: '',
+    industry: '',
+    companySize: '',
+    website: '',
+    address: '',
+    source: 'website',
+    sourceDetail: '',
+    region: 'hanoi',
+    product: '',
+    budget: '',
+    timeline: '',
+    priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent',
+    content: '',
+    notes: '',
+    assignedTo: '',
+    leadScore: 50,
+    referrerName: '',
+    referrerContact: '',
+    socialMedia: {
+      linkedin: '',
+      facebook: '',
+      twitter: ''
+    },
+    preferredContact: 'email' as 'email' | 'phone' | 'whatsapp' | 'meeting',
+    bestTimeToContact: 'morning' as 'morning' | 'afternoon' | 'evening' | 'anytime',
+    tags: [] as string[]
+  })
   
   // Drag & Drop handlers
   const handleDragStart = (e: React.DragEvent, lead: Lead) => {
@@ -251,6 +287,112 @@ export default function SalesManagement() {
     
     setLeads(updatedLeads)
     return assignmentCount
+  }
+
+  // Function to add new lead
+  const handleAddLead = () => {
+    // Validation
+    if (!newLead.name.trim() || !newLead.email.trim() || !newLead.phone.trim()) {
+      setNotification({
+        message: 'Vui lòng điền đầy đủ thông tin bắt buộc (Tên, Email, Số điện thoại)',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(newLead.email)) {
+      setNotification({
+        message: 'Email không hợp lệ',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+
+    // Phone validation
+    const phoneRegex = /^[0-9+\-\s\(\)]{8,15}$/
+    if (!phoneRegex.test(newLead.phone)) {
+      setNotification({
+        message: 'Số điện thoại không hợp lệ (8-15 ký tự, chỉ số và ký tự đặc biệt)',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+
+    // Create new lead
+    const leadToAdd: Lead = {
+      id: Date.now(), // Simple ID generation
+      name: newLead.name.trim(),
+      phone: newLead.phone.trim(),
+      email: newLead.email.trim().toLowerCase(),
+      company: newLead.company.trim(),
+      source: newLead.source,
+      region: newLead.region,
+      product: newLead.product.trim(),
+      tags: newLead.tags,
+      content: newLead.content.trim(),
+      status: 'new',
+      stage: 'Mới',
+      notes: newLead.notes.trim(),
+      assignedTo: newLead.assignedTo,
+      value: parseInt(newLead.budget) || 0,
+      lastContactedAt: null,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      type: 'lead',
+      priority: newLead.priority,
+      nextAction: 'Liên hệ lần đầu',
+      nextActionDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0] // Tomorrow
+    }
+
+    // Add to leads list
+    setLeads(prevLeads => [leadToAdd, ...prevLeads])
+
+    // Reset form
+    setNewLead({
+      name: '',
+      phone: '',
+      email: '',
+      company: '',
+      jobTitle: '',
+      industry: '',
+      companySize: '',
+      website: '',
+      address: '',
+      source: 'website',
+      sourceDetail: '',
+      region: 'hanoi',
+      product: '',
+      budget: '',
+      timeline: '',
+      priority: 'medium',
+      content: '',
+      notes: '',
+      assignedTo: '',
+      leadScore: 50,
+      referrerName: '',
+      referrerContact: '',
+      socialMedia: {
+        linkedin: '',
+        facebook: '',
+        twitter: ''
+      },
+      preferredContact: 'email',
+      bestTimeToContact: 'morning',
+      tags: []
+    })
+
+    // Close modal and show success message
+    setShowAddLeadModal(false)
+    setNotification({
+      message: `Lead "${leadToAdd.name}" đã được thêm thành công!`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
   }
   
   // Calculate preview data for auto assignment
@@ -968,7 +1110,26 @@ export default function SalesManagement() {
         {viewMode === 'table' && (
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="flex items-center justify-between mb-6">
-              <h3 className="text-base font-semibold text-gray-900">Quy trình Bán hàng</h3>
+              <div className="flex items-center gap-2">
+                <h3 className="text-base font-semibold text-gray-900">Quy trình Bán hàng</h3>
+                <div 
+                  className="relative"
+                  onMouseEnter={() => setShowTooltip('pipeline-overview')}
+                  onMouseLeave={() => setShowTooltip(null)}
+                >
+                  <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                  {showTooltip === 'pipeline-overview' && (
+                    <div className="absolute left-0 top-6 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                      <div className="max-w-xs">
+                        <p className="font-medium mb-1">Quy trình Bán hàng</p>
+                        <p>Theo dõi toàn bộ hành trình khách hàng từ lead mới đến chuyển đổi thành công.</p>
+                        <p className="mt-1 text-gray-300">Nhấp vào từng giai đoạn để xem chi tiết leads.</p>
+                      </div>
+                      <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
             
             {/* Pipeline Cards in horizontal layout */}
@@ -982,7 +1143,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('new')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-new')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showTooltip === 'stage-new' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Mới</p>
+                          <p>Leads vừa được tạo, chưa có tương tác nào.</p>
+                          <p className="mt-1 text-gray-300">Cần liên hệ ngay để xác định mức độ quan tâm.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <Users className="w-4 h-4 text-gray-500" />
                 </div>
                 <div>
@@ -1009,7 +1187,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('contacted')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-contacted')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-blue-400 hover:text-blue-600 cursor-help" />
+                    {showTooltip === 'stage-contacted' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Đã liên hệ</p>
+                          <p>Đã có tương tác đầu tiên với khách hàng.</p>
+                          <p className="mt-1 text-gray-300">Cần đánh giá nhu cầu và khả năng mua của khách hàng.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <Phone className="w-4 h-4 text-blue-500" />
                 </div>
                 <div>
@@ -1036,7 +1231,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('qualified')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-qualified')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-green-400 hover:text-green-600 cursor-help" />
+                    {showTooltip === 'stage-qualified' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Đã xác định</p>
+                          <p>Khách hàng đã được xác định có nhu cầu thực sự và khả năng mua.</p>
+                          <p className="mt-1 text-gray-300">Có thể tiến hành chuẩn bị báo giá.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <CheckCircle className="w-4 h-4 text-green-500" />
                 </div>
                 <div>
@@ -1063,7 +1275,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('proposal')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-proposal')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-yellow-500 hover:text-yellow-600 cursor-help" />
+                    {showTooltip === 'stage-proposal' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Báo giá</p>
+                          <p>Đã gửi báo giá chính thức cho khách hàng.</p>
+                          <p className="mt-1 text-gray-300">Cần theo dõi phản hồi và sẵn sàng điều chỉnh.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <Calendar className="w-4 h-4 text-yellow-500" />
                 </div>
                 <div>
@@ -1090,7 +1319,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('negotiation')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-negotiation')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-orange-500 hover:text-orange-600 cursor-help" />
+                    {showTooltip === 'stage-negotiation' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Đàm phán</p>
+                          <p>Đang thảo luận về giá cả, điều khoản và điều kiện.</p>
+                          <p className="mt-1 text-gray-300">Giai đoạn quan trọng quyết định thành công deal.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <Briefcase className="w-4 h-4 text-orange-500" />
                 </div>
                 <div>
@@ -1117,7 +1363,24 @@ export default function SalesManagement() {
                 }`}
                 onClick={() => handlePipelineStageClick('converted')}
               >
-                <div className="absolute top-2 right-2">
+                <div className="absolute top-2 right-2 flex items-center gap-1">
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('stage-converted')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-purple-500 hover:text-purple-600 cursor-help" />
+                    {showTooltip === 'stage-converted' && (
+                      <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Giai đoạn Đã chuyển đổi</p>
+                          <p>Deal đã thành công, khách hàng đã ký hợp đồng/mua hàng.</p>
+                          <p className="mt-1 text-gray-300">Cần chuyển sang chăm sóc khách hàng dài hạn.</p>
+                        </div>
+                        <div className="absolute top-[-4px] right-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
                   <Target className="w-4 h-4 text-purple-500" />
                 </div>
                 <div>
@@ -1134,7 +1397,26 @@ export default function SalesManagement() {
             {/* Pipeline Progress Bar */}
             <div className="mt-6 pt-4 border-t border-gray-100">
               <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
-                <span>Tiến độ Pipeline</span>
+                <div className="flex items-center gap-2">
+                  <span>Tiến độ Pipeline</span>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('progress-bar')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showTooltip === 'progress-bar' && (
+                      <div className="absolute left-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">Tiến độ Pipeline</p>
+                          <p>Tỷ lệ phần trăm leads đã chuyển đổi thành công so với tổng số leads.</p>
+                          <p className="mt-1 text-gray-300">Công thức: (Số leads đã chuyển đổi / Tổng số leads) × 100%</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <span>{Math.round((pipelineStats.convertedLeads / leads.length) * 100)}% hoàn thành</span>
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
@@ -1248,7 +1530,10 @@ export default function SalesManagement() {
                 Phân leads tự động
               </button>
               
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2">
+              <button 
+                onClick={() => setShowAddLeadModal(true)}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
                 <Plus className="w-4 h-4" />
                 Thêm Lead
               </button>
@@ -2033,13 +2318,592 @@ export default function SalesManagement() {
         </div>
       </div>
 
+      {/* Add Lead Modal */}
+      {showAddLeadModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Thêm Lead mới</h3>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowTooltip('add-lead-title')}
+                    onMouseLeave={() => setShowTooltip(null)}
+                  >
+                    <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showTooltip === 'add-lead-title' && (
+                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-lg py-3 px-4 shadow-lg">
+                        <div className="max-w-sm">
+                          <p className="font-medium mb-2">📝 Tạo lead mới</p>
+                          <p className="mb-2">Nhập thông tin khách hàng tiềm năng mới:</p>
+                          <ul className="text-xs space-y-1 text-gray-300">
+                            <li>• Thông tin bắt buộc: Tên, Email, Số ĐT</li>
+                            <li>• Lead sẽ tự động có trạng thái "Mới"</li>
+                            <li>• Có thể phân công sau bằng hệ thống tự động</li>
+                          </ul>
+                        </div>
+                        <div className="absolute top-[-6px] left-4 w-3 h-3 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setShowAddLeadModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Required Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="text-red-500">*</span>
+                  Thông tin bắt buộc
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Tên khách hàng <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={newLead.name}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, name: e.target.value }))}
+                      placeholder="Nhập tên khách hàng..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Số điện thoại <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={newLead.phone}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="0901234567"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={newLead.email}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, email: e.target.value }))}
+                      placeholder="email@domain.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Company Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-500" />
+                  Thông tin công ty
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Công ty</label>
+                    <input
+                      type="text"
+                      value={newLead.company}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, company: e.target.value }))}
+                      placeholder="Tên công ty..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
+                    <input
+                      type="text"
+                      value={newLead.jobTitle}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, jobTitle: e.target.value }))}
+                      placeholder="CEO, Manager, Developer..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ngành nghề</label>
+                    <select
+                      value={newLead.industry}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, industry: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chọn ngành nghề...</option>
+                      <option value="technology">Công nghệ thông tin</option>
+                      <option value="finance">Tài chính - Ngân hàng</option>
+                      <option value="healthcare">Y tế - Sức khỏe</option>
+                      <option value="education">Giáo dục</option>
+                      <option value="retail">Bán lẻ</option>
+                      <option value="manufacturing">Sản xuất</option>
+                      <option value="real-estate">Bất động sản</option>
+                      <option value="consulting">Tư vấn</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="logistics">Vận chuyển - Logistics</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty</label>
+                    <select
+                      value={newLead.companySize}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, companySize: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chọn quy mô...</option>
+                      <option value="1-10">1-10 nhân viên</option>
+                      <option value="11-50">11-50 nhân viên</option>
+                      <option value="51-200">51-200 nhân viên</option>
+                      <option value="201-500">201-500 nhân viên</option>
+                      <option value="501-1000">501-1000 nhân viên</option>
+                      <option value="1000+">1000+ nhân viên</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Website</label>
+                    <input
+                      type="url"
+                      value={newLead.website}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="https://domain.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
+                    <input
+                      type="text"
+                      value={newLead.address}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, address: e.target.value }))}
+                      placeholder="Địa chỉ công ty..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Lead Source & Assignment */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Target className="w-4 h-4 text-green-500" />
+                  Nguồn lead & Phân công
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn</label>
+                    <select
+                      value={newLead.source}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, source: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="website">Website</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="google">Google Ads</option>
+                      <option value="referral">Giới thiệu</option>
+                      <option value="cold-call">Cold Call</option>
+                      <option value="exhibition">Triển lãm</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="email-marketing">Email Marketing</option>
+                      <option value="webinar">Webinar</option>
+                      <option value="partner">Đối tác</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Chi tiết nguồn</label>
+                    <input
+                      type="text"
+                      value={newLead.sourceDetail}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, sourceDetail: e.target.value }))}
+                      placeholder="Landing page cụ thể, campaign..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Khu vực</label>
+                    <select
+                      value={newLead.region}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, region: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="hanoi">Hà Nội</option>
+                      <option value="hcm">TP. Hồ Chí Minh</option>
+                      <option value="danang">Đà Nẵng</option>
+                      <option value="haiphong">Hải Phòng</option>
+                      <option value="cantho">Cần Thơ</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Phân công cho
+                      <div 
+                        className="inline-block ml-1 relative"
+                        onMouseEnter={() => setShowTooltip('assign-to')}
+                        onMouseLeave={() => setShowTooltip(null)}
+                      >
+                        <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                        {showTooltip === 'assign-to' && (
+                          <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                            <div className="max-w-xs">
+                              <p className="text-gray-300">Bỏ trống để phân công tự động sau, hoặc chọn người phụ trách ngay.</p>
+                            </div>
+                            <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                          </div>
+                        )}
+                      </div>
+                    </label>
+                    <select
+                      value={newLead.assignedTo}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, assignedTo: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chưa phân công</option>
+                      {getAvailableSalesPersons().map(person => (
+                        <option key={person.id} value={person.name}>
+                          {person.name} ({person.currentLeads} leads hiện tại)
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Product & Sales Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <DollarSign className="w-4 h-4 text-yellow-500" />
+                  Thông tin sản phẩm & Bán hàng
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Sản phẩm quan tâm</label>
+                    <input
+                      type="text"
+                      value={newLead.product}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, product: e.target.value }))}
+                      placeholder="CRM, ERP, Website..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ngân sách ước tính (VND)</label>
+                    <input
+                      type="number"
+                      value={newLead.budget}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, budget: e.target.value }))}
+                      placeholder="50000000"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Timeline dự kiến</label>
+                    <select
+                      value={newLead.timeline}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, timeline: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chọn timeline...</option>
+                      <option value="immediate">Ngay lập tức</option>
+                      <option value="1-month">Trong 1 tháng</option>
+                      <option value="1-3-months">1-3 tháng</option>
+                      <option value="3-6-months">3-6 tháng</option>
+                      <option value="6-12-months">6-12 tháng</option>
+                      <option value="12+ months">Trên 12 tháng</option>
+                      <option value="undefined">Chưa xác định</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Độ ưu tiên</label>
+                    <select
+                      value={newLead.priority}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, priority: e.target.value as any }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="low">🔵 Thấp</option>
+                      <option value="medium">🟡 Trung bình</option>
+                      <option value="high">🟠 Cao</option>
+                      <option value="urgent">🔴 Khẩn cấp</option>
+                    </select>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Lead Score (0-100)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={newLead.leadScore}
+                        onChange={(e) => setNewLead(prev => ({ ...prev, leadScore: parseInt(e.target.value) }))}
+                        className="flex-1"
+                      />
+                      <span className="text-sm font-medium text-gray-700 w-12">{newLead.leadScore}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Đánh giá tiềm năng của lead (0: thấp, 100: rất cao)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  Thông tin giới thiệu
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tên người giới thiệu</label>
+                    <input
+                      type="text"
+                      value={newLead.referrerName}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, referrerName: e.target.value }))}
+                      placeholder="Tên người giới thiệu..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Liên hệ người giới thiệu</label>
+                    <input
+                      type="text"
+                      value={newLead.referrerContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, referrerContact: e.target.value }))}
+                      placeholder="Email hoặc số điện thoại..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media & Contact Preferences */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-indigo-500" />
+                  Mạng xã hội & Tùy chọn liên hệ
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">LinkedIn</label>
+                    <input
+                      type="url"
+                      value={newLead.socialMedia.linkedin}
+                      onChange={(e) => setNewLead(prev => ({ 
+                        ...prev, 
+                        socialMedia: { ...prev.socialMedia, linkedin: e.target.value }
+                      }))}
+                      placeholder="https://linkedin.com/in/username"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Facebook</label>
+                    <input
+                      type="url"
+                      value={newLead.socialMedia.facebook}
+                      onChange={(e) => setNewLead(prev => ({ 
+                        ...prev, 
+                        socialMedia: { ...prev.socialMedia, facebook: e.target.value }
+                      }))}
+                      placeholder="https://facebook.com/username"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Phương thức liên hệ ưa thích</label>
+                    <select
+                      value={newLead.preferredContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, preferredContact: e.target.value as any }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="email">📧 Email</option>
+                      <option value="phone">📞 Điện thoại</option>
+                      <option value="whatsapp">💬 WhatsApp</option>
+                      <option value="meeting">🤝 Gặp trực tiếp</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Thời gian liên hệ tốt nhất</label>
+                    <select
+                      value={newLead.bestTimeToContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, bestTimeToContact: e.target.value as any }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="morning">🌅 Buổi sáng (8-12h)</option>
+                      <option value="afternoon">☀️ Buổi chiều (13-17h)</option>
+                      <option value="evening">🌆 Buổi tối (18-20h)</option>
+                      <option value="anytime">🕐 Bất cứ lúc nào</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-orange-500" />
+                  Mô tả chi tiết
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nội dung quan tâm</label>
+                    <textarea
+                      value={newLead.content}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, content: e.target.value }))}
+                      placeholder="Mô tả nhu cầu, yêu cầu của khách hàng..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ghi chú</label>
+                    <textarea
+                      value={newLead.notes}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, notes: e.target.value }))}
+                      placeholder="Ghi chú thêm về lead này..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Preview Card */}
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+                <h4 className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
+                  <Eye className="w-4 h-4" />
+                  Xem trước Lead
+                </h4>
+                <div className="text-sm text-blue-800 space-y-1">
+                  <div><strong>Tên:</strong> {newLead.name || 'Chưa nhập'} {newLead.jobTitle && `- ${newLead.jobTitle}`}</div>
+                  <div><strong>Email:</strong> {newLead.email || 'Chưa nhập'}</div>
+                  <div><strong>SĐT:</strong> {newLead.phone || 'Chưa nhập'}</div>
+                  {newLead.company && <div><strong>Công ty:</strong> {newLead.company} {newLead.companySize && `(${newLead.companySize})`}</div>}
+                  {newLead.industry && <div><strong>Ngành:</strong> {
+                    newLead.industry === 'technology' ? 'Công nghệ thông tin' :
+                    newLead.industry === 'finance' ? 'Tài chính - Ngân hàng' :
+                    newLead.industry === 'healthcare' ? 'Y tế - Sức khỏe' :
+                    newLead.industry === 'education' ? 'Giáo dục' :
+                    newLead.industry === 'retail' ? 'Bán lẻ' :
+                    newLead.industry === 'manufacturing' ? 'Sản xuất' :
+                    newLead.industry === 'real-estate' ? 'Bất động sản' :
+                    newLead.industry === 'consulting' ? 'Tư vấn' :
+                    newLead.industry === 'marketing' ? 'Marketing' :
+                    newLead.industry === 'logistics' ? 'Vận chuyển - Logistics' : 'Khác'
+                  }</div>}
+                  <div><strong>Nguồn:</strong> {
+                    newLead.source === 'website' ? 'Website' :
+                    newLead.source === 'facebook' ? 'Facebook' :
+                    newLead.source === 'google' ? 'Google Ads' :
+                    newLead.source === 'referral' ? 'Giới thiệu' :
+                    newLead.source === 'cold-call' ? 'Cold Call' :
+                    newLead.source === 'exhibition' ? 'Triển lãm' :
+                    newLead.source === 'linkedin' ? 'LinkedIn' :
+                    newLead.source === 'email-marketing' ? 'Email Marketing' :
+                    newLead.source === 'webinar' ? 'Webinar' :
+                    newLead.source === 'partner' ? 'Đối tác' : 'Khác'
+                  } {newLead.sourceDetail && `- ${newLead.sourceDetail}`}</div>
+                  <div><strong>Độ ưu tiên:</strong> {
+                    newLead.priority === 'low' ? '🔵 Thấp' :
+                    newLead.priority === 'medium' ? '🟡 Trung bình' :
+                    newLead.priority === 'high' ? '🟠 Cao' : '🔴 Khẩn cấp'
+                  }</div>
+                  <div><strong>Lead Score:</strong> {newLead.leadScore}/100</div>
+                  {newLead.budget && <div><strong>Ngân sách:</strong> {parseInt(newLead.budget).toLocaleString('vi-VN')} VND</div>}
+                  {newLead.timeline && <div><strong>Timeline:</strong> {
+                    newLead.timeline === 'immediate' ? 'Ngay lập tức' :
+                    newLead.timeline === '1-month' ? 'Trong 1 tháng' :
+                    newLead.timeline === '1-3-months' ? '1-3 tháng' :
+                    newLead.timeline === '3-6-months' ? '3-6 tháng' :
+                    newLead.timeline === '6-12-months' ? '6-12 tháng' :
+                    newLead.timeline === '12+ months' ? 'Trên 12 tháng' : 'Chưa xác định'
+                  }</div>}
+                  {newLead.assignedTo && <div><strong>Phân công cho:</strong> {newLead.assignedTo}</div>}
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowAddLeadModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleAddLead}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <Plus className="w-4 h-4" />
+                Thêm Lead
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Auto Assign Modal */}
       {showAutoAssignModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Phân leads tự động</h3>
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Phân leads tự động</h3>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('main-title')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'main-title' && (
+                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-lg py-3 px-4 shadow-lg">
+                        <div className="max-w-sm">
+                          <p className="font-medium mb-2">🤖 Hệ thống phân leads tự động</p>
+                          <p className="mb-2">Tự động phân công leads cho đội ngũ sales dựa trên:</p>
+                          <ul className="text-xs space-y-1 text-gray-300">
+                            <li>• Chiến lược phân công phù hợp</li>
+                            <li>• Kỹ năng và chuyên môn của từng người</li>
+                            <li>• Khối lượng công việc hiện tại</li>
+                            <li>• Hiệu suất làm việc</li>
+                          </ul>
+                          <p className="text-xs text-gray-300 mt-2">Giúp tối ưu hóa tỷ lệ chuyển đổi và cân bằng workload.</p>
+                        </div>
+                        <div className="absolute top-[-6px] left-4 w-3 h-3 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <button
                   onClick={() => setShowAutoAssignModal(false)}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -2054,36 +2918,164 @@ export default function SalesManagement() {
             <div className="p-6 space-y-6">
               {/* Strategy Selection */}
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Chiến lược phân công</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-medium text-gray-900">Chiến lược phân công</h4>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('strategy-section')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'strategy-section' && (
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">📋 Chọn phương pháp phân công phù hợp</p>
+                          <p className="text-gray-300">Mỗi chiến lược có ưu điểm riêng, hãy chọn dựa trên tình hình thực tế của đội nhóm.</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-xs text-blue-700">
+                      <p className="font-medium">💡 Gợi ý lựa chọn:</p>
+                      <ul className="mt-1 space-y-1">
+                        <li>• <strong>Đội mới/cùng trình độ:</strong> Chọn "Phân bổ đều"</li>
+                        <li>• <strong>Có chuyên gia từng lĩnh vực:</strong> Chọn "Dựa trên kỹ năng"</li>
+                        <li>• <strong>Muốn khen thưởng người giỏi:</strong> Chọn "Dựa trên hiệu suất"</li>
+                        <li>• <strong>Cân bằng khối lượng:</strong> Chọn "Dựa trên công việc"</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+                
                 <div className="space-y-3">
                   <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input type="radio" name="strategy" value="balanced" className="mt-1" defaultChecked />
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">Phân bổ đều</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm text-gray-900">⚖️ Phân bổ đều</div>
+                        <div 
+                          className="relative"
+                          onMouseEnter={() => setShowAutoAssignTooltip('strategy-balanced')}
+                          onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                        >
+                          <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                          {showAutoAssignTooltip === 'strategy-balanced' && (
+                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                              <div className="max-w-xs">
+                                <p className="font-medium mb-1">⚖️ Phân bổ đều (Round Robin)</p>
+                                <p className="mb-1">Phân leads theo thứ tự vòng tròn cho tất cả nhân viên.</p>
+                                <div className="text-gray-300">
+                                  <p><strong>Ưu điểm:</strong> Công bằng, đơn giản</p>
+                                  <p><strong>Phù hợp:</strong> Team có trình độ tương đương</p>
+                                  <p><strong>Ví dụ:</strong> Lead 1→A, Lead 2→B, Lead 3→C, Lead 4→A...</p>
+                                </div>
+                              </div>
+                              <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="text-xs text-gray-600">Phân leads đều cho tất cả nhân viên sales</div>
                     </div>
                   </label>
                   
                   <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input type="radio" name="strategy" value="skill-based" className="mt-1" />
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">Dựa trên kỹ năng</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm text-gray-900">🎯 Dựa trên kỹ năng</div>
+                        <div 
+                          className="relative"
+                          onMouseEnter={() => setShowAutoAssignTooltip('strategy-skill')}
+                          onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                        >
+                          <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                          {showAutoAssignTooltip === 'strategy-skill' && (
+                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                              <div className="max-w-xs">
+                                <p className="font-medium mb-1">🎯 Phân công theo chuyên môn</p>
+                                <p className="mb-1">Ghép leads với nhân viên có chuyên môn phù hợp.</p>
+                                <div className="text-gray-300">
+                                  <p><strong>Ưu điểm:</strong> Tăng tỷ lệ chuyển đổi</p>
+                                  <p><strong>Phù hợp:</strong> Team có chuyên gia từng lĩnh vực</p>
+                                  <p><strong>Ví dụ:</strong> Lead IT → Chuyên gia Tech, Lead BĐS → Chuyên gia Real Estate</p>
+                                </div>
+                              </div>
+                              <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="text-xs text-gray-600">Phân leads theo chuyên môn và kinh nghiệm</div>
                     </div>
                   </label>
                   
                   <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input type="radio" name="strategy" value="performance" className="mt-1" />
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">Dựa trên hiệu suất</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm text-gray-900">🏆 Dựa trên hiệu suất</div>
+                        <div 
+                          className="relative"
+                          onMouseEnter={() => setShowAutoAssignTooltip('strategy-performance')}
+                          onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                        >
+                          <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                          {showAutoAssignTooltip === 'strategy-performance' && (
+                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                              <div className="max-w-xs">
+                                <p className="font-medium mb-1">🏆 Ưu tiên người có hiệu suất cao</p>
+                                <p className="mb-1">Phân leads cho nhân viên có tỷ lệ chuyển đổi tốt nhất.</p>
+                                <div className="text-gray-300">
+                                  <p><strong>Ưu điểm:</strong> Tối đa hóa doanh số</p>
+                                  <p><strong>Phù hợp:</strong> Khi muốn khen thưởng top performer</p>
+                                  <p><strong>Lưu ý:</strong> Có thể tạo áp lực cho nhân viên yếu hơn</p>
+                                </div>
+                              </div>
+                              <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="text-xs text-gray-600">Ưu tiên nhân viên có tỷ lệ chuyển đổi cao</div>
                     </div>
                   </label>
                   
                   <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
                     <input type="radio" name="strategy" value="workload" className="mt-1" />
-                    <div>
-                      <div className="font-medium text-sm text-gray-900">Dựa trên khối lượng công việc</div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="font-medium text-sm text-gray-900">📊 Dựa trên khối lượng công việc</div>
+                        <div 
+                          className="relative"
+                          onMouseEnter={() => setShowAutoAssignTooltip('strategy-workload')}
+                          onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                        >
+                          <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                          {showAutoAssignTooltip === 'strategy-workload' && (
+                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                              <div className="max-w-xs">
+                                <p className="font-medium mb-1">📊 Cân bằng khối lượng công việc</p>
+                                <p className="mb-1">Phân leads cho nhân viên đang có ít việc nhất.</p>
+                                <div className="text-gray-300">
+                                  <p><strong>Ưu điểm:</strong> Tránh quá tải, tăng hiệu suất</p>
+                                  <p><strong>Phù hợp:</strong> Khi muốn cân bằng workload</p>
+                                  <p><strong>Logic:</strong> A: 5 leads, B: 8 leads → Ưu tiên A</p>
+                                </div>
+                              </div>
+                              <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       <div className="text-xs text-gray-600">Phân leads cho nhân viên có ít công việc nhất</div>
                     </div>
                   </label>
@@ -2092,7 +3084,37 @@ export default function SalesManagement() {
 
               {/* Filters */}
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Bộ lọc leads</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-medium text-gray-900">Bộ lọc leads</h4>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('filters-section')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'filters-section' && (
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">🔍 Lọc leads trước khi phân công</p>
+                          <p className="text-gray-300">Chỉ phân công những leads phù hợp với điều kiện đã chọn. Bỏ trống để áp dụng cho tất cả leads.</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-yellow-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-xs text-yellow-700">
+                      <p className="font-medium">⚠️ Lưu ý khi sử dụng bộ lọc:</p>
+                      <p>Chỉ những leads thỏa mãn TẤT CẢ điều kiện được chọn mới được phân công. Bỏ trống các trường không cần lọc.</p>
+                    </div>
+                  </div>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Trạng thái</label>
@@ -2142,39 +3164,162 @@ export default function SalesManagement() {
 
               {/* Assignment Rules */}
               <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3">Quy tắc phân công</h4>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-medium text-gray-900">Quy tắc phân công</h4>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('rules-section')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'rules-section' && (
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">⚙️ Tùy chỉnh cách thức phân công</p>
+                          <p className="text-gray-300">Các quy tắc bổ sung để điều chỉnh hành vi của hệ thống phân công tự động.</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
                 <div className="space-y-3">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                    <div className="flex items-start gap-2">
+                      <svg className="w-4 h-4 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <div className="text-xs text-green-700">
+                        <p className="font-medium">✅ Quy tắc được khuyến nghị:</p>
+                        <p>Nên bật "Chỉ phân leads chưa được phân công" và "Gửi thông báo" để đảm bảo hoạt động hiệu quả.</p>
+                      </div>
+                    </div>
+                  </div>
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" className="rounded" defaultChecked />
                     <span className="text-sm text-gray-700">Chỉ phân leads chưa được phân công</span>
+                    <div 
+                      className="relative"
+                      onMouseEnter={() => setShowAutoAssignTooltip('rule-unassigned')}
+                      onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                    >
+                      <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                      {showAutoAssignTooltip === 'rule-unassigned' && (
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                          <div className="max-w-xs">
+                            <p className="font-medium mb-1">🔒 Bảo vệ leads đã có người phụ trách</p>
+                            <p className="text-gray-300">Chỉ phân công những leads chưa có ai đảm nhận, tránh làm gián đoạn công việc đang diễn ra.</p>
+                          </div>
+                          <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                        </div>
+                      )}
+                    </div>
                   </label>
                   
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" className="rounded" />
                     <span className="text-sm text-gray-700">Ghi đè phân công hiện tại</span>
+                    <div 
+                      className="relative"
+                      onMouseEnter={() => setShowAutoAssignTooltip('rule-override')}
+                      onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                    >
+                      <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                      {showAutoAssignTooltip === 'rule-override' && (
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                          <div className="max-w-xs">
+                            <p className="font-medium mb-1">⚠️ Thay đổi người phụ trách</p>
+                            <p className="text-gray-300">Phân công lại tất cả leads, bao gồm cả những leads đã có người đảm nhận. <strong>Cẩn thận khi sử dụng!</strong></p>
+                          </div>
+                          <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                        </div>
+                      )}
+                    </div>
                   </label>
                   
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" className="rounded" defaultChecked />
                     <span className="text-sm text-gray-700">Gửi thông báo cho nhân viên được phân công</span>
+                    <div 
+                      className="relative"
+                      onMouseEnter={() => setShowAutoAssignTooltip('rule-notification')}
+                      onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                    >
+                      <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                      {showAutoAssignTooltip === 'rule-notification' && (
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                          <div className="max-w-xs">
+                            <p className="font-medium mb-1">📧 Thông báo tự động</p>
+                            <p className="text-gray-300">Gửi email/SMS thông báo cho nhân viên về leads mới được phân công, kèm thông tin chi tiết.</p>
+                          </div>
+                          <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                        </div>
+                      )}
+                    </div>
                   </label>
                   
                   <label className="flex items-center space-x-2">
                     <input type="checkbox" className="rounded" />
                     <span className="text-sm text-gray-700">Tự động tạo tác vụ follow-up</span>
+                    <div 
+                      className="relative"
+                      onMouseEnter={() => setShowAutoAssignTooltip('rule-followup')}
+                      onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                    >
+                      <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
+                      {showAutoAssignTooltip === 'rule-followup' && (
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                          <div className="max-w-xs">
+                            <p className="font-medium mb-1">📅 Tạo lời nhắc tự động</p>
+                            <p className="text-gray-300">Tự động tạo task nhắc nhở liên hệ lead trong 24-48h, đảm bảo không bỏ sót cơ hội.</p>
+                          </div>
+                          <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                        </div>
+                      )}
+                    </div>
                   </label>
                 </div>
               </div>
 
               {/* Preview */}
               <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-gray-900 mb-2">Xem trước kết quả</h4>
+                <div className="flex items-center gap-2 mb-2">
+                  <h4 className="text-sm font-medium text-gray-900">Xem trước kết quả</h4>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('preview-section')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'preview-section' && (
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">👁️ Kiểm tra trước khi thực hiện</p>
+                          <p className="text-gray-300">Xem thông tin tổng quan về số lượng leads sẽ được phân công và phân bổ dự kiến.</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>• Tổng số leads: <span className="font-medium text-gray-900">{getPreviewData().totalLeads} leads</span></div>
                   <div>• Leads chưa phân công: <span className="font-medium text-gray-900">{getPreviewData().unassignedLeads} leads</span></div>
                   <div>• Nhân viên sales hoạt động: <span className="font-medium text-gray-900">{getPreviewData().activeSalesPeople} người</span></div>
                   <div>• Trung bình mỗi người: <span className="font-medium text-gray-900">{getPreviewData().avgLeadsPerPerson} leads</span></div>
                 </div>
+                
+                {getPreviewData().unassignedLeads === 0 && (
+                  <div className="mt-3 bg-yellow-100 border border-yellow-300 rounded-lg p-2">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      </svg>
+                      <p className="text-xs text-yellow-700 font-medium">Không có leads nào cần phân công!</p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 

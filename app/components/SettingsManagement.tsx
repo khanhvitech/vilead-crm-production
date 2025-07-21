@@ -15,7 +15,6 @@ import {
   UserCog,
   Database,
   Clock,
-  Activity,
   History,
   Search,
   Plus,
@@ -111,9 +110,6 @@ interface User {
   lastLogin: string
   createdAt: string
   permissions: UserPermissions
-  twoFactorEnabled: boolean
-  allowedIPs: string[]
-  sessionLimit: number
   workingHours: {
     enabled: boolean
     start: string
@@ -212,27 +208,6 @@ interface OrderStatus {
   isActive: boolean
 }
 
-interface SecuritySettings {
-  twoFactorRequired: boolean
-  loginAttempts: {
-    maxAttempts: number
-    lockDuration: number // minutes
-  }
-  sessionTimeout: number // minutes
-  allowedIPs: string[]
-  ipRestrictionEnabled: boolean
-  encryptionEnabled: boolean
-  deviceTrustEnabled: boolean
-  passwordPolicy: {
-    minLength: number
-    requireUppercase: boolean
-    requireLowercase: boolean
-    requireNumbers: boolean
-    requireSpecialChars: boolean
-    expiryDays: number
-  }
-}
-
 interface IntegrationConfig {
   id: string
   type: 'zalo' | 'facebook'
@@ -267,7 +242,11 @@ interface CustomTag {
   isDefault: boolean
   autoAssign: {
     enabled: boolean
-    conditions: any[]
+    conditions: {
+      field: string
+      operator: 'equals' | 'not_equals' | 'greater_than' | 'less_than' | 'contains' | 'not_contains'
+      value: any
+    }[]
   }
   createdBy: string
   createdAt: string
@@ -304,17 +283,20 @@ interface DataTemplate {
 }
 
 interface SystemLog {
-  id: string
-  category: 'user' | 'security' | 'integration' | 'system' | 'data'
+  id: string | number
+  category: 'lead_management' | 'deal_management' | 'customer_management' | 'user_management' | 'permissions' | 'workflow' | 'integration' | 'interface' | 'system'
   action: string
-  userId: string
-  userName: string
-  target: string
-  details: any
-  ipAddress: string
-  userAgent: string
+  details: string
+  performedBy: string
+  performedByRole: 'admin' | 'manager' | 'sales' | 'support' | 'system'
   timestamp: string
-  severity: 'low' | 'medium' | 'high' | 'critical'
+  affectedEntities: string[]
+  changes: {
+    before: any
+    after: any
+  }
+  ip: string
+  status: 'success' | 'failed' | 'partial_success'
 }
 
 interface InterfaceSettings {
@@ -365,9 +347,6 @@ const sampleUsers: User[] = [
     status: 'active',
     lastLogin: '2025-06-11T08:30:00',
     createdAt: '2025-01-01T00:00:00',
-    twoFactorEnabled: true,
-    allowedIPs: [],
-    sessionLimit: 3,
     workingHours: {
       enabled: false,
       start: '08:00',
@@ -393,9 +372,6 @@ const sampleUsers: User[] = [
     status: 'active',
     lastLogin: '2025-06-11T09:15:00',
     createdAt: '2025-02-15T00:00:00',
-    twoFactorEnabled: false,
-    allowedIPs: [],
-    sessionLimit: 2,
     workingHours: {
       enabled: true,
       start: '08:30',
@@ -474,24 +450,6 @@ const sampleOrderStatuses: OrderStatus[] = [
   }
 ]
 
-const sampleSecuritySettings: SecuritySettings = {
-  twoFactorRequired: false,
-  loginAttempts: { maxAttempts: 5, lockDuration: 15 },
-  sessionTimeout: 15,
-  allowedIPs: [],
-  ipRestrictionEnabled: false,
-  encryptionEnabled: true,
-  deviceTrustEnabled: true,
-  passwordPolicy: {
-    minLength: 8,
-    requireUppercase: true,
-    requireLowercase: true,
-    requireNumbers: true,
-    requireSpecialChars: false,
-    expiryDays: 90
-  }
-}
-
 const sampleInterfaceSettings: InterfaceSettings = {
   theme: 'light',
   primaryColor: '#3B82F6',
@@ -558,7 +516,7 @@ const sampleTags: CustomTag[] = [
     autoAssign: {
       enabled: true,
       conditions: [
-        { field: 'revenue', operator: '>', value: 100000000 }
+        { field: 'revenue', operator: 'greater_than', value: 100000000 }
       ]
     },
     createdBy: 'admin',
@@ -572,27 +530,28 @@ const sampleTags: CustomTag[] = [
     scope: 'global',
     isDefault: true,
     autoAssign: {
-      enabled: false,
-      conditions: []
+      enabled: true,
+      conditions: [
+        { field: 'score', operator: 'greater_than', value: 80 }
+      ]
     },
     createdBy: 'admin',
     createdAt: '2025-01-15T00:00:00'
   },
   {
     id: '3',
-    name: 'Ưu tiên',
+    name: 'Deal lớn',
     color: '#EF4444',
     category: 'deal',
-    scope: 'team',
-    scopeId: 'team-a',
+    scope: 'global',
     isDefault: false,
     autoAssign: {
       enabled: true,
       conditions: [
-        { field: 'amount', operator: '>', value: 50000000 }
+        { field: 'amount', operator: 'greater_than', value: 50000000 }
       ]
     },
-    createdBy: 'sales01',
+    createdBy: 'admin',
     createdAt: '2025-02-01T00:00:00'
   },
   {
@@ -603,11 +562,30 @@ const sampleTags: CustomTag[] = [
     scope: 'global',
     isDefault: false,
     autoAssign: {
-      enabled: false,
-      conditions: []
+      enabled: true,
+      conditions: [
+        { field: 'priority', operator: 'equals', value: 'high' }
+      ]
     },
     createdBy: 'admin',
     createdAt: '2025-01-20T00:00:00'
+  },
+  {
+    id: '5',
+    name: 'Team A',
+    color: '#3B82F6',
+    category: 'lead',
+    scope: 'team',
+    scopeId: 'team-a',
+    isDefault: false,
+    autoAssign: {
+      enabled: true,
+      conditions: [
+        { field: 'source', operator: 'equals', value: 'website' }
+      ]
+    },
+    createdBy: 'manager',
+    createdAt: '2025-03-01T00:00:00'
   }
 ]
 
@@ -624,12 +602,12 @@ export default function SettingsManagement() {
   const [showIntegrationModal, setShowIntegrationModal] = useState(false)
   const [selectedRole, setSelectedRole] = useState<any>(null)
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
+  const [selectedTag, setSelectedTag] = useState<CustomTag | null>(null)
   
   // Data states
   const [users, setUsers] = useState<User[]>(sampleUsers)
   const [salesStages, setSalesStages] = useState<SalesStage[]>(sampleSalesStages)
   const [orderStatuses, setOrderStatuses] = useState<OrderStatus[]>(sampleOrderStatuses)
-  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>(sampleSecuritySettings)
   const [interfaceSettings, setInterfaceSettings] = useState<InterfaceSettings>(sampleInterfaceSettings)
   const [languages, setLanguages] = useState<LanguageConfig[]>(sampleLanguages)
   const [tags, setTags] = useState<CustomTag[]>(sampleTags)
@@ -640,7 +618,6 @@ export default function SettingsManagement() {
   const [roleFilter, setRoleFilter] = useState('all')
   const [statusFilter, setStatusFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
-  const [tagFilter, setTagFilter] = useState('all')
   const [categoryFilter, setCategoryFilter] = useState('all')
 
   // Utility functions
@@ -676,13 +653,58 @@ export default function SettingsManagement() {
 
   // Component: Workflow Management
   const WorkflowManagement = () => {
+    const getCategoryColor = (category: string) => {
+      switch (category) {
+        case 'lead': return 'bg-blue-100 text-blue-800'
+        case 'customer': return 'bg-green-100 text-green-800'
+        case 'deal': return 'bg-purple-100 text-purple-800'
+        case 'task': return 'bg-orange-100 text-orange-800'
+        default: return 'bg-gray-100 text-gray-800'
+      }
+    }
+
+    const getScopeColor = (scope: string) => {
+      switch (scope) {
+        case 'global': return 'bg-indigo-100 text-indigo-800'
+        case 'team': return 'bg-cyan-100 text-cyan-800'
+        case 'user': return 'bg-pink-100 text-pink-800'
+        default: return 'bg-gray-100 text-gray-800'
+      }
+    }
+
+    const handleCreateTag = () => {
+      setSelectedTag(null)
+      setShowTagModal(true)
+    }
+
+    const handleEditTag = (tag: CustomTag) => {
+      setSelectedTag(tag)
+      setShowTagModal(true)
+    }
+
+    const handleDeleteTag = (tagId: string) => {
+      setTags(prev => prev.filter(t => t.id !== tagId))
+    }
+
+    const getOperatorText = (operator: string) => {
+      switch (operator) {
+        case 'equals': return 'bằng'
+        case 'not_equals': return 'không bằng'
+        case 'greater_than': return 'lớn hơn'
+        case 'less_than': return 'nhỏ hơn'
+        case 'contains': return 'chứa'
+        case 'not_contains': return 'không chứa'
+        default: return operator
+      }
+    }
+
     return (
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900">Quản lý Quy trình</h2>
-            <p className="text-gray-600">Tùy chỉnh giai đoạn bán hàng và trạng thái đơn hàng</p>
+            <h2 className="text-2xl font-bold text-gray-900">Quản lý Quy trình & Nhãn</h2>
+            <p className="text-gray-600">Tùy chỉnh giai đoạn bán hàng, trạng thái đơn hàng và nhãn tự động</p>
           </div>
         </div>
 
@@ -797,6 +819,204 @@ export default function SettingsManagement() {
           </Card>
         </div>
 
+        {/* Tags Management Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">Quản lý Nhãn & Quy tắc Tự động</h3>
+              <p className="text-gray-600">Tạo nhãn và thiết lập quy tắc phân bổ tự động</p>
+            </div>
+            <Button onClick={handleCreateTag}>
+              <Plus className="w-4 h-4 mr-2" />
+              Tạo nhãn mới
+            </Button>
+          </div>
+
+          {/* Tags Statistics */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Tổng nhãn</p>
+                    <p className="text-2xl font-bold text-blue-600">{tags.length}</p>
+                  </div>
+                  <Tags className="w-6 h-6 text-blue-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Nhãn toàn cục</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {tags.filter(t => t.scope === 'global').length}
+                    </p>
+                  </div>
+                  <Globe className="w-6 h-6 text-green-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Tự động gán</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {tags.filter(t => t.autoAssign.enabled).length}
+                    </p>
+                  </div>
+                  <Zap className="w-6 h-6 text-purple-500" />
+                </div>
+              </CardContent>
+            </Card>
+            <Card>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Nhãn mặc định</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {tags.filter(t => t.isDefault).length}
+                    </p>
+                  </div>
+                  <Star className="w-6 h-6 text-orange-500" />
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Tags List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Danh sách Nhãn</CardTitle>
+              <CardDescription>Quản lý tất cả nhãn trong hệ thống</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {tags.map((tag) => (
+                  <div key={tag.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className="w-4 h-4 rounded"
+                        style={{ backgroundColor: tag.color }}
+                      />
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <h4 className="font-medium">{tag.name}</h4>
+                          {tag.isDefault && (
+                            <Badge variant="outline" className="text-xs">
+                              <Star className="w-3 h-3 mr-1" />
+                              Mặc định
+                            </Badge>
+                          )}
+                          {tag.autoAssign.enabled && (
+                            <Badge variant="outline" className="text-xs">
+                              <Zap className="w-3 h-3 mr-1" />
+                              Tự động
+                            </Badge>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge className={getCategoryColor(tag.category)}>
+                            {tag.category === 'lead' && 'Lead'}
+                            {tag.category === 'customer' && 'Khách hàng'}
+                            {tag.category === 'deal' && 'Deal'}
+                            {tag.category === 'task' && 'Công việc'}
+                          </Badge>
+                          <Badge className={getScopeColor(tag.scope)}>
+                            {tag.scope === 'global' && 'Toàn cục'}
+                            {tag.scope === 'team' && 'Nhóm'}
+                            {tag.scope === 'user' && 'Cá nhân'}
+                          </Badge>
+                        </div>
+                        {tag.autoAssign.enabled && tag.autoAssign.conditions.length > 0 && (
+                          <div className="text-xs text-gray-500 mt-1">
+                            Điều kiện: {tag.autoAssign.conditions.map(c => 
+                              `${c.field} ${getOperatorText(c.operator)} ${c.value}`
+                            ).join(', ')}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditTag(tag)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteTag(tag.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Auto-Assignment Rules */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quy tắc Tự động gán Nhãn</CardTitle>
+              <CardDescription>Cấu hình quy tắc tự động gán nhãn dựa trên điều kiện</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {tags.filter(t => t.autoAssign.enabled).map((tag) => (
+                  <div key={tag.id} className="p-4 border rounded-lg">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <div
+                          className="w-4 h-4 rounded"
+                          style={{ backgroundColor: tag.color }}
+                        />
+                        <h4 className="font-medium">{tag.name}</h4>
+                        <Badge className={getCategoryColor(tag.category)}>
+                          {tag.category === 'lead' && 'Lead'}
+                          {tag.category === 'customer' && 'Khách hàng'}
+                          {tag.category === 'deal' && 'Deal'}
+                          {tag.category === 'task' && 'Công việc'}
+                        </Badge>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => handleEditTag(tag)}>
+                        <Edit2 className="w-4 h-4 mr-2" />
+                        Chỉnh sửa
+                      </Button>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="text-sm font-medium text-gray-700">Điều kiện tự động gán:</div>
+                      {tag.autoAssign.conditions.map((condition, index) => (
+                        <div key={index} className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
+                          <span className="font-medium">{condition.field}</span>
+                          <span className="text-gray-400">{getOperatorText(condition.operator)}</span>
+                          <span className="font-medium text-blue-600">{condition.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+                {tags.filter(t => t.autoAssign.enabled).length === 0 && (
+                  <div className="text-center py-8 text-gray-500">
+                    <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                    <p>Chưa có quy tắc tự động gán nào</p>
+                    <Button variant="outline" className="mt-2" onClick={handleCreateTag}>
+                      Tạo quy tắc đầu tiên
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Workflow Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card>
@@ -840,7 +1060,7 @@ export default function SettingsManagement() {
                 <div>
                   <p className="text-sm font-medium text-gray-600">Tự động hóa</p>
                   <p className="text-2xl font-bold text-orange-600">
-                    {salesStages.filter(s => s.autoTransition.enabled).length}
+                    {salesStages.filter(s => s.autoTransition.enabled).length + tags.filter(t => t.autoAssign.enabled).length}
                   </p>
                 </div>
                 <Zap className="w-6 h-6 text-orange-500" />
@@ -848,307 +1068,145 @@ export default function SettingsManagement() {
             </CardContent>
           </Card>
         </div>
-      </div>
-    )
-  }
 
-  // Component: Security Settings
-  const SecurityManagement = () => {
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Cài đặt Bảo mật</h2>
-            <p className="text-gray-600">Quản lý xác thực, phiên đăng nhập và bảo mật dữ liệu</p>
-          </div>
-          <Button>
-            <Save className="w-4 h-4 mr-2" />
-            Lưu cài đặt
-          </Button>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Authentication Settings */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Xác thực người dùng</CardTitle>
-              <CardDescription>Cài đặt bảo mật đăng nhập</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="2fa-required">Bắt buộc 2FA cho Quản lý</Label>
-                  <p className="text-sm text-gray-500">Yêu cầu xác thực hai yếu tố</p>
-                </div>
-                <Switch
-                  id="2fa-required"
-                  checked={securitySettings.twoFactorRequired}
-                  onCheckedChange={(checked) => 
-                    setSecuritySettings(prev => ({ ...prev, twoFactorRequired: checked }))
-                  }
+        {/* Tag Creation/Edit Modal */}
+        <Dialog open={showTagModal} onOpenChange={setShowTagModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>
+                {selectedTag ? 'Chỉnh sửa nhãn' : 'Tạo nhãn mới'}
+              </DialogTitle>
+              <DialogDescription>
+                {selectedTag 
+                  ? 'Cập nhật thông tin nhãn và quy tắc tự động gán'
+                  : 'Tạo nhãn mới để phân loại dữ liệu'
+                }
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="tag-name">Tên nhãn</Label>
+                <Input
+                  id="tag-name"
+                  placeholder="Nhập tên nhãn"
+                  defaultValue={selectedTag?.name || ''}
                 />
               </div>
-              
+
+              <div>
+                <Label>Màu sắc</Label>
+                <div className="grid grid-cols-8 gap-2 mt-2">
+                  {[
+                    '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                    '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded border-2 ${
+                        selectedTag?.color === color ? 'border-gray-900' : 'border-gray-200'
+                      }`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label>Loại</Label>
+                <Select defaultValue={selectedTag?.category || 'lead'}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="lead">Lead</SelectItem>
+                    <SelectItem value="customer">Khách hàng</SelectItem>
+                    <SelectItem value="deal">Deal</SelectItem>
+                    <SelectItem value="task">Công việc</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Phạm vi</Label>
+                <Select defaultValue={selectedTag?.scope || 'global'}>
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="global">Toàn cục</SelectItem>
+                    <SelectItem value="team">Nhóm</SelectItem>
+                    <SelectItem value="user">Cá nhân</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="is-default">Nhãn mặc định</Label>
+                <Switch
+                  id="is-default"
+                  defaultChecked={selectedTag?.isDefault || false}
+                />
+              </div>
+
+              <div className="flex items-center justify-between">
+                <Label htmlFor="auto-assign">Tự động gán</Label>
+                <Switch
+                  id="auto-assign"
+                  defaultChecked={selectedTag?.autoAssign.enabled || false}
+                />
+              </div>
+
+              {/* Auto Assignment Conditions */}
               <div className="space-y-2">
-                <Label>Giới hạn đăng nhập sai</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    value={securitySettings.loginAttempts.maxAttempts}
-                    onChange={(e) => setSecuritySettings(prev => ({
-                      ...prev,
-                      loginAttempts: { ...prev.loginAttempts, maxAttempts: parseInt(e.target.value) }
-                    }))}
-                    className="w-20"
-                  />
-                  <span className="flex items-center text-sm text-gray-500">lần, khóa trong</span>
-                  <Input
-                    type="number"
-                    value={securitySettings.loginAttempts.lockDuration}
-                    onChange={(e) => setSecuritySettings(prev => ({
-                      ...prev,
-                      loginAttempts: { ...prev.loginAttempts, lockDuration: parseInt(e.target.value) }
-                    }))}
-                    className="w-20"
-                  />
-                  <span className="flex items-center text-sm text-gray-500">phút</span>
+                <Label>Điều kiện tự động gán</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Trường" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="score">Điểm số</SelectItem>
+                      <SelectItem value="revenue">Doanh thu</SelectItem>
+                      <SelectItem value="amount">Giá trị</SelectItem>
+                      <SelectItem value="source">Nguồn</SelectItem>
+                      <SelectItem value="priority">Ưu tiên</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Phép so sánh" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="equals">Bằng</SelectItem>
+                      <SelectItem value="not_equals">Không bằng</SelectItem>
+                      <SelectItem value="greater_than">Lớn hơn</SelectItem>
+                      <SelectItem value="less_than">Nhỏ hơn</SelectItem>
+                      <SelectItem value="contains">Chứa</SelectItem>
+                      <SelectItem value="not_contains">Không chứa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  
+                  <Input placeholder="Giá trị" />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label>Thời gian chờ phiên</Label>
-                <div className="flex space-x-2">
-                  <Input
-                    type="number"
-                    value={securitySettings.sessionTimeout}
-                    onChange={(e) => setSecuritySettings(prev => ({
-                      ...prev,
-                      sessionTimeout: parseInt(e.target.value)
-                    }))}
-                    className="w-20"
-                  />
-                  <span className="flex items-center text-sm text-gray-500">phút không hoạt động</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Access Control */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Kiểm soát truy cập</CardTitle>
-              <CardDescription>Hạn chế IP và thiết bị</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="ip-restriction">Hạn chế IP</Label>
-                  <p className="text-sm text-gray-500">Chỉ cho phép IP xác định</p>
-                </div>
-                <Switch
-                  id="ip-restriction"
-                  checked={securitySettings.ipRestrictionEnabled}
-                  onCheckedChange={(checked) => 
-                    setSecuritySettings(prev => ({ ...prev, ipRestrictionEnabled: checked }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="device-trust">Tin cậy thiết bị</Label>
-                  <p className="text-sm text-gray-500">Ghi nhớ thiết bị đăng nhập</p>
-                </div>
-                <Switch
-                  id="device-trust"
-                  checked={securitySettings.deviceTrustEnabled}
-                  onCheckedChange={(checked) => 
-                    setSecuritySettings(prev => ({ ...prev, deviceTrustEnabled: checked }))
-                  }
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="encryption">Mã hóa dữ liệu</Label>
-                  <p className="text-sm text-gray-500">Mã hóa thông tin nhạy cảm</p>
-                </div>
-                <Switch
-                  id="encryption"
-                  checked={securitySettings.encryptionEnabled}
-                  onCheckedChange={(checked) => 
-                    setSecuritySettings(prev => ({ ...prev, encryptionEnabled: checked }))
-                  }
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label>Danh sách IP được phép</Label>
-                <Textarea
-                  placeholder="192.168.1.1&#10;10.0.0.0/24&#10;Mỗi IP/subnet một dòng"
-                  value={securitySettings.allowedIPs.join('\n')}
-                  onChange={(e) => setSecuritySettings(prev => ({
-                    ...prev,
-                    allowedIPs: e.target.value.split('\n').filter(ip => ip.trim())
-                  }))}
-                  rows={4}
-                />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Password Policy */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Chính sách mật khẩu</CardTitle>
-            <CardDescription>Quy định về độ phức tạp mật khẩu</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label>Độ dài tối thiểu</Label>
-                  <Input
-                    type="number"
-                    value={securitySettings.passwordPolicy.minLength}
-                    onChange={(e) => setSecuritySettings(prev => ({
-                      ...prev,
-                      passwordPolicy: { ...prev.passwordPolicy, minLength: parseInt(e.target.value) }
-                    }))}
-                    className="w-20"
-                  />
-                </div>
-                
-                <div className="space-y-2">
-                  <Label>Hết hạn sau (ngày)</Label>
-                  <Input
-                    type="number"
-                    value={securitySettings.passwordPolicy.expiryDays}
-                    onChange={(e) => setSecuritySettings(prev => ({
-                      ...prev,
-                      passwordPolicy: { ...prev.passwordPolicy, expiryDays: parseInt(e.target.value) }
-                    }))}
-                    className="w-20"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="require-uppercase">Yêu cầu chữ hoa</Label>
-                  <Switch
-                    id="require-uppercase"
-                    checked={securitySettings.passwordPolicy.requireUppercase}
-                    onCheckedChange={(checked) => 
-                      setSecuritySettings(prev => ({
-                        ...prev,
-                        passwordPolicy: { ...prev.passwordPolicy, requireUppercase: checked }
-                      }))
-                    }
-                  />
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="require-lowercase">Yêu cầu chữ thường</Label>
-                  <Switch
-                    id="require-lowercase"
-                    checked={securitySettings.passwordPolicy.requireLowercase}
-                    onCheckedChange={(checked) => 
-                      setSecuritySettings(prev => ({
-                        ...prev,
-                        passwordPolicy: { ...prev.passwordPolicy, requireLowercase: checked }
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="require-numbers">Yêu cầu số</Label>
-                  <Switch
-                    id="require-numbers"
-                    checked={securitySettings.passwordPolicy.requireNumbers}
-                    onCheckedChange={(checked) => 
-                      setSecuritySettings(prev => ({
-                        ...prev,
-                        passwordPolicy: { ...prev.passwordPolicy, requireNumbers: checked }
-                      }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="require-special">Yêu cầu ký tự đặc biệt</Label>
-                  <Switch
-                    id="require-special"
-                    checked={securitySettings.passwordPolicy.requireSpecialChars}
-                    onCheckedChange={(checked) => 
-                      setSecuritySettings(prev => ({
-                        ...prev,
-                        passwordPolicy: { ...prev.passwordPolicy, requireSpecialChars: checked }
-                      }))
-                    }
-                  />
-                </div>
+                <Button variant="outline" size="sm" className="w-full">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Thêm điều kiện
+                </Button>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-        {/* Security Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Người dùng có 2FA</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {users.filter(u => u.twoFactorEnabled).length}
-                  </p>
-                </div>
-                <Shield className="w-6 h-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Phiên hoạt động</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {users.filter(u => u.status === 'active').length * 2}
-                  </p>
-                </div>
-                <Monitor className="w-6 h-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tài khoản bị khóa</p>
-                  <p className="text-2xl font-bold text-red-600">
-                    {users.filter(u => u.status === 'locked').length}
-                  </p>
-                </div>
-                <Lock className="w-6 h-6 text-red-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Mức độ bảo mật</p>
-                  <p className="text-2xl font-bold text-purple-600">Cao</p>
-                </div>
-                <Star className="w-6 h-6 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTagModal(false)}>
+                Hủy
+              </Button>
+              <Button>
+                {selectedTag ? 'Cập nhật' : 'Tạo mới'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
@@ -1637,7 +1695,6 @@ export default function SettingsManagement() {
                   <TableHead>Phòng ban/Team</TableHead>
                   <TableHead>Trạng thái</TableHead>
                   <TableHead>Đăng nhập cuối</TableHead>
-                  <TableHead>2FA</TableHead>
                   <TableHead>Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
@@ -1674,19 +1731,6 @@ export default function SettingsManagement() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">{formatDate(user.lastLogin)}</div>
-                    </TableCell>
-                    <TableCell>
-                      {user.twoFactorEnabled ? (
-                        <Badge className="bg-green-100 text-green-800">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Bật
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">
-                          <Shield className="w-3 h-3 mr-1" />
-                          Tắt
-                        </Badge>
-                      )}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -1764,19 +1808,6 @@ export default function SettingsManagement() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">Đã bật 2FA</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    {users.filter(u => u.twoFactorEnabled).length}
-                  </p>
-                </div>
-                <Shield className="w-6 h-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
                   <p className="text-sm font-medium text-gray-600">Online hôm nay</p>
                   <p className="text-2xl font-bold text-purple-600">
                     {users.filter(u => {
@@ -1786,7 +1817,7 @@ export default function SettingsManagement() {
                     }).length}
                   </p>
                 </div>
-                <Activity className="w-6 h-6 text-purple-500" />
+                <Clock className="w-6 h-6 text-purple-500" />
               </div>
             </CardContent>
           </Card>
@@ -2076,432 +2107,6 @@ export default function SettingsManagement() {
             </div>
           </CardContent>
         </Card>
-      </div>
-    )
-  }
-
-  // Component: Tags Management
-  const TagsManagement = () => {
-    const [showTagModal, setShowTagModal] = useState(false)
-    const [selectedTag, setSelectedTag] = useState<CustomTag | null>(null)
-    const [editingTag, setEditingTag] = useState<CustomTag | null>(null)
-
-    const filteredTags = tags.filter(tag => {
-      const matchesSearch = tag.name.toLowerCase().includes(searchTerm.toLowerCase())
-      const matchesCategory = categoryFilter === 'all' || tag.category === categoryFilter
-      const matchesScope = tagFilter === 'all' || tag.scope === tagFilter
-      
-      return matchesSearch && matchesCategory && matchesScope
-    })
-
-    const getCategoryColor = (category: string) => {
-      switch (category) {
-        case 'lead': return 'bg-blue-100 text-blue-800'
-        case 'customer': return 'bg-green-100 text-green-800'
-        case 'deal': return 'bg-purple-100 text-purple-800'
-        case 'task': return 'bg-orange-100 text-orange-800'
-        default: return 'bg-gray-100 text-gray-800'
-      }
-    }
-
-    const getScopeColor = (scope: string) => {
-      switch (scope) {
-        case 'global': return 'bg-indigo-100 text-indigo-800'
-        case 'team': return 'bg-cyan-100 text-cyan-800'
-        case 'user': return 'bg-pink-100 text-pink-800'
-        default: return 'bg-gray-100 text-gray-800'
-      }
-    }
-
-    const handleCreateTag = () => {
-      setSelectedTag(null)
-      setEditingTag(null)
-      setShowTagModal(true)
-    }
-
-    const handleEditTag = (tag: CustomTag) => {
-      setSelectedTag(tag)
-      setEditingTag({ ...tag })
-      setShowTagModal(true)
-    }
-
-    const handleDeleteTag = (tagId: string) => {
-      setTags(prev => prev.filter(t => t.id !== tagId))
-    }
-
-    const handleSaveTag = () => {
-      if (editingTag) {
-        if (selectedTag) {
-          // Update existing tag
-          setTags(prev => prev.map(t => t.id === selectedTag.id ? editingTag : t))
-        } else {
-          // Create new tag
-          const newTag = {
-            ...editingTag,
-            id: Date.now().toString(),
-            createdAt: new Date().toISOString(),
-            createdBy: 'current-user'
-          }
-          setTags(prev => [...prev, newTag])
-        }
-      }
-      setShowTagModal(false)
-      setSelectedTag(null)
-      setEditingTag(null)
-    }
-
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Quản lý Nhãn</h2>
-            <p className="text-gray-600">Tạo và quản lý nhãn để phân loại dữ liệu</p>
-          </div>
-          <Button onClick={handleCreateTag}>
-            <Plus className="w-4 h-4 mr-2" />
-            Tạo nhãn mới
-          </Button>
-        </div>
-
-        {/* Filters */}
-        <Card>
-          <CardContent className="p-4">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  placeholder="Tìm kiếm nhãn..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Loại" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả loại</SelectItem>
-                  <SelectItem value="lead">Lead</SelectItem>
-                  <SelectItem value="customer">Khách hàng</SelectItem>
-                  <SelectItem value="deal">Deal</SelectItem>
-                  <SelectItem value="task">Công việc</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={tagFilter} onValueChange={setTagFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Phạm vi" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Tất cả phạm vi</SelectItem>
-                  <SelectItem value="global">Toàn cục</SelectItem>
-                  <SelectItem value="team">Nhóm</SelectItem>
-                  <SelectItem value="user">Cá nhân</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Xuất danh sách
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tags Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tổng số nhãn</p>
-                  <p className="text-2xl font-bold text-blue-600">{tags.length}</p>
-                </div>
-                <Tags className="w-6 h-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Nhãn toàn cục</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {tags.filter(t => t.scope === 'global').length}
-                  </p>
-                </div>
-                <Globe className="w-6 h-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tự động gán</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {tags.filter(t => t.autoAssign.enabled).length}
-                  </p>
-                </div>
-                <Zap className="w-6 h-6 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Nhãn mặc định</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {tags.filter(t => t.isDefault).length}
-                  </p>
-                </div>
-                <Star className="w-6 h-6 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tags List */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Danh sách Nhãn</CardTitle>
-            <CardDescription>Quản lý tất cả nhãn trong hệ thống</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {filteredTags.map((tag) => (
-                <div key={tag.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
-                  <div className="flex items-center space-x-4">
-                    <div
-                      className="w-4 h-4 rounded"
-                      style={{ backgroundColor: tag.color }}
-                    />
-                    <div>
-                      <div className="flex items-center space-x-2">
-                        <h4 className="font-medium">{tag.name}</h4>
-                        {tag.isDefault && (
-                          <Badge variant="outline" className="text-xs">
-                            <Star className="w-3 h-3 mr-1" />
-                            Mặc định
-                          </Badge>
-                        )}
-                        {tag.autoAssign.enabled && (
-                          <Badge variant="outline" className="text-xs">
-                            <Zap className="w-3 h-3 mr-1" />
-                            Tự động
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex items-center space-x-2 mt-1">
-                        <Badge className={getCategoryColor(tag.category)}>
-                          {tag.category === 'lead' && 'Lead'}
-                          {tag.category === 'customer' && 'Khách hàng'}
-                          {tag.category === 'deal' && 'Deal'}
-                          {tag.category === 'task' && 'Công việc'}
-                        </Badge>
-                        <Badge className={getScopeColor(tag.scope)}>
-                          {tag.scope === 'global' && 'Toàn cục'}
-                          {tag.scope === 'team' && 'Nhóm'}
-                          {tag.scope === 'user' && 'Cá nhân'}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditTag(tag)}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteTag(tag.id)}
-                      className="text-red-600 hover:text-red-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Auto-Assignment Rules */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quy tắc Tự động gán</CardTitle>
-            <CardDescription>Cấu hình quy tắc tự động gán nhãn dựa trên điều kiện</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {tags.filter(t => t.autoAssign.enabled).map((tag) => (
-                <div key={tag.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-3">
-                      <div
-                        className="w-4 h-4 rounded"
-                        style={{ backgroundColor: tag.color }}
-                      />
-                      <h4 className="font-medium">{tag.name}</h4>
-                      <Badge className={getCategoryColor(tag.category)}>
-                        {tag.category === 'lead' && 'Lead'}
-                        {tag.category === 'customer' && 'Khách hàng'}
-                        {tag.category === 'deal' && 'Deal'}
-                        {tag.category === 'task' && 'Công việc'}
-                      </Badge>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      <Edit2 className="w-4 h-4 mr-2" />
-                      Chỉnh sửa
-                    </Button>
-                  </div>
-                  <div className="space-y-2">
-                    {tag.autoAssign.conditions.map((condition: any, index: number) => (
-                      <div key={index} className="flex items-center space-x-2 text-sm text-gray-600">
-                        <span className="font-medium">{condition.field}</span>
-                        <span>{condition.operator}</span>
-                        <span className="font-medium">{condition.value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              ))}
-              {tags.filter(t => t.autoAssign.enabled).length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                  <p>Chưa có quy tắc tự động gán nào</p>
-                  <Button variant="outline" className="mt-2" onClick={handleCreateTag}>
-                    Tạo quy tắc đầu tiên
-                  </Button>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Tag Creation/Edit Modal */}
-        <Dialog open={showTagModal} onOpenChange={setShowTagModal}>
-          <DialogContent className="max-w-md">
-            <DialogHeader>
-              <DialogTitle>
-                {selectedTag ? 'Chỉnh sửa nhãn' : 'Tạo nhãn mới'}
-              </DialogTitle>
-              <DialogDescription>
-                {selectedTag 
-                  ? 'Cập nhật thông tin nhãn'
-                  : 'Tạo nhãn mới để phân loại dữ liệu'
-                }
-              </DialogDescription>
-            </DialogHeader>
-            
-            {editingTag && (
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="tag-name">Tên nhãn</Label>
-                  <Input
-                    id="tag-name"
-                    value={editingTag.name}
-                    onChange={(e) => setEditingTag(prev => prev ? { ...prev, name: e.target.value } : null)}
-                    placeholder="Nhập tên nhãn"
-                  />
-                </div>
-
-                <div>
-                  <Label>Màu sắc</Label>
-                  <div className="grid grid-cols-8 gap-2 mt-2">
-                    {[
-                      '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
-                      '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
-                    ].map((color) => (
-                      <button
-                        key={color}
-                        className={`w-8 h-8 rounded border-2 ${
-                          editingTag.color === color ? 'border-gray-900' : 'border-gray-200'
-                        }`}
-                        style={{ backgroundColor: color }}
-                        onClick={() => setEditingTag(prev => prev ? { ...prev, color } : null)}
-                      />
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <Label>Loại</Label>
-                  <Select
-                    value={editingTag.category}
-                    onValueChange={(value: any) => setEditingTag(prev => prev ? { ...prev, category: value } : null)}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="lead">Lead</SelectItem>
-                      <SelectItem value="customer">Khách hàng</SelectItem>
-                      <SelectItem value="deal">Deal</SelectItem>
-                      <SelectItem value="task">Công việc</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label>Phạm vi</Label>
-                  <Select
-                    value={editingTag.scope}
-                    onValueChange={(value: any) => setEditingTag(prev => prev ? { ...prev, scope: value } : null)}
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="global">Toàn cục</SelectItem>
-                      <SelectItem value="team">Nhóm</SelectItem>
-                      <SelectItem value="user">Cá nhân</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="is-default">Nhãn mặc định</Label>
-                  <Switch
-                    id="is-default"
-                    checked={editingTag.isDefault}
-                    onCheckedChange={(checked) => 
-                      setEditingTag(prev => prev ? { ...prev, isDefault: checked } : null)
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="auto-assign">Tự động gán</Label>
-                  <Switch
-                    id="auto-assign"
-                    checked={editingTag.autoAssign.enabled}
-                    onCheckedChange={(checked) => 
-                      setEditingTag(prev => prev ? { 
-                        ...prev, 
-                        autoAssign: { ...prev.autoAssign, enabled: checked }
-                      } : null)
-                    }
-                  />
-                </div>
-              </div>
-            )}
-
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setShowTagModal(false)}>
-                Hủy
-              </Button>
-              <Button onClick={handleSaveTag}>
-                {selectedTag ? 'Cập nhật' : 'Tạo mới'}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
       </div>
     )
   }
@@ -3055,360 +2660,161 @@ export default function SettingsManagement() {
     )
   }
 
-  // Activity Log Management Component
-  const ActivityLogManagement = () => {
-    const [activityLogs, setActivityLogs] = useState([
+  // System History Management Component
+  const SystemHistoryManagement = () => {
+    const [systemHistory, setSystemHistory] = useState([
+      // Lead Management Activities
       {
         id: 1,
-        userId: 1,
-        userName: 'Nguyễn Văn An',
-        userRole: 'sales',
-        module: 'leads',
-        action: 'create',
-        details: 'Tạo lead mới: Trần Thị C',
-        entityId: 'lead_123',
-        entityType: 'lead',
-        timestamp: '2025-06-11T15:30:00',
+        category: 'lead_management',
+        action: 'create_lead',
+        details: 'Tạo lead mới: "Nguyễn Thị Lan - Quan tâm sản phẩm A"',
+        performedBy: 'Nguyễn Văn An',
+        performedByRole: 'sales',
+        timestamp: '2025-06-11T16:45:00',
+        affectedEntities: ['lead_12345'],
+        changes: {
+          before: null,
+          after: {
+            name: 'Nguyễn Thị Lan',
+            phone: '0987654321',
+            email: 'lanng@email.com',
+            source: 'website',
+            status: 'new',
+            assignedTo: 'Nguyễn Văn An',
+            score: 75
+          }
+        },
         ip: '192.168.1.100',
-        device: 'Chrome/Windows',
         status: 'success'
       },
       {
         id: 2,
-        userId: 2,
-        userName: 'Trần Thị Bình',
-        userRole: 'manager',
-        module: 'deals',
-        action: 'update',
-        details: 'Cập nhật trạng thái deal #456 từ "Đàm phán" thành "Đóng thành công"',
-        entityId: 'deal_456',
-        entityType: 'deal',
-        timestamp: '2025-06-11T14:20:00',
+        category: 'lead_management',
+        action: 'assign_lead',
+        details: 'Phân lead "Trần Minh Hoàng" từ Nguyễn Văn An cho Lê Thị Mai',
+        performedBy: 'Trần Thị Bình',
+        performedByRole: 'manager',
+        timestamp: '2025-06-11T16:30:00',
+        affectedEntities: ['lead_12344'],
+        changes: {
+          before: { assignedTo: 'Nguyễn Văn An', status: 'contacted' },
+          after: { assignedTo: 'Lê Thị Mai', status: 'transferred', reason: 'Chuyên môn phù hợp hơn' }
+        },
         ip: '192.168.1.101',
-        device: 'Firefox/Windows',
         status: 'success'
       },
       {
         id: 3,
-        userId: 1,
-        userName: 'Nguyễn Văn An',
-        userRole: 'sales',
-        module: 'customers',
-        action: 'export',
-        details: 'Xuất danh sách khách hàng (50 records)',
-        entityId: null,
-        entityType: 'customer',
-        timestamp: '2025-06-11T13:45:00',
-        ip: '192.168.1.100',
-        device: 'Chrome/Windows',
+        category: 'lead_management',
+        action: 'update_lead_status',
+        details: 'Cập nhật trạng thái lead "Phạm Văn Đức" từ "Tư vấn" sang "Báo giá"',
+        performedBy: 'Lê Thị Mai',
+        performedByRole: 'sales',
+        timestamp: '2025-06-11T16:15:00',
+        affectedEntities: ['lead_12343'],
+        changes: {
+          before: { status: 'consulting', stage: 'Tư vấn', score: 65 },
+          after: { status: 'quoted', stage: 'Báo giá', score: 80, note: 'Gửi báo giá sản phẩm B' }
+        },
+        ip: '192.168.1.102',
         status: 'success'
       },
       {
         id: 4,
-        userId: 3,
-        userName: 'Lê Minh Chánh',
-        userRole: 'sales',
-        module: 'reports',
-        action: 'view',
-        details: 'Xem báo cáo doanh số tháng 6',
-        entityId: 'report_789',
-        entityType: 'report',
-        timestamp: '2025-06-11T12:30:00',
-        ip: '192.168.1.102',
-        device: 'Safari/MacOS',
+        category: 'lead_management',
+        action: 'convert_lead_to_deal',
+        details: 'Chuyển đổi lead "Công ty XYZ" thành deal với giá trị 150.000.000 VNĐ',
+        performedBy: 'Nguyễn Văn An',
+        performedByRole: 'sales',
+        timestamp: '2025-06-11T16:00:00',
+        affectedEntities: ['lead_12342', 'deal_5678'],
+        changes: {
+          before: { type: 'lead', status: 'interested', value: null },
+          after: { type: 'deal', status: 'negotiating', value: 150000000, probability: 70 }
+        },
+        ip: '192.168.1.100',
         status: 'success'
       },
       {
         id: 5,
-        userId: 4,
-        userName: 'Phạm Thị Dung',
-        userRole: 'admin',
-        module: 'users',
-        action: 'update_permissions',
-        details: 'Cập nhật quyền cho người dùng Nguyễn Văn An',
-        entityId: 'user_1',
-        entityType: 'user',
-        timestamp: '2025-06-11T11:15:00',
-        ip: '192.168.1.103',
-        device: 'Chrome/Windows',
+        category: 'lead_management',
+        action: 'bulk_assign_leads',
+        details: 'Phân bổ tự động 25 lead từ Zalo OA cho Team Sales A',
+        performedBy: 'System Auto',
+        performedByRole: 'system',
+        timestamp: '2025-06-11T15:30:00',
+        affectedEntities: ['team_sales_a', 'bulk_assign_001'],
+        changes: {
+          before: { unassignedLeads: 25, teamWorkload: 45 },
+          after: { assignedLeads: 25, teamWorkload: 70, assignmentRule: 'Round Robin' }
+        },
+        ip: 'system',
         status: 'success'
-      }
-    ])
-
-    const [filterModule, setFilterModule] = useState('all')
-    const [filterAction, setFilterAction] = useState('all')
-    const [filterUser, setFilterUser] = useState('all')
-    const [filterDate, setFilterDate] = useState('')
-
-    const modules = [
-      { value: 'all', label: 'Tất cả module' },
-      { value: 'leads', label: 'Leads' },
-      { value: 'deals', label: 'Deals' },
-      { value: 'customers', label: 'Khách hàng' },
-      { value: 'reports', label: 'Báo cáo' },
-      { value: 'users', label: 'Người dùng' },
-      { value: 'settings', label: 'Cài đặt' }
-    ]
-
-    const actions = [
-      { value: 'all', label: 'Tất cả hành động' },
-      { value: 'create', label: 'Tạo mới' },
-      { value: 'update', label: 'Cập nhật' },
-      { value: 'delete', label: 'Xóa' },
-      { value: 'view', label: 'Xem' },
-      { value: 'export', label: 'Xuất dữ liệu' },
-      { value: 'import', label: 'Nhập dữ liệu' }
-    ]
-
-    const filteredLogs = activityLogs.filter(log => {
-      const moduleMatch = filterModule === 'all' || log.module === filterModule
-      const actionMatch = filterAction === 'all' || log.action === filterAction
-      const userMatch = filterUser === 'all' || log.userId.toString() === filterUser
-      const dateMatch = !filterDate || new Date(log.timestamp).toDateString() === new Date(filterDate).toDateString()
-      
-      return moduleMatch && actionMatch && userMatch && dateMatch
-    })
-
-    const getActionIcon = (action: string) => {
-      switch (action) {
-        case 'create': return <Plus className="w-4 h-4 text-green-600" />
-        case 'update': return <Edit2 className="w-4 h-4 text-blue-600" />
-        case 'delete': return <Trash2 className="w-4 h-4 text-red-600" />
-        case 'view': return <Eye className="w-4 h-4 text-gray-600" />
-        case 'export': return <Download className="w-4 h-4 text-purple-600" />
-        case 'import': return <Upload className="w-4 h-4 text-orange-600" />
-        default: return <Activity className="w-4 h-4 text-gray-600" />
-      }
-    }
-
-    const getModuleIcon = (module: string) => {
-      switch (module) {
-        case 'leads': return <Users className="w-4 h-4 text-blue-600" />
-        case 'deals': return <Target className="w-4 h-4 text-green-600" />
-        case 'customers': return <UserCog className="w-4 h-4 text-purple-600" />
-        case 'reports': return <BarChart3 className="w-4 h-4 text-orange-600" />
-        case 'users': return <User2 className="w-4 h-4 text-gray-600" />
-        case 'settings': return <Settings className="w-4 h-4 text-gray-600" />
-        default: return <Activity className="w-4 h-4 text-gray-600" />
-      }
-    }
-
-    return (
-      <div className="space-y-6">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Nhật ký Hoạt động Người dùng</h2>
-            <p className="text-gray-600">Theo dõi và kiểm soát mọi hoạt động trong hệ thống</p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Xuất nhật ký
-            </Button>
-            <Button variant="outline">
-              <Filter className="w-4 h-4 mr-2" />
-              Lọc nâng cao
-            </Button>
-          </div>
-        </div>
-
-        {/* Activity Overview */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tổng hoạt động</p>
-                  <p className="text-2xl font-bold text-blue-600">{activityLogs.length}</p>
-                </div>
-                <Activity className="w-6 h-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Hôm nay</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {activityLogs.filter(log => 
-                      new Date(log.timestamp).toDateString() === new Date().toDateString()
-                    ).length}
-                  </p>
-                </div>
-                <Calendar className="w-6 h-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Người dùng hoạt động</p>
-                  <p className="text-2xl font-bold text-purple-600">
-                    {new Set(activityLogs.map(log => log.userId)).size}
-                  </p>
-                </div>
-                <Users className="w-6 h-6 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Module phổ biến</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {activityLogs.reduce((acc, log) => {
-                      acc[log.module] = (acc[log.module] || 0) + 1
-                      return acc
-                    }, {} as any) && Object.entries(activityLogs.reduce((acc, log) => {
-                      acc[log.module] = (acc[log.module] || 0) + 1
-                      return acc
-                    }, {} as any)).sort(([,a], [,b]) => (b as number) - (a as number))[0]?.[0] || 'N/A'}
-                  </p>
-                </div>
-                <BarChart3 className="w-6 h-6 text-orange-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Filters */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Bộ lọc</CardTitle>
-            <CardDescription>Lọc nhật ký theo các tiêu chí</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <div>
-                <Label>Module</Label>
-                <Select value={filterModule} onValueChange={setFilterModule}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {modules.map((module) => (
-                      <SelectItem key={module.value} value={module.value}>
-                        {module.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Hành động</Label>
-                <Select value={filterAction} onValueChange={setFilterAction}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {actions.map((action) => (
-                      <SelectItem key={action.value} value={action.value}>
-                        {action.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Người dùng</Label>
-                <Select value={filterUser} onValueChange={setFilterUser}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tất cả người dùng</SelectItem>
-                    {Array.from(new Set(activityLogs.map(log => ({ id: log.userId, name: log.userName }))))
-                      .map((user) => (
-                        <SelectItem key={user.id} value={user.id.toString()}>
-                          {user.name}
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Label>Ngày</Label>
-                <Input
-                  type="date"
-                  value={filterDate}
-                  onChange={(e) => setFilterDate(e.target.value)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Activity Logs */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Nhật ký Hoạt động ({filteredLogs.length})</CardTitle>
-            <CardDescription>Danh sách chi tiết các hoạt động trong hệ thống</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {filteredLogs.map((log) => (
-                <div key={log.id} className="border rounded-lg p-4 hover:bg-gray-50">
-                  <div className="flex items-start space-x-3">
-                    <div className="flex items-center space-x-2">
-                      {getModuleIcon(log.module)}
-                      {getActionIcon(log.action)}
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <span className="font-medium">{log.userName}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {log.userRole}
-                          </Badge>
-                          <Badge variant={log.status === 'success' ? 'default' : 'destructive'} className="text-xs">
-                            {log.status === 'success' ? 'Thành công' : 'Thất bại'}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(log.timestamp).toLocaleString('vi-VN')}
-                        </div>
-                      </div>
-                      <p className="text-sm text-gray-700 mt-1">{log.details}</p>
-                      <div className="flex items-center space-x-4 mt-2 text-xs text-gray-500">
-                        <span>Module: {log.module}</span>
-                        <span>IP: {log.ip}</span>
-                        <span>Thiết bị: {log.device}</span>
-                        {log.entityId && <span>ID: {log.entityId}</span>}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filteredLogs.length === 0 && (
-              <div className="text-center py-8">
-                <Activity className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Không có nhật ký</h3>
-                <p className="text-gray-500">Không tìm thấy hoạt động nào phù hợp với bộ lọc.</p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    )
-  }
-
-  // System History Management Component
-  const SystemHistoryManagement = () => {
-    const [systemHistory, setSystemHistory] = useState([
+      },
       {
-        id: 1,
+        id: 6,
+        category: 'lead_management',
+        action: 'add_lead_tag',
+        details: 'Thêm tag "VIP" cho lead "Nguyễn Thị Hoa" do doanh thu > 100 triệu',
+        performedBy: 'Auto Tag System',
+        performedByRole: 'system',
+        timestamp: '2025-06-11T15:20:00',
+        affectedEntities: ['lead_12341', 'tag_vip'],
+        changes: {
+          before: { tags: ['Tiềm năng cao'], revenue: 120000000 },
+          after: { tags: ['Tiềm năng cao', 'VIP'], autoTagged: true, priority: 'high' }
+        },
+        ip: 'system',
+        status: 'success'
+      },
+      {
+        id: 7,
+        category: 'lead_management',
+        action: 'import_leads',
+        details: 'Import 50 lead từ file Excel "Danh_sach_KH_thang6.xlsx"',
+        performedBy: 'Trần Thị Bình',
+        performedByRole: 'manager',
+        timestamp: '2025-06-11T14:45:00',
+        affectedEntities: ['import_batch_001'],
+        changes: {
+          before: { totalLeads: 1250 },
+          after: { 
+            totalLeads: 1300, 
+            importedCount: 50, 
+            successCount: 48, 
+            errorCount: 2, 
+            duplicateCount: 2 
+          }
+        },
+        ip: '192.168.1.101',
+        status: 'partial_success'
+      },
+      {
+        id: 8,
+        category: 'lead_management',
+        action: 'delete_lead',
+        details: 'Xóa lead "Spam Contact" do vi phạm chính sách',
+        performedBy: 'Nguyễn Văn An',
+        performedByRole: 'sales',
+        timestamp: '2025-06-11T14:30:00',
+        affectedEntities: ['lead_12340'],
+        changes: {
+          before: { name: 'Spam Contact', phone: '0000000000', status: 'new' },
+          after: null
+        },
+        ip: '192.168.1.100',
+        status: 'success'
+      },
+      // User Management Activities
+      {
+        id: 9,
         category: 'user_management',
         action: 'create_user',
         details: 'Tạo tài khoản người dùng mới: Nguyễn Văn E',
         performedBy: 'Phạm Thị Dung',
         performedByRole: 'admin',
-        timestamp: '2025-06-11T16:30:00',
+        timestamp: '2025-06-11T14:00:00',
         affectedEntities: ['user_5'],
         changes: {
           before: null,
@@ -3422,40 +2828,9 @@ export default function SettingsManagement() {
         ip: '192.168.1.103',
         status: 'success'
       },
+      // System Configuration
       {
-        id: 2,
-        category: 'permissions',
-        action: 'update_role_permissions',
-        details: 'Cập nhật quyền cho vai trò "Sales": thêm quyền xuất báo cáo',
-        performedBy: 'Phạm Thị Dung',
-        performedByRole: 'admin',
-        timestamp: '2025-06-11T15:45:00',
-        affectedEntities: ['role_sales'],
-        changes: {
-          before: { reports: { export: false } },
-          after: { reports: { export: true } }
-        },
-        ip: '192.168.1.103',
-        status: 'success'
-      },
-      {
-        id: 3,
-        category: 'security',
-        action: 'enable_2fa',
-        details: 'Kích hoạt xác thực 2 yếu tố cho toàn hệ thống',
-        performedBy: 'Phạm Thị Dung',
-        performedByRole: 'admin',
-        timestamp: '2025-06-11T14:20:00',
-        affectedEntities: ['system_security'],
-        changes: {
-          before: { twoFactorEnabled: false },
-          after: { twoFactorEnabled: true }
-        },
-        ip: '192.168.1.103',
-        status: 'success'
-      },
-      {
-        id: 4,
+        id: 10,
         category: 'workflow',
         action: 'create_stage',
         details: 'Tạo giai đoạn mới trong quy trình sales: "Tư vấn chi tiết"',
@@ -3471,35 +2846,40 @@ export default function SettingsManagement() {
         status: 'success'
       },
       {
-        id: 5,
+        id: 11,
         category: 'integration',
-        action: 'connect_zalo_oa',
-        details: 'Kết nối Zalo OA mới: VileLead Official',
-        performedBy: 'Phạm Thị Dung',
-        performedByRole: 'admin',
-        timestamp: '2025-06-11T12:00:00',
-        affectedEntities: ['zalo_integration'],
+        action: 'sync_leads_zalo',
+        details: 'Đồng bộ 12 lead mới từ Zalo OA "VileLead Official"',
+        performedBy: 'Zalo Integration',
+        performedByRole: 'system',
+        timestamp: '2025-06-11T13:00:00',
+        affectedEntities: ['zalo_sync_001'],
         changes: {
-          before: { connectedAccounts: 1 },
-          after: { connectedAccounts: 2, newAccount: 'VileLead Official' }
+          before: { lastSync: '2025-06-11T12:00:00', totalSynced: 1288 },
+          after: { lastSync: '2025-06-11T13:00:00', totalSynced: 1300, newLeads: 12 }
         },
-        ip: '192.168.1.103',
+        ip: 'zalo_webhook',
         status: 'success'
       },
       {
-        id: 6,
-        category: 'interface',
-        action: 'update_theme',
-        details: 'Thay đổi theme hệ thống từ Light sang Dark',
-        performedBy: 'Nguyễn Văn An',
-        performedByRole: 'sales',
-        timestamp: '2025-06-11T11:30:00',
-        affectedEntities: ['user_interface'],
+        id: 12,
+        category: 'lead_management',
+        action: 'update_lead_score',
+        details: 'Cập nhật điểm lead "Công ty ABC" từ 45 lên 85 do tương tác tích cực',
+        performedBy: 'Lead Scoring System',
+        performedByRole: 'system',
+        timestamp: '2025-06-11T12:30:00',
+        affectedEntities: ['lead_12339', 'scoring_rule_001'],
         changes: {
-          before: { theme: 'light' },
-          after: { theme: 'dark' }
+          before: { score: 45, interactions: 3, lastContact: '2025-06-10' },
+          after: { 
+            score: 85, 
+            interactions: 8, 
+            lastContact: '2025-06-11',
+            scoreFactors: ['Mở email: +10', 'Click link: +15', 'Phản hồi: +15']
+          }
         },
-        ip: '192.168.1.100',
+        ip: 'system',
         status: 'success'
       }
     ])
@@ -3510,12 +2890,15 @@ export default function SettingsManagement() {
 
     const categories = [
       { value: 'all', label: 'Tất cả danh mục', icon: Settings },
-      { value: 'user_management', label: 'Quản lý người dùng', icon: Users },
+      { value: 'lead_management', label: 'Quản lý Lead', icon: Users },
+      { value: 'deal_management', label: 'Quản lý Deal', icon: Target },
+      { value: 'customer_management', label: 'Quản lý Khách hàng', icon: User2 },
+      { value: 'user_management', label: 'Quản lý Người dùng', icon: UserCog },
       { value: 'permissions', label: 'Phân quyền', icon: Shield },
-      { value: 'security', label: 'Bảo mật', icon: Lock },
       { value: 'workflow', label: 'Quy trình', icon: Workflow },
       { value: 'integration', label: 'Tích hợp', icon: Zap },
-      { value: 'interface', label: 'Giao diện', icon: Monitor }
+      { value: 'interface', label: 'Giao diện', icon: Monitor },
+      { value: 'system', label: 'Hệ thống', icon: Database }
     ]
 
     const filteredHistory = systemHistory.filter(item => {
@@ -3534,12 +2917,15 @@ export default function SettingsManagement() {
 
     const getCategoryColor = (category: string) => {
       const colors = {
-        user_management: 'text-blue-600 bg-blue-100',
-        permissions: 'text-green-600 bg-green-100',
-        security: 'text-red-600 bg-red-100',
-        workflow: 'text-purple-600 bg-purple-100',
+        lead_management: 'text-blue-600 bg-blue-100',
+        deal_management: 'text-purple-600 bg-purple-100',
+        customer_management: 'text-green-600 bg-green-100',
+        user_management: 'text-indigo-600 bg-indigo-100',
+        permissions: 'text-emerald-600 bg-emerald-100',
+        workflow: 'text-violet-600 bg-violet-100',
         integration: 'text-orange-600 bg-orange-100',
-        interface: 'text-gray-600 bg-gray-100'
+        interface: 'text-gray-600 bg-gray-100',
+        system: 'text-slate-600 bg-slate-100'
       }
       return colors[category as keyof typeof colors] || 'text-gray-600 bg-gray-100'
     }
@@ -3790,15 +3176,12 @@ export default function SettingsManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-9">
+        <TabsList className="grid w-full grid-cols-6">
           <TabsTrigger value="company">Công ty</TabsTrigger>
           <TabsTrigger value="workflow">Quy trình</TabsTrigger>
-          <TabsTrigger value="security">Bảo mật</TabsTrigger>
           <TabsTrigger value="interface">Giao diện</TabsTrigger>
           <TabsTrigger value="integrations">Tích hợp</TabsTrigger>
-          <TabsTrigger value="tags">Nhãn</TabsTrigger>
           <TabsTrigger value="templates">Mẫu dữ liệu</TabsTrigger>
-          <TabsTrigger value="activity">Hoạt động</TabsTrigger>
           <TabsTrigger value="history">Lịch sử</TabsTrigger>
         </TabsList>
 
@@ -3811,10 +3194,6 @@ export default function SettingsManagement() {
           <WorkflowManagement />
         </TabsContent>
 
-        <TabsContent value="security" className="mt-6">
-          <SecurityManagement />
-        </TabsContent>
-
         <TabsContent value="interface" className="mt-6">
           <InterfaceManagement />
         </TabsContent>
@@ -3823,16 +3202,8 @@ export default function SettingsManagement() {
           <IntegrationManagement />
         </TabsContent>
 
-        <TabsContent value="tags" className="mt-6">
-          <TagsManagement />
-        </TabsContent>
-
         <TabsContent value="templates" className="mt-6">
           <DataTemplateManagement />
-        </TabsContent>
-
-        <TabsContent value="activity" className="mt-6">
-          <ActivityLogManagement />
         </TabsContent>
 
         <TabsContent value="history" className="mt-6">
