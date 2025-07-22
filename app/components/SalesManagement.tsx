@@ -27,7 +27,9 @@ import {
   Bot,
   Table,
   LayoutGrid,
-  HelpCircle
+  HelpCircle,
+  Download,
+  Trash2
 } from 'lucide-react'
 
 import AISuggestionsTab from './AISuggestionsTab'
@@ -81,6 +83,10 @@ export default function SalesManagement() {
   const [selectedPipelineStage, setSelectedPipelineStage] = useState<string | null>(null)
   const [showTooltip, setShowTooltip] = useState<string | null>(null)
   const [showAutoAssignTooltip, setShowAutoAssignTooltip] = useState<string | null>(null)
+  const [showLeadDetailModal, setShowLeadDetailModal] = useState(false)
+  const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [showConvertModal, setShowConvertModal] = useState(false)
+  const [selectedProduct, setSelectedProduct] = useState('')
   const [showAddLeadModal, setShowAddLeadModal] = useState(false)
   const [newLead, setNewLead] = useState({
     name: '',
@@ -177,6 +183,84 @@ export default function SalesManagement() {
     
     // Clear notification after 3 seconds
     setTimeout(() => setNotification(null), 3000)
+  }
+
+  // Action handlers for buttons
+
+  const handleViewLeadDetail = (lead: Lead) => {
+    setSelectedLead(lead)
+    setShowLeadDetailModal(true)
+  }
+
+  const handleConvertLead = (lead: Lead) => {
+    setSelectedLead(lead)
+    setSelectedProduct('') // Reset product selection
+    setShowConvertModal(true)
+  }
+
+  const handleExportLead = (lead: Lead) => {
+    const leadData = JSON.stringify(lead, null, 2)
+    const blob = new Blob([leadData], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `lead_${lead.name.replace(/\s+/g, '_')}.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+    setNotification({
+      message: `Đã xuất dữ liệu lead "${lead.name}"`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+  }
+
+  const handleDeleteLead = (lead: Lead) => {
+    if (window.confirm(`Bạn có chắc muốn xóa lead "${lead.name}"?`)) {
+      setLeads(prevLeads => prevLeads.filter(l => l.id !== lead.id))
+      setNotification({
+        message: `Đã xóa lead "${lead.name}"`,
+        type: 'success'
+      })
+      setTimeout(() => setNotification(null), 3000)
+    }
+  }
+
+  const confirmConvertLead = () => {
+    if (!selectedProduct) {
+      setNotification({
+        message: 'Vui lòng chọn sản phẩm khách hàng mua trước khi chuyển đổi',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+
+    if (selectedLead) {
+      const updatedLeads = leads.map(l => 
+        l.id === selectedLead.id 
+          ? { 
+              ...l, 
+              status: 'converted' as Lead['status'], 
+              stage: 'deal_created',
+              product: selectedProduct, // Update with selected product
+              updatedAt: new Date().toISOString(),
+              nextAction: 'Bắt đầu thực hiện dự án'
+            }
+          : l
+      )
+      setLeads(updatedLeads)
+      
+      setNotification({
+        message: `${selectedLead.name} đã được chuyển thành khách hàng với sản phẩm "${selectedProduct}"!`,
+        type: 'success'
+      })
+      setTimeout(() => setNotification(null), 3000)
+    }
+    setShowConvertModal(false)
+    setSelectedLead(null)
+    setSelectedProduct('')
   }
 
   // Auto assignment logic
@@ -1516,7 +1600,7 @@ export default function SalesManagement() {
               
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 hover:text-slate-800 transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
               >
                 <Filter className="w-4 h-4" />
                 Bộ lọc
@@ -1524,7 +1608,7 @@ export default function SalesManagement() {
               
               <button 
                 onClick={() => setShowAutoAssignModal(true)}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Bot className="w-4 h-4" />
                 Phân leads tự động
@@ -1532,7 +1616,7 @@ export default function SalesManagement() {
               
               <button 
                 onClick={() => setShowAddLeadModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Plus className="w-4 h-4" />
                 Thêm Lead
@@ -1856,21 +1940,34 @@ export default function SalesManagement() {
                     
                     {/* Hành động */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white group-hover:bg-gray-50 shadow-lg z-10">
-                      <div className="flex items-center space-x-2">
-                        <button className="text-blue-600 hover:text-blue-900" title="Gọi điện">
-                          <Phone className="w-4 h-4" />
-                        </button>
-                        <button className="text-blue-600 hover:text-blue-900" title="Gửi email">
-                          <Mail className="w-4 h-4" />
-                        </button>
-                        <button className="text-blue-600 hover:text-blue-900" title="Xem chi tiết">
+                      <div className="flex items-center space-x-1">
+                        <button 
+                          onClick={() => handleViewLeadDetail(lead)}
+                          className="p-2 text-slate-600 hover:text-white hover:bg-purple-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                          title="Xem chi tiết"
+                        >
                           <Eye className="w-4 h-4" />
                         </button>
-                        <button className="text-green-600 hover:text-green-900" title="Chuyển thành khách hàng">
+                        <button 
+                          onClick={() => handleExportLead(lead)}
+                          className="p-2 text-slate-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                          title="Xuất dữ liệu"
+                        >
+                          <Download className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleConvertLead(lead)}
+                          className="p-2 text-slate-600 hover:text-white hover:bg-green-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                          title="Chuyển thành khách hàng"
+                        >
                           <User className="w-4 h-4" />
                         </button>
-                        <button className="text-gray-400 hover:text-gray-600" title="Thêm">
-                          <MoreVertical className="w-4 h-4" />
+                        <button 
+                          onClick={() => handleDeleteLead(lead)}
+                          className="p-2 text-slate-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                          title="Xóa lead"
+                        >
+                          <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
                     </td>
@@ -1883,10 +1980,10 @@ export default function SalesManagement() {
           {/* Pagination */}
           <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
             <div className="flex-1 flex justify-between sm:hidden">
-              <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              <button className="relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
                 Trước
               </button>
-              <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+              <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
                 Sau
               </button>
             </div>
@@ -1898,17 +1995,17 @@ export default function SalesManagement() {
                 </p>
               </div>
               <div>
-                <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
+                  <button className="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                     <span className="sr-only">Trước</span>
                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                     </svg>
                   </button>
-                  <button className="bg-blue-50 border-blue-500 text-blue-600 relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+                  <button className="bg-blue-600 border-blue-600 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium shadow-md hover:bg-blue-700 transition-all duration-200">
                     1
                   </button>
-                  <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 focus:z-10 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                  <button className="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
                     <span className="sr-only">Sau</span>
                     <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                       <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -2035,15 +2132,34 @@ export default function SalesManagement() {
                                 
                                 {/* Actions */}
                                 <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                  <div className="flex items-center gap-2">
-                                    <button className="text-blue-600 hover:text-blue-800 p-1" title="Gọi điện">
-                                      <Phone className="w-4 h-4" />
+                                  <div className="flex items-center gap-1">
+                                    <button 
+                                      onClick={() => handleViewLeadDetail(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-purple-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xem chi tiết"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" />
                                     </button>
-                                    <button className="text-blue-600 hover:text-blue-800 p-1" title="Email">
-                                      <Mail className="w-4 h-4" />
+                                    <button 
+                                      onClick={() => handleExportLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-indigo-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xuất dữ liệu"
+                                    >
+                                      <Download className="w-3.5 h-3.5" />
                                     </button>
-                                    <button className="text-blue-600 hover:text-blue-800 p-1" title="Xem chi tiết">
-                                      <Eye className="w-4 h-4" />
+                                    <button 
+                                      onClick={() => handleConvertLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Chuyển thành khách hàng"
+                                    >
+                                      <User className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xóa lead"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
                                     </button>
                                   </div>
                                   <span className="text-xs text-gray-500">
@@ -2856,13 +2972,13 @@ export default function SalesManagement() {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => setShowAddLeadModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={handleAddLead}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Plus className="w-4 h-4" />
                 Thêm Lead
@@ -3326,7 +3442,7 @@ export default function SalesManagement() {
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
                 onClick={() => setShowAutoAssignModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
@@ -3355,9 +3471,297 @@ export default function SalesManagement() {
                   setTimeout(() => setNotification(null), 3000)
                   setShowAutoAssignModal(false)
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 Thực hiện phân công
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lead Detail Modal */}
+      {showLeadDetailModal && selectedLead && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Chi tiết Lead - {selectedLead.name}</h3>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                    selectedLead.status === 'converted' ? 'bg-green-100 text-green-800' :
+                    selectedLead.status === 'qualified' ? 'bg-blue-100 text-blue-800' :
+                    selectedLead.status === 'contacted' ? 'bg-yellow-100 text-yellow-800' :
+                    selectedLead.status === 'negotiation' ? 'bg-orange-100 text-orange-800' :
+                    selectedLead.status === 'proposal' ? 'bg-purple-100 text-purple-800' :
+                    selectedLead.status === 'lost' ? 'bg-red-100 text-red-800' :
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {getStatusName(selectedLead.status)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => setShowLeadDetailModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Thông tin liên hệ */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin liên hệ</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{selectedLead.name}</p>
+                        <p className="text-xs text-gray-500">{selectedLead.company || 'Cá nhân'}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.phone}</p>
+                        <p className="text-xs text-gray-500">Số điện thoại</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.email}</p>
+                        <p className="text-xs text-gray-500">Email</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin bán hàng */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin bán hàng</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <DollarSign className="w-4 h-4 text-green-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{(selectedLead.value / 1000000).toFixed(1)}M VND</p>
+                        <p className="text-xs text-gray-500">Giá trị dự kiến</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Briefcase className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.product}</p>
+                        <p className="text-xs text-gray-500">Sản phẩm quan tâm</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Users className="w-4 h-4 text-purple-500" />
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.assignedTo || 'Chưa phân công'}</p>
+                        <p className="text-xs text-gray-500">Người phụ trách</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin thời gian */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin thời gian</h4>
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Calendar className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-900">{new Date(selectedLead.createdAt).toLocaleString('vi-VN')}</p>
+                        <p className="text-xs text-gray-500">Ngày tạo</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Clock className="w-4 h-4 text-gray-400" />
+                      <div>
+                        <p className="text-sm text-gray-900">
+                          {selectedLead.lastContactedAt 
+                            ? new Date(selectedLead.lastContactedAt).toLocaleString('vi-VN')
+                            : 'Chưa liên hệ'
+                          }
+                        </p>
+                        <p className="text-xs text-gray-500">Lần liên hệ cuối</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Thông tin khác */}
+                <div className="space-y-4">
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags & Nguồn</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs text-gray-500 mb-1">Tags</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedLead.tags.map((tag, index) => (
+                          <span key={index} className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            tag === 'hot' ? 'bg-red-100 text-red-800' :
+                            tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
+                            tag === 'cold' ? 'bg-blue-100 text-blue-800' :
+                            tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Nguồn: <span className="text-gray-900 font-medium">{selectedLead.source}</span></p>
+                      <p className="text-xs text-gray-500">Khu vực: <span className="text-gray-900 font-medium">{selectedLead.region}</span></p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Notes */}
+              <div className="mt-6 space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Ghi chú & Nội dung</h4>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <p className="text-sm text-gray-700">{selectedLead.content || 'Không có nội dung'}</p>
+                </div>
+                {selectedLead.notes && (
+                  <div className="bg-blue-50 rounded-lg p-4">
+                    <p className="text-sm text-blue-900 font-medium mb-1">Ghi chú:</p>
+                    <p className="text-sm text-blue-800">{selectedLead.notes}</p>
+                  </div>
+                )}
+              </div>
+
+              {/* Next Action */}
+              <div className="mt-6 space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Hành động tiếp theo</h4>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <p className="text-sm text-green-900 font-medium">{selectedLead.nextAction}</p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Dự kiến: {new Date(selectedLead.nextActionDate).toLocaleString('vi-VN')}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowLeadDetailModal(false)}
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Đóng
+              </button>
+              <button
+                onClick={() => {
+                  setShowLeadDetailModal(false)
+                  handleConvertLead(selectedLead)
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
+              >
+                <User className="w-4 h-4" />
+                Chuyển đổi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Convert Lead Confirmation Modal */}
+      {showConvertModal && selectedLead && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Xác nhận chuyển đổi</h3>
+            </div>
+            
+            <div className="p-6">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                  <User className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">{selectedLead.name}</h4>
+                  <p className="text-sm text-gray-500">{selectedLead.company || 'Cá nhân'}</p>
+                  <p className="text-lg font-semibold text-green-600">{(selectedLead.value / 1000000).toFixed(1)}M VND</p>
+                </div>
+              </div>
+
+              {/* Product Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Sản phẩm khách hàng mua <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={selectedProduct}
+                  onChange={(e) => setSelectedProduct(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">-- Chọn sản phẩm --</option>
+                  <option value="CRM Solution">CRM Solution</option>
+                  <option value="Marketing Automation">Marketing Automation</option>
+                  <option value="Sales Management">Sales Management</option>
+                  <option value="Customer Service">Customer Service</option>
+                  <option value="Analytics Dashboard">Analytics Dashboard</option>
+                  <option value="E-commerce Platform">E-commerce Platform</option>
+                  <option value="Inventory Management">Inventory Management</option>
+                  <option value="HR Management">HR Management</option>
+                  <option value="Financial Management">Financial Management</option>
+                  <option value="Project Management">Project Management</option>
+                  <option value="Supply Chain">Supply Chain</option>
+                  <option value="Customer Analytics">Customer Analytics</option>
+                  <option value="Quality Management">Quality Management</option>
+                  <option value="Education Platform">Education Platform</option>
+                  <option value="Security System">Security System</option>
+                  <option value="Mobile App Development">Mobile App Development</option>
+                  <option value="Cloud Infrastructure">Cloud Infrastructure</option>
+                  <option value="IoT Solutions">IoT Solutions</option>
+                </select>
+                {!selectedProduct && (
+                  <p className="mt-1 text-xs text-red-500">Vui lòng chọn sản phẩm trước khi chuyển đổi</p>
+                )}
+              </div>
+              
+              <div className="bg-green-50 rounded-lg p-4 mb-4">
+                <h5 className="text-sm font-medium text-green-900 mb-2">Điều gì sẽ xảy ra:</h5>
+                <ul className="text-sm text-green-800 space-y-1">
+                  <li>• Lead được chuyển thành trạng thái "Đã chuyển đổi"</li>
+                  <li>• Deal mới sẽ được tạo trong hệ thống</li>
+                  <li>• Bắt đầu quy trình thực hiện dự án</li>
+                  {selectedProduct && <li>• Sản phẩm: <span className="font-medium">{selectedProduct}</span></li>}
+                </ul>
+              </div>
+              
+              <p className="text-sm text-gray-600">
+                Bạn có chắc chắn muốn chuyển lead này thành khách hàng không?
+              </p>
+            </div>
+            
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowConvertModal(false)
+                  setSelectedProduct('') // Reset product when closing modal
+                }}
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmConvertLead}
+                disabled={!selectedProduct}
+                className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${
+                  selectedProduct
+                    ? 'text-white bg-green-600 hover:bg-green-700'
+                    : 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4" />
+                {selectedProduct ? 'Xác nhận chuyển đổi' : 'Chọn sản phẩm để tiếp tục'}
               </button>
             </div>
           </div>
