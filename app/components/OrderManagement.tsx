@@ -913,6 +913,20 @@ export default function OrderManagement() {
 
     return (
       <div className="space-y-6">
+        {/* Header Explanation */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center space-x-3 mb-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+              <Bell className="w-4 h-4 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900">Quản lý Nhắc thanh toán</h3>
+          </div>
+          <p className="text-sm text-gray-700 leading-relaxed">
+            Tính năng này giúp bạn tự động gửi nhắc thanh toán đến <strong>khách hàng</strong> (qua email/SMS) 
+            và thông báo cho <strong>người phụ trách</strong> để theo dõi các đơn hàng chưa thanh toán.
+          </p>
+        </div>
+
         {/* Reminder Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-lg">
@@ -961,10 +975,40 @@ export default function OrderManagement() {
         {/* Bulk Actions */}
         <div className="bg-white rounded-lg border border-gray-200 p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác hàng loạt</h3>
+          
+          {/* Explanation for Payment Reminders */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start space-x-3">
+              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <Bell className="w-4 h-4 text-blue-600" />
+              </div>
+              <div>
+                <h4 className="font-medium text-blue-900 mb-2">💡 Về tính năng nhắc thanh toán</h4>
+                <p className="text-sm text-blue-800 leading-relaxed">
+                  Khi gửi nhắc thanh toán, hệ thống sẽ tự động gửi thông báo đến <strong>cả hai bên</strong>:
+                </p>
+                <ul className="text-sm text-blue-800 mt-2 space-y-1 ml-4">
+                  <li className="flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                    <span><strong>Khách hàng:</strong> Nhận email/SMS nhắc thanh toán với chi tiết đơn hàng và hướng dẫn thanh toán</span>
+                  </li>
+                  <li className="flex items-center space-x-2">
+                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
+                    <span><strong>Người phụ trách:</strong> Nhận thông báo để theo dõi và liên hệ khách hàng nếu cần</span>
+                  </li>
+                </ul>
+                <div className="mt-2 text-xs text-blue-700 bg-blue-100 rounded px-2 py-1 inline-block">
+                  ⏰ Lưu ý: Tránh gửi nhắc liên tục để không làm phiền khách hàng
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div className="flex flex-wrap gap-3">
             <button 
               onClick={() => handleBulkOperation('send_reminder')}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+              title="Gửi nhắc thanh toán cho khách hàng và thông báo cho người phụ trách"
             >
               <Send className="w-4 h-4" />
               <span>Gửi nhắc thanh toán tất cả</span>

@@ -29,7 +29,10 @@ import {
   LayoutGrid,
   HelpCircle,
   Download,
-  Trash2
+  Trash2,
+  Edit,
+  MessageSquarePlus,
+  Send
 } from 'lucide-react'
 
 import AISuggestionsTab from './AISuggestionsTab'
@@ -57,6 +60,12 @@ interface Lead {
   priority: 'low' | 'medium' | 'high' | 'urgent'
   nextAction: string
   nextActionDate: string
+  careCount?: number // Số lần chăm sóc
+  quickNotes?: Array<{
+    content: string
+    timestamp: string
+    author: string
+  }> // Danh sách ghi chú nhanh
 }
 
 interface MetricData {
@@ -88,6 +97,10 @@ export default function SalesManagement() {
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState('')
   const [showAddLeadModal, setShowAddLeadModal] = useState(false)
+  const [showEditLeadModal, setShowEditLeadModal] = useState(false)
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
+  const [quickNote, setQuickNote] = useState('')
+  const [isAddingQuickNote, setIsAddingQuickNote] = useState(false)
   const [newLead, setNewLead] = useState({
     name: '',
     phone: '',
@@ -190,6 +203,58 @@ export default function SalesManagement() {
   const handleViewLeadDetail = (lead: Lead) => {
     setSelectedLead(lead)
     setShowLeadDetailModal(true)
+    setIsAddingQuickNote(false)
+    setQuickNote('')
+  }
+
+  const handleEditLead = (lead: Lead) => {
+    setEditingLead(lead)
+    setShowEditLeadModal(true)
+  }
+
+  const handleUpdateLead = (updatedLead: Lead) => {
+    const updatedLeads = leads.map(lead => 
+      lead.id === updatedLead.id ? { ...updatedLead, updatedAt: new Date().toISOString() } : lead
+    )
+    setLeads(updatedLeads)
+    setShowEditLeadModal(false)
+    setEditingLead(null)
+    setNotification({
+      message: `Lead "${updatedLead.name}" đã được cập nhật thành công!`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+  }
+
+  const handleAddQuickNote = () => {
+    if (!quickNote.trim() || !selectedLead) return
+
+    const updatedLead = {
+      ...selectedLead,
+      quickNotes: [...(selectedLead.quickNotes || []), {
+        content: quickNote.trim(),
+        timestamp: new Date().toISOString(),
+        author: 'Current User' // Trong thực tế sẽ lấy từ user hiện tại
+      }],
+      careCount: (selectedLead.careCount || 0) + 1,
+      lastContactedAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+
+    const updatedLeads = leads.map(lead => 
+      lead.id === selectedLead.id ? updatedLead : lead
+    )
+    
+    setLeads(updatedLeads)
+    setSelectedLead(updatedLead)
+    setQuickNote('')
+    setIsAddingQuickNote(false)
+    
+    setNotification({
+      message: 'Đã thêm ghi chú nhanh và cập nhật số lần chăm sóc!',
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
   }
 
   const handleConvertLead = (lead: Lead) => {
@@ -544,7 +609,15 @@ export default function SalesManagement() {
       company: 'ABC Corp',
       priority: 'urgent',
       nextAction: 'Ký hợp đồng',
-      nextActionDate: '2024-01-25T10:00:00'
+      nextActionDate: '2024-01-25T10:00:00',
+      careCount: 8,
+      quickNotes: [
+        { content: 'Gọi điện tư vấn ban đầu', timestamp: '2024-01-15T10:00:00', author: 'Minh Expert' },
+        { content: 'Gửi brochure và báo giá sơ bộ', timestamp: '2024-01-16T14:00:00', author: 'Minh Expert' },
+        { content: 'Họp demo sản phẩm với team kỹ thuật', timestamp: '2024-01-18T09:30:00', author: 'Minh Expert' },
+        { content: 'Thảo luận về customization và integration', timestamp: '2024-01-19T15:00:00', author: 'Minh Expert' },
+        { content: 'Gửi proposal chi tiết và timeline', timestamp: '2024-01-20T11:00:00', author: 'Minh Expert' }
+      ]
     },
     {
       id: 2,
@@ -568,7 +641,14 @@ export default function SalesManagement() {
       company: 'DEF Startup',
       priority: 'high',
       nextAction: 'Gửi báo giá chi tiết',
-      nextActionDate: '2024-01-22T09:30:00'
+      nextActionDate: '2024-01-22T09:30:00',
+      careCount: 5,
+      quickNotes: [
+        { content: 'Cuộc gọi đầu tiên - tìm hiểu nhu cầu', timestamp: '2024-01-16T13:00:00', author: 'An Expert' },
+        { content: 'Gửi case study của các startup tương tự', timestamp: '2024-01-17T10:30:00', author: 'An Expert' },
+        { content: 'Demo tính năng automation workflow', timestamp: '2024-01-18T14:00:00', author: 'An Expert' },
+        { content: 'Thảo luận pricing và package phù hợp', timestamp: '2024-01-19T11:15:00', author: 'An Expert' }
+      ]
     },
     {
       id: 3,
@@ -592,7 +672,18 @@ export default function SalesManagement() {
       company: 'DEF Export',
       priority: 'urgent',
       nextAction: 'Cuộc họp ký hợp đồng',
-      nextActionDate: '2024-01-23T14:00:00'
+      nextActionDate: '2024-01-23T14:00:00',
+      careCount: 12,
+      quickNotes: [
+        { content: 'Tìm hiểu quy trình hiện tại của công ty', timestamp: '2024-01-12T14:00:00', author: 'An Sales' },
+        { content: 'Demo module quản lý đơn hàng xuất khẩu', timestamp: '2024-01-13T10:30:00', author: 'An Sales' },
+        { content: 'Khách hàng quan tâm tính năng tracking container', timestamp: '2024-01-14T15:45:00', author: 'An Sales' },
+        { content: 'Gửi báo giá cho module bổ sung', timestamp: '2024-01-15T09:00:00', author: 'An Sales' },
+        { content: 'Họp với team IT để đánh giá integration', timestamp: '2024-01-16T14:30:00', author: 'An Sales' },
+        { content: 'Thảo luận về training plan cho user', timestamp: '2024-01-17T11:15:00', author: 'An Sales' },
+        { content: 'Đàm phán giảm giá 10% cho gói enterprise', timestamp: '2024-01-18T16:00:00', author: 'An Sales' },
+        { content: 'Khách đồng ý mức giá, đang review contract', timestamp: '2024-01-19T10:15:00', author: 'An Sales' }
+      ]
     },
     {
       id: 4,
@@ -640,7 +731,9 @@ export default function SalesManagement() {
       company: 'MNO Analytics',
       priority: 'low',
       nextAction: 'Liên hệ qua email',
-      nextActionDate: '2024-01-24T10:00:00'
+      nextActionDate: '2024-01-24T10:00:00',
+      careCount: 0,
+      quickNotes: []
     },
     {
       id: 6,
@@ -1949,6 +2042,13 @@ export default function SalesManagement() {
                           <Eye className="w-4 h-4" />
                         </button>
                         <button 
+                          onClick={() => handleEditLead(lead)}
+                          className="p-2 text-slate-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                          title="Chỉnh sửa lead"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button 
                           onClick={() => handleExportLead(lead)}
                           className="p-2 text-slate-600 hover:text-white hover:bg-indigo-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
                           title="Xuất dữ liệu"
@@ -2139,6 +2239,13 @@ export default function SalesManagement() {
                                       title="Xem chi tiết"
                                     >
                                       <Eye className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleEditLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Chỉnh sửa lead"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
                                     </button>
                                     <button 
                                       onClick={() => handleExportLead(lead)}
@@ -3501,7 +3608,11 @@ export default function SalesManagement() {
                   </span>
                 </div>
                 <button
-                  onClick={() => setShowLeadDetailModal(false)}
+                  onClick={() => {
+                    setShowLeadDetailModal(false)
+                    setIsAddingQuickNote(false)
+                    setQuickNote('')
+                  }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3571,7 +3682,7 @@ export default function SalesManagement() {
 
                 {/* Thông tin thời gian */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin thời gian</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin thời gian & Chăm sóc</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <Calendar className="w-4 h-4 text-gray-400" />
@@ -3590,6 +3701,13 @@ export default function SalesManagement() {
                           }
                         </p>
                         <p className="text-xs text-gray-500">Lần liên hệ cuối</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Activity className="w-4 h-4 text-blue-500" />
+                      <div>
+                        <p className="text-sm font-medium text-blue-900">{selectedLead.careCount || 0} lần</p>
+                        <p className="text-xs text-gray-500">Số lần chăm sóc</p>
                       </div>
                     </div>
                   </div>
@@ -3637,6 +3755,82 @@ export default function SalesManagement() {
                 )}
               </div>
 
+              {/* Quick Notes */}
+              <div className="mt-6 space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2 flex-1">Ghi chú nhanh</h4>
+                  <button
+                    onClick={() => setIsAddingQuickNote(true)}
+                    className="ml-4 px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-1"
+                  >
+                    <MessageSquarePlus className="w-3 h-3" />
+                    Thêm ghi chú
+                  </button>
+                </div>
+
+                {isAddingQuickNote && (
+                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+                    <div className="flex items-start gap-3">
+                      <textarea
+                        value={quickNote}
+                        onChange={(e) => setQuickNote(e.target.value)}
+                        placeholder="Nhập ghi chú nhanh về cuộc liên hệ, tình trạng khách hàng..."
+                        className="flex-1 px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
+                        rows={3}
+                        autoFocus
+                      />
+                      <div className="flex flex-col gap-2">
+                        <button
+                          onClick={handleAddQuickNote}
+                          disabled={!quickNote.trim()}
+                          className="px-3 py-2 text-xs font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-1"
+                        >
+                          <Send className="w-3 h-3" />
+                          Lưu
+                        </button>
+                        <button
+                          onClick={() => {
+                            setIsAddingQuickNote(false)
+                            setQuickNote('')
+                          }}
+                          className="px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                        >
+                          Hủy
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {selectedLead.quickNotes && selectedLead.quickNotes.length > 0 ? (
+                  <div className="space-y-2 max-h-60 overflow-y-auto">
+                    {selectedLead.quickNotes.slice().reverse().map((note, index) => (
+                      <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <p className="text-sm text-gray-900">{note.content}</p>
+                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
+                              <span>{new Date(note.timestamp).toLocaleString('vi-VN')}</span>
+                              <span>•</span>
+                              <span className="font-medium">{note.author}</span>
+                            </div>
+                          </div>
+                          <div className="ml-3">
+                            <MessageSquarePlus className="w-4 h-4 text-gray-400" />
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-4 text-center">
+                    <MessageSquarePlus className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Chưa có ghi chú nhanh nào</p>
+                    <p className="text-xs text-gray-400 mt-1">Nhấn "Thêm ghi chú" để bắt đầu theo dõi cuộc liên hệ</p>
+                  </div>
+                )}
+              </div>
+
               {/* Next Action */}
               <div className="mt-6 space-y-4">
                 <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Hành động tiếp theo</h4>
@@ -3651,7 +3845,11 @@ export default function SalesManagement() {
 
             <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
               <button
-                onClick={() => setShowLeadDetailModal(false)}
+                onClick={() => {
+                  setShowLeadDetailModal(false)
+                  setIsAddingQuickNote(false)
+                  setQuickNote('')
+                }}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Đóng
@@ -3659,6 +3857,8 @@ export default function SalesManagement() {
               <button
                 onClick={() => {
                   setShowLeadDetailModal(false)
+                  setIsAddingQuickNote(false)
+                  setQuickNote('')
                   handleConvertLead(selectedLead)
                 }}
                 className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
@@ -3666,6 +3866,226 @@ export default function SalesManagement() {
                 <User className="w-4 h-4" />
                 Chuyển đổi
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Lead Modal */}
+      {showEditLeadModal && editingLead && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa Lead</h3>
+            </div>
+            
+            <div className="p-6">
+              <form onSubmit={(e) => {
+                e.preventDefault()
+                handleUpdateLead(editingLead)
+              }}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tên */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tên <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={editingLead.name}
+                      onChange={(e) => setEditingLead({...editingLead, name: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Email <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      value={editingLead.email}
+                      onChange={(e) => setEditingLead({...editingLead, email: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Số điện thoại */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Số điện thoại <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="tel"
+                      value={editingLead.phone}
+                      onChange={(e) => setEditingLead({...editingLead, phone: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      required
+                    />
+                  </div>
+
+                  {/* Công ty */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Công ty
+                    </label>
+                    <input
+                      type="text"
+                      value={editingLead.company || ''}
+                      onChange={(e) => setEditingLead({...editingLead, company: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Nguồn */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nguồn
+                    </label>
+                    <select
+                      value={editingLead.source}
+                      onChange={(e) => setEditingLead({...editingLead, source: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="website">Website</option>
+                      <option value="facebook">Facebook</option>
+                      <option value="google">Google</option>
+                      <option value="zalo">Zalo</option>
+                      <option value="linkedin">LinkedIn</option>
+                      <option value="referral">Giới thiệu</option>
+                    </select>
+                  </div>
+
+                  {/* Khu vực */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Khu vực
+                    </label>
+                    <select
+                      value={editingLead.region}
+                      onChange={(e) => setEditingLead({...editingLead, region: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="ha_noi">Hà Nội</option>
+                      <option value="ho_chi_minh">TP. Hồ Chí Minh</option>
+                      <option value="da_nang">Đà Nẵng</option>
+                      <option value="hai_phong">Hải Phòng</option>
+                      <option value="can_tho">Cần Thơ</option>
+                    </select>
+                  </div>
+
+                  {/* Sản phẩm */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Sản phẩm quan tâm
+                    </label>
+                    <input
+                      type="text"
+                      value={editingLead.product}
+                      onChange={(e) => setEditingLead({...editingLead, product: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Độ ưu tiên */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Độ ưu tiên
+                    </label>
+                    <select
+                      value={editingLead.priority}
+                      onChange={(e) => setEditingLead({...editingLead, priority: e.target.value as Lead['priority']})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="low">Thấp</option>
+                      <option value="medium">Trung bình</option>
+                      <option value="high">Cao</option>
+                      <option value="urgent">Khẩn cấp</option>
+                    </select>
+                  </div>
+
+                  {/* Giá trị dự kiến */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Giá trị dự kiến (VND)
+                    </label>
+                    <input
+                      type="number"
+                      value={editingLead.value}
+                      onChange={(e) => setEditingLead({...editingLead, value: parseInt(e.target.value) || 0})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  {/* Người phụ trách */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Người phụ trách
+                    </label>
+                    <select
+                      value={editingLead.assignedTo}
+                      onChange={(e) => setEditingLead({...editingLead, assignedTo: e.target.value})}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    >
+                      <option value="">Chưa phân công</option>
+                      {getAvailableSalesPersons().map(person => (
+                        <option key={person.id} value={person.name}>
+                          {person.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Nội dung */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Nội dung
+                  </label>
+                  <textarea
+                    value={editingLead.content}
+                    onChange={(e) => setEditingLead({...editingLead, content: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                {/* Ghi chú */}
+                <div className="mt-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ghi chú
+                  </label>
+                  <textarea
+                    value={editingLead.notes}
+                    onChange={(e) => setEditingLead({...editingLead, notes: e.target.value})}
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+
+                <div className="mt-6 flex justify-end space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowEditLeadModal(false)
+                      setEditingLead(null)
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    type="submit"
+                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Cập nhật Lead
+                  </button>
+                </div>
+              </form>
             </div>
           </div>
         </div>

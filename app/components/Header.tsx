@@ -109,7 +109,7 @@ export default function Header() {
     console.log('Creating email campaign')
   }
 
-  const handleCreateTemplate = (type) => {
+  const handleCreateTemplate = (type: string) => {
     console.log(`Creating template: ${type}`)
     // Navigate to template creation page or open template modal
     if (type === 'b2b') {

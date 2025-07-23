@@ -189,8 +189,6 @@ export default function CustomersManagement() {
     status: true,
     products: true,
     lastInteraction: true,
-    engagementScore: true,
-    churnRisk: true,
     value: true,
     birthday: true,
     firstPurchaseDate: true,
@@ -4125,8 +4123,6 @@ export default function CustomersManagement() {
                 >
                   <option value="name">Sắp xếp theo tên</option>
                   <option value="lastInteraction">Tương tác gần nhất</option>
-                  <option value="engagementScore">Điểm tương tác</option>
-                  <option value="churnRisk">Rủi ro rời bỏ</option>
                   <option value="totalValue">Giá trị</option>
                 </select>
                 <select 
@@ -4186,8 +4182,6 @@ export default function CustomersManagement() {
                             { key: 'status', label: 'Trạng thái' },
                             { key: 'products', label: 'Sản phẩm' },
                             { key: 'lastInteraction', label: 'Tương tác cuối' },
-                            { key: 'engagementScore', label: 'Điểm tương tác' },
-                            { key: 'churnRisk', label: 'Nguy cơ rời bỏ' },
                             { key: 'value', label: 'Giá trị' },
                             { key: 'birthday', label: 'Sinh nhật' },
                             { key: 'firstPurchaseDate', label: 'Mua đầu tiên' },
@@ -4219,8 +4213,6 @@ export default function CustomersManagement() {
                               status: true,
                               products: true,
                               lastInteraction: true,
-                              engagementScore: true,
-                              churnRisk: true,
                               value: true,
                               birthday: true,
                               firstPurchaseDate: true,
@@ -4268,12 +4260,6 @@ export default function CustomersManagement() {
                     )}
                     {visibleColumns.lastInteraction && (
                       <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tương tác cuối</th>
-                    )}
-                    {visibleColumns.engagementScore && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Điểm tương tác</th>
-                    )}
-                    {visibleColumns.churnRisk && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Rủi ro</th>
                     )}
                     {visibleColumns.value && (
                       <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Giá trị</th>
@@ -4398,29 +4384,9 @@ export default function CustomersManagement() {
                           <div className="text-xs text-gray-500">{customer.daysSinceLastInteraction} ngày</div>
                         </td>
                       )}
-                      {visibleColumns.engagementScore && (
-                        <td className="py-3 px-4 border-r border-gray-200">
-                          <div className="flex items-center">
-                            <div className={`w-2 h-2 rounded-full mr-2 ${
-                              customer.engagementScore >= 80 ? 'bg-green-500' :
-                              customer.engagementScore >= 60 ? 'bg-yellow-500' :
-                              customer.engagementScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
-                            }`}></div>
-                            <span className="text-sm font-medium">{customer.engagementScore}</span>
-                          </div>
-                        </td>
-                      )}
-                      {visibleColumns.churnRisk && (
-                        <td className="py-3 px-4 border-r border-gray-200">
-                          <div className={`text-sm font-medium ${getRiskColor(customer.churnRisk)}`}>
-                            {customer.churnRisk}%
-                          </div>
-                        </td>
-                      )}
                       {visibleColumns.value && (
                         <td className="py-3 px-4 border-r border-gray-200">
                           <div className="font-medium text-gray-900">{formatCurrency(customer.totalValue)} VNĐ</div>
-                          <div className="text-xs text-gray-500">LTV: {formatCurrency(customer.lifetimeValue)} VNĐ</div>
                         </td>
                       )}
                       {visibleColumns.birthday && (
@@ -5437,34 +5403,6 @@ export default function CustomersManagement() {
                   </span>
                 </div>
               </div>
-              <div className="flex space-x-2">
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2">
-                  <Phone className="w-4 h-4" />
-                  <span>Gọi</span>
-                </button>
-                <button className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 flex items-center space-x-2">
-                  <Mail className="w-4 h-4" />
-                  <span>Email</span>
-                </button>
-                <button className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 flex items-center space-x-2">
-                  <Calendar className="w-4 h-4" />
-                  <span>Lịch</span>
-                </button>
-                <button 
-                  onClick={() => setActiveTab('notes')}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center space-x-2"
-                >
-                  <FileText className="w-4 h-4" />
-                  <span>Ghi chú</span>
-                </button>
-                <button 
-                  onClick={() => setActiveTab('interactions')}
-                  className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center space-x-2"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>Tương tác</span>
-                </button>
-              </div>
             </div>
 
             {/* Tab Navigation */}
@@ -5601,33 +5539,10 @@ export default function CustomersManagement() {
                   {/* Thống kê khách hàng với đường kẻ phân cách */}
                   <div className="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg p-6 border border-gray-200 mt-6">
                     <h5 className="font-medium text-gray-900 mb-4 pb-2 border-b border-gray-300">📊 Thống kê khách hàng</h5>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="text-center p-4 bg-white rounded-lg border border-blue-200 shadow-sm">
-                        <div className="text-2xl font-bold text-blue-600">{selectedCustomer.engagementScore}</div>
-                        <div className="text-sm text-blue-700 mt-1">Điểm tương tác</div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                          <div 
-                            className="bg-blue-600 h-2 rounded-full" 
-                            style={{width: `${selectedCustomer.engagementScore}%`}}
-                          ></div>
-                        </div>
-                      </div>
-                      <div className="text-center p-4 bg-white rounded-lg border border-red-200 shadow-sm">
-                        <div className="text-2xl font-bold text-red-600">{selectedCustomer.churnRisk}%</div>
-                        <div className="text-sm text-red-700 mt-1">Rủi ro rời bỏ</div>
-                        <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
-                          <div 
-                            className="bg-red-600 h-2 rounded-full" 
-                            style={{width: `${selectedCustomer.churnRisk}%`}}
-                          ></div>
-                        </div>
-                      </div>
+                    <div className="grid grid-cols-1 gap-4">
                       <div className="text-center p-4 bg-white rounded-lg border border-green-200 shadow-sm">
                         <div className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.totalValue)}</div>
-                        <div className="text-sm text-green-700 mt-1">Giá trị (VNĐ)</div>
-                        <div className="text-xs text-gray-500 mt-2">
-                          LTV: {formatCurrency(selectedCustomer.lifetimeValue)}
-                        </div>
+                        <div className="text-sm text-green-700 mt-1">Tổng giá trị đã mua (VNĐ)</div>
                       </div>
                     </div>
                   </div>
@@ -5843,17 +5758,6 @@ export default function CustomersManagement() {
 
               {activeTab === 'notes' && (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-gradient-to-r from-orange-50 to-yellow-50 p-4 rounded-lg border border-orange-200">
-                    <h5 className="font-medium text-gray-900 flex items-center">
-                      <FileText className="w-5 h-5 mr-2 text-orange-600" />
-                      Ghi chú khách hàng
-                    </h5>
-                    <button className="px-4 py-2 bg-orange-600 text-white text-sm rounded-lg hover:bg-orange-700 flex items-center space-x-2">
-                      <Plus className="w-4 h-4" />
-                      <span>Thêm ghi chú</span>
-                    </button>
-                  </div>
-                  
                   {selectedCustomer.notes ? (
                     <div className="bg-white border border-gray-200 rounded-lg shadow-sm">
                       <div className="p-4 border-b border-gray-200">
@@ -5954,6 +5858,72 @@ export default function CustomersManagement() {
                           {selectedCustomer.daysSinceLastInteraction > 30 && ' Đã lâu không tương tác.'}
                           {selectedCustomer.engagementScore < 50 && ' Mức độ tương tác thấp.'}
                         </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Metrics Explanation */}
+                  <div className="bg-white border border-gray-200 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-4">
+                      <div className="w-6 h-6 bg-gray-100 rounded-full flex items-center justify-center">
+                        <BarChart3 className="w-3 h-3 text-gray-600" />
+                      </div>
+                      <h6 className="font-medium text-gray-900">📊 Giải thích các chỉ số</h6>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 gap-4">
+                      {/* Days Since Last Interaction */}
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                        <div className="flex items-center space-x-2 mb-2">
+                          <Clock className="w-4 h-4 text-yellow-600" />
+                          <span className="font-medium text-yellow-900 text-sm">Ngày Không Tương Tác ({selectedCustomer.daysSinceLastInteraction})</span>
+                        </div>
+                        <p className="text-xs text-yellow-700 leading-relaxed">
+                          <strong>Ý nghĩa:</strong> Số ngày kể từ lần tương tác cuối cùng.<br/>
+                          <strong>Tính toán:</strong> Thời gian từ lần cuối gọi điện, email, chat, hoặc gặp mặt.<br/>
+                          <strong>Ngưỡng cảnh báo:</strong> 
+                          <span className={selectedCustomer.daysSinceLastInteraction > 60 ? 'text-red-800 font-medium' : ''}>Nguy hiểm (&gt;60 ngày)</span>, 
+                          <span className={selectedCustomer.daysSinceLastInteraction > 30 && selectedCustomer.daysSinceLastInteraction <= 60 ? 'text-orange-800 font-medium' : ''}>Cần chú ý (30-60 ngày)</span>, 
+                          <span className={selectedCustomer.daysSinceLastInteraction <= 30 ? 'text-green-800 font-medium' : ''}>Bình thường (&lt;30 ngày)</span>
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Additional Metrics */}
+                    <div className="mt-4 pt-4 border-t border-gray-200">
+                      <h6 className="font-medium text-gray-900 mb-3 text-sm">🎯 Chỉ số bổ sung</h6>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-green-900 text-sm">Tổng Giá Trị Đã Mua</span>
+                            <span className="text-lg font-bold text-green-600">{formatCurrency(selectedCustomer.totalValue)}</span>
+                          </div>
+                          <p className="text-xs text-green-700">
+                            Tổng số tiền khách hàng đã chi tiêu cho sản phẩm/dịch vụ của công ty từ trước đến nay.
+                          </p>
+                        </div>
+                        
+                        <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="font-medium text-purple-900 text-sm">Hạng Khách Hàng</span>
+                            <span className={`px-2 py-1 text-xs rounded-full font-medium ${
+                              selectedCustomer.customerType === 'diamond' ? 'bg-purple-100 text-purple-800' :
+                              selectedCustomer.customerType === 'gold' ? 'bg-yellow-100 text-yellow-800' :
+                              selectedCustomer.customerType === 'silver' ? 'bg-gray-100 text-gray-800' :
+                              selectedCustomer.customerType === 'bronze' ? 'bg-orange-100 text-orange-800' :
+                              'bg-blue-100 text-blue-800'
+                            }`}>
+                              {selectedCustomer.customerType === 'diamond' ? '💎 Kim cương' :
+                               selectedCustomer.customerType === 'gold' ? '🥇 Vàng' :
+                               selectedCustomer.customerType === 'silver' ? '🥈 Bạc' :
+                               selectedCustomer.customerType === 'bronze' ? '🥉 Đồng' :
+                               selectedCustomer.customerType === 'new' ? '🌟 Mới' : '🔄 Quay lại'}
+                            </span>
+                          </div>
+                          <p className="text-xs text-purple-700">
+                            Phân hạng dựa trên giá trị mua hàng, thời gian là khách hàng, và mức độ tương tác.
+                          </p>
+                        </div>
                       </div>
                     </div>
                   </div>
