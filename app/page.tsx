@@ -81,9 +81,8 @@ export default function Home() {
           {renderContent()}
         </main>
       </div>
-      {/* Vileads Chatbot - Available on all pages */}
-      <ChatbotAssistant />
-      {/* <VileadsChatbot /> */}
+      {/* AI Chatbot - Hidden per request */}
+      {/* <ChatbotAssistant /> */}
     </div>
   )
 }

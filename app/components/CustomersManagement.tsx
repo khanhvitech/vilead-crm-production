@@ -14,7 +14,6 @@ import {
 import CustomerFilters, { CustomerFilters as FilterType } from './CustomerFilters'
 import CustomerEventsManager from './CustomerEventsManager'
 import CustomerAnalytics from './CustomerAnalytics'
-import CustomerAIInsights from './CustomerAIInsights'
 
 interface CustomerTag {
   id: string
