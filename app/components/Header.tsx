@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Search, Bell, Plus, User, Settings, LogOut, Shield, HelpCircle, Moon, Sun, Crown, Mail, Phone } from 'lucide-react'
+import { Search, Bell, User, Settings, LogOut, Shield, HelpCircle, Moon, Sun, Crown, Mail, Phone } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -136,101 +136,6 @@ export default function Header() {
       <div className="flex items-center justify-end">
         {/* Actions */}
         <div className="flex items-center space-x-4">
-          {/* Enhanced Add Button */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105 flex items-center space-x-2">
-                <Plus className="w-4 h-4" />
-                <span className="font-semibold">✨ Tạo mới</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-80 p-4">
-              <div className="mb-4">
-                <h3 className="text-lg font-bold text-gray-900 mb-1">🚀 Tạo mới</h3>
-                <p className="text-sm text-gray-600">Chọn loại dữ liệu bạn muốn tạo</p>
-              </div>
-              
-              {/* Quick Actions */}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">
-                  🔥 Thao tác nhanh
-                </DropdownMenuLabel>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                  <DropdownMenuItem onClick={() => handleCreateLead('general')} className="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mb-2">
-                        <User className="w-4 h-4 text-blue-600" />
-                      </div>
-                      <div className="font-medium text-sm">Lead mới</div>
-                      <div className="text-xs text-gray-500">Khách hàng tiềm năng</div>
-                    </div>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem onClick={handleCreateOrder} className="cursor-pointer p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all">
-                    <div className="flex flex-col items-center text-center">
-                      <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mb-2">
-                        <Plus className="w-4 h-4 text-green-600" />
-                      </div>
-                      <div className="font-medium text-sm">Đơn hàng</div>
-                      <div className="text-xs text-gray-500">Đơn bán mới</div>
-                    </div>
-                  </DropdownMenuItem>
-                </div>
-              </DropdownMenuGroup>
-
-              <DropdownMenuSeparator className="my-3" />
-
-              {/* Customer Management */}              <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs font-medium text-green-600 uppercase tracking-wide mb-2 flex items-center gap-1">
-                  👥 Chăm sóc khách hàng
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => handleCreateCustomer('business')} className="cursor-pointer flex items-center p-2 hover:bg-green-50 rounded-md">
-                  <div className="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center mr-3">
-                    <User className="w-4 h-4 text-emerald-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">🏢 Khách hàng doanh nghiệp</div>
-                    <div className="text-xs text-gray-500">Thêm khách hàng B2B</div>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleCreateCustomer('individual')} className="cursor-pointer flex items-center p-2 hover:bg-green-50 rounded-md">
-                  <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
-                    <User className="w-4 h-4 text-blue-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">👤 Khách hàng cá nhân</div>
-                    <div className="text-xs text-gray-500">Thêm khách hàng B2C</div>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-
-              <DropdownMenuSeparator className="my-3" />
-
-              {/* Task & Project */}
-              <DropdownMenuGroup>
-                <DropdownMenuLabel className="text-xs font-medium text-purple-600 uppercase tracking-wide mb-2 flex items-center gap-1">
-                  📋 Công việc & Dự án
-                </DropdownMenuLabel>
-                <DropdownMenuItem onClick={handleCreateTask} className="cursor-pointer flex items-center p-2 hover:bg-purple-50 rounded-md">
-                  <div className="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
-                    <Plus className="w-4 h-4 text-orange-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">✅ Task/Nhiệm vụ</div>
-                    <div className="text-xs text-gray-500">Tạo công việc cần làm</div>
-                  </div>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleCreateAppointment} className="cursor-pointer flex items-center p-2 hover:bg-purple-50 rounded-md">
-                  <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
-                    <Plus className="w-4 h-4 text-purple-600" />
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-medium">📅 Cuộc hẹn</div>
-                    <div className="text-xs text-gray-500">Lên lịch gặp khách hàng</div>
-                  </div>
-                </DropdownMenuItem>
-              </DropdownMenuGroup>
-            </DropdownMenuContent>
-          </DropdownMenu>
           
           {/* Notifications */}
           <Popover>

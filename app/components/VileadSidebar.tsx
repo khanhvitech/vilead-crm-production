@@ -245,7 +245,9 @@ export default function VileadSidebar({
             return (
               <button
                 key={item.id}
-                onClick={() => setCurrentView(item.id)}
+                onClick={() => {
+                  setCurrentView(item.id)
+                }}
                 className={cn(
                   "w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer",
                   isActive 
@@ -256,7 +258,9 @@ export default function VileadSidebar({
               >
                 <div className={cn(
                   "flex items-center justify-center w-6 h-6",
-                  isActive ? "text-blue-600" : "text-gray-500 group-hover:text-gray-700"
+                  isActive 
+                    ? "text-blue-600" 
+                    : "text-gray-500 group-hover:text-gray-700"
                 )}>
                   <Icon className="w-5 h-5" />
                 </div>

@@ -23,7 +23,6 @@ import {
   CheckCircle,
   Clock,
   AlertCircle,
-  XCircle,
   Activity,
   Bot,
   Table,
@@ -36,10 +35,12 @@ import {
   Edit,
   MessageSquarePlus,
   Send,
-  Save,
   Columns,
   MapPin,
-  Percent
+  Percent,
+  Upload,
+  FileSpreadsheet,
+  CheckCircle2
 } from 'lucide-react'
 
 interface Lead {
@@ -108,13 +109,6 @@ export default function SalesManagement() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState('')
-  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
-  const [isEditMode, setIsEditMode] = useState(false)
-  const [editedLead, setEditedLead] = useState<Lead | null>(null)
-  const [showDragConvertModal, setShowDragConvertModal] = useState(false)
-  const [dragTargetStatus, setDragTargetStatus] = useState<string>('')
-  const [originalTargetStatus, setOriginalTargetStatus] = useState<string>('') // Track trạng thái gốc user kéo vào
-  const [pendingDragLead, setPendingDragLead] = useState<Lead | null>(null)
   
   // Column visibility state
   // Sales team data
@@ -169,24 +163,20 @@ export default function SalesManagement() {
   })
   
   const [showAddLeadModal, setShowAddLeadModal] = useState(false)
+  const [addLeadTab, setAddLeadTab] = useState<'manual' | 'excel'>('manual')
+  const [excelFile, setExcelFile] = useState<File | null>(null)
+  const [excelData, setExcelData] = useState<any[]>([])
+  const [excelColumns, setExcelColumns] = useState<string[]>([])
+  const [columnMapping, setColumnMapping] = useState<Record<string, string>>({})
+  const [isProcessingExcel, setIsProcessingExcel] = useState(false)
   const [showEditLeadModal, setShowEditLeadModal] = useState(false)
   const [showColumnModal, setShowColumnModal] = useState(false)
-  const [showImportModal, setShowImportModal] = useState(false)
   const [selectedLeadIds, setSelectedLeadIds] = useState<number[]>([])
   const [selectAllChecked, setSelectAllChecked] = useState(false)
   const [showAssignSalesModal, setShowAssignSalesModal] = useState(false)
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
   const [selectedTaskType, setSelectedTaskType] = useState('')
   const [selectedTaskObj, setSelectedTaskObj] = useState<any | null>(null)
-  
-  // Import states
-  const [importFile, setImportFile] = useState<File | null>(null)
-  const [importProgress, setImportProgress] = useState(0)
-  const [importError, setImportError] = useState<string | null>(null)
-  const [importSuccess, setImportSuccess] = useState<string | null>(null)
-  const [importAutoAssign, setImportAutoAssign] = useState(false)
-  const [importPreviewData, setImportPreviewData] = useState<any[]>([])
-  const [showImportPreview, setShowImportPreview] = useState(false)
   const [taskDeadlineDate, setTaskDeadlineDate] = useState<string>(() => {
     const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0,10)
   })
@@ -208,13 +198,25 @@ export default function SalesManagement() {
     website: '',
     address: '',
     source: 'website',
+    sourceDetail: '',
     region: 'hanoi',
     product: '',
+    budget: '',
+    timeline: '',
     content: '',
     notes: '',
     assignedTo: '',
-    tags: [] as string[],
-    customerType: 'individual' as 'individual' | 'business'
+    leadScore: 50,
+    referrerName: '',
+    referrerContact: '',
+    socialMedia: {
+      linkedin: '',
+      facebook: '',
+      twitter: ''
+    },
+    preferredContact: 'email' as 'email' | 'phone' | 'whatsapp' | 'meeting',
+    bestTimeToContact: 'morning' as 'morning' | 'afternoon' | 'evening' | 'anytime',
+    tags: [] as string[]
   })
   
   // Drag & Drop handlers
@@ -232,62 +234,23 @@ export default function SalesManagement() {
     e.preventDefault()
     
     if (draggedLead && draggedLead.status !== targetStatus) {
-      // Ngăn không cho kéo từ trạng thái "Chuyển đổi thành công" 
-      if (draggedLead.status === 'converted') {
-        setNotification({
-          message: `"${draggedLead.name}" đã hoàn tất chuyển đổi thành công, không thể di chuyển sang trạng thái khác!`,
-          type: 'error'
-        })
-        setTimeout(() => setNotification(null), 3000)
-        setDraggedLead(null)
-        return
-      }
-
-      // Xử lý logic đặc biệt khi kéo vào "Chuyển đổi thành công"
-      if (targetStatus === 'converted') {
-        // Tự động chuyển về "Chờ thanh toán" thay vì "Chuyển đổi thành công"
-        setPendingDragLead(draggedLead)
-        setOriginalTargetStatus('converted') // Lưu trạng thái gốc
-        setDragTargetStatus('payment_pending') // Tự động đặt về payment_pending
-        setSelectedProducts([]) // Reset selected products
-        setShowDragConvertModal(true)
-        return
-      }
-
-      // Kiểm tra xem có cần hiển thị popup chọn sản phẩm không
-      const needProductSelection = (
-        // Từ "Chờ thanh toán" kéo sang trạng thái khác (trừ lost)
-        (draggedLead.status === 'payment_pending' && targetStatus !== 'lost') ||
-        // Kéo vào "Chờ thanh toán" từ các trạng thái khác
-        (targetStatus === 'payment_pending')
+      // Update lead status
+      const updatedLeads = leads.map(lead => 
+        lead.id === draggedLead.id 
+          ? { ...lead, status: targetStatus as Lead['status'], updatedAt: new Date().toISOString() }
+          : lead
       )
-
-      if (needProductSelection) {
-        // Hiển thị popup chọn sản phẩm
-        setPendingDragLead(draggedLead)
-        setOriginalTargetStatus(targetStatus) // Lưu trạng thái gốc
-        setDragTargetStatus(targetStatus)
-        setSelectedProducts([]) // Reset selected products
-        setShowDragConvertModal(true)
-      } else {
-        // Chuyển trạng thái thông thường
-        const updatedLeads = leads.map(lead => 
-          lead.id === draggedLead.id 
-            ? { ...lead, status: targetStatus as Lead['status'], updatedAt: new Date().toISOString() }
-            : lead
-        )
-        
-        setLeads(updatedLeads)
-        
-        // Show success notification
-        setNotification({
-          message: `Đã chuyển "${draggedLead.name}" sang "${getStatusName(targetStatus)}"`,
-          type: 'success'
-        })
-        
-        // Clear notification after 3 seconds
-        setTimeout(() => setNotification(null), 3000)
-      }
+      
+      setLeads(updatedLeads)
+      
+      // Show success notification
+      setNotification({
+        message: `Đã chuyển "${draggedLead.name}" sang "${getStatusName(targetStatus)}"`,
+        type: 'success'
+      })
+      
+      // Clear notification after 3 seconds
+      setTimeout(() => setNotification(null), 3000)
     }
     
     setDraggedLead(null)
@@ -324,11 +287,9 @@ export default function SalesManagement() {
 
   const handleViewLeadDetail = (lead: Lead) => {
     setSelectedLead(lead)
-    setEditedLead({...lead}) // Tạo bản copy để edit
     setShowLeadDetailModal(true)
     setIsAddingQuickNote(false)
     setQuickNote('')
-    setIsEditMode(false) // Bắt đầu ở view mode
   }
 
   const handleEditLead = (lead: Lead) => {
@@ -383,8 +344,7 @@ export default function SalesManagement() {
 
   const handleConvertLead = (lead: Lead) => {
     setSelectedLead(lead)
-    setSelectedProduct('') // Reset single product selection
-    setSelectedProducts([]) // Reset multiple products selection
+    setSelectedProduct('') // Reset product selection
     setShowConvertModal(true)
   }
 
@@ -418,9 +378,9 @@ export default function SalesManagement() {
   }
 
   const confirmConvertLead = () => {
-    if (selectedProducts.length === 0) {
+    if (!selectedProduct) {
       setNotification({
-        message: 'Vui lòng chọn ít nhất một sản phẩm khách hàng quan tâm trước khi chuyển đổi',
+        message: 'Vui lòng chọn sản phẩm khách hàng mua trước khi chuyển đổi',
         type: 'error'
       })
       setTimeout(() => setNotification(null), 3000)
@@ -432,18 +392,18 @@ export default function SalesManagement() {
         l.id === selectedLead.id 
           ? { 
               ...l, 
-              status: 'payment_pending' as Lead['status'], // Chuyển vào chờ thanh toán
-              stage: 'payment_pending',
-              product: selectedProducts.join(', '), // Combine multiple products
+              status: 'converted' as Lead['status'], 
+              stage: 'deal_created',
+              product: selectedProduct, // Update with selected product
               updatedAt: new Date().toISOString(),
-              nextAction: 'Theo dõi thanh toán từ khách hàng'
+              nextAction: 'Bắt đầu thực hiện dự án'
             }
           : l
       )
       setLeads(updatedLeads)
       
       setNotification({
-        message: `${selectedLead.name} đã chuyển vào "Chuyển đổi - chờ thanh toán" với ${selectedProducts.length} sản phẩm: "${selectedProducts.join(', ')}"!`,
+        message: `${selectedLead.name} đã được chuyển thành khách hàng với sản phẩm "${selectedProduct}"!`,
         type: 'success'
       })
       setTimeout(() => setNotification(null), 3000)
@@ -451,104 +411,6 @@ export default function SalesManagement() {
     setShowConvertModal(false)
     setSelectedLead(null)
     setSelectedProduct('')
-    setSelectedProducts([]) // Reset multiple products selection
-  }
-
-  // Payment success handler
-  const handlePaymentSuccess = (lead: Lead) => {
-    const updatedLeads = leads.map(l => 
-      l.id === lead.id 
-        ? { 
-            ...l, 
-            status: 'converted' as Lead['status'],
-            stage: 'deal_closed',
-            updatedAt: new Date().toISOString(),
-            nextAction: 'Bắt đầu thực hiện dự án'
-          }
-        : l
-    )
-    setLeads(updatedLeads)
-    
-    setNotification({
-      message: `${lead.name} đã thanh toán thành công! Tự động chuyển sang "Chuyển đổi thành công".`,
-      type: 'success'
-    })
-    setTimeout(() => setNotification(null), 3000)
-  }
-
-  // Payment failed handler
-  const handlePaymentFailed = (lead: Lead) => {
-    const updatedLeads = leads.map(l => 
-      l.id === lead.id 
-        ? { 
-            ...l, 
-            status: 'lost' as Lead['status'],
-            stage: 'payment_failed',
-            updatedAt: new Date().toISOString(),
-            nextAction: 'Phân tích nguyên nhân thất bại'
-          }
-        : l
-    )
-    setLeads(updatedLeads)
-    
-    setNotification({
-      message: `${lead.name} thanh toán thất bại. Deal chuyển vào "Thất bại".`,
-      type: 'error'
-    })
-    setTimeout(() => setNotification(null), 3000)
-  }
-
-  // Drag convert confirmation handler
-  const confirmDragConvert = () => {
-    if (selectedProducts.length === 0) {
-      setNotification({
-        message: 'Vui lòng chọn ít nhất một sản phẩm trước khi chuyển đổi',
-        type: 'error'
-      })
-      setTimeout(() => setNotification(null), 3000)
-      return
-    }
-
-    if (pendingDragLead) {
-      let nextAction = 'Tiếp tục theo dõi'
-      let stage = dragTargetStatus
-
-      // Xác định next action và stage dựa vào target status
-      if (dragTargetStatus === 'payment_pending') {
-        nextAction = 'Theo dõi thanh toán từ khách hàng'
-        stage = 'payment_pending'
-      } else if (dragTargetStatus === 'converted') {
-        nextAction = 'Bắt đầu thực hiện dự án'
-        stage = 'deal_closed'
-      }
-
-      const updatedLeads = leads.map(l => 
-        l.id === pendingDragLead.id 
-          ? { 
-              ...l, 
-              status: dragTargetStatus as Lead['status'],
-              stage: stage,
-              product: selectedProducts.join(', '),
-              updatedAt: new Date().toISOString(),
-              nextAction: nextAction
-            }
-          : l
-      )
-      setLeads(updatedLeads)
-      
-      setNotification({
-        message: `Đã chuyển "${pendingDragLead.name}" sang "${getStatusName(dragTargetStatus)}" với ${selectedProducts.length} sản phẩm!`,
-        type: 'success'
-      })
-      setTimeout(() => setNotification(null), 3000)
-    }
-
-    // Reset states
-    setShowDragConvertModal(false)
-    setPendingDragLead(null)
-    setDragTargetStatus('')
-    setOriginalTargetStatus('')
-    setSelectedProducts([])
   }
 
   // Auto assignment logic
@@ -661,6 +523,140 @@ export default function SalesManagement() {
     return assignmentCount
   }
 
+  // Excel handling functions
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    
+    if (!file.name.endsWith('.xlsx') && !file.name.endsWith('.xls') && !file.name.endsWith('.csv')) {
+      setNotification({
+        message: 'Vui lòng chọn file Excel (.xlsx, .xls) hoặc CSV',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+    
+    setExcelFile(file)
+    setIsProcessingExcel(true)
+    
+    // Simulate file processing (in real app, use a library like SheetJS)
+    setTimeout(() => {
+      // Mock data for demonstration
+      const mockData = [
+        ['Tên', 'Email', 'Số điện thoại', 'Công ty', 'Chức vụ'],
+        ['Nguyễn Văn A', 'a@email.com', '0901234567', 'Công ty ABC', 'Giám đốc'],
+        ['Trần Thị B', 'b@email.com', '0987654321', 'Công ty XYZ', 'Trưởng phòng'],
+        ['Lê Văn C', 'c@email.com', '0912345678', 'Công ty DEF', 'Nhân viên']
+      ]
+      
+      const columns = mockData[0]
+      const data = mockData.slice(1)
+      
+      setExcelColumns(columns)
+      setExcelData(data)
+      setColumnMapping({
+        'name': columns.includes('Tên') ? 'Tên' : '',
+        'email': columns.includes('Email') ? 'Email' : '',
+        'phone': columns.includes('Số điện thoại') ? 'Số điện thoại' : '',
+        'company': columns.includes('Công ty') ? 'Công ty' : '',
+        'jobTitle': columns.includes('Chức vụ') ? 'Chức vụ' : ''
+      })
+      setIsProcessingExcel(false)
+    }, 2000)
+  }
+  
+  const handleImportExcel = () => {
+    if (!excelData.length) return
+    
+    const importedLeads: any[] = []
+    
+    excelData.forEach((row, index) => {
+      const leadData: any = {
+        id: Date.now() + index,
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        jobTitle: '',
+        industry: '',
+        companySize: '',
+        website: '',
+        address: '',
+        source: 'excel_import',
+        sourceDetail: `Import từ ${excelFile?.name}`,
+        region: 'hanoi',
+        product: '',
+        budget: '',
+        timeline: '',
+        content: '',
+        notes: `Import từ Excel lúc ${new Date().toLocaleString()}`,
+        assignedTo: '',
+        leadScore: 50,
+        referrerName: '',
+        referrerContact: '',
+        socialMedia: {
+          linkedin: '',
+          facebook: '',
+          twitter: ''
+        },
+        tags: ['imported'],
+        lastContact: '',
+        nextFollowUp: '',
+        pipeline: 'potential'
+      }
+      
+      // Map data based on column mapping
+      Object.entries(columnMapping).forEach(([field, excelColumn]) => {
+        if (excelColumn) {
+          const columnIndex = excelColumns.indexOf(excelColumn)
+          if (columnIndex !== -1 && row[columnIndex]) {
+            leadData[field] = row[columnIndex]
+          }
+        }
+      })
+      
+      // Validation
+      if (leadData.name && leadData.email && leadData.phone) {
+        importedLeads.push(leadData)
+      }
+    })
+    
+    if (importedLeads.length === 0) {
+      setNotification({
+        message: 'Không có dữ liệu hợp lệ để import. Kiểm tra lại mapping cột.',
+        type: 'error'
+      })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+    
+    // Add imported leads to the main list
+    setLeads(prev => [...prev, ...importedLeads])
+    
+    // Reset states
+    setExcelFile(null)
+    setExcelData([])
+    setExcelColumns([])
+    setColumnMapping({})
+    setAddLeadTab('manual')
+    setShowAddLeadModal(false)
+    
+    setNotification({
+      message: `Đã import thành công ${importedLeads.length} leads từ Excel`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+  }
+  
+  const resetExcelImport = () => {
+    setExcelFile(null)
+    setExcelData([])
+    setExcelColumns([])
+    setColumnMapping({})
+    setIsProcessingExcel(false)
+  }
+
   // Function to add new lead
   const handleAddLead = () => {
     // Validation
@@ -710,8 +706,8 @@ export default function SalesManagement() {
       status: 'new',
       stage: 'Mới',
       notes: newLead.notes.trim(),
-      assignedTo: newLead.assignedTo || 'Minh Expert', // Mặc định cho người tạo nếu không chọn
-      value: 0, // Bỏ ngân sách ước tính
+      assignedTo: newLead.assignedTo,
+      value: parseInt(newLead.budget) || 0,
       lastContactedAt: null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -740,14 +736,26 @@ export default function SalesManagement() {
       website: '',
       address: '',
       source: 'website',
+      sourceDetail: '',
       region: 'hanoi',
       product: '',
+      budget: '',
+      timeline: '',
 
       content: '',
       notes: '',
-      assignedTo: '', // Sẽ được set thành 'Minh Expert' khi submit
-      tags: [],
-      customerType: 'individual'
+      assignedTo: '',
+      leadScore: 50,
+      referrerName: '',
+      referrerContact: '',
+      socialMedia: {
+        linkedin: '',
+        facebook: '',
+        twitter: ''
+      },
+      preferredContact: 'email',
+      bestTimeToContact: 'morning',
+      tags: []
     })
 
     // Close modal and show success message
@@ -757,209 +765,6 @@ export default function SalesManagement() {
       type: 'success'
     })
     setTimeout(() => setNotification(null), 3000)
-  }
-  
-  // Import Excel functions
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0]
-    if (file) {
-      setImportFile(file)
-      setImportError(null)
-      setImportSuccess(null)
-      setImportPreviewData([])
-      setShowImportPreview(false)
-      
-      // Parse file để preview data
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        try {
-          // Simulate parsing CSV data - trong thực tế sẽ dùng library như papaparse
-          const csvContent = e.target?.result as string
-          const lines = csvContent.split('\n')
-          if (lines.length > 1) {
-            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
-            const previewRows = lines.slice(1, 6).map(line => { // Chỉ lấy 5 dòng đầu để preview
-              const values = line.split(',').map(v => v.trim().replace(/"/g, ''))
-              const row: any = {}
-              headers.forEach((header, index) => {
-                row[header] = values[index] || ''
-              })
-              return row
-            }).filter(row => Object.values(row).some(val => val !== ''))
-            
-            setImportPreviewData(previewRows)
-          }
-        } catch (error) {
-          console.error('Error parsing file:', error)
-        }
-      }
-      reader.readAsText(file)
-    }
-  }
-
-  const handleImportExcel = async () => {
-    if (!importFile) {
-      setImportError('Vui lòng chọn file Excel để import')
-      return
-    }
-
-    // Check if preview data exists and validate field mapping
-    if (importPreviewData.length === 0) {
-      setImportError('Không có dữ liệu để import. Vui lòng kiểm tra file.')
-      return
-    }
-
-    // Validate required fields in the data
-    const requiredFields = ['Tên', 'Số điện thoại', 'Email']
-    const headers = importPreviewData[0] || []
-    const missingFields = requiredFields.filter(field => !headers.includes(field))
-    
-    if (missingFields.length > 0) {
-      setImportError(`Thiếu các cột bắt buộc: ${missingFields.join(', ')}`)
-      return
-    }
-
-    setImportProgress(0)
-    setImportError(null)
-    setImportSuccess(null)
-
-    try {
-      setImportProgress(30)
-      
-      setTimeout(() => {
-        setImportProgress(60)
-        
-        // Process the actual preview data
-        const dataRows = importPreviewData.slice(1) // Skip header row
-        const validLeads: any[] = []
-        
-        dataRows.forEach((row, index) => {
-          const leadData: any = {}
-          headers.forEach((header: string, colIndex: number) => {
-            leadData[header] = row[colIndex] || ''
-          })
-          
-          // Validate required fields for each row
-          if (leadData['Tên'] && leadData['Số điện thoại'] && leadData['Email']) {
-            validLeads.push({
-              name: leadData['Tên'],
-              phone: leadData['Số điện thoại'],
-              email: leadData['Email'].toLowerCase(),
-              company: leadData['Công ty'] || '',
-              source: 'excel_import',
-              region: leadData['Khu vực'] || 'hanoi',
-              product: leadData['Sản phẩm quan tâm'] || '',
-              content: leadData['Nội dung'] || 'Import từ file Excel',
-              position: leadData['Chức vụ'] || '',
-              industry: leadData['Ngành nghề'] || '',
-              companySize: leadData['Quy mô công ty'] || '',
-              website: leadData['Website'] || '',
-              address: leadData['Địa chỉ'] || '',
-              customerType: leadData['Loại khách hàng'] || 'business',
-              notes: leadData['Ghi chú'] || ''
-            })
-          }
-        })
-        
-        if (validLeads.length === 0) {
-          setImportError('Không có dữ liệu hợp lệ để import')
-          setImportProgress(0)
-          return
-        }
-        
-        setImportProgress(90)
-        
-        // Convert to Lead format and add to leads list
-        setTimeout(() => {
-          // Determine who to assign leads to
-          const defaultAssignee = importAutoAssign ? '' : 'Minh Expert' // Default to current user if not auto-assigning
-          
-          const newLeads: Lead[] = validLeads.map((leadData, index) => ({
-            id: Date.now() + index,
-            name: leadData.name,
-            phone: leadData.phone,
-            email: leadData.email,
-            company: leadData.company,
-            source: leadData.source,
-            region: leadData.region,
-            product: leadData.product,
-            content: leadData.content,
-            status: 'new',
-            stage: 'Mới',
-            notes: leadData.notes,
-            assignedTo: defaultAssignee,
-            value: 0,
-            lastContactedAt: null,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            type: 'lead',
-            nextAction: 'Liên hệ lần đầu',
-            nextActionDate: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            address: leadData.address,
-            customerType: leadData.customerType,
-            winProbability: 50,
-            interactionCount: 0,
-            lastInteractionAt: null,
-            tags: ['excel-import']
-          }))
-
-          setLeads(prevLeads => [...newLeads, ...prevLeads])
-          
-          // Auto assign if selected
-          if (importAutoAssign) {
-            const assignmentCount = autoAssignLeads(autoAssignStrategy, {
-              leadIds: newLeads.map(lead => lead.id)
-            })
-            setImportSuccess(`Đã import thành công ${newLeads.length} leads và phân công ${assignmentCount} leads tự động!`)
-          } else {
-            setImportSuccess(`Đã import thành công ${newLeads.length} leads và phân công cho Minh Expert!`)
-          }
-          
-          setImportProgress(100)
-          
-          setTimeout(() => {
-            setShowImportModal(false)
-            setImportFile(null)
-            setImportProgress(0)
-            setImportSuccess(null)
-            setImportAutoAssign(false)
-            setImportPreviewData([])
-            setShowImportPreview(false)
-            const message = importAutoAssign 
-              ? `Import thành công ${newLeads.length} leads từ Excel và đã phân công tự động!`
-              : `Import thành công ${newLeads.length} leads từ Excel và phân công cho Minh Expert!`
-            setNotification({
-              message,
-              type: 'success'
-            })
-            setTimeout(() => setNotification(null), 3000)
-          }, 1500)
-        }, 500)
-      }, 1000)
-    } catch (error) {
-      setImportError('Đã xảy ra lỗi khi import file Excel')
-      setImportProgress(0)
-    }
-  }
-
-  const downloadTemplate = () => {
-    // Template CSV khớp với các trường trong phần mềm
-    const csvContent = [
-      'Tên,Số điện thoại,Email,Công ty,Loại khách hàng,Chức vụ,Ngành nghề,Quy mô công ty,Website,Địa chỉ,Nguồn,Khu vực,Sản phẩm quan tâm,Nội dung,Ghi chú',
-      'Nguyễn Văn A,0901234567,nguyenvana@email.com,Công ty ABC,business,CEO,technology,51-200,https://congtyabc.com,Hà Nội,website,hanoi,CRM Solution,Quan tâm giải pháp CRM,Khách hàng tiềm năng cao',
-      'Trần Thị B,0907654321,tranthib@email.com,Công ty XYZ,business,Marketing Manager,marketing,11-50,https://companyxyz.vn,TP HCM,facebook,hcm,Marketing Automation,Cần tự động hóa marketing,Liên hệ trong tuần này',
-      'Lê Văn C,0909876543,levanc@personal.com,,individual,,,,,Đà Nẵng,referral,danang,Website Development,Cần làm website cá nhân,Giới thiệu từ bạn bè'
-    ].join('\n')
-
-    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
-    const link = document.createElement('a')
-    const url = URL.createObjectURL(blob)
-    link.setAttribute('href', url)
-    link.setAttribute('download', 'lead_template.csv')
-    link.style.visibility = 'hidden'
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
   }
   
   // Calculate preview data for auto assignment
@@ -1047,13 +852,12 @@ export default function SalesManagement() {
 
   const getStatusName = (status: string) => {
     switch(status) {
-      case 'new': return 'Lead mới';
-      case 'contacted': return 'Đang tư vấn';
-      case 'qualified': return 'Đã gửi ĐX';
+      case 'new': return 'Mới';
+      case 'contacted': return 'Đã liên hệ';
+      case 'qualified': return 'Đã xác định';
+      case 'proposal': return 'Báo giá';
       case 'negotiation': return 'Đàm phán';
-      case 'payment_pending': return 'Chuyển đổi - chờ thanh toán';
-      case 'converted': return 'Chuyển đổi thành công';
-      case 'lost': return 'Thất bại';
+      case 'converted': return 'Đã chuyển đổi';
       default: return status;
     }
   }
@@ -1689,41 +1493,6 @@ export default function SalesManagement() {
       winProbability: 0,
       interactionCount: 4,
       lastInteractionAt: '2024-06-25T14:00:00'
-    },
-    {
-      id: 20,
-      name: 'Phạm Thị Payment',
-      phone: '0912345678',
-      email: 'phamthipayment@email.com',
-      source: 'google',
-      region: 'ha_noi',
-      product: 'CRM Premium',
-      tags: ['hot', 'enterprise'],
-      content: 'Đã ký hợp đồng, đang chờ thanh toán',
-      status: 'payment_pending',
-      stage: 'waiting_payment',
-      notes: 'Hợp đồng đã ký, khách hàng xác nhận thanh toán trong tuần',
-      assignedTo: 'An Expert',
-      value: 85000000,
-      lastContactedAt: '2024-07-01T10:00:00',
-      createdAt: '2024-05-15T08:30:00',
-      updatedAt: '2024-07-01T10:00:00',
-      type: 'lead',
-      company: 'Premium Corp',
-      nextAction: 'Theo dõi thanh toán',
-      nextActionDate: '2024-07-05T09:00:00',
-      address: '789 Ba Dinh, Ba Dinh, Ha Noi',
-      customerType: 'business',
-      winProbability: 95,
-      interactionCount: 12,
-      lastInteractionAt: '2024-07-01T10:00:00',
-      quickNotes: [
-        {
-          content: 'Khách hàng đã ký hợp đồng và xác nhận thanh toán',
-          timestamp: '2024-07-01T10:00:00',
-          author: 'An Expert'
-        }
-      ]
     }
   ])
 
@@ -1869,9 +1638,10 @@ export default function SalesManagement() {
       newLeads: leads.filter(l => l.status === 'new').length,
       contactedLeads: leads.filter(l => l.status === 'contacted').length,
       qualifiedLeads: leads.filter(l => l.status === 'qualified').length,
+      proposalLeads: leads.filter(l => l.status === 'proposal').length,
       negotiationLeads: leads.filter(l => l.status === 'negotiation').length,
-      paymentPendingLeads: leads.filter(l => l.status === 'payment_pending').length,
       convertedLeads: leads.filter(l => l.status === 'converted').length,
+      paymentPendingLeads: leads.filter(l => l.status === 'negotiation').length,
       lostLeads: leads.filter(l => l.status === 'lost').length,
       totalValue: leads.reduce((sum, lead) => sum + lead.value, 0),
       hotLeads: leads.filter(l => l.tags.includes('hot')).length,
@@ -2130,7 +1900,7 @@ export default function SalesManagement() {
                     {showTooltip === 'stage-payment' && (
                       <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
                         <div className="max-w-xs">
-                          <p className="font-medium mb-1">💳 Chuyển đổi - chờ thanh toán [BẮT BUỘC]</p>
+                          <p className="font-medium mb-1">💳 Chờ thanh toán [BẮT BUỘC]</p>
                           <p>Quan trọng cho báo cáo dòng tiền - không thể xóa.</p>
                           <p className="mt-1 text-gray-300">Khách hàng đã đồng ý, đang chờ thanh toán.</p>
                         </div>
@@ -2141,7 +1911,7 @@ export default function SalesManagement() {
                   <span className="text-sm">💳</span>
                 </div>
                 <div>
-                  <p className="text-xs text-purple-600 mb-1">Chuyển đổi - chờ thanh toán</p>
+                  <p className="text-xs text-purple-600 mb-1">Chờ thanh toán</p>
                   <p className="text-lg font-bold text-purple-900">{pipelineStats.paymentPendingLeads || 0}</p>
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-xs text-purple-500">T.trước: 1</p>
@@ -2174,7 +1944,7 @@ export default function SalesManagement() {
                     {showTooltip === 'stage-converted' && (
                       <div className="absolute right-0 top-5 z-10 bg-black text-white text-xs rounded-lg py-2 px-3 whitespace-nowrap shadow-lg">
                         <div className="max-w-xs">
-                          <p className="font-medium mb-1">✅ Chuyển đổi thành công [BẮT BUỘC]</p>
+                          <p className="font-medium mb-1">✅ Đã chốt [BẮT BUỘC]</p>
                           <p>Giai đoạn kết thúc thành công - không thể xóa.</p>
                           <p className="mt-1 text-gray-300">Deal thành công, đã nhận thanh toán.</p>
                         </div>
@@ -2185,7 +1955,7 @@ export default function SalesManagement() {
                   <span className="text-sm">✅</span>
                 </div>
                 <div>
-                  <p className="text-xs text-green-600 mb-1">Chuyển đổi thành công</p>
+                  <p className="text-xs text-green-600 mb-1">Đã chốt</p>
                   <p className="text-lg font-bold text-green-900">{pipelineStats.convertedLeads}</p>
                   <div className="flex items-center justify-between mt-1">
                     <p className="text-xs text-green-500">T.trước: 1</p>
@@ -2327,9 +2097,9 @@ export default function SalesManagement() {
                 <option value="new">🆕 Lead mới</option>
                 <option value="contacted">💬 Đang tư vấn</option>
                 <option value="qualified">📄 Đã gửi ĐX</option>
-                <option value="negotiation">🤝 Đàm phán</option>
-                <option value="payment_pending">💳 Chuyển đổi - chờ thanh toán</option>
-                <option value="converted">✅ Chuyển đổi thành công</option>
+                <option value="proposal">🤝 Đàm phán</option>
+                <option value="negotiation">💳 Chờ thanh toán</option>
+                <option value="converted">✅ Đã chốt</option>
                 <option value="lost">❌ Thất bại</option>
               </select>
               
@@ -2433,14 +2203,6 @@ export default function SalesManagement() {
               >
                 <Bot className="w-4 h-4" />
                 Phân leads tự động
-              </button>
-              
-              <button 
-                onClick={() => setShowImportModal(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
-              >
-                <Download className="w-4 h-4" />
-                Import Excel
               </button>
               
               <button 
@@ -2596,7 +2358,7 @@ export default function SalesManagement() {
                   {/* 14. Sản phẩm quan tâm */}
                   {visibleColumns.product && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
-                      🛍️ Sản phẩm quan tâm
+                      🛍️ Sản phẩm
                     </th>
                   )}
                   
@@ -2926,17 +2688,31 @@ export default function SalesManagement() {
                         <div className="flex items-center space-x-1">
                           <button 
                             onClick={() => handleViewLeadDetail(lead)}
-                            className="p-2 text-slate-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                            title="Xem chi tiết & Chỉnh sửa"
+                            className="p-2 text-slate-600 hover:text-white hover:bg-purple-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                            title="Xem chi tiết"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button 
+                            onClick={() => handleEditLead(lead)}
+                            className="p-2 text-slate-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
                             onClick={() => handleConvertLead(lead)}
                             className="p-2 text-slate-600 hover:text-white hover:bg-green-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                            title="Chuyển đổi thành khách hàng"
+                            title="Chuyển đổi"
                           >
                             <User className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteLead(lead)}
+                            className="p-2 text-slate-600 hover:text-white hover:bg-red-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                            title="Xóa"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </td>
@@ -2989,8 +2765,8 @@ export default function SalesManagement() {
         ) : (
           /* Kanban View */
           <div className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-7 gap-4 h-[calc(100vh-400px)]">
-              {['new', 'contacted', 'qualified', 'negotiation', 'payment_pending', 'converted', 'lost'].map((status) => {
+            <div className="grid grid-cols-1 lg:grid-cols-6 gap-4 h-[calc(100vh-400px)]">
+              {['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'converted'].map((status) => {
                 const statusLeads = filteredLeads.filter(lead => lead.status === status);
                 
                 return (
@@ -3002,26 +2778,18 @@ export default function SalesManagement() {
                   >
                     {/* Column Header */}
                     <div className={`p-4 border-b border-gray-200 flex items-center justify-between transition-colors ${
-                      draggedLead && draggedLead.status !== status ? 
-                        (status === 'converted' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200') 
-                        : ''
+                      draggedLead && draggedLead.status !== status ? 'bg-blue-50 border-blue-200' : ''
                     }`}>
                       <div className="flex items-center">
                         <span className={`w-3 h-3 rounded-full mr-2 ${
                           status === 'new' ? 'bg-gray-500' :
-                          status === 'contacted' ? 'bg-blue-500' :
-                          status === 'qualified' ? 'bg-green-500' :
-                          status === 'negotiation' ? 'bg-yellow-500' :
-                          status === 'payment_pending' ? 'bg-purple-500' :
-                          status === 'converted' ? 'bg-green-600' :
-                          'bg-red-500'
+                          status === 'contacted' ? 'bg-yellow-500' :
+                          status === 'qualified' ? 'bg-blue-500' :
+                          status === 'proposal' ? 'bg-purple-500' :
+                          status === 'negotiation' ? 'bg-orange-500' :
+                          'bg-green-500'
                         }`}></span>
-                        <h3 className="font-medium text-gray-900">
-                          {getStatusName(status)}
-                          {status === 'converted' && (
-                            <span className="text-xs text-gray-500 ml-1">(Tự động)</span>
-                          )}
-                        </h3>
+                        <h3 className="font-medium text-gray-900">{getStatusName(status)}</h3>
                       </div>
                       <span className="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded-full">
                         {statusLeads.length}
@@ -3047,22 +2815,11 @@ export default function SalesManagement() {
                           statusLeads.map((lead) => (
                             <div 
                               key={lead.id} 
-                              className={`bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-all ${
-                                lead.status === 'converted' 
-                                  ? 'cursor-not-allowed border-green-300 bg-green-50' 
-                                  : 'cursor-move'
-                              } ${
+                              className={`bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-all cursor-move ${
                                 draggedLead?.id === lead.id ? 'opacity-50 rotate-2 scale-105' : 'hover:scale-102'
                               }`}
-                              draggable={lead.status !== 'converted'}
-                              title={lead.status === 'converted' ? 'Lead đã chuyển đổi thành công, không thể di chuyển' : ''}
-                              onDragStart={(e) => {
-                                if (lead.status === 'converted') {
-                                  e.preventDefault()
-                                  return
-                                }
-                                handleDragStart(e, lead)
-                              }}
+                              draggable
+                              onDragStart={(e) => handleDragStart(e, lead)}
                               onDragEnd={handleDragEnd}
                             >
                               <div className="space-y-2">
@@ -3070,41 +2827,19 @@ export default function SalesManagement() {
                                 <div className="flex items-start justify-between">
                                   <div>
                                     <h4 className="font-medium text-gray-900 text-sm">{lead.name}</h4>
-                                    {lead.company && (
-                                      <p className="text-xs text-gray-500">{lead.company}</p>
-                                    )}
                                   </div>
-                                  {lead.status === 'converted' && (
-                                    <div className="flex items-center">
-                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        ✓ Hoàn tất
-                                      </span>
-                                    </div>
-                                  )}
                                 </div>
                                 
-                                {/* Sản phẩm quan tâm */}
+                                {/* Product & Value */}
                                 <div>
-                                  <p className="text-xs text-gray-500 mb-1">Sản phẩm quan tâm:</p>
                                   <p className="text-sm text-gray-900 font-medium">{lead.product}</p>
+                                  <p className="text-lg font-bold text-green-600">{(lead.value / 1000000).toFixed(0)}M VND</p>
                                 </div>
                                 
                                 {/* Contact Info */}
-                                <div className="text-xs text-gray-500 space-y-1">
-                                  <p className="flex items-center gap-1">
-                                    <Phone className="w-3 h-3" />
-                                    {lead.phone}
-                                  </p>
-                                  <p className="flex items-center gap-1">
-                                    <Mail className="w-3 h-3" />
-                                    {lead.email}
-                                  </p>
-                                </div>
-                                
-                                {/* Source & Region */}
-                                <div className="text-xs text-gray-500 space-y-1">
-                                  <p><span className="font-medium">Nguồn:</span> {lead.source}</p>
-                                  <p><span className="font-medium">Khu vực:</span> {lead.region}</p>
+                                <div className="text-xs text-gray-500">
+                                  <p>{lead.phone}</p>
+                                  <p>{lead.email}</p>
                                 </div>
                                 
                                 {/* Tags */}
@@ -3135,39 +2870,39 @@ export default function SalesManagement() {
                                   <div className="flex items-center gap-1">
                                     <button 
                                       onClick={() => handleViewLeadDetail(lead)}
-                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                      title="Xem chi tiết & Chỉnh sửa"
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-purple-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xem chi tiết"
                                     >
                                       <Eye className="w-3.5 h-3.5" />
                                     </button>
-                                    
-                                    {/* Hiển thị buttons khác nhau tùy theo status */}
-                                    {lead.status === 'payment_pending' ? (
-                                      <>
-                                        <button 
-                                          onClick={() => handlePaymentSuccess(lead)}
-                                          className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                          title="Thanh toán thành công"
-                                        >
-                                          <CheckCircle className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button 
-                                          onClick={() => handlePaymentFailed(lead)}
-                                          className="p-1.5 text-slate-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                          title="Thanh toán thất bại"
-                                        >
-                                          <XCircle className="w-3.5 h-3.5" />
-                                        </button>
-                                      </>
-                                    ) : lead.status !== 'converted' && lead.status !== 'lost' ? (
-                                      <button 
-                                        onClick={() => handleConvertLead(lead)}
-                                        className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                        title="Chuyển đổi thành khách hàng"
-                                      >
-                                        <User className="w-3.5 h-3.5" />
-                                      </button>
-                                    ) : null}
+                                    <button 
+                                      onClick={() => handleEditLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Chỉnh sửa lead"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleExportLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-indigo-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xuất dữ liệu"
+                                    >
+                                      <Download className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleConvertLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Chuyển thành khách hàng"
+                                    >
+                                      <User className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button 
+                                      onClick={() => handleDeleteLead(lead)}
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                                      title="Xóa lead"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
                                   </div>
                                   <span className="text-xs text-gray-500">
                                     {new Date(lead.createdAt).toLocaleDateString('vi-VN')}
@@ -3298,94 +3033,315 @@ export default function SalesManagement() {
       {/* Add Lead Modal */}
       {showAddLeadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">Thêm Lead mới</h3>
-                  <div 
-                    className="relative"
-                    onMouseEnter={() => setShowTooltip('add-lead-title')}
-                    onMouseLeave={() => setShowTooltip(null)}
-                  >
-                    <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" />
-                    {showTooltip === 'add-lead-title' && (
-                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-lg py-3 px-4 shadow-lg">
-                        <div className="max-w-sm">
-                          <p className="font-medium mb-2">📝 Tạo lead mới</p>
-                          <p className="mb-2">Nhập thông tin khách hàng tiềm năng mới:</p>
-                          <ul className="text-xs space-y-1 text-gray-300">
-                            <li>• Thông tin bắt buộc: Tên, Email, Số ĐT</li>
-                            <li>• Lead sẽ tự động có trạng thái "Mới"</li>
-                            <li>• Tự động phân công cho người tạo</li>
-                          </ul>
-                        </div>
-                        <div className="absolute top-[-6px] left-4 w-3 h-3 bg-black transform rotate-45"></div>
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <h3 className="text-lg font-semibold text-gray-900">Thêm Lead mới</h3>
                 <button
-                  onClick={() => setShowAddLeadModal(false)}
+                  onClick={() => {
+                    setShowAddLeadModal(false)
+                    setAddLeadTab('manual')
+                    resetExcelImport()
+                  }}
                   className="text-gray-400 hover:text-gray-600 transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <X className="w-6 h-6" />
                 </button>
+              </div>
+              
+              {/* Tab Navigation */}
+              <div className="mt-4">
+                <div className="border-b border-gray-200">
+                  <div className="flex space-x-8">
+                    <button
+                      onClick={() => setAddLeadTab('manual')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        addLeadTab === 'manual'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <User className="w-4 h-4" />
+                        Nhập thủ công
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setAddLeadTab('excel')}
+                      className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                        addLeadTab === 'excel'
+                          ? 'border-blue-500 text-blue-600'
+                          : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <FileSpreadsheet className="w-4 h-4" />
+                        Import từ Excel
+                      </div>
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
-              {/* Customer Type Selection */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="text-red-500">*</span>
-                  Loại khách hàng
-                </h4>
-                <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
-                    <input
-                      type="radio"
-                      name="customerType"
-                      value="individual"
-                      checked={newLead.customerType === 'individual'}
-                      onChange={(e) => setNewLead(prev => ({ 
-                        ...prev, 
-                        customerType: e.target.value as 'individual' | 'business',
-                        company: '', // Clear company info when switching to individual
-                        industry: '',
-                        companySize: '',
-                        website: ''
-                      }))}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                    />
-                    <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">👤 Cá nhân</div>
-                      <div className="text-xs text-gray-500">Khách hàng cá nhân</div>
+            <div className="p-6">
+              {addLeadTab === 'manual' ? (
+                /* Manual Input Tab */
+                <div className="space-y-6">
+                  {/* Required Information */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <span className="text-red-500">*</span>
+                      Thông tin bắt buộc
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Tên khách hàng <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={newLead.name}
+                          onChange={(e) => setNewLead(prev => ({ ...prev, name: e.target.value }))}
+                          placeholder="Nhập tên khách hàng..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Số điện thoại <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="tel"
+                          value={newLead.phone}
+                          onChange={(e) => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
+                          placeholder="0901234567"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      
+                      <div className="md:col-span-2">
+                        <label className="block text-xs font-medium text-gray-700 mb-1">
+                          Email <span className="text-red-500">*</span>
+                        </label>
+                        <input
+                          type="email"
+                          value={newLead.email}
+                          onChange={(e) => setNewLead(prev => ({ ...prev, email: e.target.value }))}
+                          placeholder="email@domain.com"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                     </div>
-                  </label>
-                  
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
-                    <input
-                      type="radio"
-                      name="customerType"
-                      value="business"
-                      checked={newLead.customerType === 'business'}
-                      onChange={(e) => setNewLead(prev => ({ ...prev, customerType: e.target.value as 'individual' | 'business' }))}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                    />
-                    <div className="ml-3">
-                      <div className="text-sm font-medium text-gray-900">🏢 Công ty</div>
-                      <div className="text-xs text-gray-500">Khách hàng doanh nghiệp</div>
-                    </div>
-                  </label>
-                </div>
-              </div>
+                  </div>
 
-              {/* Required Information */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  {/* Company Information */}
+                  <div>
+                    <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                      <Building2 className="w-4 h-4 text-blue-500" />
+                      Thông tin công ty
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Công ty</label>
+                        <input
+                          type="text"
+                          value={newLead.company}
+                          onChange={(e) => setNewLead(prev => ({ ...prev, company: e.target.value }))}
+                          placeholder="Tên công ty..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      
+                      <div>
+                        <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
+                        <input
+                          type="text"
+                          value={newLead.jobTitle}
+                          onChange={(e) => setNewLead(prev => ({ ...prev, jobTitle: e.target.value }))}
+                          placeholder="CEO, Manager, Developer..."
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                /* Excel Import Tab */
+                <div className="space-y-6">
+                  {!excelFile ? (
+                    /* File Upload */
+                    <div className="text-center py-12">
+                      <FileSpreadsheet className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Import leads từ Excel</h3>
+                      <p className="text-sm text-gray-600 mb-6">
+                        Chọn file Excel (.xlsx, .xls) hoặc CSV để import danh sách leads
+                      </p>
+                      
+                      <div className="max-w-sm mx-auto">
+                        <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                          <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                            <Upload className="w-8 h-8 mb-2 text-gray-400" />
+                            <p className="text-sm text-gray-600">
+                              <span className="font-semibold">Click để chọn file</span> hoặc kéo thả
+                            </p>
+                            <p className="text-xs text-gray-500">Excel, CSV (tối đa 10MB)</p>
+                          </div>
+                          <input 
+                            type="file" 
+                            className="hidden" 
+                            accept=".xlsx,.xls,.csv"
+                            onChange={handleFileUpload}
+                          />
+                        </label>
+                      </div>
+                      
+                      <div className="mt-6 p-4 bg-blue-50 rounded-lg text-left max-w-md mx-auto">
+                        <h4 className="text-sm font-medium text-blue-900 mb-2">💡 Định dạng file Excel:</h4>
+                        <ul className="text-xs text-blue-800 space-y-1">
+                          <li>• Dòng đầu tiên là tiêu đề cột</li>
+                          <li>• Cần có ít nhất: Tên, Email, Số điện thoại</li>
+                          <li>• Có thể có thêm: Công ty, Chức vụ, Địa chỉ...</li>
+                        </ul>
+                      </div>
+                    </div>
+                  ) : isProcessingExcel ? (
+                    /* Processing */
+                    <div className="text-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                      <h3 className="text-lg font-medium text-gray-900 mb-2">Đang xử lý file...</h3>
+                      <p className="text-sm text-gray-600">Vui lòng đợi trong giây lát</p>
+                    </div>
+                  ) : (
+                    /* Column Mapping */
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div>
+                          <h3 className="text-lg font-medium text-gray-900">Mapping cột dữ liệu</h3>
+                          <p className="text-sm text-gray-600">
+                            File: <span className="font-medium">{excelFile.name}</span> ({excelData.length} dòng)
+                          </p>
+                        </div>
+                        <button
+                          onClick={resetExcelImport}
+                          className="text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-5 h-5" />
+                        </button>
+                      </div>
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Tên khách hàng <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={columnMapping.name || ''}
+                            onChange={(e) => setColumnMapping(prev => ({ ...prev, name: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Chọn cột...</option>
+                            {excelColumns.map(col => (
+                              <option key={col} value={col}>{col}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Email <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={columnMapping.email || ''}
+                            onChange={(e) => setColumnMapping(prev => ({ ...prev, email: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Chọn cột...</option>
+                            {excelColumns.map(col => (
+                              <option key={col} value={col}>{col}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Số điện thoại <span className="text-red-500">*</span>
+                          </label>
+                          <select
+                            value={columnMapping.phone || ''}
+                            onChange={(e) => setColumnMapping(prev => ({ ...prev, phone: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Chọn cột...</option>
+                            {excelColumns.map(col => (
+                              <option key={col} value={col}>{col}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Công ty</label>
+                          <select
+                            value={columnMapping.company || ''}
+                            onChange={(e) => setColumnMapping(prev => ({ ...prev, company: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Chọn cột...</option>
+                            {excelColumns.map(col => (
+                              <option key={col} value={col}>{col}</option>
+                            ))}
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">Chức vụ</label>
+                          <select
+                            value={columnMapping.jobTitle || ''}
+                            onChange={(e) => setColumnMapping(prev => ({ ...prev, jobTitle: e.target.value }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Chọn cột...</option>
+                            {excelColumns.map(col => (
+                              <option key={col} value={col}>{col}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      
+                      {/* Preview */}
+                      <div className="border rounded-lg p-4 bg-gray-50">
+                        <h4 className="text-sm font-medium text-gray-900 mb-3">Xem trước dữ liệu (3 dòng đầu)</h4>
+                        <div className="overflow-x-auto">
+                          <table className="min-w-full text-xs">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left py-2 px-3 font-medium text-gray-700">Tên</th>
+                                <th className="text-left py-2 px-3 font-medium text-gray-700">Email</th>
+                                <th className="text-left py-2 px-3 font-medium text-gray-700">Điện thoại</th>
+                                <th className="text-left py-2 px-3 font-medium text-gray-700">Công ty</th>
+                                <th className="text-left py-2 px-3 font-medium text-gray-700">Chức vụ</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {excelData.slice(0, 3).map((row, index) => (
+                                <tr key={index} className="border-b">
+                                  <td className="py-2 px-3">{columnMapping.name ? row[excelColumns.indexOf(columnMapping.name)] || '-' : '-'}</td>
+                                  <td className="py-2 px-3">{columnMapping.email ? row[excelColumns.indexOf(columnMapping.email)] || '-' : '-'}</td>
+                                  <td className="py-2 px-3">{columnMapping.phone ? row[excelColumns.indexOf(columnMapping.phone)] || '-' : '-'}</td>
+                                  <td className="py-2 px-3">{columnMapping.company ? row[excelColumns.indexOf(columnMapping.company)] || '-' : '-'}</td>
+                                  <td className="py-2 px-3">{columnMapping.jobTitle ? row[excelColumns.indexOf(columnMapping.jobTitle)] || '-' : '-'}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
                   <span className="text-red-500">*</span>
                   Thông tin bắt buộc
                 </h4>
@@ -3431,99 +3387,97 @@ export default function SalesManagement() {
                 </div>
               </div>
 
-              {/* Company Information - Only show for business customers */}
-              {newLead.customerType === 'business' && (
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Building2 className="w-4 h-4 text-blue-500" />
-                    Thông tin công ty
-                  </h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Công ty</label>
-                      <input
-                        type="text"
-                        value={newLead.company}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, company: e.target.value }))}
-                        placeholder="Tên công ty..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
-                      <input
-                        type="text"
-                        value={newLead.jobTitle}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, jobTitle: e.target.value }))}
-                        placeholder="CEO, Manager, Developer..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Ngành nghề</label>
-                      <select
-                        value={newLead.industry}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, industry: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Chọn ngành nghề...</option>
-                        <option value="technology">Công nghệ thông tin</option>
-                        <option value="finance">Tài chính - Ngân hàng</option>
-                        <option value="healthcare">Y tế - Sức khỏe</option>
-                        <option value="education">Giáo dục</option>
-                        <option value="retail">Bán lẻ</option>
-                        <option value="manufacturing">Sản xuất</option>
-                        <option value="real-estate">Bất động sản</option>
-                        <option value="consulting">Tư vấn</option>
-                        <option value="marketing">Marketing</option>
-                        <option value="logistics">Vận chuyển - Logistics</option>
-                        <option value="other">Khác</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty</label>
-                      <select
-                        value={newLead.companySize}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, companySize: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Chọn quy mô...</option>
-                        <option value="1-10">1-10 nhân viên</option>
-                        <option value="11-50">11-50 nhân viên</option>
-                        <option value="51-200">51-200 nhân viên</option>
-                        <option value="201-500">201-500 nhân viên</option>
-                        <option value="501-1000">501-1000 nhân viên</option>
-                        <option value="1000+">1000+ nhân viên</option>
-                      </select>
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Website</label>
-                      <input
-                        type="url"
-                        value={newLead.website}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, website: e.target.value }))}
-                        placeholder="https://domain.com"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
-                      <input
-                        type="text"
-                        value={newLead.address}
-                        onChange={(e) => setNewLead(prev => ({ ...prev, address: e.target.value }))}
-                        placeholder="Địa chỉ công ty..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+              {/* Company Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-blue-500" />
+                  Thông tin công ty
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Công ty</label>
+                    <input
+                      type="text"
+                      value={newLead.company}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, company: e.target.value }))}
+                      placeholder="Tên công ty..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
+                    <input
+                      type="text"
+                      value={newLead.jobTitle}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, jobTitle: e.target.value }))}
+                      placeholder="CEO, Manager, Developer..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ngành nghề</label>
+                    <select
+                      value={newLead.industry}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, industry: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chọn ngành nghề...</option>
+                      <option value="technology">Công nghệ thông tin</option>
+                      <option value="finance">Tài chính - Ngân hàng</option>
+                      <option value="healthcare">Y tế - Sức khỏe</option>
+                      <option value="education">Giáo dục</option>
+                      <option value="retail">Bán lẻ</option>
+                      <option value="manufacturing">Sản xuất</option>
+                      <option value="real-estate">Bất động sản</option>
+                      <option value="consulting">Tư vấn</option>
+                      <option value="marketing">Marketing</option>
+                      <option value="logistics">Vận chuyển - Logistics</option>
+                      <option value="other">Khác</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty</label>
+                    <select
+                      value={newLead.companySize}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, companySize: e.target.value }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Chọn quy mô...</option>
+                      <option value="1-10">1-10 nhân viên</option>
+                      <option value="11-50">11-50 nhân viên</option>
+                      <option value="51-200">51-200 nhân viên</option>
+                      <option value="201-500">201-500 nhân viên</option>
+                      <option value="501-1000">501-1000 nhân viên</option>
+                      <option value="1000+">1000+ nhân viên</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Website</label>
+                    <input
+                      type="url"
+                      value={newLead.website}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, website: e.target.value }))}
+                      placeholder="https://domain.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
+                    <input
+                      type="text"
+                      value={newLead.address}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, address: e.target.value }))}
+                      placeholder="Địa chỉ công ty..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
                   </div>
                 </div>
-              )}
+              </div>
 
               {/* Lead Source & Assignment */}
               <div>
@@ -3554,6 +3508,17 @@ export default function SalesManagement() {
                   </div>
                   
                   <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Chi tiết nguồn</label>
+                    <input
+                      type="text"
+                      value={newLead.sourceDetail}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, sourceDetail: e.target.value }))}
+                      placeholder="Landing page cụ thể, campaign..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Khu vực</label>
                     <select
                       value={newLead.region}
@@ -3569,7 +3534,7 @@ export default function SalesManagement() {
                     </select>
                   </div>
                   
-                  <div className="md:col-span-2">
+                  <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">
                       Phân công cho
                       <div 
@@ -3581,7 +3546,7 @@ export default function SalesManagement() {
                         {showTooltip === 'assign-to' && (
                           <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
                             <div className="max-w-xs">
-                              <p className="text-gray-300">Mặc định phân công cho người tạo. Có thể chọn người khác hoặc để trống để phân công tự động sau.</p>
+                              <p className="text-gray-300">Bỏ trống để phân công tự động sau, hoặc chọn người phụ trách ngay.</p>
                             </div>
                             <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
                           </div>
@@ -3593,7 +3558,7 @@ export default function SalesManagement() {
                       onChange={(e) => setNewLead(prev => ({ ...prev, assignedTo: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Mặc định (Minh Expert - người tạo)</option>
+                      <option value="">Chưa phân công</option>
                       {getAvailableSalesPersons().map(person => (
                         <option key={person.id} value={person.name}>
                           {person.name} ({person.currentLeads} leads hiện tại)
@@ -3613,27 +3578,155 @@ export default function SalesManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Sản phẩm quan tâm</label>
-                    <select
+                    <input
+                      type="text"
                       value={newLead.product}
                       onChange={(e) => setNewLead(prev => ({ ...prev, product: e.target.value }))}
+                      placeholder="CRM, ERP, Website..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ngân sách ước tính (VND)</label>
+                    <input
+                      type="number"
+                      value={newLead.budget}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, budget: e.target.value }))}
+                      placeholder="50000000"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Timeline dự kiến</label>
+                    <select
+                      value={newLead.timeline}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, timeline: e.target.value }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="">Chọn sản phẩm...</option>
-                      <option value="CRM Solution">CRM Solution - Quản lý khách hàng</option>
-                      <option value="ERP System">ERP System - Quản lý tài nguyên doanh nghiệp</option>
-                      <option value="Website Development">Website Development - Phát triển website</option>
-                      <option value="E-commerce Platform">E-commerce Platform - Nền tảng thương mại điện tử</option>
-                      <option value="Mobile Application">Mobile Application - Ứng dụng di động</option>
-                      <option value="Marketing Automation">Marketing Automation - Tự động hóa marketing</option>
-                      <option value="Data Analytics">Data Analytics - Phân tích dữ liệu</option>
-                      <option value="Cloud Services">Cloud Services - Dịch vụ đám mây</option>
-                      <option value="AI/ML Solutions">AI/ML Solutions - Giải pháp trí tuệ nhân tạo</option>
-                      <option value="Cybersecurity">Cybersecurity - An ninh mạng</option>
-                      <option value="Digital Transformation">Digital Transformation - Chuyển đổi số</option>
-                      <option value="Custom Software">Custom Software - Phần mềm tùy chỉnh</option>
-                      <option value="Consulting Services">Consulting Services - Dịch vụ tư vấn</option>
-                      <option value="Training & Support">Training & Support - Đào tạo và hỗ trợ</option>
-                      <option value="Other">Khác</option>
+                      <option value="">Chọn timeline...</option>
+                      <option value="immediate">Ngay lập tức</option>
+                      <option value="1-month">Trong 1 tháng</option>
+                      <option value="1-3-months">1-3 tháng</option>
+                      <option value="3-6-months">3-6 tháng</option>
+                      <option value="6-12-months">6-12 tháng</option>
+                      <option value="12+ months">Trên 12 tháng</option>
+                      <option value="undefined">Chưa xác định</option>
+                    </select>
+                  </div>
+                  
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Lead Score (0-100)</label>
+                    <div className="flex items-center gap-3">
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={newLead.leadScore}
+                        onChange={(e) => setNewLead(prev => ({ ...prev, leadScore: parseInt(e.target.value) }))}
+                        className="flex-1"
+                      />
+                      <span className="text-sm font-medium text-gray-700 w-12">{newLead.leadScore}</span>
+                    </div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      Đánh giá tiềm năng của lead (0: thấp, 100: rất cao)
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Referral Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-purple-500" />
+                  Thông tin giới thiệu
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tên người giới thiệu</label>
+                    <input
+                      type="text"
+                      value={newLead.referrerName}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, referrerName: e.target.value }))}
+                      placeholder="Tên người giới thiệu..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Liên hệ người giới thiệu</label>
+                    <input
+                      type="text"
+                      value={newLead.referrerContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, referrerContact: e.target.value }))}
+                      placeholder="Email hoặc số điện thoại..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Social Media & Contact Preferences */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Phone className="w-4 h-4 text-indigo-500" />
+                  Mạng xã hội & Tùy chọn liên hệ
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">LinkedIn</label>
+                    <input
+                      type="url"
+                      value={newLead.socialMedia.linkedin}
+                      onChange={(e) => setNewLead(prev => ({ 
+                        ...prev, 
+                        socialMedia: { ...prev.socialMedia, linkedin: e.target.value }
+                      }))}
+                      placeholder="https://linkedin.com/in/username"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Facebook</label>
+                    <input
+                      type="url"
+                      value={newLead.socialMedia.facebook}
+                      onChange={(e) => setNewLead(prev => ({ 
+                        ...prev, 
+                        socialMedia: { ...prev.socialMedia, facebook: e.target.value }
+                      }))}
+                      placeholder="https://facebook.com/username"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Phương thức liên hệ ưa thích</label>
+                    <select
+                      value={newLead.preferredContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, preferredContact: e.target.value as any }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="email">📧 Email</option>
+                      <option value="phone">📞 Điện thoại</option>
+                      <option value="whatsapp">💬 WhatsApp</option>
+                      <option value="meeting">🤝 Gặp trực tiếp</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Thời gian liên hệ tốt nhất</label>
+                    <select
+                      value={newLead.bestTimeToContact}
+                      onChange={(e) => setNewLead(prev => ({ ...prev, bestTimeToContact: e.target.value as any }))}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="morning">🌅 Buổi sáng (8-12h)</option>
+                      <option value="afternoon">☀️ Buổi chiều (13-17h)</option>
+                      <option value="evening">🌆 Buổi tối (18-20h)</option>
+                      <option value="anytime">🕐 Bất cứ lúc nào</option>
                     </select>
                   </div>
                 </div>
@@ -3704,8 +3797,18 @@ export default function SalesManagement() {
                     newLead.source === 'email-marketing' ? 'Email Marketing' :
                     newLead.source === 'webinar' ? 'Webinar' :
                     newLead.source === 'partner' ? 'Đối tác' : 'Khác'
-                  }</div>
-                  <div><strong>Phân công cho:</strong> {newLead.assignedTo || 'Minh Expert (người tạo)'}</div>
+                  } {newLead.sourceDetail && `- ${newLead.sourceDetail}`}</div>
+                  <div><strong>Lead Score:</strong> {newLead.leadScore}/100</div>
+                  {newLead.budget && <div><strong>Ngân sách:</strong> {parseInt(newLead.budget).toLocaleString('vi-VN')} VND</div>}
+                  {newLead.timeline && <div><strong>Timeline:</strong> {
+                    newLead.timeline === 'immediate' ? 'Ngay lập tức' :
+                    newLead.timeline === '1-month' ? 'Trong 1 tháng' :
+                    newLead.timeline === '1-3-months' ? '1-3 tháng' :
+                    newLead.timeline === '3-6-months' ? '3-6 tháng' :
+                    newLead.timeline === '6-12-months' ? '6-12 tháng' :
+                    newLead.timeline === '12+ months' ? 'Trên 12 tháng' : 'Chưa xác định'
+                  }</div>}
+                  {newLead.assignedTo && <div><strong>Phân công cho:</strong> {newLead.assignedTo}</div>}
                 </div>
               </div>
             </div>
@@ -4239,9 +4342,7 @@ export default function SalesManagement() {
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {isEditMode ? 'Chỉnh sửa Lead' : 'Chi tiết Lead'} - {selectedLead.name}
-                  </h3>
+                  <h3 className="text-lg font-semibold text-gray-900">Chi tiết Lead - {selectedLead.name}</h3>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     selectedLead.status === 'converted' ? 'bg-green-100 text-green-800' :
                     selectedLead.status === 'qualified' ? 'bg-blue-100 text-blue-800' :
@@ -4254,52 +4355,18 @@ export default function SalesManagement() {
                     {getStatusName(selectedLead.status)}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {!isEditMode ? (
-                    <button
-                      onClick={() => setIsEditMode(true)}
-                      className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-1"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Chỉnh sửa
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={() => {
-                          // Save changes logic here
-                          setIsEditMode(false)
-                        }}
-                        className="px-3 py-1 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-1"
-                      >
-                        <Save className="w-4 h-4" />
-                        Lưu
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditedLead({...selectedLead}) // Reset về giá trị ban đầu
-                          setIsEditMode(false)
-                        }}
-                        className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
-                      >
-                        Hủy
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      setShowLeadDetailModal(false)
-                      setIsAddingQuickNote(false)
-                      setQuickNote('')
-                      setIsEditMode(false)
-                    }}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setShowLeadDetailModal(false)
+                    setIsAddingQuickNote(false)
+                    setQuickNote('')
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
             </div>
 
@@ -4311,41 +4378,23 @@ export default function SalesManagement() {
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
                       <User className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
+                      <div>
                         <p className="text-sm font-medium text-gray-900">{selectedLead.name}</p>
                         <p className="text-xs text-gray-500">{selectedLead.company || 'Cá nhân'}</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Tên không thể thay đổi
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Phone className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
+                      <div>
                         <p className="text-sm text-gray-900">{selectedLead.phone}</p>
                         <p className="text-xs text-gray-500">Số điện thoại</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Số điện thoại không thể thay đổi
-                          </p>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Mail className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
+                      <div>
                         <p className="text-sm text-gray-900">{selectedLead.email}</p>
                         <p className="text-xs text-gray-500">Email</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Email không thể thay đổi
-                          </p>
-                        )}
                       </div>
                     </div>
                   </div>
@@ -4356,44 +4405,23 @@ export default function SalesManagement() {
                   <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin bán hàng</h4>
                   <div className="space-y-3">
                     <div className="flex items-center gap-3">
+                      <DollarSign className="w-4 h-4 text-green-500" />
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{(selectedLead.value / 1000000).toFixed(1)}M VND</p>
+                        <p className="text-xs text-gray-500">Giá trị dự kiến</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
                       <Briefcase className="w-4 h-4 text-blue-500" />
-                      <div className="flex-1">
-                        {isEditMode ? (
-                          <select
-                            value={editedLead?.product || ''}
-                            onChange={(e) => setEditedLead(prev => prev ? {...prev, product: e.target.value} : null)}
-                            className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                          >
-                            <option value="">Chọn sản phẩm</option>
-                            <option value="CRM Premium">CRM Premium</option>
-                            <option value="CRM Enterprise">CRM Enterprise</option>
-                            <option value="Marketing Automation">Marketing Automation</option>
-                            <option value="Sales Analytics">Sales Analytics</option>
-                            <option value="Custom Solution">Custom Solution</option>
-                          </select>
-                        ) : (
-                          <p className="text-sm text-gray-900">{selectedLead.product}</p>
-                        )}
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.product}</p>
                         <p className="text-xs text-gray-500">Sản phẩm quan tâm</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-3">
                       <Users className="w-4 h-4 text-purple-500" />
-                      <div className="flex-1">
-                        {isEditMode ? (
-                          <select
-                            value={editedLead?.assignedTo || ''}
-                            onChange={(e) => setEditedLead(prev => prev ? {...prev, assignedTo: e.target.value} : null)}
-                            className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                          >
-                            <option value="">Chưa phân công</option>
-                            {salesTeam.map(member => (
-                              <option key={member.id} value={member.name}>{member.name}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-gray-900">{selectedLead.assignedTo || 'Chưa phân công'}</p>
-                        )}
+                      <div>
+                        <p className="text-sm text-gray-900">{selectedLead.assignedTo || 'Chưa phân công'}</p>
                         <p className="text-xs text-gray-500">Người phụ trách</p>
                       </div>
                     </div>
@@ -4435,97 +4463,27 @@ export default function SalesManagement() {
 
                 {/* Thông tin khác */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags, Nguồn & Khu vực</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags & Nguồn</h4>
                   <div className="space-y-3">
                     <div>
-                      <p className="text-xs text-gray-500 mb-2">Tags</p>
-                      {isEditMode ? (
-                        <div className="space-y-2">
-                          <div className="flex flex-wrap gap-2">
-                            {['hot', 'warm', 'cold', 'enterprise', 'potential', 'follow-up'].map((tag) => (
-                              <label key={tag} className="flex items-center space-x-1 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={editedLead?.tags?.includes(tag) || false}
-                                  onChange={(e) => {
-                                    if (!editedLead) return;
-                                    const currentTags = editedLead.tags || [];
-                                    const newTags = e.target.checked 
-                                      ? [...currentTags, tag]
-                                      : currentTags.filter(t => t !== tag);
-                                    setEditedLead({...editedLead, tags: newTags});
-                                  }}
-                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                                  tag === 'hot' ? 'bg-red-100 text-red-800' :
-                                  tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
-                                  tag === 'cold' ? 'bg-blue-100 text-blue-800' :
-                                  tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                                  'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {tag}
-                                </span>
-                              </label>
-                            ))}
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap gap-1">
-                          {selectedLead.tags.map((tag, index) => (
-                            <span key={index} className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              tag === 'hot' ? 'bg-red-100 text-red-800' :
-                              tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
-                              tag === 'cold' ? 'bg-blue-100 text-blue-800' :
-                              tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+                      <p className="text-xs text-gray-500 mb-1">Tags</p>
+                      <div className="flex flex-wrap gap-1">
+                        {selectedLead.tags.map((tag, index) => (
+                          <span key={index} className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            tag === 'hot' ? 'bg-red-100 text-red-800' :
+                            tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
+                            tag === 'cold' ? 'bg-blue-100 text-blue-800' :
+                            tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
+                            'bg-gray-100 text-gray-800'
+                          }`}>
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Nguồn</p>
-                      {isEditMode ? (
-                        <select
-                          value={editedLead?.source || ''}
-                          onChange={(e) => setEditedLead(prev => prev ? {...prev, source: e.target.value} : null)}
-                          className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                        >
-                          <option value="">Chọn nguồn</option>
-                          <option value="Website">Website</option>
-                          <option value="Facebook">Facebook</option>
-                          <option value="Google Ads">Google Ads</option>
-                          <option value="Referral">Referral</option>
-                          <option value="Cold Call">Cold Call</option>
-                          <option value="Event">Event</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      ) : (
-                        <span className="text-gray-900 font-medium">{selectedLead.source}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Khu vực</p>
-                      {isEditMode ? (
-                        <select
-                          value={editedLead?.region || ''}
-                          onChange={(e) => setEditedLead(prev => prev ? {...prev, region: e.target.value} : null)}
-                          className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                        >
-                          <option value="">Chọn khu vực</option>
-                          <option value="Hà Nội">Hà Nội</option>
-                          <option value="TP.HCM">TP.HCM</option>
-                          <option value="Đà Nẵng">Đà Nẵng</option>
-                          <option value="Hải Phòng">Hải Phòng</option>
-                          <option value="Cần Thơ">Cần Thơ</option>
-                          <option value="Khác">Khác</option>
-                        </select>
-                      ) : (
-                        <span className="text-gray-900 font-medium">{selectedLead.region}</span>
-                      )}
+                      <p className="text-xs text-gray-500">Nguồn: <span className="text-gray-900 font-medium">{selectedLead.source}</span></p>
+                      <p className="text-xs text-gray-500">Khu vực: <span className="text-gray-900 font-medium">{selectedLead.region}</span></p>
                     </div>
                   </div>
                 </div>
@@ -4545,27 +4503,27 @@ export default function SalesManagement() {
                 )}
               </div>
 
-              {/* Interaction History */}
+              {/* Quick Notes */}
               <div className="mt-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2 flex-1">Lịch sử tương tác</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2 flex-1">Ghi chú nhanh</h4>
                   <button
                     onClick={() => setIsAddingQuickNote(true)}
                     className="ml-4 px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-1"
                   >
                     <MessageSquarePlus className="w-3 h-3" />
-                    Thêm tương tác
+                    Thêm ghi chú
                   </button>
                 </div>
 
                 {isAddingQuickNote && (
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                  <div className="bg-yellow-50 rounded-lg p-4 border border-yellow-200">
                     <div className="flex items-start gap-3">
                       <textarea
                         value={quickNote}
                         onChange={(e) => setQuickNote(e.target.value)}
-                        placeholder="Ghi lại nội dung tương tác với khách hàng (cuộc gọi, email, meeting...)..."
-                        className="flex-1 px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                        placeholder="Nhập ghi chú nhanh về cuộc liên hệ, tình trạng khách hàng..."
+                        className="flex-1 px-3 py-2 border border-yellow-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent resize-none"
                         rows={3}
                         autoFocus
                       />
@@ -4615,10 +4573,21 @@ export default function SalesManagement() {
                 ) : (
                   <div className="bg-gray-50 rounded-lg p-4 text-center">
                     <MessageSquarePlus className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Chưa có lịch sử tương tác nào</p>
-                    <p className="text-xs text-gray-400 mt-1">Nhấn "Thêm tương tác" để ghi lại cuộc liên hệ với khách hàng</p>
+                    <p className="text-sm text-gray-500">Chưa có ghi chú nhanh nào</p>
+                    <p className="text-xs text-gray-400 mt-1">Nhấn "Thêm ghi chú" để bắt đầu theo dõi cuộc liên hệ</p>
                   </div>
                 )}
+              </div>
+
+              {/* Next Action */}
+              <div className="mt-6 space-y-4">
+                <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Hành động tiếp theo</h4>
+                <div className="bg-green-50 rounded-lg p-4">
+                  <p className="text-sm text-green-900 font-medium">{selectedLead.nextAction}</p>
+                  <p className="text-xs text-green-700 mt-1">
+                    Dự kiến: {new Date(selectedLead.nextActionDate).toLocaleString('vi-VN')}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -4644,222 +4613,6 @@ export default function SalesManagement() {
               >
                 <User className="w-4 h-4" />
                 Chuyển đổi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Import Excel Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Import Leads từ Excel</h3>
-                <button
-                  onClick={() => {
-                    setShowImportModal(false)
-                    setImportFile(null)
-                    setImportError(null)
-                    setImportSuccess(null)
-                    setImportProgress(0)
-                    setImportAutoAssign(false)
-                    setImportPreviewData([])
-                    setShowImportPreview(false)
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-            
-            <div className="px-6 py-4 space-y-4">
-              {/* Download Template */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <Download className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-blue-900 mb-1">Tải template Excel</h4>
-                    <p className="text-sm text-blue-700 mb-3">
-                      Tải file mẫu để đảm bảo định dạng đúng cho việc import leads
-                    </p>
-                    <button
-                      onClick={downloadTemplate}
-                      className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition-colors"
-                    >
-                      Tải template
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* File Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chọn file Excel (.xlsx, .xls, .csv)
-                </label>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-                />
-                {importFile && (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Đã chọn: {importFile.name}
-                    </p>
-                    {importPreviewData.length > 0 && (
-                      <button
-                        onClick={() => setShowImportPreview(!showImportPreview)}
-                        className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition-colors flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        {showImportPreview ? 'Ẩn dữ liệu' : 'Xem dữ liệu'}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Data Preview */}
-              {showImportPreview && importPreviewData.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-                  <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    Preview dữ liệu ({importPreviewData.length} dòng đầu)
-                  </h5>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          {Object.keys(importPreviewData[0] || {}).map(header => (
-                            <th key={header} className="px-2 py-1 text-left font-medium text-gray-700 border">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {importPreviewData.map((row, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            {Object.values(row).map((value: any, cellIndex) => (
-                              <td key={cellIndex} className="px-2 py-1 border text-gray-600">
-                                {value || '-'}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="mt-3 text-xs text-gray-600">
-                    💡 <strong>Lưu ý:</strong> Đảm bảo các cột trong file Excel khớp với template để import thành công.
-                  </div>
-                </div>
-              )}
-
-              {/* Auto Assignment Option */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="importAutoAssign"
-                    checked={importAutoAssign}
-                    onChange={(e) => setImportAutoAssign(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="importAutoAssign" className="font-medium text-purple-900 cursor-pointer">
-                      Phân công tự động sau khi import
-                    </label>
-                    <p className="text-sm text-purple-700 mt-1">
-                      Leads sẽ được phân công tự động cho sales team theo chiến lược đã chọn ({autoAssignStrategy === 'round_robin' ? 'Luân phiên' : 
-                      autoAssignStrategy === 'workload_based' ? 'Theo khối lượng công việc' :
-                      autoAssignStrategy === 'territory_based' ? 'Theo vùng địa lý' :
-                      autoAssignStrategy === 'source_based' ? 'Theo nguồn lead' :
-                      autoAssignStrategy === 'shift_based' ? 'Theo ca làm việc' : 'Luân phiên'})
-                    </p>
-                    <p className="text-sm text-orange-600 mt-2 bg-orange-50 px-2 py-1 rounded">
-                      💡 <strong>Lưu ý:</strong> Nếu không chọn, tất cả leads sẽ được phân công mặc định cho người thực hiện import
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {importProgress > 0 && (
-                <div>
-                  <div className="flex justify-between text-sm text-gray-600 mb-1">
-                    <span>Đang import...</span>
-                    <span>{importProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${importProgress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Error Message */}
-              {importError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-red-700">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm">{importError}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Success Message */}
-              {importSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <div className="flex items-center gap-2 text-green-700">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm">{importSuccess}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Instructions */}
-              <div className="bg-gray-50 rounded-lg p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Hướng dẫn import:</h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• File phải có các cột: Tên, Số điện thoại, Email, Công ty</li>
-                  <li>• Định dạng file hỗ trợ: .xlsx, .xls, .csv</li>
-                  <li>• Dòng đầu tiên là tiêu đề cột</li>
-                  <li>• Email phải có định dạng hợp lệ</li>
-                  <li>• Số điện thoại phải từ 8-15 ký tự</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowImportModal(false)
-                  setImportFile(null)
-                  setImportError(null)
-                  setImportSuccess(null)
-                  setImportProgress(0)
-                  setImportAutoAssign(false)
-                  setImportPreviewData([])
-                  setShowImportPreview(false)
-                }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleImportExcel}
-                disabled={!importFile || importProgress > 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {importProgress > 0 ? 'Đang import...' : 'Import'}
               </button>
             </div>
           </div>
@@ -5074,7 +4827,7 @@ export default function SalesManagement() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">Chuyển vào chuyển đổi - chờ thanh toán</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Xác nhận chuyển đổi</h3>
             </div>
             
             <div className="p-6">
@@ -5089,64 +4842,38 @@ export default function SalesManagement() {
                 </div>
               </div>
 
-              {/* Product Selection - Multiple Choice */}
+              {/* Product Selection */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chọn sản phẩm khách hàng quan tâm <span className="text-red-500">*</span>
-                  <span className="text-xs text-gray-500 ml-1">(Có thể chọn nhiều)</span>
+                  Sản phẩm khách hàng mua <span className="text-red-500">*</span>
                 </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                  {[
-                    'CRM Solution',
-                    'Marketing Automation', 
-                    'Sales Management',
-                    'Customer Service',
-                    'Analytics Dashboard',
-                    'E-commerce Platform',
-                    'Inventory Management',
-                    'HR Management',
-                    'Financial Management',
-                    'Project Management',
-                    'Supply Chain',
-                    'Customer Analytics',
-                    'Quality Management',
-                    'Education Platform',
-                    'Security System',
-                    'Mobile App Development',
-                    'Cloud Infrastructure',
-                    'IoT Solutions'
-                  ].map((product) => (
-                    <label key={product} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product])
-                          } else {
-                            setSelectedProducts(prev => prev.filter(p => p !== product))
-                          }
-                        }}
-                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                      />
-                      <span className="text-sm text-gray-700">{product}</span>
-                    </label>
-                  ))}
-                </div>
-                {selectedProducts.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600 mb-1">Đã chọn {selectedProducts.length} sản phẩm:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedProducts.map(product => (
-                        <span key={product} className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                          {product}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {selectedProducts.length === 0 && (
-                  <p className="mt-1 text-xs text-red-500">Vui lòng chọn ít nhất một sản phẩm trước khi chuyển đổi</p>
+                <select
+                  value={selectedProduct}
+                  onChange={(e) => setSelectedProduct(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                >
+                  <option value="">-- Chọn sản phẩm --</option>
+                  <option value="CRM Solution">CRM Solution</option>
+                  <option value="Marketing Automation">Marketing Automation</option>
+                  <option value="Sales Management">Sales Management</option>
+                  <option value="Customer Service">Customer Service</option>
+                  <option value="Analytics Dashboard">Analytics Dashboard</option>
+                  <option value="E-commerce Platform">E-commerce Platform</option>
+                  <option value="Inventory Management">Inventory Management</option>
+                  <option value="HR Management">HR Management</option>
+                  <option value="Financial Management">Financial Management</option>
+                  <option value="Project Management">Project Management</option>
+                  <option value="Supply Chain">Supply Chain</option>
+                  <option value="Customer Analytics">Customer Analytics</option>
+                  <option value="Quality Management">Quality Management</option>
+                  <option value="Education Platform">Education Platform</option>
+                  <option value="Security System">Security System</option>
+                  <option value="Mobile App Development">Mobile App Development</option>
+                  <option value="Cloud Infrastructure">Cloud Infrastructure</option>
+                  <option value="IoT Solutions">IoT Solutions</option>
+                </select>
+                {!selectedProduct && (
+                  <p className="mt-1 text-xs text-red-500">Vui lòng chọn sản phẩm trước khi chuyển đổi</p>
                 )}
               </div>
               
@@ -5161,7 +4888,7 @@ export default function SalesManagement() {
               </div>
               
               <p className="text-sm text-gray-600">
-                Khách hàng đã đồng ý mua sản phẩm. Lead sẽ chuyển vào "Chuyển đổi - chờ thanh toán" để theo dõi việc thanh toán.
+                Bạn có chắc chắn muốn chuyển lead này thành khách hàng không?
               </p>
             </div>
             
@@ -5169,8 +4896,7 @@ export default function SalesManagement() {
               <button
                 onClick={() => {
                   setShowConvertModal(false)
-                  setSelectedProduct('') // Reset single product when closing modal
-                  setSelectedProducts([]) // Reset multiple products when closing modal
+                  setSelectedProduct('') // Reset product when closing modal
                 }}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
@@ -5178,152 +4904,15 @@ export default function SalesManagement() {
               </button>
               <button
                 onClick={confirmConvertLead}
-                disabled={selectedProducts.length === 0}
+                disabled={!selectedProduct}
                 className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${
-                  selectedProducts.length > 0
+                  selectedProduct
                     ? 'text-white bg-green-600 hover:bg-green-700'
                     : 'text-gray-400 bg-gray-300 cursor-not-allowed'
                 }`}
               >
                 <CheckCircle className="w-4 h-4" />
-                {selectedProducts.length > 0 ? `Chuyển vào chuyển đổi - chờ thanh toán (${selectedProducts.length} sản phẩm)` : 'Chọn sản phẩm để tiếp tục'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Drag Convert Modal */}
-      {showDragConvertModal && pendingDragLead && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900">
-                Chuyển sang "{getStatusName(dragTargetStatus)}"
-              </h3>
-              {originalTargetStatus === 'converted' && dragTargetStatus === 'payment_pending' && (
-                <p className="text-sm text-amber-600 mt-1">
-                  ℹ️ Bạn đã kéo vào "Chuyển đổi thành công", nhưng lead sẽ được chuyển về "Chờ thanh toán" để xác nhận thanh toán trước.
-                </p>
-              )}
-            </div>
-            
-            <div className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                  <User className="w-6 h-6 text-blue-600" />
-                </div>
-                <div>
-                  <h4 className="font-medium text-gray-900">{pendingDragLead.name}</h4>
-                  <p className="text-sm text-gray-500">{pendingDragLead.company || 'Cá nhân'}</p>
-                </div>
-              </div>
-
-              {/* Product Selection - Multiple Choice */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  {dragTargetStatus === 'converted' ? 
-                    'Chọn sản phẩm đã bán' : 
-                    'Chọn sản phẩm chuyển đổi'
-                  } <span className="text-red-500">*</span>
-                  <span className="text-xs text-gray-500 ml-1">(Có thể chọn nhiều)</span>
-                </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                  {[
-                    'CRM Solution',
-                    'Marketing Automation', 
-                    'Sales Management',
-                    'Customer Service',
-                    'Analytics Dashboard',
-                    'E-commerce Platform',
-                    'Inventory Management',
-                    'HR Management',
-                    'Financial Management',
-                    'Project Management',
-                    'Supply Chain',
-                    'Customer Analytics',
-                    'Quality Management',
-                    'Education Platform',
-                    'Security System',
-                    'Mobile App Development',
-                    'Cloud Infrastructure',
-                    'IoT Solutions'
-                  ].map((product) => (
-                    <label key={product} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product])
-                          } else {
-                            setSelectedProducts(prev => prev.filter(p => p !== product))
-                          }
-                        }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{product}</span>
-                    </label>
-                  ))}
-                </div>
-                {selectedProducts.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600 mb-1">Đã chọn {selectedProducts.length} sản phẩm:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedProducts.map(product => (
-                        <span key={product} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                          {product}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {selectedProducts.length === 0 && (
-                  <p className="mt-1 text-xs text-red-500">Vui lòng chọn ít nhất một sản phẩm</p>
-                )}
-              </div>
-              
-              <p className="text-sm text-gray-600">
-                {dragTargetStatus === 'converted' ? 
-                  `Xác nhận lead đã thanh toán thành công và hoàn tất giao dịch với các sản phẩm đã chọn.` :
-                  dragTargetStatus === 'payment_pending' ? 
-                  `Lead sẽ được chuyển sang trạng thái "${getStatusName(dragTargetStatus)}" với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển sang "Chuyển đổi thành công".` :
-                  `Lead sẽ được chuyển sang trạng thái "${getStatusName(dragTargetStatus)}" với các sản phẩm đã chọn.`
-                }
-              </p>
-            </div>
-            
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
-              <button
-                onClick={() => {
-                  setShowDragConvertModal(false)
-                  setPendingDragLead(null)
-                  setDragTargetStatus('')
-                  setOriginalTargetStatus('')
-                  setSelectedProducts([])
-                }}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={confirmDragConvert}
-                disabled={selectedProducts.length === 0}
-                className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${
-                  selectedProducts.length > 0
-                    ? dragTargetStatus === 'converted' 
-                      ? 'text-white bg-green-600 hover:bg-green-700'
-                      : 'text-white bg-blue-600 hover:bg-blue-700'
-                    : 'text-gray-400 bg-gray-300 cursor-not-allowed'
-                }`}
-              >
-                <CheckCircle className="w-4 h-4" />
-                {selectedProducts.length > 0 ? 
-                  dragTargetStatus === 'converted' 
-                    ? `Xác nhận hoàn tất (${selectedProducts.length} sản phẩm)` 
-                    : `Xác nhận chuyển (${selectedProducts.length} sản phẩm)`
-                  : 'Chọn sản phẩm để tiếp tục'
-                }
+                {selectedProduct ? 'Xác nhận chuyển đổi' : 'Chọn sản phẩm để tiếp tục'}
               </button>
             </div>
           </div>
