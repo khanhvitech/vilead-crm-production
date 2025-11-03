@@ -9,7 +9,7 @@ import {
   Bell, RefreshCw, Zap, BarChart3, PieChart, CheckCircle, XCircle,
   FileText, History, Send, Settings, Download, Crown, Award, UserPlus,
   Info, ArrowUpRight, ArrowDownRight, X, MessageSquare, Columns,
-  Brain, BarChart, Package, Edit
+  Brain, BarChart, Package, Edit, ShoppingCart, StickyNote, Save
 } from 'lucide-react'
 import CustomerEventsManager from './CustomerEventsManager'
 import CustomerAnalytics from './CustomerAnalytics'
@@ -180,7 +180,71 @@ interface Customer {
 export default function CustomersManagement() {
   const [selectedView, setSelectedView] = useState<'list' | 'analytics' | 'events' | 'insights'>('list')
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [isEditingCustomer, setIsEditingCustomer] = useState(false)
+  const [editCustomerData, setEditCustomerData] = useState<Partial<Customer>>({})
   const [activeTab, setActiveTab] = useState<'details' | 'interactions' | 'orders' | 'notes'>('details')
+  const [showAddInteractionModal, setShowAddInteractionModal] = useState(false)
+  const [newInteractionData, setNewInteractionData] = useState({
+    type: 'call',
+    channel: '',
+    title: '',
+    summary: '',
+    status: 'success'
+  })
+  const [showCreateOrderModal, setShowCreateOrderModal] = useState(false)
+  const [selectedCustomerForOrder, setSelectedCustomerForOrder] = useState<Customer | null>(null)
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
+  const [newOrderData, setNewOrderData] = useState({
+    notes: ''
+  })
+
+  // Available products and packages list
+  const availableProducts = [
+    // Main Products
+    { id: 'crm-basic', name: 'CRM Basic', category: 'Sản phẩm', price: 500000, description: 'Hệ thống CRM cơ bản cho doanh nghiệp nhỏ' },
+    { id: 'crm-professional', name: 'CRM Professional', category: 'Sản phẩm', price: 1200000, description: 'Hệ thống CRM chuyên nghiệp với nhiều tính năng nâng cao' },
+    { id: 'crm-enterprise', name: 'CRM Enterprise', category: 'Sản phẩm', price: 2500000, description: 'Hệ thống CRM doanh nghiệp với đầy đủ tính năng' },
+    { id: 'ai-analytics', name: 'AI Analytics Module', category: 'Sản phẩm', price: 800000, description: 'Module phân tích dữ liệu với AI' },
+    { id: 'marketing-automation', name: 'Marketing Automation', category: 'Sản phẩm', price: 600000, description: 'Tự động hóa marketing và email campaigns' },
+    { id: 'sales-dashboard', name: 'Sales Dashboard Pro', category: 'Sản phẩm', price: 400000, description: 'Dashboard bán hàng chuyên nghiệp' },
+    { id: 'mobile-app', name: 'Mobile App License', category: 'Sản phẩm', price: 300000, description: 'Giấy phép sử dụng ứng dụng di động' }
+  ]
+
+  // Available packages for each product
+  const availablePackages = {
+    'crm-basic': [
+      { id: 'basic-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'basic-plus', name: 'Gói Plus', price: 200000, description: 'Thêm training cơ bản + support 3 tháng' },
+      { id: 'basic-premium', name: 'Gói Premium', price: 500000, description: 'Thêm training + support 6 tháng + customization' }
+    ],
+    'crm-professional': [
+      { id: 'pro-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'pro-plus', name: 'Gói Plus', price: 400000, description: 'Thêm AI Analytics + training nâng cao' },
+      { id: 'pro-premium', name: 'Gói Premium', price: 800000, description: 'Thêm full modules + premium support 1 năm' }
+    ],
+    'crm-enterprise': [
+      { id: 'ent-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'ent-plus', name: 'Gói Plus', price: 1000000, description: 'Thêm full training + migration service' },
+      { id: 'ent-premium', name: 'Gói Premium', price: 2000000, description: 'Thêm custom development + premium support 2 năm' }
+    ],
+    'ai-analytics': [
+      { id: 'ai-standard', name: 'Gói Standard', price: 0, description: 'Module cơ bản' },
+      { id: 'ai-advanced', name: 'Gói Advanced', price: 300000, description: 'Thêm custom reports + training' }
+    ],
+    'marketing-automation': [
+      { id: 'marketing-standard', name: 'Gói Standard', price: 0, description: 'Module cơ bản' },
+      { id: 'marketing-pro', name: 'Gói Pro', price: 250000, description: 'Thêm email templates + analytics' }
+    ],
+    'sales-dashboard': [
+      { id: 'dashboard-standard', name: 'Gói Standard', price: 0, description: 'Dashboard cơ bản' },
+      { id: 'dashboard-pro', name: 'Gói Pro', price: 200000, description: 'Thêm custom widgets + real-time data' }
+    ],
+    'mobile-app': [
+      { id: 'mobile-standard', name: 'Gói Standard', price: 0, description: 'License cơ bản' },
+      { id: 'mobile-unlimited', name: 'Gói Unlimited', price: 150000, description: 'Unlimited users + premium features' }
+    ]
+  }
   const [showFilters, setShowFilters] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -220,6 +284,44 @@ export default function CustomersManagement() {
   const [showRemarketingModal, setShowRemarketingModal] = useState(false)
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false)
   const [showRankingDefinitionModal, setShowRankingDefinitionModal] = useState(false)
+  const [isEditingRanking, setIsEditingRanking] = useState(false)
+  const [rankingSettings, setRankingSettings] = useState({
+    diamond: {
+      totalSpent: 10000000,
+      orderCount: 20,
+      timeAsCustomer: 24, // months
+      discount: '20-30%',
+      benefits: ['Ưu đãi độc quyền 20-30%', 'Account Manager riêng', 'Hỗ trợ 24/7 ưu tiên cao', 'Trải nghiệm cá nhân hóa', 'Mời sự kiện VIP']
+    },
+    gold: {
+      totalSpent: 5000000,
+      orderCount: 10,
+      timeAsCustomer: 12,
+      discount: '15-20%',
+      benefits: ['Ưu đãi đặc biệt 15-20%', 'Hỗ trợ ưu tiên', 'Trải nghiệm nâng cao', 'Tư vấn chuyên sâu', 'Quà tặng định kỳ']
+    },
+    silver: {
+      totalSpent: 2000000,
+      orderCount: 5,
+      timeAsCustomer: 6,
+      discount: '10-15%',
+      benefits: ['Ưu đãi thành viên 10-15%', 'Hỗ trợ nhanh chóng', 'Tích điểm thưởng', 'Newsletter độc quyền', 'Chương trình loyalty']
+    },
+    bronze: {
+      totalSpent: 500000,
+      orderCount: 2,
+      timeAsCustomer: 3,
+      discount: '5-10%',
+      benefits: ['Ưu đãi cơ bản 5-10%', 'Hỗ trợ tiêu chuẩn', 'Tích điểm cơ bản', 'Thông tin sản phẩm mới', 'Chăm sóc khách hàng']
+    },
+    new: {
+      totalSpent: 0,
+      orderCount: 0,
+      timeAsCustomer: 0,
+      discount: '0-5%',
+      benefits: ['Ưu đãi chào mừng', 'Hướng dẫn sử dụng', 'Hỗ trợ onboarding', 'Tài liệu tham khảo', 'Chăm sóc khách hàng mới']
+    }
+  })
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
   const [showQuickTaskModal, setShowQuickTaskModal] = useState(false)
@@ -308,7 +410,8 @@ export default function CustomersManagement() {
     setShowQuickTaskModal(false)
   }
 
-  const handleBulkEmail = () => {
+  // Ẩn chức năng gửi email hàng loạt theo yêu cầu
+  /* const handleBulkEmail = () => {
     const selectedCustomers = customers.filter(customer => 
       selectedCustomerIds.includes(customer.id.toString())
     )
@@ -319,7 +422,7 @@ export default function CustomersManagement() {
     // Reset selection after action
     setSelectedCustomerIds([])
     setSelectAll(false)
-  }
+  } */
   
   const [newCustomerData, setNewCustomerData] = useState({
     firstName: '',
@@ -330,7 +433,7 @@ export default function CustomersManagement() {
     position: '',
     industry: '',
     companySize: 'small',
-    customerType: 'bronze',
+    customerType: 'individual', // Changed from 'bronze' to 'individual'
     status: 'active',
     preferredChannel: 'email',
     address: '',
@@ -338,9 +441,159 @@ export default function CustomersManagement() {
     state: '',
     postalCode: '',
     notes: '',
+    source: 'website', // Added source field
     marketingConsent: false,
-    smsConsent: false
+    smsConsent: false,
+    // Required product fields - now supporting multiple products
+    selectedProducts: [] as Array<{
+      productId: string,
+      productName: string,
+      packageId: string,
+      packageName: string,
+      price: number,
+      features: string[]
+    }>,
+    totalAmount: 0
   })
+
+  // Temporary state for adding new product
+  const [tempProduct, setTempProduct] = useState({
+    selectedProduct: '',
+    selectedPackage: ''
+  })
+
+  // Helper functions for product management
+  const addProductToCustomer = () => {
+    if (!tempProduct.selectedProduct || !tempProduct.selectedPackage) {
+      alert('Vui lòng chọn sản phẩm và gói dịch vụ')
+      return
+    }
+
+    const productData = products.find(p => p.id === tempProduct.selectedProduct)
+    const packageData = packages[tempProduct.selectedProduct as keyof typeof packages]?.find(pkg => pkg.id === tempProduct.selectedPackage)
+    
+    if (!productData || !packageData) return
+
+    // Check if product already exists
+    const existingProduct = newCustomerData.selectedProducts.find(p => p.productId === tempProduct.selectedProduct && p.packageId === tempProduct.selectedPackage)
+    if (existingProduct) {
+      alert('Sản phẩm và gói này đã được thêm')
+      return
+    }
+
+    const newProduct = {
+      productId: tempProduct.selectedProduct,
+      productName: productData.name,
+      packageId: tempProduct.selectedPackage,
+      packageName: packageData.name,
+      price: packageData.price,
+      features: packageData.features
+    }
+
+    const updatedProducts = [...newCustomerData.selectedProducts, newProduct]
+    const newTotal = updatedProducts.reduce((sum, product) => sum + product.price, 0)
+
+    setNewCustomerData(prev => ({
+      ...prev,
+      selectedProducts: updatedProducts,
+      totalAmount: newTotal
+    }))
+
+    // Reset temp product
+    setTempProduct({
+      selectedProduct: '',
+      selectedPackage: ''
+    })
+  }
+
+  const removeProductFromCustomer = (productId: string, packageId: string) => {
+    const updatedProducts = newCustomerData.selectedProducts.filter(p => !(p.productId === productId && p.packageId === packageId))
+    const newTotal = updatedProducts.reduce((sum, product) => sum + product.price, 0)
+
+    setNewCustomerData(prev => ({
+      ...prev,
+      selectedProducts: updatedProducts,
+      totalAmount: newTotal
+    }))
+  }
+
+  // Helper functions for ranking settings
+  const handleSaveRankingSettings = () => {
+    // Here you would normally save to backend
+    console.log('Saving ranking settings:', rankingSettings)
+    alert('Cài đặt phân hạng đã được lưu thành công!')
+    setIsEditingRanking(false)
+  }
+
+  const handleCancelEditRanking = () => {
+    // Reset to original values if needed
+    setIsEditingRanking(false)
+  }
+
+  const updateRankingSetting = (tier: string, field: string, value: any) => {
+    setRankingSettings(prev => ({
+      ...prev,
+      [tier]: {
+        ...prev[tier as keyof typeof prev],
+        [field]: value
+      }
+    }))
+  }
+
+  const addBenefit = (tier: string) => {
+    const newBenefit = prompt('Nhập quyền lợi mới:')
+    if (newBenefit && newBenefit.trim()) {
+      setRankingSettings(prev => ({
+        ...prev,
+        [tier]: {
+          ...prev[tier as keyof typeof prev],
+          benefits: [...prev[tier as keyof typeof prev].benefits, newBenefit.trim()]
+        }
+      }))
+    }
+  }
+
+  const removeBenefit = (tier: string, benefitIndex: number) => {
+    setRankingSettings(prev => ({
+      ...prev,
+      [tier]: {
+        ...prev[tier as keyof typeof prev],
+        benefits: prev[tier as keyof typeof prev].benefits.filter((_, index) => index !== benefitIndex)
+      }
+    }))
+  }
+  
+  // Product and package data
+  const products = [
+    { id: 'crm', name: 'CRM System', description: 'Hệ thống quản lý khách hàng' },
+    { id: 'marketing', name: 'Marketing Automation', description: 'Tự động hóa marketing' },
+    { id: 'sales', name: 'Sales Management', description: 'Quản lý bán hàng' },
+    { id: 'support', name: 'Customer Support', description: 'Hỗ trợ khách hàng' }
+  ]
+
+  const packages = {
+    crm: [
+      { id: 'basic', name: 'Gói Cơ Bản', price: 500000, features: ['Quản lý 100 khách hàng', 'Báo cáo cơ bản'] },
+      { id: 'pro', name: 'Gói Chuyên Nghiệp', price: 1000000, features: ['Quản lý 500 khách hàng', 'Báo cáo nâng cao', 'Tích hợp API'] },
+      { id: 'enterprise', name: 'Gói Doanh Nghiệp', price: 2000000, features: ['Quản lý không giới hạn', 'Báo cáo tùy chỉnh', 'Hỗ trợ 24/7'] }
+    ],
+    marketing: [
+      { id: 'starter', name: 'Gói Khởi Đầu', price: 300000, features: ['Email marketing', '1000 contacts'] },
+      { id: 'growth', name: 'Gói Phát Triển', price: 800000, features: ['Email + SMS', '5000 contacts', 'A/B testing'] },
+      { id: 'scale', name: 'Gói Mở Rộng', price: 1500000, features: ['Omnichannel', 'Unlimited contacts', 'Advanced automation'] }
+    ],
+    sales: [
+      { id: 'essential', name: 'Gói Thiết Yếu', price: 400000, features: ['Pipeline management', '3 users'] },
+      { id: 'professional', name: 'Gói Chuyên Nghiệp', price: 900000, features: ['Advanced pipeline', '10 users', 'Forecasting'] },
+      { id: 'ultimate', name: 'Gói Tối Ưu', price: 1800000, features: ['Complete sales suite', 'Unlimited users', 'AI insights'] }
+    ],
+    support: [
+      { id: 'basic', name: 'Gói Cơ Bản', price: 200000, features: ['Ticket system', '2 agents'] },
+      { id: 'standard', name: 'Gói Tiêu Chuẩn', price: 600000, features: ['Multi-channel support', '5 agents', 'Knowledge base'] },
+      { id: 'premium', name: 'Gói Cao Cấp', price: 1200000, features: ['Complete support suite', '15 agents', 'Live chat', 'Phone support'] }
+    ]
+  }
+
   // Sample customer data
   const [customers] = useState<Customer[]>([
     {
@@ -922,7 +1175,10 @@ export default function CustomersManagement() {
       contact: '0945678901',
       email: 'dangvanminh@gmail.com',
       company: '', // Cá nhân - không có công ty
-      companySize: 'individual',
+      industry: 'Technology',
+      position: 'Freelancer',
+      department: '',
+      companySize: 'small',
       status: 'active',
       customerType: 'bronze',
       tags: [
@@ -992,7 +1248,7 @@ export default function CustomersManagement() {
           title: 'Hỏi về gói thiết kế web',
           summary: 'Quan tâm đến tools thiết kế website responsive',
           date: '2024-01-12',
-          status: 'completed'
+          status: 'success'
         }
       ],
       products: [
@@ -1021,7 +1277,10 @@ export default function CustomersManagement() {
       contact: '0987654321',
       email: 'lythihuong88@hotmail.com',
       company: '', // Cá nhân - không có công ty
-      companySize: 'individual',
+      industry: 'Education',
+      position: 'Teacher',
+      department: '',
+      companySize: 'small',
       status: 'active',
       customerType: 'silver',
       tags: [
@@ -1085,12 +1344,12 @@ export default function CustomersManagement() {
       interactions: [
         {
           id: '6',
-          type: 'phone',
+          type: 'call',
           channel: 'Điện thoại',
           title: 'Tư vấn phần mềm học tập',
           summary: 'Hỏi về tính năng mới cho phần mềm toán học lớp 5',
           date: '2024-01-07',
-          status: 'completed'
+          status: 'success'
         }
       ],
       products: [
@@ -2343,6 +2602,143 @@ export default function CustomersManagement() {
 
   const handleCustomerSelect = (customer: Customer) => {
     setSelectedCustomer(customer)
+    setEditCustomerData(customer)
+    setIsEditingCustomer(false)
+    setActiveTab('details')
+  }
+
+  const handleSaveCustomer = () => {
+    if (!editCustomerData.name || !editCustomerData.name.trim()) {
+      alert('Vui lòng điền họ và tên')
+      return
+    }
+
+    // In a real app, this would make an API call to update the customer
+    console.log('Saving customer:', editCustomerData)
+    alert('Đã lưu thông tin khách hàng thành công!')
+    setIsEditingCustomer(false)
+    setSelectedCustomer(editCustomerData as Customer)
+  }
+
+  const handleCloseCustomerDetail = () => {
+    setSelectedCustomer(null)
+    setEditCustomerData({})
+    setIsEditingCustomer(false)
+  }
+
+  const handleAddInteraction = () => {
+    if (!newInteractionData.title.trim() || !newInteractionData.channel.trim()) {
+      alert('Vui lòng điền đầy đủ tiêu đề và kênh tương tác')
+      return
+    }
+
+    const newInteraction: CustomerInteraction = {
+      id: Date.now().toString(),
+      type: newInteractionData.type as any,
+      channel: newInteractionData.channel,
+      title: newInteractionData.title,
+      summary: newInteractionData.summary,
+      date: new Date().toISOString().split('T')[0],
+      status: newInteractionData.status as any
+    }
+
+    // In a real app, this would make an API call to add the interaction
+    console.log('Adding interaction:', newInteraction)
+    
+    // Update selected customer's interactions
+    if (selectedCustomer) {
+      const updatedCustomer = {
+        ...selectedCustomer,
+        interactions: [...(selectedCustomer.interactions || []), newInteraction]
+      }
+      setSelectedCustomer(updatedCustomer)
+    }
+
+    // Reset form and close modal
+    setNewInteractionData({
+      type: 'call',
+      channel: '',
+      title: '',
+      summary: '',
+      status: 'success'
+    })
+    setShowAddInteractionModal(false)
+    alert('Đã thêm tương tác mới thành công!')
+  }
+
+  const handleCreateOrder = (customer: Customer) => {
+    setSelectedCustomerForOrder(customer)
+    setShowCreateOrderModal(true)
+  }
+
+  const handleSubmitOrder = () => {
+    // Validation
+    if (selectedProducts.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm!')
+      return
+    }
+
+    // Calculate total amount including packages
+    const totalAmount = selectedProducts.reduce((sum, productId) => {
+      const product = availableProducts.find(p => p.id === productId)
+      const selectedPackageId = selectedPackages[productId]
+      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+      return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+    }, 0)
+
+    // Create order products with packages
+    const orderProducts = selectedProducts.map(productId => {
+      const product = availableProducts.find(p => p.id === productId)
+      const selectedPackageId = selectedPackages[productId]
+      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+      const totalProductPrice = (product?.price || 0) + (selectedPackage?.price || 0)
+      
+      return {
+        id: Date.now().toString() + '-' + productId,
+        name: `${product?.name || ''} (${selectedPackage?.name || 'Standard'})`,
+        category: product?.category || '',
+        purchaseDate: new Date().toISOString().split('T')[0],
+        quantity: 1,
+        price: totalProductPrice,
+        status: 'active' as const,
+        packageInfo: selectedPackage ? {
+          packageId: selectedPackage.id,
+          packageName: selectedPackage.name,
+          packagePrice: selectedPackage.price,
+          packageDescription: selectedPackage.description
+        } : null
+      }
+    })
+
+    // In a real app, this would make an API call to create the order
+    console.log('Creating order:', {
+      customer: selectedCustomerForOrder,
+      products: orderProducts,
+      orderDetails: newOrderData,
+      totalAmount
+    })
+
+    // Update customer's products if in selected customer detail
+    if (selectedCustomer && selectedCustomer.id === selectedCustomerForOrder?.id) {
+      const updatedCustomer = {
+        ...selectedCustomer,
+        products: [...(selectedCustomer.products || []), ...orderProducts],
+        totalOrders: (selectedCustomer.totalOrders || 0) + 1,
+        totalSpent: (selectedCustomer.totalSpent || 0) + totalAmount,
+        lastPurchaseDate: new Date().toISOString().split('T')[0]
+      }
+      setSelectedCustomer(updatedCustomer)
+    }
+
+    // Reset form and close modal
+    setNewOrderData({
+      notes: ''
+    })
+    setSelectedProducts([])
+    setSelectedPackages({})
+    setSelectedCustomerForOrder(null)
+    setShowCreateOrderModal(false)
+    alert(`Đã tạo đơn hàng cho khách hàng ${selectedCustomerForOrder?.name} thành công!`)
   }
 
   const handleExportData = (format: 'csv' | 'excel') => {
@@ -2358,6 +2754,12 @@ export default function CustomersManagement() {
     // Validate required fields
     if (!newCustomerData.email || !newCustomerData.phone) {
       alert('Vui lòng điền email và số điện thoại')
+      return
+    }
+
+    // Validate product and package selection
+    if (newCustomerData.selectedProducts.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm và gói dịch vụ')
       return
     }
 
@@ -2434,9 +2836,37 @@ export default function CustomersManagement() {
       }
     }
 
-    // Here you would normally add to the customers array
+    // Create order with multiple products for the new customer
+    const orderItems = newCustomerData.selectedProducts.map(product => ({
+      productId: product.productId,
+      productName: product.productName,
+      packageId: product.packageId,
+      packageName: product.packageName,
+      price: product.price,
+      features: product.features
+    }))
+    
+    const newOrder = {
+      id: Math.random().toString(36).substr(2, 9),
+      customerId: newCustomer.id,
+      customerName: newCustomer.name,
+      items: orderItems,
+      totalAmount: newCustomerData.totalAmount,
+      status: 'pending_payment', // Chờ thanh toán
+      createdDate: new Date().toISOString().split('T')[0],
+      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
+      notes: `Đơn hàng tự động tạo khi thêm khách hàng. Bao gồm ${orderItems.length} sản phẩm/gói.`,
+      itemsSummary: orderItems.map(item => `${item.productName} - ${item.packageName}`).join(', ')
+    }
+
+    // Here you would normally add to the customers array and orders array
     // For now, we'll just show a success message
-    alert('Khách hàng mới đã được thêm thành công!')
+    const productsSummary = orderItems.map(item => `• ${item.productName} - ${item.packageName}: ${item.price.toLocaleString('vi-VN')} VND`).join('\n')
+    
+    alert(`Khách hàng mới đã được thêm thành công!\n\nĐơn hàng ${newOrder.id} đã được tạo với trạng thái "Chờ thanh toán"\n\nSản phẩm:\n${productsSummary}\n\nTổng giá trị: ${newCustomerData.totalAmount.toLocaleString('vi-VN')} VND`)
+    
+    console.log('New Customer:', newCustomer)
+    console.log('New Order:', newOrder)
     
     // Reset form and close modal
     setNewCustomerData({
@@ -2448,7 +2878,7 @@ export default function CustomersManagement() {
       position: '',
       industry: '',
       companySize: 'small',
-      customerType: 'bronze',
+      customerType: 'individual',
       status: 'active',
       preferredChannel: 'email',
       address: '',
@@ -2456,8 +2886,11 @@ export default function CustomersManagement() {
       state: '',
       postalCode: '',
       notes: '',
+      source: 'website',
       marketingConsent: false,
-      smsConsent: false
+      smsConsent: false,
+      selectedProducts: [],
+      totalAmount: 0
     })
     setShowAddCustomerModal(false)
   }
@@ -3358,286 +3791,367 @@ export default function CustomersManagement() {
       {/* Add Customer Modal */}
       {showAddCustomerModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-6 border-b">
-              <div className="flex items-center space-x-3">
-                <UserPlus className="w-6 h-6 text-blue-600" />
-                <div>
-                  <h2 className="text-xl font-bold text-gray-900">Thêm khách hàng mới</h2>
-                  <p className="text-gray-600">Nhập thông tin chi tiết khách hàng</p>
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <h3 className="text-lg font-semibold text-gray-900">Thêm khách hàng mới</h3>
                 </div>
+                <button
+                  onClick={() => setShowAddCustomerModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
               </div>
-              <button
-                onClick={() => setShowAddCustomerModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
             </div>
 
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-200px)]">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Basic Information */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 mb-4">🏷️ Thông tin cơ bản</h3>
-                  
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Họ</label>
-                      <input
-                        type="text"
-                        value={newCustomerData.lastName}
-                        onChange={(e) => handleInputChange('lastName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Nguyễn"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tên</label>
-                      <input
-                        type="text"
-                        value={newCustomerData.firstName}
-                        onChange={(e) => handleInputChange('firstName', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Văn An"
-                      />
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+            <div className="p-6 space-y-6">
+              {/* Customer Type Selection */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="text-red-500">*</span>
+                  Loại khách hàng
+                </h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
                     <input
-                      type="email"
-                      required
-                      value={newCustomerData.email}
-                      onChange={(e) => handleInputChange('email', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="email@company.com"
+                      type="radio"
+                      name="customerType"
+                      value="individual"
+                      checked={newCustomerData.customerType === 'individual'}
+                      onChange={(e) => handleInputChange('customerType', e.target.value)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <div className="ml-3">
+                      <div className="text-sm font-medium text-gray-900">👤 Cá nhân</div>
+                      <div className="text-xs text-gray-500">Khách hàng cá nhân</div>
+                    </div>
+                  </label>
+                  
+                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                    <input
+                      type="radio"
+                      name="customerType"
+                      value="business"
+                      checked={newCustomerData.customerType === 'business'}
+                      onChange={(e) => handleInputChange('customerType', e.target.value)}
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                    />
+                    <div className="ml-3">
+                      <div className="text-sm font-medium text-gray-900">🏢 Công ty</div>
+                      <div className="text-xs text-gray-500">Khách hàng doanh nghiệp</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Required Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="text-red-500">*</span>
+                  Thông tin bắt buộc
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Tên khách hàng <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={`${newCustomerData.firstName} ${newCustomerData.lastName}`.trim()}
+                      onChange={(e) => {
+                        const names = e.target.value.split(' ')
+                        const firstName = names.slice(0, -1).join(' ') || ''
+                        const lastName = names[names.length - 1] || ''
+                        handleInputChange('firstName', firstName)
+                        handleInputChange('lastName', lastName)
+                      }}
+                      placeholder="Nhập tên khách hàng..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại *</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Số điện thoại <span className="text-red-500">*</span>
+                    </label>
                     <input
                       type="tel"
-                      required
                       value={newCustomerData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="0901234567"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Công ty</label>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Email <span className="text-red-500">*</span>
+                    </label>
                     <input
-                      type="text"
-                      value={newCustomerData.company}
-                      onChange={(e) => handleInputChange('company', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Tên công ty"
-                    />
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Chức vụ</label>
-                    <input
-                      type="text"
-                      value={newCustomerData.position}
-                      onChange={(e) => handleInputChange('position', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="CEO, Manager, ..."
+                      type="email"
+                      value={newCustomerData.email}
+                      onChange={(e) => handleInputChange('email', e.target.value)}
+                      placeholder="email@domain.com"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 </div>
-                
-                {/* Business Information */}
-                <div className="space-y-4">
-                  <h3 className="font-semibold text-gray-900 mb-4">🏢 Thông tin doanh nghiệp</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ngành nghề</label>
-                    <select 
-                      value={newCustomerData.industry}
-                      onChange={(e) => handleInputChange('industry', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="">Chọn ngành nghề</option>
-                      <option value="Công nghệ">Công nghệ</option>
-                      <option value="Tài chính">Tài chính</option>
-                      <option value="Y tế">Y tế</option>
-                      <option value="Bán lẻ">Bán lẻ</option>
-                      <option value="Sản xuất">Sản xuất</option>
-                      <option value="Giáo dục">Giáo dục</option>
-                      <option value="Bất động sản">Bất động sản</option>
-                      <option value="Khác">Khác</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Quy mô công ty</label>
-                    <select 
-                      value={newCustomerData.companySize}
-                      onChange={(e) => handleInputChange('companySize', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="small">Nhỏ (1-50 nhân viên)</option>
-                      <option value="medium">Trung bình (51-200 nhân viên)</option>
-                      <option value="large">Lớn (201-1000 nhân viên)</option>
-                      <option value="enterprise">Doanh nghiệp (1000+ nhân viên)</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Phân loại khách hàng</label>
-                    <select 
-                      value={newCustomerData.customerType}
-                      onChange={(e) => handleInputChange('customerType', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="bronze">Đồng</option>
-                      <option value="silver">Bạc</option>
-                      <option value="gold">Vàng</option>
-                      <option value="diamond">Kim cương</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Trạng thái</label>
-                    <select 
-                      value={newCustomerData.status}
-                      onChange={(e) => handleInputChange('status', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="active">Hoạt động</option>
-                      <option value="inactive">Không hoạt động</option>
-                      <option value="at-risk">Có rủi ro</option>
-                      <option value="vip">VIP</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Kênh liên lạc ưa thích</label>
-                    <select 
-                      value={newCustomerData.preferredChannel}
-                      onChange={(e) => handleInputChange('preferredChannel', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="email">Email</option>
-                      <option value="phone">Điện thoại</option>
-                      <option value="chat">Chat</option>
-                      <option value="in-person">Trực tiếp</option>
-                      <option value="social">Mạng xã hội</option>
-                    </select>
+              </div>
+
+              {/* Company Information - Only show for business customers */}
+              {newCustomerData.customerType === 'business' && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-blue-500" />
+                    Thông tin công ty
+                  </h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Tên công ty</label>
+                      <input
+                        type="text"
+                        value={newCustomerData.company}
+                        onChange={(e) => handleInputChange('company', e.target.value)}
+                        placeholder="Tên công ty..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
+                      <input
+                        type="text"
+                        value={newCustomerData.position}
+                        onChange={(e) => handleInputChange('position', e.target.value)}
+                        placeholder="CEO, Manager..."
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Ngành nghề</label>
+                      <select 
+                        value={newCustomerData.industry}
+                        onChange={(e) => handleInputChange('industry', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Chọn ngành nghề</option>
+                        <option value="Công nghệ">Công nghệ</option>
+                        <option value="Tài chính">Tài chính</option>
+                        <option value="Y tế">Y tế</option>
+                        <option value="Bán lẻ">Bán lẻ</option>
+                        <option value="Sản xuất">Sản xuất</option>
+                        <option value="Giáo dục">Giáo dục</option>
+                        <option value="Bất động sản">Bất động sản</option>
+                        <option value="Khác">Khác</option>
+                      </select>
+                    </div>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty</label>
+                      <select 
+                        value={newCustomerData.companySize}
+                        onChange={(e) => handleInputChange('companySize', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="small">Nhỏ (1-50 nhân viên)</option>
+                        <option value="medium">Trung bình (51-200 nhân viên)</option>
+                        <option value="large">Lớn (201-1000 nhân viên)</option>
+                        <option value="enterprise">Doanh nghiệp (1000+ nhân viên)</option>
+                      </select>
+                    </div>
                   </div>
                 </div>
+              )}
+
+              {/* Product and Package Selection - Required */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <span className="text-red-500">*</span>
+                  <Package className="w-4 h-4 text-purple-500" />
+                  Chọn sản phẩm và gói dịch vụ
+                </h4>
                 
-                {/* Address Information */}
-                <div className="md:col-span-2 space-y-4">
-                  <h3 className="font-semibold text-gray-900 mb-4">📍 Thông tin địa chỉ</h3>
-                  
+                {/* Add Product Section */}
+                <div className="space-y-4 p-4 bg-gray-50 rounded-lg mb-4">
+                  <h5 className="text-sm font-medium text-gray-700">Thêm sản phẩm mới:</h5>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Sản phẩm</label>
+                      <select
+                        value={tempProduct.selectedProduct}
+                        onChange={(e) => {
+                          setTempProduct(prev => ({
+                            ...prev,
+                            selectedProduct: e.target.value,
+                            selectedPackage: '' // Reset package when product changes
+                          }))
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Chọn sản phẩm...</option>
+                        {products.map(product => (
+                          <option key={product.id} value={product.id}>
+                            {product.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Gói dịch vụ</label>
+                      <select
+                        value={tempProduct.selectedPackage}
+                        onChange={(e) => {
+                          setTempProduct(prev => ({
+                            ...prev,
+                            selectedPackage: e.target.value
+                          }))
+                        }}
+                        disabled={!tempProduct.selectedProduct}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+                      >
+                        <option value="">Chọn gói...</option>
+                        {tempProduct.selectedProduct && packages[tempProduct.selectedProduct as keyof typeof packages]?.map(pkg => (
+                          <option key={pkg.id} value={pkg.id}>
+                            {pkg.name} - {pkg.price.toLocaleString('vi-VN')} VND
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div className="flex items-end">
+                      <button
+                        type="button"
+                        onClick={addProductToCustomer}
+                        disabled={!tempProduct.selectedProduct || !tempProduct.selectedPackage}
+                        className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <Plus className="w-4 h-4 inline mr-1" />
+                        Thêm
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Selected Products List */}
+                {newCustomerData.selectedProducts.length > 0 && (
+                  <div className="space-y-3">
+                    <h5 className="text-sm font-medium text-gray-700">Sản phẩm đã chọn:</h5>
+                    <div className="space-y-2">
+                      {newCustomerData.selectedProducts.map((product, index) => (
+                        <div key={`${product.productId}-${product.packageId}`} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-md">
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <h6 className="text-sm font-medium text-blue-900">
+                                {product.productName} - {product.packageName}
+                              </h6>
+                              <span className="text-sm font-bold text-blue-600">
+                                {product.price.toLocaleString('vi-VN')} VND
+                              </span>
+                            </div>
+                            <div className="text-xs text-blue-700 mt-1">
+                              <strong>Tính năng:</strong> {product.features.join(', ')}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeProductFromCustomer(product.productId, product.packageId)}
+                            className="ml-3 p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded transition-colors"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {/* Total Amount */}
+                    <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-green-900">Tổng giá trị đơn hàng:</span>
+                        <span className="text-lg font-bold text-green-600">
+                          {newCustomerData.totalAmount.toLocaleString('vi-VN')} VND
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {newCustomerData.selectedProducts.length === 0 && (
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+                    <p className="text-sm text-yellow-700">
+                      ⚠️ Vui lòng chọn ít nhất một sản phẩm và gói dịch vụ để tiếp tục
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Optional Information */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Info className="w-4 h-4 text-gray-500" />
+                  Thông tin bổ sung
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
                     <input
                       type="text"
                       value={newCustomerData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="123 Đường ABC, Phường XYZ"
+                      placeholder="Địa chỉ..."
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Thành phố</label>
-                      <input
-                        type="text"
-                        value={newCustomerData.city}
-                        onChange={(e) => handleInputChange('city', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Hà Nội"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Tỉnh/Thành phố</label>
-                      <input
-                        type="text"
-                        value={newCustomerData.state}
-                        onChange={(e) => handleInputChange('state', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="Hà Nội"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">Mã bưu điện</label>
-                      <input
-                        type="text"
-                        value={newCustomerData.postalCode}
-                        onChange={(e) => handleInputChange('postalCode', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        placeholder="100000"
-                      />
-                    </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn khách hàng</label>
+                    <select 
+                      value={newCustomerData.source}
+                      onChange={(e) => handleInputChange('source', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="website">Website</option>
+                      <option value="referral">Giới thiệu</option>
+                      <option value="social_media">Mạng xã hội</option>
+                      <option value="advertising">Quảng cáo</option>
+                      <option value="event">Sự kiện</option>
+                      <option value="other">Khác</option>
+                    </select>
                   </div>
                 </div>
                 
-                {/* Additional Information */}
-                <div className="md:col-span-2 space-y-4">
-                  <h3 className="font-semibold text-gray-900 mb-4">📝 Thông tin bổ sung</h3>
-                  
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                    <textarea
-                      rows={3}
-                      value={newCustomerData.notes}
-                      onChange={(e) => handleInputChange('notes', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                      placeholder="Ghi chú về khách hàng..."
-                    ></textarea>
-                  </div>
-                  
-                  <div className="flex items-center space-x-6">
-                    <label className="flex items-center">
-                      <input 
-                        type="checkbox" 
-                        checked={newCustomerData.marketingConsent}
-                        onChange={(e) => handleInputChange('marketingConsent', e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Đồng ý nhận email marketing</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input 
-                        type="checkbox" 
-                        checked={newCustomerData.smsConsent}
-                        onChange={(e) => handleInputChange('smsConsent', e.target.checked)}
-                        className="rounded border-gray-300 text-blue-600 focus:ring-blue-500" 
-                      />
-                      <span className="ml-2 text-sm text-gray-700">Đồng ý nhận SMS</span>
-                    </label>
-                  </div>
+                <div className="mt-4">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Ghi chú</label>
+                  <textarea
+                    value={newCustomerData.notes}
+                    onChange={(e) => handleInputChange('notes', e.target.value)}
+                    placeholder="Ghi chú về khách hàng..."
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center justify-between p-6 border-t bg-gray-50">
-              <div className="text-sm text-gray-600">
-                * Các trường bắt buộc
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => setShowAddCustomerModal(false)}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                  Hủy
-                </button>
-                <button 
-                  onClick={handleAddCustomer}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Thêm khách hàng
-                </button>
-              </div>
+            
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowAddCustomerModal(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleAddCustomer}
+                disabled={!newCustomerData.firstName && !newCustomerData.lastName || !newCustomerData.email || !newCustomerData.phone || newCustomerData.selectedProducts.length === 0}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Thêm khách hàng & Tạo đơn hàng ({newCustomerData.selectedProducts.length} sản phẩm)
+              </button>
             </div>
           </div>
         </div>
@@ -3651,16 +4165,43 @@ export default function CustomersManagement() {
               <div className="flex items-center space-x-3">
                 <Crown className="w-6 h-6 text-yellow-600" />
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900">Định nghĩa phân hạng khách hàng</h2>
+                  <h2 className="text-xl font-bold text-gray-900">Cài đặt phân hạng khách hàng</h2>
                   <p className="text-gray-600">Tiêu chí và ngưỡng phân loại khách hàng</p>
                 </div>
               </div>
-              <button
-                onClick={() => setShowRankingDefinitionModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <div className="flex items-center space-x-3">
+                {!isEditingRanking ? (
+                  <button
+                    onClick={() => setIsEditingRanking(true)}
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                  >
+                    <Edit className="w-4 h-4 mr-1" />
+                    Chỉnh sửa
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      onClick={handleSaveRankingSettings}
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-colors"
+                    >
+                      <Save className="w-4 h-4 mr-1" />
+                      Lưu
+                    </button>
+                    <button
+                      onClick={handleCancelEditRanking}
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      Hủy
+                    </button>
+                  </>
+                )}
+                <button
+                  onClick={() => setShowRankingDefinitionModal(false)}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
             </div>
 
             <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
@@ -3680,23 +4221,89 @@ export default function CustomersManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-purple-700">Tiêu chí chính:</h4>
-                      <ul className="text-sm text-purple-600 space-y-1">
-                        <li>• Tổng chi tiêu: ≥ 10,000,000 VND</li>
-                        <li>• Số đơn hàng: ≥ 20 đơn</li>
-                        <li>• Điểm engagement: ≥ 90/100</li>
-                        <li>• Rủi ro churn: ≤ 10%</li>
-                        <li>• Thời gian là khách hàng: ≥ 2 năm</li>
-                      </ul>
+                      {isEditingRanking ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-purple-600 w-32">Tổng chi tiêu:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.diamond.totalSpent}
+                              onChange={(e) => updateRankingSetting('diamond', 'totalSpent', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-purple-600">VND</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-purple-600 w-32">Số đơn hàng:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.diamond.orderCount}
+                              onChange={(e) => updateRankingSetting('diamond', 'orderCount', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-purple-600">đơn</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-purple-600 w-32">Thời gian:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.diamond.timeAsCustomer}
+                              onChange={(e) => updateRankingSetting('diamond', 'timeAsCustomer', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-purple-600">tháng</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-purple-600 space-y-1">
+                          <li>• Tổng chi tiêu: ≥ {rankingSettings.diamond.totalSpent.toLocaleString('vi-VN')} VND</li>
+                          <li>• Số đơn hàng: ≥ {rankingSettings.diamond.orderCount} đơn</li>
+                          <li>• Thời gian là khách hàng: ≥ {Math.floor(rankingSettings.diamond.timeAsCustomer / 12)} năm</li>
+                        </ul>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-purple-700">Đặc quyền:</h4>
-                      <ul className="text-sm text-purple-600 space-y-1">
-                        <li>• Ưu đãi độc quyền 20-30%</li>
-                        <li>• Account Manager riêng</li>
-                        <li>• Hỗ trợ 24/7 ưu tiên cao</li>
-                        <li>• Trải nghiệm cá nhân hóa</li>
-                        <li>• Mời sự kiện VIP</li>
-                      </ul>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-purple-700">Đặc quyền:</h4>
+                        {isEditingRanking && (
+                          <button
+                            onClick={() => addBenefit('diamond')}
+                            className="text-purple-600 hover:text-purple-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {isEditingRanking ? (
+                        <div className="space-y-1">
+                          {rankingSettings.diamond.benefits.map((benefit, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={benefit}
+                                onChange={(e) => {
+                                  const newBenefits = [...rankingSettings.diamond.benefits]
+                                  newBenefits[index] = e.target.value
+                                  updateRankingSetting('diamond', 'benefits', newBenefits)
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              />
+                              <button
+                                onClick={() => removeBenefit('diamond', index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-purple-600 space-y-1">
+                          {rankingSettings.diamond.benefits.map((benefit, index) => (
+                            <li key={index}>• {benefit}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3715,23 +4322,89 @@ export default function CustomersManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-yellow-700">Tiêu chí chính:</h4>
-                      <ul className="text-sm text-yellow-600 space-y-1">
-                        <li>• Tổng chi tiêu: 5,000,000 - 9,999,999 VND</li>
-                        <li>• Số đơn hàng: 10-19 đơn</li>
-                        <li>• Điểm engagement: 70-89/100</li>
-                        <li>• Rủi ro churn: 11-25%</li>
-                        <li>• Thời gian là khách hàng: ≥ 1 năm</li>
-                      </ul>
+                      {isEditingRanking ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-yellow-600 w-32">Tổng chi tiêu:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.gold.totalSpent}
+                              onChange={(e) => updateRankingSetting('gold', 'totalSpent', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-yellow-600">VND</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-yellow-600 w-32">Số đơn hàng:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.gold.orderCount}
+                              onChange={(e) => updateRankingSetting('gold', 'orderCount', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-yellow-600">đơn</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-yellow-600 w-32">Thời gian:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.gold.timeAsCustomer}
+                              onChange={(e) => updateRankingSetting('gold', 'timeAsCustomer', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-yellow-600">tháng</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-yellow-600 space-y-1">
+                          <li>• Tổng chi tiêu: ≥ {rankingSettings.gold.totalSpent.toLocaleString('vi-VN')} VND</li>
+                          <li>• Số đơn hàng: ≥ {rankingSettings.gold.orderCount} đơn</li>
+                          <li>• Thời gian là khách hàng: ≥ {Math.floor(rankingSettings.gold.timeAsCustomer / 12)} năm</li>
+                        </ul>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-yellow-700">Đặc quyền:</h4>
-                      <ul className="text-sm text-yellow-600 space-y-1">
-                        <li>• Ưu đãi 15-20%</li>
-                        <li>• Hỗ trợ ưu tiên</li>
-                        <li>• Chương trình loyalty đặc biệt</li>
-                        <li>• Early access sản phẩm mới</li>
-                        <li>• Tư vấn chuyên sâu</li>
-                      </ul>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-yellow-700">Đặc quyền:</h4>
+                        {isEditingRanking && (
+                          <button
+                            onClick={() => addBenefit('gold')}
+                            className="text-yellow-600 hover:text-yellow-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {isEditingRanking ? (
+                        <div className="space-y-1">
+                          {rankingSettings.gold.benefits.map((benefit, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={benefit}
+                                onChange={(e) => {
+                                  const newBenefits = [...rankingSettings.gold.benefits]
+                                  newBenefits[index] = e.target.value
+                                  updateRankingSetting('gold', 'benefits', newBenefits)
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              />
+                              <button
+                                onClick={() => removeBenefit('gold', index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-yellow-600 space-y-1">
+                          {rankingSettings.gold.benefits.map((benefit, index) => (
+                            <li key={index}>• {benefit}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3750,23 +4423,89 @@ export default function CustomersManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-gray-700">Tiêu chí chính:</h4>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        <li>• Tổng chi tiêu: 2,000,000 - 4,999,999 VND</li>
-                        <li>• Số đơn hàng: 5-9 đơn</li>
-                        <li>• Điểm engagement: 50-69/100</li>
-                        <li>• Rủi ro churn: 26-40%</li>
-                        <li>• Thời gian là khách hàng: ≥ 6 tháng</li>
-                      </ul>
+                      {isEditingRanking ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600 w-32">Tổng chi tiêu:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.silver.totalSpent}
+                              onChange={(e) => updateRankingSetting('silver', 'totalSpent', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-gray-600">VND</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600 w-32">Số đơn hàng:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.silver.orderCount}
+                              onChange={(e) => updateRankingSetting('silver', 'orderCount', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-gray-600">đơn</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-600 w-32">Thời gian:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.silver.timeAsCustomer}
+                              onChange={(e) => updateRankingSetting('silver', 'timeAsCustomer', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-gray-600">tháng</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          <li>• Tổng chi tiêu: ≥ {rankingSettings.silver.totalSpent.toLocaleString('vi-VN')} VND</li>
+                          <li>• Số đơn hàng: ≥ {rankingSettings.silver.orderCount} đơn</li>
+                          <li>• Thời gian là khách hàng: ≥ {Math.floor(rankingSettings.silver.timeAsCustomer / 12)} năm</li>
+                        </ul>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-gray-700">Đặc quyền:</h4>
-                      <ul className="text-sm text-gray-600 space-y-1">
-                        <li>• Ưu đãi 10-15%</li>
-                        <li>• Hỗ trợ tiêu chuẩn</li>
-                        <li>• Newsletter chuyên biệt</li>
-                        <li>• Khuyến mãi định kỳ</li>
-                        <li>• Tích điểm thưởng</li>
-                      </ul>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-gray-700">Đặc quyền:</h4>
+                        {isEditingRanking && (
+                          <button
+                            onClick={() => addBenefit('silver')}
+                            className="text-gray-600 hover:text-gray-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {isEditingRanking ? (
+                        <div className="space-y-1">
+                          {rankingSettings.silver.benefits.map((benefit, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={benefit}
+                                onChange={(e) => {
+                                  const newBenefits = [...rankingSettings.silver.benefits]
+                                  newBenefits[index] = e.target.value
+                                  updateRankingSetting('silver', 'benefits', newBenefits)
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              />
+                              <button
+                                onClick={() => removeBenefit('silver', index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-gray-600 space-y-1">
+                          {rankingSettings.silver.benefits.map((benefit, index) => (
+                            <li key={index}>• {benefit}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3785,23 +4524,190 @@ export default function CustomersManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <h4 className="font-semibold text-orange-700">Tiêu chí chính:</h4>
-                      <ul className="text-sm text-orange-600 space-y-1">
-                        <li>• Tổng chi tiêu: 500,000 - 1,999,999 VND</li>
-                        <li>• Số đơn hàng: 1-4 đơn</li>
-                        <li>• Điểm engagement: 30-49/100</li>
-                        <li>• Rủi ro churn: 41-60%</li>
-                        <li>• Thời gian là khách hàng: &lt; 6 tháng</li>
-                      </ul>
+                      {isEditingRanking ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-orange-600 w-32">Tổng chi tiêu:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.bronze.totalSpent}
+                              onChange={(e) => updateRankingSetting('bronze', 'totalSpent', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-orange-600">VND</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-orange-600 w-32">Số đơn hàng:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.bronze.orderCount}
+                              onChange={(e) => updateRankingSetting('bronze', 'orderCount', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-orange-600">đơn</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-orange-600 w-32">Thời gian:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.bronze.timeAsCustomer}
+                              onChange={(e) => updateRankingSetting('bronze', 'timeAsCustomer', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-orange-600">tháng</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-orange-600 space-y-1">
+                          <li>• Tổng chi tiêu: ≥ {rankingSettings.bronze.totalSpent.toLocaleString('vi-VN')} VND</li>
+                          <li>• Số đơn hàng: ≥ {rankingSettings.bronze.orderCount} đơn</li>
+                          <li>• Thời gian là khách hàng: ≥ {Math.floor(rankingSettings.bronze.timeAsCustomer / 12)} năm</li>
+                        </ul>
+                      )}
                     </div>
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-orange-700">Đặc quyền:</h4>
-                      <ul className="text-sm text-orange-600 space-y-1">
-                        <li>• Ưu đãi 5-10%</li>
-                        <li>• Hỗ trợ cơ bản</li>
-                        <li>• Welcome package</li>
-                        <li>• Hướng dẫn sử dụng</li>
-                        <li>• Chương trình giới thiệu</li>
-                      </ul>
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-orange-700">Đặc quyền:</h4>
+                        {isEditingRanking && (
+                          <button
+                            onClick={() => addBenefit('bronze')}
+                            className="text-orange-600 hover:text-orange-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {isEditingRanking ? (
+                        <div className="space-y-1">
+                          {rankingSettings.bronze.benefits.map((benefit, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={benefit}
+                                onChange={(e) => {
+                                  const newBenefits = [...rankingSettings.bronze.benefits]
+                                  newBenefits[index] = e.target.value
+                                  updateRankingSetting('bronze', 'benefits', newBenefits)
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              />
+                              <button
+                                onClick={() => removeBenefit('bronze', index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-orange-600 space-y-1">
+                          {rankingSettings.bronze.benefits.map((benefit, index) => (
+                            <li key={index}>• {benefit}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* New */}
+                <div className="border border-blue-200 rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                  <div className="flex items-center space-x-3 mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                      <UserPlus className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold text-blue-800">🎯 Mới (New)</h3>
+                      <p className="text-blue-600">Khách hàng tiềm năng</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-semibold text-blue-700">Tiêu chí chính:</h4>
+                      {isEditingRanking ? (
+                        <div className="space-y-2">
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-blue-600 w-32">Tổng chi tiêu:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.new.totalSpent}
+                              onChange={(e) => updateRankingSetting('new', 'totalSpent', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-blue-600">VND</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-blue-600 w-32">Số đơn hàng:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.new.orderCount}
+                              onChange={(e) => updateRankingSetting('new', 'orderCount', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-blue-600">đơn</span>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-blue-600 w-32">Thời gian:</span>
+                            <input
+                              type="number"
+                              value={rankingSettings.new.timeAsCustomer}
+                              onChange={(e) => updateRankingSetting('new', 'timeAsCustomer', parseInt(e.target.value) || 0)}
+                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                            />
+                            <span className="text-sm text-blue-600">tháng</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-blue-600 space-y-1">
+                          <li>• Tổng chi tiêu: {rankingSettings.new.totalSpent.toLocaleString('vi-VN')} VND</li>
+                          <li>• Số đơn hàng: {rankingSettings.new.orderCount} đơn</li>
+                          <li>• Thời gian là khách hàng: {rankingSettings.new.timeAsCustomer} tháng</li>
+                        </ul>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h4 className="font-semibold text-blue-700">Đặc quyền:</h4>
+                        {isEditingRanking && (
+                          <button
+                            onClick={() => addBenefit('new')}
+                            className="text-blue-600 hover:text-blue-800"
+                          >
+                            <Plus className="w-4 h-4" />
+                          </button>
+                        )}
+                      </div>
+                      {isEditingRanking ? (
+                        <div className="space-y-1">
+                          {rankingSettings.new.benefits.map((benefit, index) => (
+                            <div key={index} className="flex items-center space-x-2">
+                              <input
+                                type="text"
+                                value={benefit}
+                                onChange={(e) => {
+                                  const newBenefits = [...rankingSettings.new.benefits]
+                                  newBenefits[index] = e.target.value
+                                  updateRankingSetting('new', 'benefits', newBenefits)
+                                }}
+                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              />
+                              <button
+                                onClick={() => removeBenefit('new', index)}
+                                className="text-red-500 hover:text-red-700"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <ul className="text-sm text-blue-600 space-y-1">
+                          {rankingSettings.new.benefits.map((benefit, index) => (
+                            <li key={index}>• {benefit}</li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -3826,25 +4732,6 @@ export default function CustomersManagement() {
                         <li>• Giới thiệu khách hàng mới</li>
                         <li>• Tham gia sự kiện</li>
                       </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Special Cases */}
-                <div className="border border-red-200 rounded-lg p-6 bg-red-50">
-                  <h3 className="text-lg font-bold text-red-800 mb-4">⚠️ Trường hợp đặc biệt</h3>
-                  <div className="space-y-3">
-                    <div>
-                      <h4 className="font-semibold text-red-700">Khách hàng có rủi ro cao (At-risk):</h4>
-                      <p className="text-sm text-red-600">Churn risk &gt; 60% - Cần chăm sóc đặc biệt và remarketing</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-red-700">Khách hàng không hoạt động (Dormant):</h4>
-                      <p className="text-sm text-red-600">Không có tương tác &gt; 6 tháng - Cần chiến dịch tái kích hoạt</p>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-red-700">Khách hàng đã rời bỏ (Churned):</h4>
-                      <p className="text-sm text-red-600">Không có hoạt động &gt; 12 tháng - Cần chiến dịch win-back</p>
                     </div>
                   </div>
                 </div>
@@ -3898,13 +4785,6 @@ export default function CustomersManagement() {
           </div>
 
           <button 
-            onClick={handleRemarketingClick}
-            className="flex items-center space-x-2 px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700"
-          >
-            <Target className="w-4 h-4" />
-            <span>Remarketing ({remarketingCustomers.length})</span>
-          </button>
-          <button 
             onClick={() => setShowAddCustomerModal(true)}
             className="btn-primary flex items-center space-x-2"
           >
@@ -3922,7 +4802,7 @@ export default function CustomersManagement() {
             {filterCustomerType && (
               <div className="flex items-center space-x-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
                 <span>Đang lọc: {
-                  filterCustomerType === 'diamond' ? 'Kim cương' :
+                  filterCustomerType === 'diamond' ? 'VIP' :
                   filterCustomerType === 'gold' ? 'Vàng' :
                   filterCustomerType === 'silver' ? 'Bạc' :
                   filterCustomerType === 'bronze' ? 'Đồng' :
@@ -3952,33 +4832,33 @@ export default function CustomersManagement() {
               className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
             >
               <Info className="w-4 h-4 mr-2" />
-              <span>Định nghĩa phân hạng</span>
+              <span>Cài đặt phân hạng</span>
             </button>
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-          {/* Diamond Customer */}
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          {/* VIP Customer */}
           <div 
             onClick={() => handleCustomerTypeFilter('diamond')}
             className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'diamond' ? 'border-yellow-500 ring-2 ring-yellow-200' : 'border-gray-200'
+              filterCustomerType === 'diamond' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'
             }`}
           >
-            <div className="h-2 bg-yellow-500 rounded-t-lg"></div>
+            <div className="h-2 bg-purple-500 rounded-t-lg"></div>
             <div className="p-4">
               <div className="flex items-center">
-                <div className="rounded-full bg-yellow-100 p-3 mr-4 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-yellow-600" />
+                <div className="rounded-full bg-purple-100 p-3 mr-4 flex items-center justify-center">
+                  <Crown className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">Khách hàng Kim cương</p>
+                  <p className="text-sm text-gray-500">Khách hàng kim cương</p>
                   <p className="text-2xl font-bold">
                     {filteredCustomers.filter(c => c.customerType === 'diamond').length}
                   </p>
                   <div className="flex items-center text-green-600 text-xs">
                     <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">8% so với tháng trước</span>
+                    <span className="ml-1">12% so với tháng trước</span>
                   </div>
                 </div>
               </div>
@@ -4091,56 +4971,6 @@ export default function CustomersManagement() {
                 </div>
               </div>
             </div>
-          </div>
-
-          {/* Returning Customer */}
-          <div 
-            onClick={() => handleCustomerTypeFilter('returning')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'returning' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'
-            }`}
-          >
-            <div className="h-2 bg-purple-500 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-purple-100 p-3 mr-4 flex items-center justify-center">
-                  <RefreshCw className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách quay lại</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'returning').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">7% so với tháng trước</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* View Toggle */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          <div className="flex bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setSelectedView('list')}
-              className={`px-3 py-1 rounded text-sm font-medium ${
-                selectedView === 'list' ? 'bg-white text-gray-900 shadow' : 'text-gray-600'
-              }`}
-            >
-              🗂️ Danh sách
-            </button>            <button
-              onClick={() => setSelectedView('analytics')}
-              className={`px-3 py-1 rounded text-sm font-medium ${
-                selectedView === 'analytics' ? 'bg-white text-gray-900 shadow' : 'text-gray-600'
-              }`}
-            >
-              📊 Phân tích
-            </button>
           </div>
         </div>
       </div>
@@ -4330,6 +5160,7 @@ export default function CustomersManagement() {
                               interactionCount: true,
                               createdDate: true,
                               npsScore: true,
+                              customerScore: true,
                               actions: true
                             })}
                             className="text-xs text-blue-600 hover:text-blue-800"
@@ -4376,13 +5207,14 @@ export default function CustomersManagement() {
                       <Plus className="w-4 h-4" />
                       <span>Tạo task nhanh</span>
                     </button>
-                    <button
+                    {/* Ẩn chức năng gửi email hàng loạt theo yêu cầu */}
+                    {/* <button
                       onClick={() => handleBulkEmail()}
                       className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Gửi email hàng loạt</span>
-                    </button>
+                    </button> */}
                   </div>
                 </div>
               </div>
@@ -4598,14 +5430,7 @@ export default function CustomersManagement() {
                       {visibleColumns.source && (
                         <td className="py-3 px-4 border-r border-gray-200">
                           <span className="text-sm text-gray-900">
-                            {customer.source === 'facebook' ? '📱 Facebook' :
-                             customer.source === 'zalo' ? '💬 Zalo' :
-                             customer.source === 'website' ? '🌐 Website' :
-                             customer.source === 'referral' ? '👥 Giới thiệu' :
-                             customer.source === 'google' ? '🔍 Google' :
-                             customer.source === 'email' ? '📧 Email' :
-                             customer.source === 'phone' ? '📞 Điện thoại' :
-                             '🌐 Website'}
+                            🌐 Website
                           </span>
                         </td>
                       )}
@@ -4719,27 +5544,22 @@ export default function CustomersManagement() {
                             <button 
                               onClick={() => handleCustomerSelect(customer)}
                               className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                              title="👁️ Xem"
+                              title="👁️ Chi tiết & Chỉnh sửa"
                             >
                               <Eye className="w-3 h-3" />
                             </button>
                             <button 
-                              className="p-1.5 bg-gray-600 text-white rounded hover:bg-gray-700 transition-colors"
-                              title="✏️ Sửa"
-                            >
-                              <Edit className="w-3 h-3" />
-                            </button>
-                            <button 
+                              onClick={() => handleCreateOrder(customer)}
                               className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                              title="📞 Gọi"
+                              title="� Tạo đơn hàng"
                             >
-                              <Phone className="w-3 h-3" />
+                              <ShoppingCart className="w-3 h-3" />
                             </button>
                             <button 
-                              className="p-1.5 bg-purple-600 text-white rounded hover:bg-purple-700 transition-colors"
-                              title="✉️ Email"
+                              className="p-1.5 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
+                              title="📝 Ghi chú nhanh"
                             >
-                              <Mail className="w-3 h-3" />
+                              <StickyNote className="w-3 h-3" />
                             </button>
                           </div>
                         </td>
@@ -5240,6 +6060,728 @@ export default function CustomersManagement() {
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo task
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Customer Detail Modal */}
+    {selectedCustomer && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg w-full max-w-6xl mx-4 h-[90vh] flex flex-col">
+          {/* Modal Header */}
+          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center space-x-3">
+              <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold ${
+                selectedCustomer.status === 'vip' ? 'bg-purple-600' :
+                selectedCustomer.status === 'active' ? 'bg-green-600' :
+                selectedCustomer.status === 'at-risk' ? 'bg-red-600' : 'bg-gray-600'
+              }`}>
+                {selectedCustomer.name.charAt(0)}
+              </div>
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">{selectedCustomer.name}</h2>
+                <p className="text-sm text-gray-500">{selectedCustomer.email}</p>
+              </div>
+            </div>
+            <div className="flex items-center space-x-2">
+              {isEditingCustomer ? (
+                <>
+                  <button
+                    onClick={handleSaveCustomer}
+                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                  >
+                    <Save className="w-4 h-4" />
+                    <span>Lưu</span>
+                  </button>
+                  <button
+                    onClick={() => setIsEditingCustomer(false)}
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                </>
+              ) : (
+                <button
+                  onClick={() => setIsEditingCustomer(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  <Edit className="w-4 h-4" />
+                  <span>Chỉnh sửa</span>
+                </button>
+              )}
+              <button
+                onClick={handleCloseCustomerDetail}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+
+          {/* Modal Tabs */}
+          <div className="border-b border-gray-200 px-6">
+            <nav className="flex space-x-8">
+              {[
+                { id: 'details', label: 'Thông tin chi tiết', icon: User },
+                { id: 'interactions', label: 'Lịch sử tương tác', icon: MessageCircle },
+                { id: 'orders', label: 'Đơn hàng', icon: Package },
+                { id: 'notes', label: 'Ghi chú', icon: FileText }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)}
+                  className={`flex items-center space-x-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
+                    activeTab === tab.id
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  <tab.icon className="w-4 h-4" />
+                  <span>{tab.label}</span>
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Modal Content */}
+          <div className="flex-1 overflow-auto p-6">
+            {activeTab === 'details' && (
+              <div className="space-y-6">
+                {/* Basic Information */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cơ bản</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Họ và Tên</label>
+                      {isEditingCustomer ? (
+                        <input
+                          type="text"
+                          value={editCustomerData.name || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedCustomer.name || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                      <p className="text-gray-900">{selectedCustomer.email}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Điện thoại</label>
+                      <p className="text-gray-900">{selectedCustomer.contact}</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Công ty</label>
+                      {isEditingCustomer ? (
+                        <input
+                          type="text"
+                          value={editCustomerData.company || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, company: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedCustomer.company || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Chức vụ</label>
+                      {isEditingCustomer ? (
+                        <input
+                          type="text"
+                          value={editCustomerData.position || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, position: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedCustomer.position || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ đầy đủ</label>
+                      {isEditingCustomer ? (
+                        <input
+                          type="text"
+                          value={`${editCustomerData.address || ''}, ${editCustomerData.city || ''}, ${editCustomerData.state || ''}, ${editCustomerData.country || ''}`.replace(/^,\s*|,\s*,/g, '').replace(/,\s*$/, '') || ''}
+                          onChange={(e) => {
+                            const fullAddress = e.target.value
+                            setEditCustomerData(prev => ({ ...prev, address: fullAddress }))
+                          }}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="Nhập địa chỉ đầy đủ..."
+                        />
+                      ) : (
+                        <p className="text-gray-900">
+                          {[selectedCustomer.address, selectedCustomer.city, selectedCustomer.state, selectedCustomer.country]
+                            .filter(Boolean)
+                            .join(', ') || '-'}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Business Information */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin kinh doanh</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Ngành nghề</label>
+                      {isEditingCustomer ? (
+                        <input
+                          type="text"
+                          value={editCustomerData.industry || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, industry: e.target.value }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      ) : (
+                        <p className="text-gray-900">{selectedCustomer.industry || '-'}</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Quy mô công ty</label>
+                      {isEditingCustomer ? (
+                        <select
+                          value={editCustomerData.companySize || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, companySize: e.target.value as any }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="small">Nhỏ (1-50 nhân viên)</option>
+                          <option value="medium">Trung bình (51-200 nhân viên)</option>
+                          <option value="large">Lớn (201-1000 nhân viên)</option>
+                          <option value="enterprise">Doanh nghiệp (&gt;1000 nhân viên)</option>
+                        </select>
+                      ) : (
+                        <p className="text-gray-900">
+                          {selectedCustomer.companySize === 'small' ? 'Nhỏ (1-50 nhân viên)' :
+                           selectedCustomer.companySize === 'medium' ? 'Trung bình (51-200 nhân viên)' :
+                           selectedCustomer.companySize === 'large' ? 'Lớn (201-1000 nhân viên)' :
+                           selectedCustomer.companySize === 'enterprise' ? 'Doanh nghiệp (&gt;1000 nhân viên)' : '-'}
+                        </p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Trạng thái</label>
+                      {isEditingCustomer ? (
+                        <select
+                          value={editCustomerData.status || ''}
+                          onChange={(e) => setEditCustomerData(prev => ({ ...prev, status: e.target.value as any }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        >
+                          <option value="active">Hoạt động</option>
+                          <option value="inactive">Không hoạt động</option>
+                          <option value="at-risk">Có nguy cơ</option>
+                          <option value="vip">VIP</option>
+                          <option value="churned">Đã rời bỏ</option>
+                          <option value="dormant">Ngủ đông</option>
+                        </select>
+                      ) : (
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          selectedCustomer.status === 'active' ? 'bg-green-100 text-green-800' :
+                          selectedCustomer.status === 'inactive' ? 'bg-gray-100 text-gray-800' :
+                          selectedCustomer.status === 'at-risk' ? 'bg-red-100 text-red-800' :
+                          selectedCustomer.status === 'vip' ? 'bg-purple-100 text-purple-800' :
+                          selectedCustomer.status === 'churned' ? 'bg-orange-100 text-orange-800' :
+                          'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {selectedCustomer.status === 'active' ? 'Hoạt động' :
+                           selectedCustomer.status === 'inactive' ? 'Không hoạt động' :
+                           selectedCustomer.status === 'at-risk' ? 'Có nguy cơ' :
+                           selectedCustomer.status === 'vip' ? 'VIP' :
+                           selectedCustomer.status === 'churned' ? 'Đã rời bỏ' : 'Ngủ đông'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Statistics */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Thống kê</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-blue-600">{selectedCustomer.totalOrders}</p>
+                      <p className="text-sm text-gray-600">Tổng đơn hàng</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-green-600">{formatCurrency(selectedCustomer.totalSpent.toString())} VNĐ</p>
+                      <p className="text-sm text-gray-600">Tổng chi tiêu</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-2xl font-bold text-purple-600">
+                        {selectedCustomer.lastOrderDate ? formatCurrency(
+                          selectedCustomer.products && selectedCustomer.products.length > 0 
+                            ? selectedCustomer.products[selectedCustomer.products.length - 1].price.toString() 
+                            : '0'
+                        ) : '0'} VNĐ
+                      </p>
+                      <p className="text-sm text-gray-600">Đơn gần nhất</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-orange-600">
+                        {selectedCustomer.lastInteraction ? formatDate(selectedCustomer.lastInteraction) : 'Chưa có'}
+                      </p>
+                      <p className="text-sm text-gray-600">Tương tác gần nhất</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-bold text-indigo-600">
+                        {selectedCustomer.lastPurchaseDate ? formatDate(selectedCustomer.lastPurchaseDate) : 'Chưa có'}
+                      </p>
+                      <p className="text-sm text-gray-600">Mua gần nhất</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Notes */}
+                <div className="bg-gray-50 rounded-lg p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">Ghi chú</h3>
+                  {isEditingCustomer ? (
+                    <textarea
+                      value={editCustomerData.notes || ''}
+                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value }))}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Nhập ghi chú về khách hàng..."
+                    />
+                  ) : (
+                    <p className="text-gray-900">{selectedCustomer.notes || 'Chưa có ghi chú'}</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'interactions' && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-semibold text-gray-900">Lịch sử tương tác</h3>
+                  <button
+                    onClick={() => setShowAddInteractionModal(true)}
+                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Thêm tương tác</span>
+                  </button>
+                </div>
+                {selectedCustomer.interactions && selectedCustomer.interactions.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedCustomer.interactions.map((interaction, index) => (
+                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center space-x-2">
+                            <span className={`w-2 h-2 rounded-full ${
+                              interaction.status === 'success' ? 'bg-green-500' :
+                              interaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
+                            }`}></span>
+                            <span className="font-medium text-gray-900">{interaction.title}</span>
+                          </div>
+                          <span className="text-sm text-gray-500">{formatDate(interaction.date)}</span>
+                        </div>
+                        <p className="text-gray-600 text-sm mb-2">{interaction.summary}</p>
+                        <div className="flex items-center space-x-4 text-xs text-gray-500">
+                          <span>Loại: {interaction.type}</span>
+                          <span>Kênh: {interaction.channel}</span>
+                          <span className={`px-2 py-1 rounded-full ${
+                            interaction.status === 'success' ? 'bg-green-100 text-green-800' :
+                            interaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {interaction.status === 'success' ? 'Thành công' :
+                             interaction.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">Chưa có lịch sử tương tác</p>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'orders' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Đơn hàng</h3>
+                {selectedCustomer.products && selectedCustomer.products.length > 0 ? (
+                  <div className="space-y-3">
+                    {selectedCustomer.products.map((product, index) => (
+                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="font-medium text-gray-900">{product.name}</span>
+                          <span className={`px-2 py-1 text-xs rounded-full ${
+                            product.status === 'active' ? 'bg-green-100 text-green-800' :
+                            product.status === 'expired' ? 'bg-red-100 text-red-800' : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {product.status === 'active' ? 'Đang sử dụng' :
+                             product.status === 'expired' ? 'Hết hạn' : 'Đã hủy'}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                          <div>
+                            <span className="text-gray-500">Danh mục:</span>
+                            <span className="ml-1 text-gray-900">{product.category}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Số lượng:</span>
+                            <span className="ml-1 text-gray-900">{product.quantity}</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Giá:</span>
+                            <span className="ml-1 text-gray-900">{formatCurrency(product.price.toString())} VNĐ</span>
+                          </div>
+                          <div>
+                            <span className="text-gray-500">Ngày mua:</span>
+                            <span className="ml-1 text-gray-900">{formatDate(product.purchaseDate)}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 text-center py-8">Chưa có đơn hàng nào</p>
+                )}
+              </div>
+            )}
+
+            {activeTab === 'notes' && (
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-900">Ghi chú chi tiết</h3>
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Ghi chú công khai</h4>
+                  {isEditingCustomer ? (
+                    <textarea
+                      value={editCustomerData.notes || ''}
+                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value }))}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ghi chú có thể chia sẻ với team..."
+                    />
+                  ) : (
+                    <p className="text-gray-900">{selectedCustomer.notes || 'Chưa có ghi chú công khai'}</p>
+                  )}
+                </div>
+                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                  <h4 className="font-medium text-gray-900 mb-2">Ghi chú nội bộ</h4>
+                  {isEditingCustomer ? (
+                    <textarea
+                      value={editCustomerData.internalNotes || ''}
+                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, internalNotes: e.target.value }))}
+                      rows={4}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ghi chú nội bộ (chỉ team bán hàng xem được)..."
+                    />
+                  ) : (
+                    <p className="text-gray-900">{selectedCustomer.internalNotes || 'Chưa có ghi chú nội bộ'}</p>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Add Interaction Modal */}
+    {showAddInteractionModal && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác mới</h3>
+            <button
+              onClick={() => setShowAddInteractionModal(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Loại tương tác *
+              </label>
+              <select
+                value={newInteractionData.type}
+                onChange={(e) => setNewInteractionData(prev => ({ ...prev, type: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="call">Cuộc gọi</option>
+                <option value="email">Email</option>
+                <option value="meeting">Cuộc họp</option>
+                <option value="sms">SMS</option>
+                <option value="chat">Chat</option>
+                <option value="support">Hỗ trợ</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Kênh tương tác *
+              </label>
+              <input
+                type="text"
+                value={newInteractionData.channel}
+                onChange={(e) => setNewInteractionData(prev => ({ ...prev, channel: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="VD: Điện thoại, Zalo, Email, ..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tiêu đề *
+              </label>
+              <input
+                type="text"
+                value={newInteractionData.title}
+                onChange={(e) => setNewInteractionData(prev => ({ ...prev, title: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="VD: Tư vấn sản phẩm mới"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mô tả chi tiết
+              </label>
+              <textarea
+                value={newInteractionData.summary}
+                onChange={(e) => setNewInteractionData(prev => ({ ...prev, summary: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+                placeholder="Mô tả chi tiết về cuộc tương tác..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Trạng thái
+              </label>
+              <select
+                value={newInteractionData.status}
+                onChange={(e) => setNewInteractionData(prev => ({ ...prev, status: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="success">Thành công</option>
+                <option value="pending">Đang xử lý</option>
+                <option value="failed">Thất bại</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setShowAddInteractionModal(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleAddInteraction}
+              disabled={!newInteractionData.title.trim() || !newInteractionData.channel.trim()}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              Thêm tương tác
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Create Order Modal */}
+    {showCreateOrderModal && selectedCustomerForOrder && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng mới</h3>
+              <p className="text-sm text-gray-600">Khách hàng: {selectedCustomerForOrder.name}</p>
+            </div>
+            <button
+              onClick={() => setShowCreateOrderModal(false)}
+              className="text-gray-400 hover:text-gray-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {/* Product Selection */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm</h4>
+              <div className="max-h-80 overflow-y-auto space-y-3">
+                {availableProducts.map((product) => (
+                  <div key={product.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                    {/* Product Selection */}
+                    <label className="flex items-start space-x-3 cursor-pointer mb-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedProducts.includes(product.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedProducts(prev => [...prev, product.id])
+                            // Set default package to standard
+                            setSelectedPackages(prev => ({
+                              ...prev,
+                              [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                            }))
+                          } else {
+                            setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                            // Remove package selection
+                            setSelectedPackages(prev => {
+                              const newPackages = { ...prev }
+                              delete newPackages[product.id]
+                              return newPackages
+                            })
+                          }
+                        }}
+                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                      />
+                      <div className="flex-1">
+                        <div className="flex justify-between items-start">
+                          <div>
+                            <h6 className="font-medium text-gray-900">{product.name}</h6>
+                            <p className="text-sm text-gray-600">{product.description}</p>
+                          </div>
+                          <span className="font-medium text-blue-600">
+                            {formatCurrency(product.price.toString())} VNĐ
+                          </span>
+                        </div>
+                      </div>
+                    </label>
+
+                    {/* Package Selection Dropdown */}
+                    {selectedProducts.includes(product.id) && (
+                      <div className="ml-7 border-t border-gray-100 pt-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Chọn gói sản phẩm:
+                        </label>
+                        <select
+                          value={selectedPackages[product.id] || ''}
+                          onChange={(e) => setSelectedPackages(prev => ({
+                            ...prev,
+                            [product.id]: e.target.value
+                          }))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                        >
+                          {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
+                            <option key={pkg.id} value={pkg.id}>
+                              {pkg.name} - {pkg.price > 0 ? `+${formatCurrency(pkg.price.toString())} VNĐ` : 'Miễn phí'} 
+                              {pkg.description && ` - ${pkg.description}`}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Order Notes */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-3">Ghi chú đơn hàng</h4>
+              <textarea
+                value={newOrderData.notes}
+                onChange={(e) => setNewOrderData(prev => ({ ...prev, notes: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={3}
+                placeholder="Ghi chú đặc biệt cho đơn hàng (không bắt buộc)..."
+              />
+            </div>
+
+            {/* Order Summary */}
+            <div className="bg-blue-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-3">Tóm tắt đơn hàng</h4>
+              {selectedProducts.length > 0 ? (
+                <div className="space-y-3">
+                  <div className="text-sm font-medium text-gray-700 mb-2">
+                    Đã chọn {selectedProducts.length} sản phẩm:
+                  </div>
+                  <div className="space-y-2 max-h-40 overflow-y-auto">
+                    {selectedProducts.map(productId => {
+                      const product = availableProducts.find(p => p.id === productId)
+                      const selectedPackageId = selectedPackages[productId]
+                      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                      const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
+                      
+                      return product ? (
+                        <div key={productId} className="bg-white rounded p-3 shadow-sm">
+                          <div className="flex justify-between items-start mb-2">
+                            <div>
+                              <span className="font-medium text-gray-900">{product.name}</span>
+                              <div className="text-xs text-gray-500 mt-1">
+                                Sản phẩm: {formatCurrency(product.price.toString())} VNĐ
+                              </div>
+                            </div>
+                            <span className="font-medium text-blue-600">
+                              {formatCurrency(totalPrice.toString())} VNĐ
+                            </span>
+                          </div>
+                          {selectedPackage && (
+                            <div className="text-sm border-t border-gray-100 pt-2">
+                              <div className="flex justify-between items-center">
+                                <span className="text-gray-600">
+                                  📦 {selectedPackage.name}
+                                </span>
+                                <span className="text-gray-600">
+                                  {selectedPackage.price > 0 ? `+${formatCurrency(selectedPackage.price.toString())} VNĐ` : 'Miễn phí'}
+                                </span>
+                              </div>
+                              {selectedPackage.description && (
+                                <div className="text-xs text-gray-500 mt-1">
+                                  {selectedPackage.description}
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      ) : null
+                    })}
+                  </div>
+                  <div className="flex justify-between font-medium text-lg border-t border-blue-200 pt-3 mt-3">
+                    <span>Tổng cộng:</span>
+                    <span className="text-blue-600">
+                      {formatCurrency(
+                        selectedProducts.reduce((sum, productId) => {
+                          const product = availableProducts.find(p => p.id === productId)
+                          const selectedPackageId = selectedPackages[productId]
+                          const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                        }, 0).toString()
+                      )} VNĐ
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <div className="text-gray-400 mb-2">
+                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    Vui lòng chọn sản phẩm
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-3 mt-6">
+            <button
+              onClick={() => setShowCreateOrderModal(false)}
+              className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+            >
+              Hủy
+            </button>
+            <button
+              onClick={handleSubmitOrder}
+              disabled={selectedProducts.length === 0}
+              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+            >
+              Tạo đơn hàng
             </button>
           </div>
         </div>

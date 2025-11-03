@@ -634,7 +634,7 @@ export default function OrderManagement() {
         <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-lg shadow">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm text-gray-600">Khách VIP</div>
+              <div className="text-sm text-gray-600">Đã thanh toán</div>
               <div className="text-2xl font-bold text-purple-600">{metrics.vipOrders}</div>
             </div>
             <Target className="w-8 h-8 text-purple-600" />
@@ -697,199 +697,6 @@ export default function OrderManagement() {
       </div>
     </div>
   )
-
-  // Render Products Management
-  const renderProductsManagement = () => {
-    // Calculate product performance
-    const productPerformance = products.map(product => {
-      const productOrders = orders.filter(order => 
-        order.items.some(item => item.productId === product.id)
-      )
-      
-      const totalQuantity = productOrders.reduce((sum, order) => 
-        sum + order.items.filter(item => item.productId === product.id)
-          .reduce((itemSum, item) => itemSum + item.quantity, 0), 0
-      )
-      
-      const totalRevenue = productOrders.reduce((sum, order) => 
-        sum + order.items.filter(item => item.productId === product.id)
-          .reduce((itemSum, item) => itemSum + item.totalPrice, 0), 0
-      )
-
-      const avgOrderValue = productOrders.length > 0 ? totalRevenue / productOrders.length : 0
-      
-      return {
-        ...product,
-        orderCount: productOrders.length,
-        totalQuantity,
-        totalRevenue,
-        avgOrderValue,
-        conversionRate: Math.random() * 100 // Mock data
-      }
-    })
-
-    return (
-      <div className="space-y-6">
-        {/* Product Performance Metrics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Tổng sản phẩm</div>
-                <div className="text-2xl font-bold text-blue-600">{products.length}</div>
-              </div>
-              <Package className="w-8 h-8 text-blue-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Doanh thu sản phẩm</div>
-                <div className="text-2xl font-bold text-green-600">
-                  {formatCurrency(productPerformance.reduce((sum, p) => sum + p.totalRevenue, 0))}
-                </div>
-              </div>
-              <DollarSign className="w-8 h-8 text-green-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Sản phẩm bán chạy</div>
-                <div className="text-lg font-bold text-purple-600">
-                  {productPerformance.sort((a, b) => b.totalQuantity - a.totalQuantity)[0]?.name || 'N/A'}
-                </div>
-              </div>
-              <TrendingUp className="w-8 h-8 text-purple-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-orange-50 to-white p-6 border border-orange-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Tỷ lệ chuyển đổi TB</div>
-                <div className="text-2xl font-bold text-orange-600">
-                  {(productPerformance.reduce((sum, p) => sum + p.conversionRate, 0) / productPerformance.length).toFixed(1)}%
-                </div>
-              </div>
-              <Target className="w-8 h-8 text-orange-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Product Performance Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Hiệu suất Sản phẩm</h3>
-              <div className="flex items-center space-x-2">
-                <button className="px-3 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                  <Download className="w-4 h-4 inline mr-2" />
-                  Xuất báo cáo
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đơn hàng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đã bán</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">GT TB/Đơn</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tỷ lệ chuyển đổi</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {productPerformance.map((product) => (
-                  <tr key={product.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      <div>
-                        <div className="font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500">{product.code} • {product.category}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{product.orderCount}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{product.totalQuantity}</td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{formatCurrency(product.totalRevenue)}</td>
-                    <td className="px-6 py-4 text-sm text-gray-900">{formatCurrency(product.avgOrderValue)}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center">
-                        <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
-                          <div 
-                            className="bg-green-500 h-2 rounded-full" 
-                            style={{ width: `${Math.min(product.conversionRate, 100)}%` }}
-                          ></div>
-                        </div>
-                        <span className="text-sm text-gray-900">{product.conversionRate.toFixed(1)}%</span>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center space-x-2">
-                        <button className="p-1 text-gray-400 hover:text-blue-600" title="Xem chi tiết">
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button className="p-1 text-gray-400 hover:text-green-600" title="Chỉnh sửa">
-                          <Edit className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Product Variants Performance */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900">Hiệu suất theo Phiên bản</h3>
-          </div>
-          
-          <div className="p-6">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {products.map(product => (
-                <div key={product.id} className="border border-gray-200 rounded-lg p-4">
-                  <h4 className="font-medium text-gray-900 mb-3">{product.name}</h4>
-                  <div className="space-y-2">
-                    {product.variants.map(variant => {
-                      const variantOrders = orders.filter(order => 
-                        order.items.some(item => item.variantId === variant.id)
-                      )
-                      const variantRevenue = variantOrders.reduce((sum, order) => 
-                        sum + order.items.filter(item => item.variantId === variant.id)
-                          .reduce((itemSum, item) => itemSum + item.totalPrice, 0), 0
-                      )
-                      
-                      return (
-                        <div key={variant.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                          <div>
-                            <div className="font-medium text-sm">{variant.name}</div>
-                            <div className="text-xs text-gray-500">{formatCurrency(variant.price)}</div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-medium">{variantOrders.length} đơn</div>
-                            <div className="text-xs text-gray-500">{formatCurrency(variantRevenue)}</div>
-                          </div>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // Render Reminders Management  
   const renderRemindersManagement = () => {
@@ -1549,7 +1356,6 @@ export default function OrderManagement() {
             {[
               { id: 'overview', name: 'Tổng quan', icon: <Activity className="w-4 h-4" /> },
               { id: 'orders', name: 'Đơn hàng', icon: <ShoppingCart className="w-4 h-4" /> },
-              { id: 'products', name: 'Sản phẩm', icon: <Package className="w-4 h-4" /> },
               { id: 'reminders', name: 'Nhắc thanh toán', icon: <Bell className="w-4 h-4" /> }
             ].map((tab) => (
               <button
@@ -1574,7 +1380,6 @@ export default function OrderManagement() {
         <div className="p-6">
           {activeTab === 'overview' && renderOverview()}
           {activeTab === 'orders' && renderOrders()}
-          {activeTab === 'products' && renderProductsManagement()}
           {activeTab === 'reminders' && renderRemindersManagement()}
         </div>
       </div>

@@ -109,6 +109,7 @@ export default function SalesManagement() {
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState('')
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedLead, setEditedLead] = useState<Lead | null>(null)
   const [showDragConvertModal, setShowDragConvertModal] = useState(false)
@@ -144,6 +145,59 @@ export default function SalesManagement() {
     { id: 'contract', name: 'Chuẩn bị hợp đồng', icon: '📋', description: 'Soạn thảo hợp đồng', color: 'bg-gray-100 text-gray-700 border-gray-200' },
     { id: 'invoice', name: 'Gửi hóa đơn', icon: '💰', description: 'Xuất và gửi hóa đơn', color: 'bg-green-100 text-green-700 border-green-200' }
   ]
+
+  // Available products and packages list (same as CustomersManagement)
+  const availableProducts = [
+    // Main Products
+    { id: 'crm-basic', name: 'CRM Basic', category: 'Sản phẩm', price: 500000, description: 'Hệ thống CRM cơ bản cho doanh nghiệp nhỏ' },
+    { id: 'crm-professional', name: 'CRM Professional', category: 'Sản phẩm', price: 1200000, description: 'Hệ thống CRM chuyên nghiệp với nhiều tính năng nâng cao' },
+    { id: 'crm-enterprise', name: 'CRM Enterprise', category: 'Sản phẩm', price: 2500000, description: 'Hệ thống CRM doanh nghiệp với đầy đủ tính năng' },
+    { id: 'ai-analytics', name: 'AI Analytics Module', category: 'Sản phẩm', price: 800000, description: 'Module phân tích dữ liệu với AI' },
+    { id: 'marketing-automation', name: 'Marketing Automation', category: 'Sản phẩm', price: 600000, description: 'Tự động hóa marketing và email campaigns' },
+    { id: 'sales-dashboard', name: 'Sales Dashboard Pro', category: 'Sản phẩm', price: 400000, description: 'Dashboard bán hàng chuyên nghiệp' },
+    { id: 'mobile-app', name: 'Mobile App License', category: 'Sản phẩm', price: 300000, description: 'Giấy phép sử dụng ứng dụng di động' }
+  ]
+
+  // Available packages for each product
+  const availablePackages = {
+    'crm-basic': [
+      { id: 'basic-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'basic-plus', name: 'Gói Plus', price: 200000, description: 'Thêm training cơ bản + support 3 tháng' },
+      { id: 'basic-premium', name: 'Gói Premium', price: 500000, description: 'Thêm training + support 6 tháng + customization' }
+    ],
+    'crm-professional': [
+      { id: 'pro-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'pro-plus', name: 'Gói Plus', price: 400000, description: 'Thêm AI Analytics + training nâng cao' },
+      { id: 'pro-premium', name: 'Gói Premium', price: 800000, description: 'Thêm full modules + premium support 1 năm' }
+    ],
+    'crm-enterprise': [
+      { id: 'ent-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'ent-plus', name: 'Gói Plus', price: 1000000, description: 'Thêm full training + migration service' },
+      { id: 'ent-premium', name: 'Gói Premium', price: 2000000, description: 'Thêm custom development + premium support 2 năm' }
+    ],
+    'ai-analytics': [
+      { id: 'ai-standard', name: 'Gói Standard', price: 0, description: 'Module cơ bản' },
+      { id: 'ai-advanced', name: 'Gói Advanced', price: 300000, description: 'Thêm custom reports + training' }
+    ],
+    'marketing-automation': [
+      { id: 'marketing-standard', name: 'Gói Standard', price: 0, description: 'Module cơ bản' },
+      { id: 'marketing-pro', name: 'Gói Pro', price: 250000, description: 'Thêm email templates + analytics' }
+    ],
+    'sales-dashboard': [
+      { id: 'dashboard-standard', name: 'Gói Standard', price: 0, description: 'Dashboard cơ bản' },
+      { id: 'dashboard-pro', name: 'Gói Pro', price: 200000, description: 'Thêm custom widgets + real-time data' }
+    ],
+    'mobile-app': [
+      { id: 'mobile-standard', name: 'Gói Standard', price: 0, description: 'License cơ bản' },
+      { id: 'mobile-unlimited', name: 'Gói Unlimited', price: 150000, description: 'Unlimited users + premium features' }
+    ]
+  }
+
+  // Helper function to format currency
+  const formatCurrency = (amount: string | number) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+    return new Intl.NumberFormat('vi-VN').format(numAmount)
+  }
 
   const [visibleColumns, setVisibleColumns] = useState({
     checkbox: true,
@@ -250,6 +304,7 @@ export default function SalesManagement() {
         setOriginalTargetStatus('converted') // Lưu trạng thái gốc
         setDragTargetStatus('payment_pending') // Tự động đặt về payment_pending
         setSelectedProducts([]) // Reset selected products
+        setSelectedPackages({}) // Reset selected packages
         setShowDragConvertModal(true)
         return
       }
@@ -257,9 +312,9 @@ export default function SalesManagement() {
       // Kiểm tra xem có cần hiển thị popup chọn sản phẩm không
       const needProductSelection = (
         // Từ "Chờ thanh toán" kéo sang trạng thái khác (trừ lost)
-        (draggedLead.status === 'payment_pending' && targetStatus !== 'lost') ||
+        ((draggedLead.status as string) === 'payment_pending' && targetStatus !== 'lost') ||
         // Kéo vào "Chờ thanh toán" từ các trạng thái khác
-        (targetStatus === 'payment_pending')
+        (targetStatus as string === 'payment_pending')
       )
 
       if (needProductSelection) {
@@ -268,6 +323,7 @@ export default function SalesManagement() {
         setOriginalTargetStatus(targetStatus) // Lưu trạng thái gốc
         setDragTargetStatus(targetStatus)
         setSelectedProducts([]) // Reset selected products
+        setSelectedPackages({}) // Reset selected packages
         setShowDragConvertModal(true)
       } else {
         // Chuyển trạng thái thông thường
@@ -385,6 +441,7 @@ export default function SalesManagement() {
     setSelectedLead(lead)
     setSelectedProduct('') // Reset single product selection
     setSelectedProducts([]) // Reset multiple products selection
+    setSelectedPackages({}) // Reset package selection
     setShowConvertModal(true)
   }
 
@@ -452,6 +509,7 @@ export default function SalesManagement() {
     setSelectedLead(null)
     setSelectedProduct('')
     setSelectedProducts([]) // Reset multiple products selection
+    setSelectedPackages({}) // Reset package selection
   }
 
   // Payment success handler
@@ -549,6 +607,7 @@ export default function SalesManagement() {
     setDragTargetStatus('')
     setOriginalTargetStatus('')
     setSelectedProducts([])
+    setSelectedPackages({})
   }
 
   // Auto assignment logic
@@ -1700,7 +1759,7 @@ export default function SalesManagement() {
       product: 'CRM Premium',
       tags: ['hot', 'enterprise'],
       content: 'Đã ký hợp đồng, đang chờ thanh toán',
-      status: 'payment_pending',
+      status: 'negotiation',
       stage: 'waiting_payment',
       notes: 'Hợp đồng đã ký, khách hàng xác nhận thanh toán trong tuần',
       assignedTo: 'An Expert',
@@ -1870,7 +1929,7 @@ export default function SalesManagement() {
       contactedLeads: leads.filter(l => l.status === 'contacted').length,
       qualifiedLeads: leads.filter(l => l.status === 'qualified').length,
       negotiationLeads: leads.filter(l => l.status === 'negotiation').length,
-      paymentPendingLeads: leads.filter(l => l.status === 'payment_pending').length,
+      paymentPendingLeads: leads.filter(l => (l.status as string) === 'payment_pending').length,
       convertedLeads: leads.filter(l => l.status === 'converted').length,
       lostLeads: leads.filter(l => l.status === 'lost').length,
       totalValue: leads.reduce((sum, lead) => sum + lead.value, 0),
@@ -3142,7 +3201,7 @@ export default function SalesManagement() {
                                     </button>
                                     
                                     {/* Hiển thị buttons khác nhau tùy theo status */}
-                                    {lead.status === 'payment_pending' ? (
+                                    {(lead.status as string) === 'payment_pending' ? (
                                       <>
                                         <button 
                                           onClick={() => handlePaymentSuccess(lead)}
@@ -5085,63 +5144,119 @@ export default function SalesManagement() {
                 <div>
                   <h4 className="font-medium text-gray-900">{selectedLead.name}</h4>
                   <p className="text-sm text-gray-500">{selectedLead.company || 'Cá nhân'}</p>
-                  <p className="text-lg font-semibold text-green-600">{(selectedLead.value / 1000000).toFixed(1)}M VND</p>
                 </div>
               </div>
 
-              {/* Product Selection - Multiple Choice */}
+              {/* Product Selection - with Packages */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chọn sản phẩm khách hàng quan tâm <span className="text-red-500">*</span>
-                  <span className="text-xs text-gray-500 ml-1">(Có thể chọn nhiều)</span>
+                  Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span>
                 </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                  {[
-                    'CRM Solution',
-                    'Marketing Automation', 
-                    'Sales Management',
-                    'Customer Service',
-                    'Analytics Dashboard',
-                    'E-commerce Platform',
-                    'Inventory Management',
-                    'HR Management',
-                    'Financial Management',
-                    'Project Management',
-                    'Supply Chain',
-                    'Customer Analytics',
-                    'Quality Management',
-                    'Education Platform',
-                    'Security System',
-                    'Mobile App Development',
-                    'Cloud Infrastructure',
-                    'IoT Solutions'
-                  ].map((product) => (
-                    <label key={product} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product])
-                          } else {
-                            setSelectedProducts(prev => prev.filter(p => p !== product))
-                          }
-                        }}
-                        className="w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
-                      />
-                      <span className="text-sm text-gray-700">{product}</span>
-                    </label>
+                <div className="max-h-80 overflow-y-auto space-y-3 border border-gray-300 rounded-lg p-3">
+                  {availableProducts.map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-4 bg-white">
+                      {/* Product Selection */}
+                      <label className="flex items-start space-x-3 cursor-pointer mb-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(prev => [...prev, product.id])
+                              // Set default package to standard
+                              setSelectedPackages(prev => ({
+                                ...prev,
+                                [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                              }))
+                            } else {
+                              setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                              // Remove package selection
+                              setSelectedPackages(prev => {
+                                const newPackages = { ...prev }
+                                delete newPackages[product.id]
+                                return newPackages
+                              })
+                            }
+                          }}
+                          className="mt-1 h-4 w-4 text-green-600 focus:ring-green-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h6 className="font-medium text-gray-900">{product.name}</h6>
+                              <p className="text-sm text-gray-600">{product.description}</p>
+                            </div>
+                            <span className="font-medium text-green-600">
+                              {formatCurrency(product.price.toString())} VNĐ
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+
+                      {/* Package Selection Dropdown */}
+                      {selectedProducts.includes(product.id) && (
+                        <div className="ml-7 border-t border-gray-100 pt-3">
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Chọn gói sản phẩm:
+                          </label>
+                          <select
+                            value={selectedPackages[product.id] || ''}
+                            onChange={(e) => setSelectedPackages(prev => ({
+                              ...prev,
+                              [product.id]: e.target.value
+                            }))}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500 text-sm"
+                          >
+                            {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
+                              <option key={pkg.id} value={pkg.id}>
+                                {pkg.name} - {pkg.price > 0 ? `+${formatCurrency(pkg.price.toString())} VNĐ` : 'Miễn phí'} 
+                                {pkg.description && ` - ${pkg.description}`}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
+
+                {/* Selected Products Summary */}
                 {selectedProducts.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600 mb-1">Đã chọn {selectedProducts.length} sản phẩm:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedProducts.map(product => (
-                        <span key={product} className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">
-                          {product}
-                        </span>
-                      ))}
+                  <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                    <p className="text-sm font-medium text-green-800 mb-2">Đã chọn {selectedProducts.length} sản phẩm:</p>
+                    <div className="space-y-1">
+                      {selectedProducts.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
+                        
+                        return product ? (
+                          <div key={productId} className="flex justify-between text-sm">
+                            <span>
+                              {product.name} ({selectedPackage?.name || 'Standard'})
+                            </span>
+                            <span className="font-medium text-green-600">
+                              {formatCurrency(totalPrice.toString())} VNĐ
+                            </span>
+                          </div>
+                        ) : null
+                      })}
+                      <div className="border-t border-green-200 pt-1 mt-2">
+                        <div className="flex justify-between font-medium text-green-800">
+                          <span>Tổng cộng:</span>
+                          <span>
+                            {formatCurrency(
+                              selectedProducts.reduce((sum, productId) => {
+                                const product = availableProducts.find(p => p.id === productId)
+                                const selectedPackageId = selectedPackages[productId]
+                                const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                                return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                              }, 0).toString()
+                            )} VNĐ
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 )}
@@ -5153,10 +5268,21 @@ export default function SalesManagement() {
               <div className="bg-green-50 rounded-lg p-4 mb-4">
                 <h5 className="text-sm font-medium text-green-900 mb-2">Điều gì sẽ xảy ra:</h5>
                 <ul className="text-sm text-green-800 space-y-1">
-                  <li>• Lead được chuyển thành trạng thái "Đã chuyển đổi"</li>
+                  <li>• Lead được chuyển thành trạng thái "Chuyển đổi - chờ thanh toán"</li>
                   <li>• Deal mới sẽ được tạo trong hệ thống</li>
-                  <li>• Bắt đầu quy trình thực hiện dự án</li>
-                  {selectedProduct && <li>• Sản phẩm: <span className="font-medium">{selectedProduct}</span></li>}
+                  <li>• Bắt đầu quy trình theo dõi thanh toán</li>
+                  {selectedProducts.length > 0 && (
+                    <li>• Tổng giá trị đơn hàng: <span className="font-medium">
+                      {formatCurrency(
+                        selectedProducts.reduce((sum, productId) => {
+                          const product = availableProducts.find(p => p.id === productId)
+                          const selectedPackageId = selectedPackages[productId]
+                          const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                        }, 0).toString()
+                      )} VNĐ
+                    </span></li>
+                  )}
                 </ul>
               </div>
               
@@ -5171,6 +5297,7 @@ export default function SalesManagement() {
                   setShowConvertModal(false)
                   setSelectedProduct('') // Reset single product when closing modal
                   setSelectedProducts([]) // Reset multiple products when closing modal
+                  setSelectedPackages({}) // Reset packages when closing modal
                 }}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
@@ -5219,62 +5346,101 @@ export default function SalesManagement() {
                 </div>
               </div>
 
-              {/* Product Selection - Multiple Choice */}
+              {/* Product Selection - with Packages */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   {dragTargetStatus === 'converted' ? 
                     'Chọn sản phẩm đã bán' : 
                     'Chọn sản phẩm chuyển đổi'
                   } <span className="text-red-500">*</span>
-                  <span className="text-xs text-gray-500 ml-1">(Có thể chọn nhiều)</span>
                 </label>
-                <div className="space-y-2 max-h-48 overflow-y-auto border border-gray-300 rounded-lg p-3">
-                  {[
-                    'CRM Solution',
-                    'Marketing Automation', 
-                    'Sales Management',
-                    'Customer Service',
-                    'Analytics Dashboard',
-                    'E-commerce Platform',
-                    'Inventory Management',
-                    'HR Management',
-                    'Financial Management',
-                    'Project Management',
-                    'Supply Chain',
-                    'Customer Analytics',
-                    'Quality Management',
-                    'Education Platform',
-                    'Security System',
-                    'Mobile App Development',
-                    'Cloud Infrastructure',
-                    'IoT Solutions'
-                  ].map((product) => (
-                    <label key={product} className="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product])
-                          } else {
-                            setSelectedProducts(prev => prev.filter(p => p !== product))
-                          }
-                        }}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="text-sm text-gray-700">{product}</span>
-                    </label>
+                <div className="max-h-64 overflow-y-auto space-y-3 border border-gray-300 rounded-lg p-3">
+                  {availableProducts.map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+                      {/* Product Selection */}
+                      <label className="flex items-start space-x-3 cursor-pointer mb-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(prev => [...prev, product.id])
+                              // Set default package to standard
+                              setSelectedPackages(prev => ({
+                                ...prev,
+                                [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                              }))
+                            } else {
+                              setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                              // Remove package selection
+                              setSelectedPackages(prev => {
+                                const newPackages = { ...prev }
+                                delete newPackages[product.id]
+                                return newPackages
+                              })
+                            }
+                          }}
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1">
+                          <div className="flex justify-between items-start">
+                            <div>
+                              <h6 className="font-medium text-gray-900">{product.name}</h6>
+                              <p className="text-sm text-gray-600">{product.description}</p>
+                            </div>
+                            <span className="font-medium text-blue-600">
+                              {formatCurrency(product.price.toString())} VNĐ
+                            </span>
+                          </div>
+                        </div>
+                      </label>
+
+                      {/* Package Selection Dropdown */}
+                      {selectedProducts.includes(product.id) && (
+                        <div className="ml-7 border-t border-gray-100 pt-2">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Chọn gói:
+                          </label>
+                          <select
+                            value={selectedPackages[product.id] || ''}
+                            onChange={(e) => setSelectedPackages(prev => ({
+                              ...prev,
+                              [product.id]: e.target.value
+                            }))}
+                            className="w-full px-2 py-1 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
+                              <option key={pkg.id} value={pkg.id}>
+                                {pkg.name} - {pkg.price > 0 ? `+${formatCurrency(pkg.price.toString())} VNĐ` : 'Miễn phí'}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
                   ))}
                 </div>
+
+                {/* Selected Products Summary */}
                 {selectedProducts.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-xs text-gray-600 mb-1">Đã chọn {selectedProducts.length} sản phẩm:</p>
-                    <div className="flex flex-wrap gap-1">
-                      {selectedProducts.map(product => (
-                        <span key={product} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded-full">
-                          {product}
-                        </span>
-                      ))}
+                  <div className="mt-2 p-2 bg-blue-50 rounded">
+                    <p className="text-xs text-blue-800 font-medium mb-1">Đã chọn {selectedProducts.length} sản phẩm:</p>
+                    <div className="space-y-1">
+                      {selectedProducts.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
+                        
+                        return product ? (
+                          <div key={productId} className="flex justify-between text-xs">
+                            <span>{product.name} ({selectedPackage?.name || 'Standard'})</span>
+                            <span className="font-medium text-blue-600">
+                              {formatCurrency(totalPrice.toString())} VNĐ
+                            </span>
+                          </div>
+                        ) : null
+                      })}
                     </div>
                   </div>
                 )}
@@ -5301,6 +5467,7 @@ export default function SalesManagement() {
                   setDragTargetStatus('')
                   setOriginalTargetStatus('')
                   setSelectedProducts([])
+                  setSelectedPackages({})
                 }}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >

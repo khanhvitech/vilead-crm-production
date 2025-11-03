@@ -57,7 +57,8 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       label: "Tổng quan",
       iconText: "📊",
       tooltip: "Tổng quan: Dashboard theo vai trò",
-      roles: ["admin", "ceo", "leader", "sale", "accountant"]
+      roles: ["admin", "ceo", "leader", "sale", "accountant"],
+      disabled: true
     },
     {
       id: 'sales',
@@ -65,21 +66,24 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       label: "Hoạt động bán hàng",
       iconText: "🚀",
       tooltip: "Hoạt động bán hàng: Quản lý tổng thể Lead và Deal",
-      roles: ["admin", "ceo", "leader", "sale"]
+      roles: ["admin", "ceo", "leader", "sale"],
+      disabled: false
     },    {
       id: 'customers',
       icon: UserCheck,
       label: "Chăm sóc Khách hàng",
       iconText: "👤",
       tooltip: "Chăm sóc Khách hàng: Thông tin và lịch sử khách hàng",
-      roles: ["admin", "ceo", "leader", "sale", "accountant"]
+      roles: ["admin", "ceo", "leader", "sale", "accountant"],
+      disabled: false
     },    {
       id: 'orders',
       icon: ShoppingCart,
       label: "Quản lý Đơn hàng",
       iconText: "🛒",
       tooltip: "Quản lý Đơn hàng: Trạng thái và hóa đơn",
-      roles: ["admin", "ceo", "leader", "sale", "accountant"]
+      roles: ["admin", "ceo", "leader", "sale", "accountant"],
+      disabled: false
     },
     {
       id: 'tasks',
@@ -87,7 +91,8 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       label: "Quản lý Công việc",
       iconText: "✅",
       tooltip: "Quản lý Công việc: Task và tiến độ",
-      roles: ["admin", "ceo", "leader", "sale"]
+      roles: ["admin", "ceo", "leader", "sale"],
+      disabled: true
     },
     {
       id: 'reports',
@@ -95,7 +100,8 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       label: "Báo cáo",
       iconText: "📊",
       tooltip: "Báo cáo: Doanh số, hiệu suất và KPIs",
-      roles: ["admin", "ceo", "leader", "accountant"]
+      roles: ["admin", "ceo", "leader", "accountant"],
+      disabled: true
     },
     {
       id: 'settings',
@@ -103,7 +109,8 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       label: "Cài đặt",
       iconText: "⚙️",
       tooltip: "Cài đặt: Hệ thống, tích hợp và quản lý công ty",
-      roles: ["admin"]
+      roles: ["admin"],
+      disabled: true
     },
   ];
 
@@ -241,33 +248,50 @@ export default function VileadSidebar({
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentView === item.id;
+            const isDisabled = item.disabled;
             
             return (
               <button
                 key={item.id}
                 onClick={() => {
-                  setCurrentView(item.id)
+                  if (!isDisabled) {
+                    setCurrentView(item.id)
+                  }
                 }}
+                disabled={isDisabled}
                 className={cn(
-                  "w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 group cursor-pointer",
-                  isActive 
+                  "w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 group",
+                  isDisabled 
+                    ? "cursor-not-allowed opacity-50 text-gray-400" 
+                    : "cursor-pointer",
+                  !isDisabled && isActive 
                     ? "bg-blue-50 text-blue-600 shadow-sm border border-blue-100" 
-                    : "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                    : !isDisabled 
+                      ? "text-gray-700 hover:bg-gray-50 hover:text-gray-900"
+                      : "text-gray-400"
                 )}
-                title={isCollapsed ? item.tooltip : ""}
+                title={isCollapsed ? item.tooltip : (isDisabled ? `${item.tooltip} (Tạm thời không khả dụng)` : "")}
               >
                 <div className={cn(
                   "flex items-center justify-center w-6 h-6",
-                  isActive 
-                    ? "text-blue-600" 
-                    : "text-gray-500 group-hover:text-gray-700"
+                  isDisabled
+                    ? "text-gray-400"
+                    : isActive 
+                      ? "text-blue-600" 
+                      : "text-gray-500 group-hover:text-gray-700"
                 )}>
                   <Icon className="w-5 h-5" />
                 </div>
                 
                 {!isCollapsed && (
-                  <span className="font-medium text-sm truncate flex-1 text-left">
+                  <span className={cn(
+                    "font-medium text-sm truncate flex-1 text-left",
+                    isDisabled && "text-gray-400"
+                  )}>
                     {item.label}
+                    {isDisabled && (
+                      <span className="ml-2 text-xs text-gray-400">(Tạm khóa)</span>
+                    )}
                   </span>
                 )}
               </button>

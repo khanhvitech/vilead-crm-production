@@ -392,16 +392,6 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
                 <input
                   type="checkbox"
                   className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
-                  checked={filters.isVIP || false}
-                  onChange={(e) => updateFilter('isVIP', e.target.checked ? true : undefined)}
-                />
-                <span className="text-sm text-gray-700">Chỉ khách VIP</span>
-              </label>
-
-              <label className="flex items-center space-x-2">
-                <input
-                  type="checkbox"
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
                   checked={filters.isAtRisk || false}
                   onChange={(e) => updateFilter('isAtRisk', e.target.checked ? true : undefined)}
                 />

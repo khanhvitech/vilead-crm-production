@@ -387,17 +387,6 @@ export default function CreateOrderModal({
                     <option value="custom">Tùy chỉnh</option>
                   </select>
                 </div>
-                <div>
-                  <label className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={formData.isVip}
-                      onChange={(e) => setFormData(prev => ({ ...prev, isVip: e.target.checked }))}
-                      className="mr-2"
-                    />
-                    <span className="text-sm text-gray-700">Khách hàng VIP</span>
-                  </label>
-                </div>
               </div>
             </div>
           </div>
