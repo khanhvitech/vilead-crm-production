@@ -9,6 +9,7 @@ import SalesManagement from './components/SalesManagement'
 import CustomersManagement from './components/CustomersManagement'
 import OrderManagement from './components/OrderManagement'
 import TaskManagement from './components/TaskManagement'
+import KPIManagement from './components/KPIManagement'
 import ReportsManagement from './components/ReportsManagement'
 import SettingsManagement from './components/SettingsManagement'
 import ChatbotAssistant from './components/ChatbotAssistantNew'
@@ -50,6 +51,8 @@ export default function Home() {
         return <OrderManagement />
       case 'tasks':
         return <TaskManagement />
+      case 'kpi':
+        return <KPIManagement />
       case 'products':  // Redirect to settings for backward compatibility
         return <SettingsManagement />
       case 'employees': // Redirect to settings for backward compatibility

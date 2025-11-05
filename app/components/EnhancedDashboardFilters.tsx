@@ -168,10 +168,10 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
 
   return (
     <div className="mb-6 space-y-4">
-      {/* Main Filters */}
+      {/* Main Filters - Hidden */}
+      {/*
       <div className="flex items-center justify-between bg-white px-4 py-3 rounded-lg shadow-sm border border-gray-200">
         <div className="flex items-center gap-4">
-          {/* Time Filter */}
           <div className="flex items-center space-x-2">
             <label className="text-sm text-gray-600">Thời gian:</label>
             <div className="relative">
@@ -200,11 +200,9 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
             )}
           </div>
 
-          {/* View Type & Team Filter */}
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4 text-gray-400" />
             <div className="flex items-center gap-2">
-              {/* View Type Selector */}
               <select 
                 value={viewType}
                 onChange={(e) => handleViewTypeChange(e.target.value)}
@@ -216,7 +214,6 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
                 <option value="individual">Theo cá nhân</option>
               </select>
               
-              {/* Specific Filter (only show when view type is not 'all') */}
               {viewType !== 'all' && (
                 <select 
                   value={teamFilter}
@@ -234,9 +231,6 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
             </div>
           </div>
 
-
-
-          {/* Advanced Filter Button - Hidden */}
           <button 
             onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
             className="hidden"
@@ -246,7 +240,6 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
           </button>
         </div>
 
-        {/* Toggle Buttons */}
         <div className="flex items-center gap-2">
           <button
             onClick={() => setShowComparison(!showComparison)}
@@ -318,6 +311,7 @@ export default function EnhancedDashboardFilters({ onFilterChange }: DashboardFi
           </button>
         </div>
       </div>
+      */}
 
       {/* Comparison Panel */}
       {showComparison && (

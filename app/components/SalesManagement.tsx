@@ -39,7 +39,8 @@ import {
   Save,
   Columns,
   MapPin,
-  Percent
+  Percent,
+  ChevronDown
 } from 'lucide-react'
 
 interface Lead {
@@ -65,6 +66,13 @@ interface Lead {
   nextAction: string
   nextActionDate: string
   careCount?: number
+  assignee?: string
+  department?: string
+  team?: string
+  lastContact?: string
+  interactions?: number
+  priority?: string
+  interestedProducts?: string[]
   quickNotes?: Array<{
     content: string
     timestamp: string
@@ -116,6 +124,21 @@ export default function SalesManagement() {
   const [dragTargetStatus, setDragTargetStatus] = useState<string>('')
   const [originalTargetStatus, setOriginalTargetStatus] = useState<string>('') // Track trạng thái gốc user kéo vào
   const [pendingDragLead, setPendingDragLead] = useState<Lead | null>(null)
+  
+  // Advanced filters state
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterSource, setFilterSource] = useState('')
+  const [filterAssignee, setFilterAssignee] = useState('')
+  const [filterRegion, setFilterRegion] = useState('')
+  const [filterDepartment, setFilterDepartment] = useState('')
+  const [filterTeam, setFilterTeam] = useState('')
+  const [filterLastContact, setFilterLastContact] = useState('')
+  const [filterCreatedDate, setFilterCreatedDate] = useState({start: '', end: ''})
+  const [filterInteractionCount, setFilterInteractionCount] = useState({min: '', max: ''})
+  const [filterPriority, setFilterPriority] = useState('')
+  const [filterProductInterest, setFilterProductInterest] = useState('')
+  const [searchTerm, setSearchTerm] = useState('')
   
   // Column visibility state
   // Sales team data
@@ -1920,7 +1943,41 @@ export default function SalesManagement() {
       const matchesRegion = leadRegionFilter === 'all' || lead.region === leadRegionFilter
       const matchesSource = leadSourceFilter === 'all' || lead.source === leadSourceFilter
       
-      return matchesSearch && matchesStatus && matchesRegion && matchesSource
+      // Advanced filters
+      const matchesAssignee = !filterAssignee || lead.assignee === filterAssignee
+      
+      const matchesDepartment = !filterDepartment || lead.department === filterDepartment
+      
+      const matchesTeam = !filterTeam || lead.team === filterTeam
+      
+      const matchesLastContact = !filterLastContact || (() => {
+        if (!lead.lastContact) return filterLastContact === 'old'
+        const lastContactDate = new Date(lead.lastContact)
+        const now = new Date()
+        const daysDiff = Math.floor((now.getTime() - lastContactDate.getTime()) / (1000 * 60 * 60 * 24))
+        
+        switch(filterLastContact) {
+          case 'today': return daysDiff === 0
+          case 'week': return daysDiff <= 7
+          case 'month': return daysDiff <= 30
+          case 'old': return daysDiff > 30
+          default: return true
+        }
+      })()
+      
+      const matchesCreatedDate = (!filterCreatedDate.start || new Date(lead.createdAt) >= new Date(filterCreatedDate.start)) &&
+                                (!filterCreatedDate.end || new Date(lead.createdAt) <= new Date(filterCreatedDate.end))
+      
+      const matchesInteractionCount = (!filterInteractionCount.min || (lead.interactions || 0) >= parseInt(filterInteractionCount.min)) &&
+                                     (!filterInteractionCount.max || (lead.interactions || 0) <= parseInt(filterInteractionCount.max))
+      
+      const matchesPriority = !filterPriority || lead.priority === filterPriority
+      
+      const matchesProductInterest = !filterProductInterest || (lead.interestedProducts && lead.interestedProducts.includes(filterProductInterest))
+      
+      return matchesSearch && matchesStatus && matchesRegion && matchesSource &&
+             matchesAssignee && matchesDepartment && matchesTeam && matchesLastContact && 
+             matchesCreatedDate && matchesInteractionCount && matchesPriority && matchesProductInterest
     })
 
     // Pipeline statistics
@@ -2418,6 +2475,14 @@ export default function SalesManagement() {
                 <option value="referral">Referral</option>
               </select>
               
+              <button
+                onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center gap-2"
+              >
+                <Filter className="w-4 h-4" />
+                Lọc nâng cao
+                <ChevronDown className={`w-4 h-4 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+              </button>
               
               <div className="relative">
                 <button
@@ -2486,6 +2551,7 @@ export default function SalesManagement() {
                 )}
               </div>
               
+              {/* Hidden: Automatic lead distribution button 
               <button 
                 onClick={() => setShowAutoAssignModal(true)}
                 className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
@@ -2493,6 +2559,7 @@ export default function SalesManagement() {
                 <Bot className="w-4 h-4" />
                 Phân leads tự động
               </button>
+              */}
               
               <button 
                 onClick={() => setShowImportModal(true)}
@@ -2513,7 +2580,10 @@ export default function SalesManagement() {
           </div>
           
           {/* Filter Summary */}
-          {(leadSearchTerm || leadStatusFilter !== 'all' || leadRegionFilter !== 'all' || leadSourceFilter !== 'all') && (
+          {(leadSearchTerm || leadStatusFilter !== 'all' || leadRegionFilter !== 'all' || leadSourceFilter !== 'all' ||
+            filterDepartment || filterTeam || filterAssignee || filterLastContact || filterCreatedDate.start || filterCreatedDate.end ||
+            filterInteractionCount.min || filterInteractionCount.max || filterPriority || 
+            filterProductInterest) && (
             <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
               <span>Hiển thị {filteredLeads.length} / {leads.length} leads</span>
               <button 
@@ -2522,14 +2592,194 @@ export default function SalesManagement() {
                   setLeadStatusFilter('all');
                   setLeadRegionFilter('all');
                   setLeadSourceFilter('all');
+                  // Clear advanced filters
+                  setFilterDepartment('')
+                  setFilterTeam('')
+                  setFilterAssignee('')
+                  setFilterLastContact('')
+                  setFilterCreatedDate({start: '', end: ''})
+                  setFilterInteractionCount({min: '', max: ''})
+                  setFilterPriority('')
+                  setFilterProductInterest('')
                 }}
                 className="text-blue-600 hover:text-blue-800"
               >
-                Xóa bộ lọc
+                Xóa tất cả bộ lọc
               </button>
             </div>
           )}
         </div>
+
+        {/* Advanced Filters */}
+        {showAdvancedFilters && (
+          <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+            <h3 className="text-sm font-medium mb-3">Bộ lọc nâng cao</h3>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* Department */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Phòng ban</label>
+                <select
+                  value={filterDepartment}
+                  onChange={(e) => setFilterDepartment(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả phòng ban</option>
+                  <option value="Sales">Phòng kinh doanh</option>
+                  <option value="Marketing">Phòng marketing</option>
+                  <option value="Customer Success">Phòng chăm sóc khách hàng</option>
+                  <option value="Business Development">Phòng phát triển kinh doanh</option>
+                  <option value="Inside Sales">Phòng telesales</option>
+                </select>
+              </div>
+
+              {/* Team */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Team</label>
+                <select
+                  value={filterTeam}
+                  onChange={(e) => setFilterTeam(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả team</option>
+                  <option value="Team Alpha">Team Alpha</option>
+                  <option value="Team Beta">Team Beta</option>
+                  <option value="Team Gamma">Team Gamma</option>
+                  <option value="Team Delta">Team Delta</option>
+                  <option value="Team Enterprise">Team Enterprise</option>
+                  <option value="Team SMB">Team SMB</option>
+                </select>
+              </div>
+
+              {/* Assignee */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Sales phụ trách</label>
+                <select
+                  value={filterAssignee}
+                  onChange={(e) => setFilterAssignee(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                  <option value="Trần Thị B">Trần Thị B</option>
+                  <option value="Lê Văn C">Lê Văn C</option>
+                  <option value="Phạm Thị D">Phạm Thị D</option>
+                  <option value="Hoàng Văn E">Hoàng Văn E</option>
+                </select>
+              </div>
+
+              {/* Last Contact */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Liên hệ gần nhất</label>
+                <select
+                  value={filterLastContact}
+                  onChange={(e) => setFilterLastContact(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="today">Hôm nay</option>
+                  <option value="week">7 ngày qua</option>
+                  <option value="month">30 ngày qua</option>
+                  <option value="old">Hơn 30 ngày</option>
+                </select>
+              </div>
+
+              {/* Created Date Range */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Ngày tạo lead</label>
+                <div className="flex gap-2">
+                  <input
+                    type="date"
+                    value={filterCreatedDate.start}
+                    onChange={(e) => setFilterCreatedDate({...filterCreatedDate, start: e.target.value})}
+                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                  />
+                  <input
+                    type="date"
+                    value={filterCreatedDate.end}
+                    onChange={(e) => setFilterCreatedDate({...filterCreatedDate, end: e.target.value})}
+                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                  />
+                </div>
+              </div>
+
+              {/* Interaction Count */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Số lần tương tác</label>
+                <div className="flex gap-2">
+                  <input
+                    type="number"
+                    placeholder="Từ"
+                    value={filterInteractionCount.min}
+                    onChange={(e) => setFilterInteractionCount({...filterInteractionCount, min: e.target.value})}
+                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                    min="0"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Đến"
+                    value={filterInteractionCount.max}
+                    onChange={(e) => setFilterInteractionCount({...filterInteractionCount, max: e.target.value})}
+                    className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                    min="0"
+                  />
+                </div>
+              </div>
+
+              {/* Priority */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Độ ưu tiên</label>
+                <select
+                  value={filterPriority}
+                  onChange={(e) => setFilterPriority(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="high">Cao</option>
+                  <option value="medium">Trung bình</option>
+                  <option value="low">Thấp</option>
+                </select>
+              </div>
+
+              {/* Product Interest */}
+              <div>
+                <label className="block text-sm font-medium mb-1">Quan tâm sản phẩm</label>
+                <select
+                  value={filterProductInterest}
+                  onChange={(e) => setFilterProductInterest(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                >
+                  <option value="">Tất cả</option>
+                  <option value="CRM Basic">CRM Basic</option>
+                  <option value="CRM Professional">CRM Professional</option>
+                  <option value="CRM Enterprise">CRM Enterprise</option>
+                  <option value="Marketing Automation">Marketing Automation</option>
+                  <option value="Sales Analytics">Sales Analytics</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Clear Advanced Filters */}
+            <div className="mt-4 pt-3 border-t border-gray-200">
+              <button
+                onClick={() => {
+                  setFilterDepartment('')
+                  setFilterTeam('')
+                  setFilterAssignee('')
+                  setFilterLastContact('')
+                  setFilterCreatedDate({start: '', end: ''})
+                  setFilterInteractionCount({min: '', max: ''})
+                  setFilterPriority('')
+                  setFilterProductInterest('')
+                }}
+                className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+              >
+                <X className="w-4 h-4" />
+                <span>Xóa bộ lọc nâng cao</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Leads View - Table or Kanban */}
         {viewMode === 'table' ? (

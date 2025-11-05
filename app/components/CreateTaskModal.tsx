@@ -4,18 +4,17 @@ import React, { useState, useEffect } from 'react'
 import { 
   X, 
   Save, 
-  Search, 
   Calendar, 
   Clock, 
   User, 
-  Tag, 
   FileText, 
   AlertTriangle,
-  Phone,
+  ChevronDown,
   Building,
   ShoppingCart,
   Users,
-  ChevronDown,
+  Search,
+  Tag,
   Plus
 } from 'lucide-react'
 
@@ -84,13 +83,12 @@ export default function CreateTaskModal({
   isOpen,
   onClose,
   onSave,
-  templates,
   employees,
-  leads,
-  orders,
-  customers
+  templates = [],
+  leads = [],
+  orders = [],
+  customers = []
 }: CreateTaskModalProps) {
-  const [activeStep, setActiveStep] = useState(1)
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -98,23 +96,101 @@ export default function CreateTaskModal({
     dueTime: '',
     priority: 'medium',
     assignedTo: '',
-    assignedTeam: '',
+    selectedTemplate: '',
     relatedType: '',
     relatedId: '',
     relatedName: '',
-    relatedInfo: {} as any,
+    assignedTeam: '',
     tags: [] as string[],
-    internalNotes: '',
-    useTemplate: false,
-    selectedTemplate: '',
-    customTitle: false
+    notes: ''
   })
 
-  const [searchTerm, setSearchTerm] = useState('')
+  const [errors, setErrors] = useState<Record<string, string>>({})
+  const [activeStep, setActiveStep] = useState(1)
   const [showTemplates, setShowTemplates] = useState(false)
   const [showRelatedSearch, setShowRelatedSearch] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
   const [newTag, setNewTag] = useState('')
-  const [errors, setErrors] = useState<Record<string, string>>({})
+
+  // Mock data
+  const teams = [
+    { id: 'sales', name: 'Đội bán hàng' },
+    { id: 'marketing', name: 'Đội marketing' },
+    { id: 'support', name: 'Đội hỗ trợ' }
+  ]
+
+  const availableTags = [
+    'Khẩn cấp', 'Quan trọng', 'Theo dõi', 'Gọi lại', 'Email', 'Họp'
+  ]
+
+  // Helper functions
+  const handleTemplateSelect = (template: any) => {
+    setFormData(prev => ({
+      ...prev,
+      selectedTemplate: template.id,
+      title: template.title,
+      description: template.description
+    }))
+    setShowTemplates(false)
+  }
+
+  const getRelatedItems = () => {
+    if (!formData.relatedType || !searchTerm) return []
+    
+    switch (formData.relatedType) {
+      case 'lead':
+        return leads.filter((lead: any) => 
+          lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          lead.phone.includes(searchTerm)
+        ).slice(0, 5)
+      case 'order':
+        return orders.filter((order: any) => 
+          order.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          order.customerName.toLowerCase().includes(searchTerm.toLowerCase())
+        ).slice(0, 5)
+      case 'customer':
+        return customers.filter((customer: any) => 
+          customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          customer.phone.includes(searchTerm)
+        ).slice(0, 5)
+      default:
+        return []
+    }
+  }
+
+  const handleRelatedSelect = (type: string, item: any) => {
+    setFormData(prev => ({
+      ...prev,
+      relatedId: item.id,
+      relatedName: item.name || item.customerName || item.id
+    }))
+    setShowRelatedSearch(false)
+    setSearchTerm('')
+  }
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('vi-VN', {
+      style: 'currency',
+      currency: 'VND'
+    }).format(amount)
+  }
+
+  const addTag = (tag: string) => {
+    if (tag.trim() && !formData.tags.includes(tag.trim())) {
+      setFormData(prev => ({
+        ...prev,
+        tags: [...prev.tags, tag.trim()]
+      }))
+      setNewTag('')
+    }
+  }
+
+  const removeTag = (tagToRemove: string) => {
+    setFormData(prev => ({
+      ...prev,
+      tags: prev.tags.filter(tag => tag !== tagToRemove)
+    }))
+  }
 
   // Reset form when modal opens
   useEffect(() => {
@@ -126,125 +202,32 @@ export default function CreateTaskModal({
         dueTime: '',
         priority: 'medium',
         assignedTo: '',
-        assignedTeam: '',
+        selectedTemplate: '',
         relatedType: '',
         relatedId: '',
         relatedName: '',
-        relatedInfo: {},
+        assignedTeam: '',
         tags: [],
-        internalNotes: '',
-        useTemplate: false,
-        selectedTemplate: '',
-        customTitle: false
+        notes: ''
       })
-      setActiveStep(1)
       setErrors({})
+      setActiveStep(1)
+      setShowTemplates(false)
+      setShowRelatedSearch(false)
       setSearchTerm('')
       setNewTag('')
     }
   }, [isOpen])
-
-  // Available tags (in real app, this would come from API)
-  const availableTags = [
-    'Khẩn cấp',
-    'Quan trọng', 
-    'Theo dõi',
-    'VIP',
-    'Hợp đồng',
-    'Thanh toán',
-    'Tư vấn',
-    'Chăm sóc',
-    'Báo giá',
-    'Demo'
-  ]
-
-  // Teams
-  const teams = [
-    { id: 'sales', name: 'Kinh doanh' },
-    { id: 'support', name: 'Hỗ trợ' },
-    { id: 'marketing', name: 'Marketing' },
-    { id: 'technical', name: 'Kỹ thuật' }
-  ]
-
-  const handleTemplateSelect = (template: TaskTemplate) => {
-    setFormData(prev => ({
-      ...prev,
-      selectedTemplate: template.id,
-      title: template.title,
-      description: template.description,
-      useTemplate: true,
-      customTitle: false
-    }))
-    setShowTemplates(false)
-  }
-
-  const handleRelatedSelect = (type: string, item: any) => {
-    let relatedName = ''
-    let relatedInfo = {}
-
-    switch (type) {
-      case 'lead':
-        relatedName = item.name
-        relatedInfo = { phone: item.phone }
-        // Auto-assign to lead owner
-        if (item.assignedTo && !formData.assignedTo) {
-          setFormData(prev => ({ ...prev, assignedTo: item.assignedTo }))
-        }
-        break
-      case 'order':
-        relatedName = item.orderNumber
-        relatedInfo = { orderNumber: item.orderNumber, orderStatus: item.status }
-        // Auto-assign to order owner
-        if (item.assignedTo && !formData.assignedTo) {
-          setFormData(prev => ({ ...prev, assignedTo: item.assignedTo }))
-        }
-        break
-      case 'customer':
-        relatedName = item.name
-        relatedInfo = { phone: item.phone }
-        break
-    }
-
-    setFormData(prev => ({
-      ...prev,
-      relatedType: type,
-      relatedId: item.id,
-      relatedName,
-      relatedInfo
-    }))
-    setShowRelatedSearch(false)
-  }
-
-  const addTag = (tag: string) => {
-    if (tag && !formData.tags.includes(tag)) {
-      setFormData(prev => ({
-        ...prev,
-        tags: [...prev.tags, tag]
-      }))
-    }
-    setNewTag('')
-  }
-
-  const removeTag = (tagToRemove: string) => {
-    setFormData(prev => ({
-      ...prev,
-      tags: prev.tags.filter(tag => tag !== tagToRemove)
-    }))
-  }
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {}
 
     if (!formData.title.trim()) {
       newErrors.title = 'Tiêu đề là bắt buộc'
-    } else if (formData.title.length > 100) {
-      newErrors.title = 'Tiêu đề không được quá 100 ký tự'
     }
 
     if (!formData.description.trim()) {
       newErrors.description = 'Mô tả là bắt buộc'
-    } else if (formData.description.length > 1000) {
-      newErrors.description = 'Mô tả không được quá 1000 ký tự'
     }
 
     if (!formData.dueDate) {
@@ -255,12 +238,8 @@ export default function CreateTaskModal({
       newErrors.dueTime = 'Giờ đến hạn là bắt buộc'
     }
 
-    if (!formData.assignedTo && !formData.assignedTeam) {
-      newErrors.assignedTo = 'Phải chọn người phụ trách hoặc đội'
-    }
-
-    if (formData.internalNotes.length > 500) {
-      newErrors.internalNotes = 'Ghi chú không được quá 500 ký tự'
+    if (!formData.assignedTo) {
+      newErrors.assignedTo = 'Phải chọn người phụ trách'
     }
 
     setErrors(newErrors)
@@ -279,54 +258,21 @@ export default function CreateTaskModal({
       status: 'pending',
       progress: 0,
       assignedTo: formData.assignedTo,
-      assignedTeam: formData.assignedTeam,
-      tags: formData.tags,
-      relatedType: formData.relatedType || undefined,
-      relatedId: formData.relatedId || undefined,
-      relatedName: formData.relatedName || undefined,
-      relatedInfo: formData.relatedInfo || undefined,
-      internalNotes: formData.internalNotes,
+      tags: [],
+      relatedType: 'general',
+      notes: formData.notes,
       progressNotes: [],
       isAutoCreated: false,
       reminders: [],
       customReminders: [],
       createdAt: new Date().toISOString(),
-      createdBy: 'current_user', // Would be actual user ID
+      createdBy: 'current_user',
       updatedAt: new Date().toISOString(),
       history: []
     }
 
     onSave(newTask)
     onClose()
-  }
-
-  const getRelatedItems = () => {
-    switch (formData.relatedType) {
-      case 'lead':
-        return leads.filter(lead => 
-          lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          lead.phone.includes(searchTerm)
-        )
-      case 'order':
-        return orders.filter(order => 
-          order.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          order.customerName.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      case 'customer':
-        return customers.filter(customer => 
-          customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          customer.phone.includes(searchTerm)
-        )
-      default:
-        return []
-    }
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND'
-    }).format(amount)
   }
 
   if (!isOpen) return null
@@ -859,19 +805,19 @@ export default function CreateTaskModal({
                   Ghi chú nội bộ
                 </label>
                 <textarea
-                  value={formData.internalNotes}
-                  onChange={(e) => setFormData(prev => ({ ...prev, internalNotes: e.target.value }))}
+                  value={formData.notes}
+                  onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Thêm ghi chú nội bộ cho nhân viên phụ trách (tối đa 500 ký tự)"
                   maxLength={500}
                   rows={4}
                   className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.internalNotes ? 'border-red-300' : 'border-gray-300'
+                    errors.notes ? 'border-red-300' : 'border-gray-300'
                   }`}
                 />
-                {errors.internalNotes && (
-                  <p className="mt-1 text-sm text-red-600">{errors.internalNotes}</p>
+                {errors.notes && (
+                  <p className="mt-1 text-sm text-red-600">{errors.notes}</p>
                 )}
-                <p className="mt-1 text-sm text-gray-500">{formData.internalNotes.length}/500 ký tự</p>
+                <p className="mt-1 text-sm text-gray-500">{formData.notes.length}/500 ký tự</p>
               </div>
 
               {/* Summary */}
@@ -953,12 +899,12 @@ export default function CreateTaskModal({
                     </div>
                   )}
 
-                  {formData.internalNotes && (
+                  {formData.notes && (
                     <div className="flex items-start space-x-3">
                       <FileText className="w-5 h-5 text-gray-400 mt-0.5" />
                       <div>
                         <div className="font-medium">Ghi chú:</div>
-                        <div className="text-sm text-gray-600">{formData.internalNotes}</div>
+                        <div className="text-sm text-gray-600">{formData.notes}</div>
                       </div>
                     </div>
                   )}

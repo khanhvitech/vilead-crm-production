@@ -70,6 +70,8 @@ interface Customer {
   preferredChannel: 'email' | 'phone' | 'chat' | 'in-person' | 'social'
   interactions: CustomerInteraction[]
   products: CustomerProduct[]
+  team?: string
+  assignedPerson?: string
   
   // Personal Information
   dateOfBirth?: string
@@ -251,7 +253,19 @@ export default function CustomersManagement() {
   const [filterIndustry, setFilterIndustry] = useState('')
   const [filterTag, setFilterTag] = useState('')
   const [filterCustomerType, setFilterCustomerType] = useState('')
-  const [filterPurchasedProduct, setFilterPurchasedProduct] = useState('')
+  const [filterPurchasedProduct, setFilterPurchasedProduct] = useState<string[]>([])
+  
+  // Advanced filters
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false)
+  const [showProductDropdown, setShowProductDropdown] = useState(false)
+  const [productSearchTerm, setProductSearchTerm] = useState('')
+  const [filterRegion, setFilterRegion] = useState('')
+  const [filterOrderValue, setFilterOrderValue] = useState({ min: '', max: '' })
+  const [filterLastInteraction, setFilterLastInteraction] = useState('')
+  const [filterPurchaseDate, setFilterPurchaseDate] = useState({ start: '', end: '' })
+  const [filterDepartment, setFilterDepartment] = useState('')
+  const [filterTeam, setFilterTeam] = useState('')
+  const [filterAssignedPerson, setFilterAssignedPerson] = useState('')
   const [showColumnSelector, setShowColumnSelector] = useState(false)
   const [visibleColumns, setVisibleColumns] = useState({
     checkbox: true,
@@ -2908,7 +2922,7 @@ export default function CustomersManagement() {
     setFilterIndustry('')
     setFilterTag('')
     setFilterCustomerType('')
-    setFilterPurchasedProduct('')
+    setFilterPurchasedProduct([])
   }
 
   const handleCustomerTypeFilter = (customerType: string) => {
@@ -2931,13 +2945,44 @@ export default function CustomersManagement() {
       const matchesIndustry = !filterIndustry || customer.industry === filterIndustry
       const matchesTag = !filterTag || customer.tags.some(tag => tag.name === filterTag)
       const matchesCustomerType = !filterCustomerType || customer.customerType === filterCustomerType
-      const matchesPurchasedProduct = !filterPurchasedProduct || 
-        customer.products.some(product => 
-          product.name.toLowerCase().includes(filterPurchasedProduct.toLowerCase())
+      const matchesPurchasedProduct = filterPurchasedProduct.length === 0 || 
+        filterPurchasedProduct.some(selectedProduct =>
+          customer.products.some(product => 
+            product.name.toLowerCase().includes(selectedProduct.toLowerCase())
+          )
         )
 
+      // Advanced filters
+      const matchesRegion = !filterRegion || customer.state === filterRegion || customer.city.includes(filterRegion)
+      
+      const orderValue = parseInt(customer.totalValue.replace(/,/g, ''))
+      const matchesOrderValue = (!filterOrderValue.min || orderValue >= parseInt(filterOrderValue.min)) &&
+                               (!filterOrderValue.max || orderValue <= parseInt(filterOrderValue.max))
+      
+      const matchesLastInteraction = !filterLastInteraction || (() => {
+        const daysAgo = customer.daysSinceLastInteraction
+        switch(filterLastInteraction) {
+          case 'recent': return daysAgo <= 7
+          case 'week': return daysAgo <= 30
+          case 'month': return daysAgo <= 90
+          case 'old': return daysAgo > 90
+          default: return true
+        }
+      })()
+      
+      const matchesPurchaseDate = (!filterPurchaseDate.start || new Date(customer.lastOrderDate) >= new Date(filterPurchaseDate.start)) &&
+                                 (!filterPurchaseDate.end || new Date(customer.lastOrderDate) <= new Date(filterPurchaseDate.end))
+
+      const matchesDepartment = !filterDepartment || customer.department === filterDepartment
+      
+      const matchesTeam = !filterTeam || customer.team === filterTeam
+      
+      const matchesAssignedPerson = !filterAssignedPerson || customer.assignedPerson === filterAssignedPerson
+
       return matchesSearch && matchesStatus && matchesIndustry && matchesTag && 
-             matchesCustomerType && matchesPurchasedProduct
+             matchesCustomerType && matchesPurchasedProduct && matchesRegion &&
+             matchesOrderValue && matchesLastInteraction && matchesPurchaseDate &&
+             matchesDepartment && matchesTeam && matchesAssignedPerson
     }).sort((a, b) => {
       switch (sortBy) {
         case 'name':
@@ -2954,7 +2999,9 @@ export default function CustomersManagement() {
           return 0
       }
     })
-  }, [customers, searchTerm, filterStatus, filterIndustry, filterTag, filterCustomerType, filterPurchasedProduct, sortBy])
+  }, [customers, searchTerm, filterStatus, filterIndustry, filterTag, filterCustomerType, filterPurchasedProduct, 
+      filterRegion, filterOrderValue, filterLastInteraction, filterPurchaseDate, 
+      filterDepartment, filterTeam, filterAssignedPerson, sortBy])
 
   const remarketingCustomers = customers.filter(c => 
     c.remarketing.eligible && (c.status === 'at-risk' || c.churnRisk >= 50)
@@ -5069,18 +5116,14 @@ export default function CustomersManagement() {
                   <option value="new">Mới</option>
                   <option value="returning">Quay lại</option>
                 </select>
-                <select 
-                  value={filterPurchasedProduct} 
-                  onChange={(e) => setFilterPurchasedProduct(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                <button
+                  onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <option value="">Tất cả sản phẩm</option>
-                  {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || []))).map(productName => (
-                    <option key={productName} value={productName}>
-                      {productName}
-                    </option>
-                  ))}
-                </select>
+                  <Filter className="w-4 h-4" />
+                  <span>Lọc nâng cao</span>
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showAdvancedFilters ? 'rotate-180' : ''}`} />
+                </button>
                 <div className="relative">
                   <button
                     onClick={() => setShowColumnSelector(!showColumnSelector)}
@@ -5180,6 +5223,260 @@ export default function CustomersManagement() {
                 </div>
               </div>
             </div>
+
+            {/* Advanced Filters */}
+            {showAdvancedFilters && (
+              <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
+                <h3 className="text-sm font-medium mb-3">Bộ lọc nâng cao</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Department */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Phòng ban</label>
+                    <select
+                      value={filterDepartment}
+                      onChange={(e) => setFilterDepartment(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="">Tất cả phòng ban</option>
+                      <option value="Sales">Phòng kinh doanh</option>
+                      <option value="Marketing">Phòng marketing</option>
+                      <option value="Customer Success">Phòng chăm sóc khách hàng</option>
+                      <option value="Business Development">Phòng phát triển kinh doanh</option>
+                      <option value="Support">Phòng hỗ trợ</option>
+                    </select>
+                  </div>
+
+                  {/* Team */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Team</label>
+                    <select
+                      value={filterTeam}
+                      onChange={(e) => setFilterTeam(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="">Tất cả team</option>
+                      <option value="Team Alpha">Team Alpha</option>
+                      <option value="Team Beta">Team Beta</option>
+                      <option value="Team Gamma">Team Gamma</option>
+                      <option value="Team Delta">Team Delta</option>
+                      <option value="Team Enterprise">Team Enterprise</option>
+                      <option value="Team SMB">Team SMB</option>
+                    </select>
+                  </div>
+
+                  {/* Assigned Person */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Người phụ trách</label>
+                    <select
+                      value={filterAssignedPerson}
+                      onChange={(e) => setFilterAssignedPerson(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                      <option value="Trần Thị B">Trần Thị B</option>
+                      <option value="Lê Văn C">Lê Văn C</option>
+                      <option value="Phạm Thị D">Phạm Thị D</option>
+                      <option value="Hoàng Văn E">Hoàng Văn E</option>
+                    </select>
+                  </div>
+
+                  {/* Region */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Khu vực</label>
+                    <select
+                      value={filterRegion}
+                      onChange={(e) => setFilterRegion(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="Hà Nội">Hà Nội</option>
+                      <option value="TP.HCM">TP.HCM</option>
+                      <option value="Đà Nẵng">Đà Nẵng</option>
+                      <option value="Hải Phòng">Hải Phòng</option>
+                      <option value="Cần Thơ">Cần Thơ</option>
+                    </select>
+                  </div>
+
+                  {/* Order Value Range */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Giá trị đơn hàng (VND)</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="number"
+                        placeholder="Từ"
+                        value={filterOrderValue.min}
+                        onChange={(e) => setFilterOrderValue({...filterOrderValue, min: e.target.value})}
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Đến"
+                        value={filterOrderValue.max}
+                        onChange={(e) => setFilterOrderValue({...filterOrderValue, max: e.target.value})}
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Last Interaction */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Tương tác gần nhất</label>
+                    <select
+                      value={filterLastInteraction}
+                      onChange={(e) => setFilterLastInteraction(e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    >
+                      <option value="">Tất cả</option>
+                      <option value="recent">7 ngày qua</option>
+                      <option value="week">30 ngày qua</option>
+                      <option value="month">90 ngày qua</option>
+                      <option value="old">Hơn 90 ngày</option>
+                    </select>
+                  </div>
+
+                  {/* Purchase Date Range */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Ngày mua</label>
+                    <div className="flex gap-2">
+                      <input
+                        type="date"
+                        value={filterPurchaseDate.start}
+                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                      />
+                      <input
+                        type="date"
+                        value={filterPurchaseDate.end}
+                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
+                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Purchased Product - improved UI */}
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Sản phẩm đã mua</label>
+                    <div className="relative">
+                      <div 
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm cursor-pointer bg-white"
+                        onClick={() => setShowProductDropdown(!showProductDropdown)}
+                      >
+                        {filterPurchasedProduct.length === 0 ? (
+                          <span className="text-gray-500">Chọn sản phẩm...</span>
+                        ) : (
+                          <span className="text-blue-600">
+                            Đã chọn {filterPurchasedProduct.length} sản phẩm
+                          </span>
+                        )}
+                        <ChevronDown className={`w-4 h-4 float-right mt-0.5 transition-transform ${showProductDropdown ? 'rotate-180' : ''}`} />
+                      </div>
+                      
+                      {showProductDropdown && (
+                        <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-64 overflow-hidden">
+                          {/* Search input */}
+                          <div className="p-2 border-b border-gray-200">
+                            <input
+                              type="text"
+                              placeholder="Tìm kiếm sản phẩm..."
+                              value={productSearchTerm}
+                              onChange={(e) => setProductSearchTerm(e.target.value)}
+                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            />
+                          </div>
+                          
+                          {/* Options list */}
+                          <div className="max-h-48 overflow-y-auto">
+                            {/* Clear all option */}
+                            <div 
+                              className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 border-b border-gray-100"
+                              onClick={() => setFilterPurchasedProduct([])}
+                            >
+                              <span className="text-red-600">✗ Bỏ chọn tất cả</span>
+                            </div>
+                            
+                            {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || [])))
+                              .filter(productName => 
+                                productName.toLowerCase().includes(productSearchTerm.toLowerCase())
+                              )
+                              .map(productName => (
+                                <div 
+                                  key={productName}
+                                  className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center"
+                                  onClick={() => {
+                                    if (filterPurchasedProduct.includes(productName)) {
+                                      setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== productName))
+                                    } else {
+                                      setFilterPurchasedProduct([...filterPurchasedProduct, productName])
+                                    }
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={filterPurchasedProduct.includes(productName)}
+                                    onChange={() => {}} // Handled by parent div
+                                    className="mr-2 rounded"
+                                  />
+                                  <span className="flex-1">{productName}</span>
+                                </div>
+                              ))
+                            }
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Selected products tags */}
+                      {filterPurchasedProduct.length > 0 && (
+                        <div className="mt-2 flex flex-wrap gap-1">
+                          {filterPurchasedProduct.slice(0, 3).map(product => (
+                            <span 
+                              key={product}
+                              className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
+                            >
+                              {product.length > 15 ? product.substring(0, 15) + '...' : product}
+                              <button
+                                onClick={() => setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== product))}
+                                className="ml-1 text-blue-600 hover:text-blue-800"
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
+                          {filterPurchasedProduct.length > 3 && (
+                            <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
+                              +{filterPurchasedProduct.length - 3} khác
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Clear Advanced Filters */}
+                <div className="mt-4 pt-3 border-t border-gray-200">
+                  <button
+                    onClick={() => {
+                      setFilterDepartment('')
+                      setFilterTeam('')
+                      setFilterAssignedPerson('')
+                      setFilterRegion('')
+                      setFilterOrderValue({min: '', max: ''})
+                      setFilterLastInteraction('')
+                      setFilterPurchaseDate({start: '', end: ''})
+                      setFilterPurchasedProduct([])
+                      setProductSearchTerm('')
+                      setShowProductDropdown(false)
+                    }}
+                    className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                  >
+                    <X className="w-4 h-4" />
+                    <span>Xóa bộ lọc nâng cao</span>
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Bulk Actions Toolbar */}
             {selectedCustomerIds.length > 0 && (

@@ -110,15 +110,6 @@ interface Team {
   createdAt: string
 }
 
-interface Product {
-  id: number
-  name: string
-  description: string
-  price: number
-  status: 'active' | 'inactive' | 'discontinued'
-  createdAt: string
-}
-
 interface RolePermissions {
   leads: {
     view: 'all' | 'team' | 'department' | 'own' | 'none'
@@ -340,33 +331,6 @@ const sampleTeams: Team[] = [
   }
 ]
 
-const sampleProducts: Product[] = [
-  {
-    id: 1,
-    name: "CRM Pro",
-    description: "Phần mềm CRM chuyên nghiệp cho doanh nghiệp vừa và nhỏ",
-    price: 2000000,
-    status: "active",
-    createdAt: "2023-01-01"
-  },
-  {
-    id: 2,
-    name: "CRM Enterprise",
-    description: "Phần mềm CRM doanh nghiệp với đầy đủ tính năng nâng cao",
-    price: 5000000,
-    status: "active",
-    createdAt: "2023-02-01"
-  },
-  {
-    id: 3,
-    name: "Marketing Suite",
-    description: "Bộ công cụ marketing tự động và quản lý chiến dịch",
-    price: 1500000,
-    status: "active",
-    createdAt: "2023-03-01"
-  }
-]
-
 const sampleRoles: Role[] = [
   {
     id: 1,
@@ -466,7 +430,6 @@ export default function CompanyManagement() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null)
   const [selectedDepartment, setSelectedDepartment] = useState<Department | null>(null)
   const [selectedTeam, setSelectedTeam] = useState<Team | null>(null)
-  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [selectedRole, setSelectedRole] = useState<Role | null>(null)
   
   // Modal states for quick actions
@@ -480,17 +443,14 @@ export default function CompanyManagement() {
   const [showAddEmployeeModal, setShowAddEmployeeModal] = useState(false)
   const [showAddDepartmentModal, setShowAddDepartmentModal] = useState(false)
   const [showAddTeamModal, setShowAddTeamModal] = useState(false)
-  const [showAddProductModal, setShowAddProductModal] = useState(false)
   const [showAddRoleModal, setShowAddRoleModal] = useState(false)
   const [showEditRoleModal, setShowEditRoleModal] = useState(false)
   const [showRoleDetailModal, setShowRoleDetailModal] = useState(false)
   const [showEditDepartmentModal, setShowEditDepartmentModal] = useState(false)
   const [showEditTeamModal, setShowEditTeamModal] = useState(false)
-  const [showEditProductModal, setShowEditProductModal] = useState(false)
   const [employees, setEmployees] = useState<Employee[]>(sampleEmployees)
   const [departments, setDepartments] = useState<Department[]>(sampleDepartments)
   const [teams, setTeams] = useState<Team[]>(sampleTeams)
-  const [products, setProducts] = useState<Product[]>(sampleProducts)
   const [roles, setRoles] = useState<Role[]>(sampleRoles)
 
   // Role filter states
@@ -552,11 +512,6 @@ export default function CompanyManagement() {
   const filteredTeams = teams.filter(team =>
     team.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     team.description.toLowerCase().includes(searchTerm.toLowerCase())
-  )
-
-  const filteredProducts = products.filter(product =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    product.description.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   const filteredRoles = roles.filter(role => {
@@ -668,16 +623,6 @@ export default function CompanyManagement() {
     setShowAddTeamModal(false)
   }
 
-  const handleAddProduct = (productData: Omit<Product, 'id'>) => {
-    const newId = Math.max(...products.map(p => p.id), 0) + 1
-    const newProduct: Product = {
-      ...productData,
-      id: newId
-    }
-    setProducts([...products, newProduct])
-    setShowAddProductModal(false)
-  }
-
   const handleAddRole = (roleData: Omit<Role, 'id'>) => {
     const newId = Math.max(...roles.map(r => r.id), 0) + 1
     const newRole: Role = {
@@ -709,7 +654,7 @@ export default function CompanyManagement() {
     }
   }
 
-  // Edit handlers for Department, Team, Product
+  // Edit handlers for Department, Team
   const handleEditDepartment = (departmentData: Partial<Department>) => {
     if (!selectedDepartment) return
 
@@ -738,21 +683,6 @@ export default function CompanyManagement() {
     setTeams(updatedTeams)
     setShowEditTeamModal(false)
     setSelectedTeam(null)
-  }
-
-  const handleEditProduct = (productData: Partial<Product>) => {
-    if (!selectedProduct) return
-
-    const updatedProducts = products.map(product => {
-      if (product.id === selectedProduct.id) {
-        return { ...product, ...productData, updatedAt: new Date().toISOString().split('T')[0] }
-      }
-      return product
-    })
-
-    setProducts(updatedProducts)
-    setShowEditProductModal(false)
-    setSelectedProduct(null)
   }
 
   // Add Form Components
@@ -1150,86 +1080,6 @@ export default function CompanyManagement() {
           </Button>
           <Button type="submit">
             Thêm nhóm
-          </Button>
-        </DialogFooter>
-      </form>
-    )
-  }
-
-  const AddProductForm = ({ onSubmit, onCancel }: {
-    onSubmit: (data: Omit<Product, 'id'>) => void
-    onCancel: () => void
-  }) => {
-    const [formData, setFormData] = useState({
-      name: '',
-      description: '',
-      price: 0,
-      status: 'active' as Product['status'],
-      createdAt: new Date().toISOString().split('T')[0]
-    })
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!formData.name || formData.price <= 0) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc')
-        return
-      }
-
-      onSubmit(formData)
-    }
-
-    return (
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="productName">Tên sản phẩm *</Label>
-          <Input
-            id="productName"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            placeholder="Nhập tên sản phẩm"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="productDescription">Mô tả sản phẩm</Label>
-          <Input
-            id="productDescription"
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            placeholder="Mô tả chi tiết về sản phẩm"
-          />
-        </div>
-        <div>
-          <Label htmlFor="productPrice">Giá sản phẩm (VND) *</Label>
-          <Input
-            id="productPrice"
-            type="number"
-            min="0"
-            value={formData.price}
-            onChange={(e) => setFormData({...formData, price: parseInt(e.target.value)})}
-            placeholder="0"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="productStatus">Trạng thái</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as Product['status']})}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Hoạt động</SelectItem>
-              <SelectItem value="inactive">Ngừng hoạt động</SelectItem>
-              <SelectItem value="discontinued">Ngừng sản xuất</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Hủy
-          </Button>
-          <Button type="submit">
-            Thêm sản phẩm
           </Button>
         </DialogFooter>
       </form>
@@ -1923,86 +1773,6 @@ export default function CompanyManagement() {
     )
   }
 
-  const EditProductForm = ({ onSubmit, onCancel, initialData }: {
-    onSubmit: (data: Partial<Product>) => void
-    onCancel: () => void
-    initialData: Product
-  }) => {
-    const [formData, setFormData] = useState({
-      name: initialData.name,
-      description: initialData.description,
-      price: initialData.price,
-      status: initialData.status
-    })
-
-    const handleSubmit = (e: React.FormEvent) => {
-      e.preventDefault()
-      if (!formData.name) {
-        alert('Vui lòng điền đầy đủ thông tin bắt buộc')
-        return
-      }
-      
-      onSubmit({
-        ...formData,
-        price: Number(formData.price)
-      })
-    }
-
-    return (
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="productName">Tên sản phẩm *</Label>
-          <Input
-            id="productName"
-            value={formData.name}
-            onChange={(e) => setFormData({...formData, name: e.target.value})}
-            placeholder="Nhập tên sản phẩm"
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="description">Mô tả sản phẩm</Label>
-          <Input
-            id="description"
-            value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
-            placeholder="Mô tả chi tiết về sản phẩm"
-          />
-        </div>
-        <div>
-          <Label htmlFor="price">Giá sản phẩm (VND)</Label>
-          <Input
-            id="price"
-            type="number"
-            value={formData.price}
-            onChange={(e) => setFormData({...formData, price: Number(e.target.value)})}
-            placeholder="0"
-          />
-        </div>
-        <div>
-          <Label htmlFor="productStatus">Trạng thái</Label>
-          <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value as Product['status']})}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="active">Hoạt động</SelectItem>
-              <SelectItem value="discontinued">Ngừng sản xuất</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <DialogFooter>
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Hủy
-          </Button>
-          <Button type="submit">
-            Cập nhật sản phẩm
-          </Button>
-        </DialogFooter>
-      </form>
-    )
-  }
-
   const EmployeeManagement = () => (
     <div className="space-y-6">
       {/* Header */}
@@ -2334,77 +2104,6 @@ export default function CompanyManagement() {
     </div>
   )
 
-  const ProductManagement = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Quản lý Sản phẩm</h2>
-          <p className="text-gray-600">Quản lý danh mục sản phẩm</p>
-        </div>
-        <Button size="sm" onClick={() => setShowAddProductModal(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm sản phẩm
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProducts.map((product) => (
-          <Card key={product.id}>
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {product.name}
-                  {getStatusBadge(product.status)}
-                </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => {
-                      setSelectedProduct(product)
-                      setShowEditProductModal(true)
-                    }}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Chỉnh sửa
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => {
-                        if (confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) {
-                          setProducts(products.filter(p => p.id !== product.id))
-                        }
-                      }}
-                      className="text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Xóa
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-gray-600 mb-4">{product.description}</p>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Giá sản phẩm:</span>
-                  <span className="font-medium text-blue-600">{formatCurrency(product.price)}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Ngày tạo:</span>
-                  <span className="font-medium">{formatDate(product.createdAt)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  )
-
   const RoleManagement = () => {
     const getPermissionBadge = (level: string) => {
       switch (level) {
@@ -2668,11 +2367,10 @@ export default function CompanyManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="employees">Nhân viên</TabsTrigger>
           <TabsTrigger value="departments">Phòng ban</TabsTrigger>
           <TabsTrigger value="teams">Nhóm</TabsTrigger>
-          <TabsTrigger value="products">Sản phẩm</TabsTrigger>
           <TabsTrigger value="roles">Vai trò</TabsTrigger>
         </TabsList>
 
@@ -2686,10 +2384,6 @@ export default function CompanyManagement() {
 
         <TabsContent value="teams">
           <TeamManagement />
-        </TabsContent>
-
-        <TabsContent value="products">
-          <ProductManagement />
         </TabsContent>
 
         <TabsContent value="roles">
@@ -3138,19 +2832,6 @@ export default function CompanyManagement() {
         </DialogContent>
       </Dialog>
 
-      {/* Add Product Modal */}
-      <Dialog open={showAddProductModal} onOpenChange={setShowAddProductModal}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle>Thêm sản phẩm mới</DialogTitle>
-            <DialogDescription>
-              Nhập thông tin để thêm sản phẩm mới vào danh mục
-            </DialogDescription>
-          </DialogHeader>
-          <AddProductForm onSubmit={handleAddProduct} onCancel={() => setShowAddProductModal(false)} />
-        </DialogContent>
-      </Dialog>
-
       {/* Add Role Modal */}
       <Dialog open={showAddRoleModal} onOpenChange={setShowAddRoleModal}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -3362,25 +3043,6 @@ export default function CompanyManagement() {
               onSubmit={handleEditTeam} 
               onCancel={() => setShowEditTeamModal(false)}
               initialData={selectedTeam}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Product Modal */}
-      <Dialog open={showEditProductModal} onOpenChange={setShowEditProductModal}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Chỉnh sửa sản phẩm</DialogTitle>
-            <DialogDescription>
-              Cập nhật thông tin sản phẩm: {selectedProduct?.name}
-            </DialogDescription>
-          </DialogHeader>
-          {selectedProduct && (
-            <EditProductForm 
-              onSubmit={handleEditProduct} 
-              onCancel={() => setShowEditProductModal(false)}
-              initialData={selectedProduct}
             />
           )}
         </DialogContent>

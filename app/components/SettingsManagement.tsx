@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Image from 'next/image'
-import { 
+import {
   Settings,
   Users,
   Shield,
@@ -32,6 +32,7 @@ import {
   ChevronRight,
   CheckCircle,
   AlertTriangle,
+  Info,
   Lock,
   Unlock,
   Monitor,
@@ -181,6 +182,7 @@ interface SalesStage {
   team?: string
   product?: string
   isActive: boolean
+  isFixed?: boolean  // Giai đoạn cố định không được xóa
   autoTransition: {
     enabled: boolean
     days: number
@@ -193,7 +195,7 @@ interface OrderStatus {
   name: string
   description: string
   color: string
-  category: 'payment' | 'delivery' | 'contract' | 'other'
+  category: 'payment' | 'delivery' | 'contract' | 'other' | 'shipping' | 'processing' | 'completion'
   timeout: {
     enabled: boolean
     days: number
@@ -324,17 +326,83 @@ interface InterfaceSettings {
   allowCustomization: boolean
 }
 
-interface LanguageConfig {
-  code: string
+interface DistributionRule {
+  id: string
   name: string
-  nativeName: string
-  flag: string
+  description: string
+  method: 'round_robin' | 'load_based' | 'random'
+  assignmentType: 'department' | 'team' | 'individual'
+  assignedTargets: string[]  // Changed to array for multiple selections
   isActive: boolean
-  progress: number // translation percentage
-  lastUpdated: string
+  leadsAssigned: number
+  conditions: {
+    source?: string[]
+    maxLeads?: number
+    timeRange?: string
+    priority?: string
+  }
+  createdAt: string
+  lastModified: string
 }
 
 // Sample Data
+const sampleDistributionRules: DistributionRule[] = [
+  {
+    id: '1',
+    name: 'Phân bổ leads website',
+    description: 'Tự động phân bổ leads từ website cho team sales',
+    method: 'round_robin',
+    assignmentType: 'department',
+    assignedTargets: ['Phòng Sales'],
+    isActive: true,
+    leadsAssigned: 145,
+    conditions: {
+      source: ['website'],
+      maxLeads: 100,
+      timeRange: 'business',
+      priority: 'medium'
+    },
+    createdAt: '2025-06-01T00:00:00',
+    lastModified: '2025-06-10T00:00:00'
+  },
+  {
+    id: '2',
+    name: 'Leads VIP tự động',
+    description: 'Phân bổ leads có điểm cao cho Team Sales A và B',
+    method: 'load_based',
+    assignmentType: 'team',
+    assignedTargets: ['Team Sales A', 'Team Sales B'],
+    isActive: true,
+    leadsAssigned: 78,
+    conditions: {
+      source: ['all'],
+      maxLeads: 50,
+      timeRange: 'all',
+      priority: 'high'
+    },
+    createdAt: '2025-05-15T00:00:00',
+    lastModified: '2025-06-08T00:00:00'
+  },
+  {
+    id: '3',
+    name: 'Leads Zalo OA',
+    description: 'Phân bổ leads từ Zalo OA cho telesales',
+    method: 'random',
+    assignmentType: 'individual',
+    assignedTargets: ['Nguyễn Văn A', 'Trần Thị B'],
+    isActive: false,
+    leadsAssigned: 234,
+    conditions: {
+      source: ['zalo'],
+      maxLeads: 25,
+      timeRange: 'all',
+      priority: 'low'
+    },
+    createdAt: '2025-04-20T00:00:00',
+    lastModified: '2025-06-05T00:00:00'
+  }
+]
+
 const sampleUsers: User[] = [
   {
     id: '1',
@@ -390,39 +458,73 @@ const sampleUsers: User[] = [
 
 const sampleSalesStages: SalesStage[] = [
   {
-    id: '1',
-    name: 'Tiếp nhận',
+    id: 'new',
+    name: 'Lead mới',
     description: 'Lead mới được tiếp nhận từ các kênh',
     color: '#3B82F6',
     order: 1,
     isActive: true,
-    autoTransition: { enabled: true, days: 1, nextStage: '2' }
+    isFixed: true,  // Giai đoạn cố định
+    autoTransition: { enabled: false, days: 1, nextStage: 'contacted' }
   },
   {
-    id: '2',
-    name: 'Tư vấn',
-    description: 'Tư vấn chi tiết cho khách hàng',
+    id: 'contacted',
+    name: 'Đang tư vấn',
+    description: 'Đang liên hệ và tư vấn chi tiết cho khách hàng',
     color: '#F59E0B',
     order: 2,
     isActive: true,
-    autoTransition: { enabled: false, days: 3, nextStage: '3' }
+    isFixed: false,  // Giai đoạn tùy chỉnh - có thể xóa
+    autoTransition: { enabled: false, days: 3, nextStage: 'qualified' }
   },
   {
-    id: '3',
-    name: 'Báo giá',
-    description: 'Gửi báo giá cho khách hàng',
+    id: 'qualified',
+    name: 'Đã gửi ĐX',
+    description: 'Đã gửi đề xuất/báo giá cho khách hàng',
     color: '#8B5CF6',
     order: 3,
     isActive: true,
-    autoTransition: { enabled: false, days: 5, nextStage: '4' }
+    isFixed: false,  // Giai đoạn tùy chỉnh - có thể xóa
+    autoTransition: { enabled: false, days: 5, nextStage: 'negotiation' }
   },
   {
-    id: '4',
-    name: 'Chốt Deal',
-    description: 'Chốt deal thành công',
-    color: '#10B981',
+    id: 'negotiation',
+    name: 'Đàm phán',
+    description: 'Đang trong quá trình đàm phán với khách hàng',
+    color: '#EC4899',
     order: 4,
     isActive: true,
+    isFixed: false,  // Giai đoạn tùy chỉnh - có thể xóa
+    autoTransition: { enabled: false, days: 0, nextStage: 'payment_pending' }
+  },
+  {
+    id: 'payment_pending',
+    name: 'Chuyển đổi - chờ thanh toán',
+    description: 'Khách hàng đã đồng ý, đang chờ thanh toán',
+    color: '#F97316',
+    order: 5,
+    isActive: true,
+    isFixed: true,  // Giai đoạn cố định
+    autoTransition: { enabled: false, days: 7, nextStage: 'converted' }
+  },
+  {
+    id: 'converted',
+    name: 'Chuyển đổi thành công',
+    description: 'Khách hàng đã thanh toán thành công',
+    color: '#10B981',
+    order: 6,
+    isActive: true,
+    isFixed: true,  // Giai đoạn cố định
+    autoTransition: { enabled: false, days: 0, nextStage: '' }
+  },
+  {
+    id: 'lost',
+    name: 'Thất bại',
+    description: 'Lead không thành công, không chuyển đổi được',
+    color: '#EF4444',
+    order: 7,
+    isActive: true,
+    isFixed: true,  // Giai đoạn cố định
     autoTransition: { enabled: false, days: 0, nextStage: '' }
   }
 ]
@@ -435,7 +537,7 @@ const sampleOrderStatuses: OrderStatus[] = [
     color: '#EF4444',
     category: 'payment',
     timeout: { enabled: true, days: 3, action: 'notify' },
-    notifications: { zalo: true, email: true, app: true },
+    notifications: { zalo: false, email: true, app: true },
     isActive: true
   },
   {
@@ -445,7 +547,7 @@ const sampleOrderStatuses: OrderStatus[] = [
     color: '#10B981',
     category: 'payment',
     timeout: { enabled: false, days: 0, action: 'none' },
-    notifications: { zalo: true, email: false, app: true },
+    notifications: { zalo: false, email: false, app: true },
     isActive: true
   }
 ]
@@ -474,36 +576,6 @@ const sampleInterfaceSettings: InterfaceSettings = {
   customCSS: '',
   allowCustomization: true
 }
-
-const sampleLanguages: LanguageConfig[] = [
-  {
-    code: 'vi',
-    name: 'Vietnamese',
-    nativeName: 'Tiếng Việt',
-    flag: '🇻🇳',
-    isActive: true,
-    progress: 100,
-    lastUpdated: '2025-06-11T00:00:00'
-  },
-  {
-    code: 'en',
-    name: 'English',
-    nativeName: 'English',
-    flag: '🇺🇸',
-    isActive: true,
-    progress: 95,
-    lastUpdated: '2025-06-10T00:00:00'
-  },
-  {
-    code: 'zh',
-    name: 'Chinese',
-    nativeName: '中文',
-    flag: '🇨🇳',
-    isActive: false,
-    progress: 60,
-    lastUpdated: '2025-06-05T00:00:00'
-  }
-]
 
 const sampleTags: CustomTag[] = [
   {
@@ -590,17 +662,37 @@ const sampleTags: CustomTag[] = [
 ]
 
 export default function SettingsManagement() {
-  const [activeTab, setActiveTab] = useState('company')
+  const [activeTab, setActiveTab] = useState('workflow')
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showUserModal, setShowUserModal] = useState(false)
   const [showRoleModal, setShowRoleModal] = useState(false)
   const [showStageModal, setShowStageModal] = useState(false)
+  const [showEditStageModal, setShowEditStageModal] = useState(false)
+  const [showDeleteStageModal, setShowDeleteStageModal] = useState(false)
   const [showStatusModal, setShowStatusModal] = useState(false)
+  const [showEditStatusModal, setShowEditStatusModal] = useState(false)
+  const [showDeleteStatusModal, setShowDeleteStatusModal] = useState(false)
   const [showTagModal, setShowTagModal] = useState(false)
   const [showTemplateModal, setShowTemplateModal] = useState(false)
   const [showIntegrationModal, setShowIntegrationModal] = useState(false)
   const [selectedRole, setSelectedRole] = useState<any>(null)
+  const [selectedStage, setSelectedStage] = useState<SalesStage | null>(null)
+  const [selectedStatus, setSelectedStatus] = useState<OrderStatus | null>(null)
+  const [statusToDelete, setStatusToDelete] = useState<OrderStatus | null>(null)
+  const [transferToStatusId, setTransferToStatusId] = useState<string>('')
+  
+  // Edit status form state
+  const [editStatusForm, setEditStatusForm] = useState({
+    name: '',
+    description: '',
+    color: '#3B82F6',
+    category: 'payment' as 'payment' | 'delivery' | 'contract' | 'other' | 'shipping' | 'processing' | 'completion',
+    notifications: { zalo: false, email: false, app: false }
+  })
+  
+  const [stageToDelete, setStageToDelete] = useState<SalesStage | null>(null)
+  const [transferToStageId, setTransferToStageId] = useState<string>('')
   const [selectedTemplate, setSelectedTemplate] = useState<any>(null)
   const [selectedTag, setSelectedTag] = useState<CustomTag | null>(null)
   
@@ -609,7 +701,6 @@ export default function SettingsManagement() {
   const [salesStages, setSalesStages] = useState<SalesStage[]>(sampleSalesStages)
   const [orderStatuses, setOrderStatuses] = useState<OrderStatus[]>(sampleOrderStatuses)
   const [interfaceSettings, setInterfaceSettings] = useState<InterfaceSettings>(sampleInterfaceSettings)
-  const [languages, setLanguages] = useState<LanguageConfig[]>(sampleLanguages)
   const [tags, setTags] = useState<CustomTag[]>(sampleTags)
   const [userActions, setUserActions] = useState<UserAction[]>([])
   const [systemLogs, setSystemLogs] = useState<SystemLog[]>([])
@@ -653,6 +744,18 @@ export default function SettingsManagement() {
 
   // Component: Workflow Management
   const WorkflowManagement = () => {
+    // Distribution Rules state
+    const [distributionRules, setDistributionRules] = useState<DistributionRule[]>(sampleDistributionRules)
+    const [showAddDistributionRule, setShowAddDistributionRule] = useState(false)
+    const [showEditDistributionRule, setShowEditDistributionRule] = useState(false)
+    const [selectedDistributionRule, setSelectedDistributionRule] = useState<DistributionRule | null>(null)
+    const [selectedAssignmentType, setSelectedAssignmentType] = useState<string>('')
+    const [individualSearchTerm, setIndividualSearchTerm] = useState<string>('')
+    const [individualFilterTeam, setIndividualFilterTeam] = useState<string>('all')
+    const [distributionRuleToDelete, setDistributionRuleToDelete] = useState<DistributionRule | null>(null)
+    const [selectedTimeRange, setSelectedTimeRange] = useState<string>('all')
+    const [editTimeRange, setEditTimeRange] = useState<string>('all')
+
     const getCategoryColor = (category: string) => {
       switch (category) {
         case 'lead': return 'bg-blue-100 text-blue-800'
@@ -672,6 +775,32 @@ export default function SettingsManagement() {
       }
     }
 
+    // Distribution Rule Handlers
+    const handleEditDistributionRule = (rule: DistributionRule) => {
+      setSelectedDistributionRule(rule)
+      setShowEditDistributionRule(true)
+    }
+
+    const handleDeleteDistributionRule = (ruleId: string) => {
+      const rule = distributionRules.find(r => r.id === ruleId)
+      if (rule) {
+        setDistributionRuleToDelete(rule)
+      }
+    }
+
+    const handleConfirmDeleteDistributionRule = () => {
+      if (distributionRuleToDelete) {
+        setDistributionRules(prev => prev.filter(rule => rule.id !== distributionRuleToDelete.id))
+        setDistributionRuleToDelete(null)
+      }
+    }
+
+    const handleToggleDistributionRule = (ruleId: string, isActive: boolean) => {
+      setDistributionRules(prev => prev.map(rule => 
+        rule.id === ruleId ? { ...rule, isActive } : rule
+      ))
+    }
+
     const handleCreateTag = () => {
       setSelectedTag(null)
       setShowTagModal(true)
@@ -684,6 +813,133 @@ export default function SettingsManagement() {
 
     const handleDeleteTag = (tagId: string) => {
       setTags(prev => prev.filter(t => t.id !== tagId))
+    }
+
+    const handleDeleteSalesStage = (stageId: string) => {
+      const stage = salesStages.find(s => s.id === stageId)
+      if (!stage) return
+      
+      if (stage.isFixed) {
+        alert('Không thể xóa giai đoạn cố định của hệ thống!')
+        return
+      }
+      
+      // Giả định có dữ liệu trong giai đoạn này (thực tế sẽ check từ database)
+      const hasData = Math.random() > 0.5 // Mô phỏng có data ngẫu nhiên
+      
+      if (hasData) {
+        setStageToDelete(stage)
+        setShowDeleteStageModal(true)
+      } else {
+        if (confirm('Bạn có chắc chắn muốn xóa giai đoạn này?')) {
+          setSalesStages(prev => prev.filter(s => s.id !== stageId))
+        }
+      }
+    }
+
+    const handleEditSalesStage = (stage: SalesStage) => {
+      setSelectedStage(stage)
+      setShowEditStageModal(true)
+    }
+
+    const handleConfirmDeleteStage = () => {
+      if (!stageToDelete || !transferToStageId) return
+      
+      // Thực hiện chuyển đổi dữ liệu và xóa giai đoạn
+      setSalesStages(prev => prev.filter(s => s.id !== stageToDelete.id))
+      
+      // Reset states
+      setStageToDelete(null)
+      setTransferToStageId('')
+      setShowDeleteStageModal(false)
+      
+      alert(`Đã chuyển toàn bộ dữ liệu từ "${stageToDelete.name}" sang giai đoạn khác và xóa giai đoạn thành công!`)
+    }
+
+    const handleAddOrderStatus = (statusData: Omit<OrderStatus, 'id'>) => {
+      const newId = (Math.max(...orderStatuses.map(s => parseInt(s.id)), 0) + 1).toString()
+      const newStatus: OrderStatus = {
+        ...statusData,
+        id: newId
+      }
+      setOrderStatuses(prev => [...prev, newStatus])
+      setShowStatusModal(false)
+    }
+
+    const handleEditOrderStatus = (status: OrderStatus) => {
+      setSelectedStatus(status)
+      initializeEditForm(status)
+      setShowEditStatusModal(true)
+    }
+
+    const handleDeleteOrderStatus = (statusId: string) => {
+      // Luôn phải có ít nhất 1 trạng thái
+      if (orderStatuses.length <= 1) {
+        alert('Phải có ít nhất một trạng thái đơn hàng trong hệ thống!')
+        return
+      }
+
+      const status = orderStatuses.find(s => s.id === statusId)
+      if (!status) return
+      
+      // Giả định có dữ liệu trong trạng thái này
+      const hasData = Math.random() > 0.3 // Mô phỏng có data
+      
+      if (hasData) {
+        setStatusToDelete(status)
+        setShowDeleteStatusModal(true)
+      } else {
+        if (confirm('Bạn có chắc chắn muốn xóa trạng thái này?')) {
+          setOrderStatuses(prev => prev.filter(s => s.id !== statusId))
+        }
+      }
+    }
+
+    const handleConfirmDeleteStatus = () => {
+      if (!statusToDelete || !transferToStatusId) return
+      
+      // Thực hiện chuyển đổi dữ liệu và xóa trạng thái
+      setOrderStatuses(prev => prev.filter(s => s.id !== statusToDelete.id))
+      
+      // Reset states
+      setStatusToDelete(null)
+      setTransferToStatusId('')
+      setShowDeleteStatusModal(false)
+      
+      alert(`Đã chuyển toàn bộ đơn hàng từ trạng thái "${statusToDelete.name}" sang trạng thái khác và xóa thành công!`)
+    }
+
+    const handleEditOrderStatusSubmit = () => {
+      if (!selectedStatus) return
+
+      const updatedStatus = {
+        ...selectedStatus,
+        name: editStatusForm.name,
+        description: editStatusForm.description,
+        color: editStatusForm.color,
+        category: editStatusForm.category,
+        notifications: editStatusForm.notifications
+      }
+
+      setOrderStatuses(prev => 
+        prev.map(status => 
+          status.id === selectedStatus.id ? updatedStatus : status
+        )
+      )
+
+      setShowEditStatusModal(false)
+      setSelectedStatus(null)
+      alert('Cập nhật trạng thái đơn hàng thành công!')
+    }
+
+    const initializeEditForm = (status: OrderStatus) => {
+      setEditStatusForm({
+        name: status.name,
+        description: status.description,
+        color: status.color,
+        category: status.category,
+        notifications: status.notifications
+      })
     }
 
     const getOperatorText = (operator: string) => {
@@ -715,7 +971,10 @@ export default function SettingsManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle>Giai đoạn bán hàng</CardTitle>
-                  <CardDescription>Tùy chỉnh quy trình chuyển đổi lead</CardDescription>
+                  <CardDescription>
+                    Các giai đoạn cố định tương ứng với quy trình bán hàng hiện tại. 
+                    Bạn có thể thêm các giai đoạn tùy chỉnh để mở rộng quy trình.
+                  </CardDescription>
                 </div>
                 <Button onClick={() => setShowStageModal(true)}>
                   <Plus className="w-4 h-4 mr-2" />
@@ -725,28 +984,40 @@ export default function SettingsManagement() {
             </CardHeader>
             <CardContent className="space-y-3">
               {salesStages.map((stage, index) => (
-                <div key={stage.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div key={stage.id} className={`flex items-center justify-between p-3 border rounded-lg ${stage.isFixed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'}`}>
                   <div className="flex items-center space-x-3">
                     <div
                       className="w-4 h-4 rounded-full"
                       style={{ backgroundColor: stage.color }}
                     />
                     <div>
-                      <div className="font-medium">{stage.name}</div>
+                      <div className="flex items-center space-x-2">
+                        <span className="font-medium">{stage.name}</span>
+                        {stage.isFixed && (
+                          <Badge variant="secondary" className="text-xs">Cố định</Badge>
+                        )}
+                      </div>
                       <div className="text-sm text-gray-500">{stage.description}</div>
-                      {stage.autoTransition.enabled && (
-                        <div className="text-xs text-blue-600">
-                          Tự chuyển sau {stage.autoTransition.days} ngày
-                        </div>
-                      )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">{stage.order}</Badge>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditSalesStage(stage)}
+                      title="Chỉnh sửa giai đoạn"
+                    >
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      disabled={stage.isFixed}
+                      className={stage.isFixed ? 'cursor-not-allowed opacity-50' : ''}
+                      title={stage.isFixed ? 'Giai đoạn cố định không thể xóa' : 'Xóa giai đoạn'}
+                      onClick={() => !stage.isFixed && handleDeleteSalesStage(stage.id)}
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -806,10 +1077,20 @@ export default function SettingsManagement() {
                         <Bell className="w-3 h-3 text-purple-500" />
                       )}
                     </div>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleEditOrderStatus(status)}
+                      title="Chỉnh sửa trạng thái"
+                    >
                       <Edit2 className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm">
+                    <Button 
+                      variant="ghost" 
+                      size="sm"
+                      onClick={() => handleDeleteOrderStatus(status.id)}
+                      title="Xóa trạng thái"
+                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
@@ -823,67 +1104,13 @@ export default function SettingsManagement() {
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900">Quản lý Nhãn & Quy tắc Tự động</h3>
-              <p className="text-gray-600">Tạo nhãn và thiết lập quy tắc phân bổ tự động</p>
+              <h3 className="text-xl font-semibold text-gray-900">Quản lý nhãn</h3>
+              <p className="text-gray-600">Tạo và quản lý nhãn trong hệ thống</p>
             </div>
             <Button onClick={handleCreateTag}>
               <Plus className="w-4 h-4 mr-2" />
               Tạo nhãn mới
             </Button>
-          </div>
-
-          {/* Tags Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Tổng nhãn</p>
-                    <p className="text-2xl font-bold text-blue-600">{tags.length}</p>
-                  </div>
-                  <Tags className="w-6 h-6 text-blue-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Nhãn toàn cục</p>
-                    <p className="text-2xl font-bold text-green-600">
-                      {tags.filter(t => t.scope === 'global').length}
-                    </p>
-                  </div>
-                  <Globe className="w-6 h-6 text-green-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Tự động gán</p>
-                    <p className="text-2xl font-bold text-purple-600">
-                      {tags.filter(t => t.autoAssign.enabled).length}
-                    </p>
-                  </div>
-                  <Zap className="w-6 h-6 text-purple-500" />
-                </div>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Nhãn mặc định</p>
-                    <p className="text-2xl font-bold text-orange-600">
-                      {tags.filter(t => t.isDefault).length}
-                    </p>
-                  </div>
-                  <Star className="w-6 h-6 text-orange-500" />
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Tags List */}
@@ -910,12 +1137,6 @@ export default function SettingsManagement() {
                               Mặc định
                             </Badge>
                           )}
-                          {tag.autoAssign.enabled && (
-                            <Badge variant="outline" className="text-xs">
-                              <Zap className="w-3 h-3 mr-1" />
-                              Tự động
-                            </Badge>
-                          )}
                         </div>
                         <div className="flex items-center space-x-2 mt-1">
                           <Badge className={getCategoryColor(tag.category)}>
@@ -930,13 +1151,6 @@ export default function SettingsManagement() {
                             {tag.scope === 'user' && 'Cá nhân'}
                           </Badge>
                         </div>
-                        {tag.autoAssign.enabled && tag.autoAssign.conditions.length > 0 && (
-                          <div className="text-xs text-gray-500 mt-1">
-                            Điều kiện: {tag.autoAssign.conditions.map(c => 
-                              `${c.field} ${getOperatorText(c.operator)} ${c.value}`
-                            ).join(', ')}
-                          </div>
-                        )}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
@@ -958,112 +1172,6 @@ export default function SettingsManagement() {
                     </div>
                   </div>
                 ))}
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Auto-Assignment Rules */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Quy tắc Tự động gán Nhãn</CardTitle>
-              <CardDescription>Cấu hình quy tắc tự động gán nhãn dựa trên điều kiện</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {tags.filter(t => t.autoAssign.enabled).map((tag) => (
-                  <div key={tag.id} className="p-4 border rounded-lg">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{ backgroundColor: tag.color }}
-                        />
-                        <h4 className="font-medium">{tag.name}</h4>
-                        <Badge className={getCategoryColor(tag.category)}>
-                          {tag.category === 'lead' && 'Lead'}
-                          {tag.category === 'customer' && 'Khách hàng'}
-                          {tag.category === 'deal' && 'Deal'}
-                          {tag.category === 'task' && 'Công việc'}
-                        </Badge>
-                      </div>
-                      <Button variant="outline" size="sm" onClick={() => handleEditTag(tag)}>
-                        <Edit2 className="w-4 h-4 mr-2" />
-                        Chỉnh sửa
-                      </Button>
-                    </div>
-                    <div className="space-y-2">
-                      <div className="text-sm font-medium text-gray-700">Điều kiện tự động gán:</div>
-                      {tag.autoAssign.conditions.map((condition, index) => (
-                        <div key={index} className="flex items-center space-x-2 text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                          <span className="font-medium">{condition.field}</span>
-                          <span className="text-gray-400">{getOperatorText(condition.operator)}</span>
-                          <span className="font-medium text-blue-600">{condition.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-                {tags.filter(t => t.autoAssign.enabled).length === 0 && (
-                  <div className="text-center py-8 text-gray-500">
-                    <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                    <p>Chưa có quy tắc tự động gán nào</p>
-                    <Button variant="outline" className="mt-2" onClick={handleCreateTag}>
-                      Tạo quy tắc đầu tiên
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Workflow Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tổng giai đoạn</p>
-                  <p className="text-2xl font-bold">{salesStages.length}</p>
-                </div>
-                <Workflow className="w-6 h-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Giai đoạn hoạt động</p>
-                  <p className="text-2xl font-bold text-green-600">
-                    {salesStages.filter(s => s.isActive).length}
-                  </p>
-                </div>
-                <CheckCircle className="w-6 h-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Trạng thái đơn</p>
-                  <p className="text-2xl font-bold">{orderStatuses.length}</p>
-                </div>
-                <Target className="w-6 h-6 text-purple-500" />
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">Tự động hóa</p>
-                  <p className="text-2xl font-bold text-orange-600">
-                    {salesStages.filter(s => s.autoTransition.enabled).length + tags.filter(t => t.autoAssign.enabled).length}
-                  </p>
-                </div>
-                <Zap className="w-6 h-6 text-orange-500" />
               </div>
             </CardContent>
           </Card>
@@ -1148,53 +1256,6 @@ export default function SettingsManagement() {
                   defaultChecked={selectedTag?.isDefault || false}
                 />
               </div>
-
-              <div className="flex items-center justify-between">
-                <Label htmlFor="auto-assign">Tự động gán</Label>
-                <Switch
-                  id="auto-assign"
-                  defaultChecked={selectedTag?.autoAssign.enabled || false}
-                />
-              </div>
-
-              {/* Auto Assignment Conditions */}
-              <div className="space-y-2">
-                <Label>Điều kiện tự động gán</Label>
-                <div className="grid grid-cols-3 gap-2">
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Trường" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="score">Điểm số</SelectItem>
-                      <SelectItem value="revenue">Doanh thu</SelectItem>
-                      <SelectItem value="amount">Giá trị</SelectItem>
-                      <SelectItem value="source">Nguồn</SelectItem>
-                      <SelectItem value="priority">Ưu tiên</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Select>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Phép so sánh" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="equals">Bằng</SelectItem>
-                      <SelectItem value="not_equals">Không bằng</SelectItem>
-                      <SelectItem value="greater_than">Lớn hơn</SelectItem>
-                      <SelectItem value="less_than">Nhỏ hơn</SelectItem>
-                      <SelectItem value="contains">Chứa</SelectItem>
-                      <SelectItem value="not_contains">Không chứa</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  
-                  <Input placeholder="Giá trị" />
-                </div>
-                <Button variant="outline" size="sm" className="w-full">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Thêm điều kiện
-                </Button>
-              </div>
             </div>
 
             <DialogFooter>
@@ -1203,6 +1264,1276 @@ export default function SettingsManagement() {
               </Button>
               <Button>
                 {selectedTag ? 'Cập nhật' : 'Tạo mới'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Sales Stage Modal */}
+        <Dialog open={showStageModal} onOpenChange={setShowStageModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Thêm giai đoạn bán hàng mới</DialogTitle>
+              <DialogDescription>
+                Tạo giai đoạn tùy chỉnh cho quy trình bán hàng của bạn
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="stage-name">Tên giai đoạn</Label>
+                <Input
+                  id="stage-name"
+                  placeholder="Nhập tên giai đoạn"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="stage-description">Mô tả</Label>
+                <Input
+                  id="stage-description"
+                  placeholder="Mô tả chi tiết về giai đoạn"
+                />
+              </div>
+
+              <div>
+                <Label>Màu sắc</Label>
+                <div className="grid grid-cols-8 gap-2 mt-2">
+                  {[
+                    '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                    '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded border-2 border-gray-200 hover:border-gray-400"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStageModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implement add stage logic
+                setShowStageModal(false)
+              }}>
+                Thêm giai đoạn
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Sales Stage Modal */}
+        <Dialog open={showEditStageModal} onOpenChange={setShowEditStageModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Chỉnh sửa giai đoạn bán hàng</DialogTitle>
+              <DialogDescription>
+                Cập nhật thông tin giai đoạn "{selectedStage?.name}"
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-stage-name">Tên giai đoạn</Label>
+                <Input
+                  id="edit-stage-name"
+                  defaultValue={selectedStage?.name}
+                  placeholder="Nhập tên giai đoạn"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-stage-description">Mô tả</Label>
+                <Input
+                  id="edit-stage-description"
+                  defaultValue={selectedStage?.description}
+                  placeholder="Mô tả chi tiết về giai đoạn"
+                />
+              </div>
+
+              <div>
+                <Label>Màu sắc</Label>
+                <div className="grid grid-cols-8 gap-2 mt-2">
+                  {[
+                    '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                    '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded border-2 ${
+                        selectedStage?.color === color ? 'border-gray-900' : 'border-gray-200'
+                      } hover:border-gray-400`}
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditStageModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implement edit stage logic
+                setShowEditStageModal(false)
+              }}>
+                Cập nhật
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Stage with Data Transfer Modal */}
+        <Dialog open={showDeleteStageModal} onOpenChange={setShowDeleteStageModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                <span>Xóa giai đoạn có dữ liệu</span>
+              </DialogTitle>
+              <DialogDescription>
+                Giai đoạn "{stageToDelete?.name}" đang chứa dữ liệu. 
+                Vui lòng chọn giai đoạn để chuyển toàn bộ dữ liệu trước khi xóa.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="transfer-stage">Chuyển dữ liệu sang giai đoạn</Label>
+                <select
+                  id="transfer-stage"
+                  className="w-full mt-1 p-2 border rounded"
+                  value={transferToStageId}
+                  onChange={(e) => setTransferToStageId(e.target.value)}
+                >
+                  <option value="">-- Chọn giai đoạn đích --</option>
+                  {salesStages
+                    .filter(s => s.id !== stageToDelete?.id)
+                    .map(stage => (
+                      <option key={stage.id} value={stage.id}>
+                        {stage.name} {stage.isFixed ? '(Cố định)' : ''}
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div className="flex items-center space-x-2 text-yellow-800">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="font-medium">Cảnh báo</span>
+                </div>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Hành động này sẽ chuyển toàn bộ leads/deals trong giai đoạn 
+                  "{stageToDelete?.name}" sang giai đoạn được chọn và không thể hoàn tác.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowDeleteStageModal(false)
+                setStageToDelete(null)
+                setTransferToStageId('')
+              }}>
+                Hủy
+              </Button>
+              <Button 
+                variant="destructive"
+                disabled={!transferToStageId}
+                onClick={handleConfirmDeleteStage}
+              >
+                Chuyển dữ liệu và xóa
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Order Status Modal */}
+        <Dialog open={showStatusModal} onOpenChange={setShowStatusModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Thêm trạng thái đơn hàng mới</DialogTitle>
+              <DialogDescription>
+                Tạo trạng thái mới cho đơn hàng với thông báo tự động
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="status-name">Tên trạng thái</Label>
+                <Input
+                  id="status-name"
+                  placeholder="Nhập tên trạng thái"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="status-description">Mô tả</Label>
+                <Input
+                  id="status-description"
+                  placeholder="Mô tả chi tiết về trạng thái"
+                />
+              </div>
+
+              <div>
+                <Label>Màu sắc</Label>
+                <div className="grid grid-cols-8 gap-2 mt-2">
+                  {[
+                    '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                    '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      className="w-8 h-8 rounded border-2 border-gray-200 hover:border-gray-400"
+                      style={{ backgroundColor: color }}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="status-category">Loại trạng thái</Label>
+                <select
+                  id="status-category"
+                  className="w-full mt-1 p-2 border rounded"
+                >
+                  <option value="payment">Thanh toán</option>
+                  <option value="shipping">Vận chuyển</option>
+                  <option value="processing">Xử lý</option>
+                  <option value="completion">Hoàn thành</option>
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Thông báo</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="zalo-notify" defaultChecked />
+                    <Label htmlFor="zalo-notify" className="text-sm">Zalo</Label>
+                  </div> */}
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="email-notify" defaultChecked />
+                    <Label htmlFor="email-notify" className="text-sm">Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input type="checkbox" id="app-notify" defaultChecked />
+                    <Label htmlFor="app-notify" className="text-sm">App</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowStatusModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={() => {
+                const nameInput = document.getElementById('status-name') as HTMLInputElement
+                const descInput = document.getElementById('status-description') as HTMLInputElement
+                const categorySelect = document.getElementById('status-category') as HTMLSelectElement
+                
+                if (!nameInput?.value) {
+                  alert('Vui lòng nhập tên trạng thái')
+                  return
+                }
+
+                const newStatus = {
+                  name: nameInput.value,
+                  description: descInput?.value || '',
+                  color: '#3B82F6', // Default color
+                  category: categorySelect?.value as OrderStatus['category'] || 'processing',
+                  timeout: { enabled: false, days: 0, action: 'notify' as const },
+                  notifications: { 
+                    zalo: (document.getElementById('zalo-notify') as HTMLInputElement)?.checked || false,
+                    email: (document.getElementById('email-notify') as HTMLInputElement)?.checked || false,
+                    app: (document.getElementById('app-notify') as HTMLInputElement)?.checked || false
+                  },
+                  isActive: true
+                }
+
+                handleAddOrderStatus(newStatus)
+              }}>
+                Thêm trạng thái
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Order Status Modal */}
+        <Dialog open={showEditStatusModal} onOpenChange={setShowEditStatusModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Chỉnh sửa trạng thái đơn hàng</DialogTitle>
+              <DialogDescription>
+                Cập nhật thông tin trạng thái "{selectedStatus?.name}"
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="edit-status-name">Tên trạng thái</Label>
+                <Input
+                  id="edit-status-name"
+                  value={editStatusForm.name}
+                  onChange={(e) => setEditStatusForm(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Nhập tên trạng thái"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="edit-status-description">Mô tả</Label>
+                <Input
+                  id="edit-status-description"
+                  value={editStatusForm.description}
+                  onChange={(e) => setEditStatusForm(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Mô tả chi tiết về trạng thái"
+                />
+              </div>
+
+              <div>
+                <Label>Màu sắc</Label>
+                <div className="grid grid-cols-8 gap-2 mt-2">
+                  {[
+                    '#EF4444', '#F59E0B', '#10B981', '#3B82F6',
+                    '#8B5CF6', '#EC4899', '#6366F1', '#14B8A6'
+                  ].map((color) => (
+                    <button
+                      key={color}
+                      className={`w-8 h-8 rounded border-2 ${
+                        editStatusForm.color === color ? 'border-gray-900' : 'border-gray-200'
+                      } hover:border-gray-400`}
+                      style={{ backgroundColor: color }}
+                      onClick={() => setEditStatusForm(prev => ({ ...prev, color }))}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="edit-status-category">Loại trạng thái</Label>
+                <select
+                  id="edit-status-category"
+                  className="w-full mt-1 p-2 border rounded"
+                  value={editStatusForm.category}
+                  onChange={(e) => setEditStatusForm(prev => ({ 
+                    ...prev, 
+                    category: e.target.value as 'payment' | 'delivery' | 'contract' | 'other' | 'shipping' | 'processing' | 'completion'
+                  }))}
+                >
+                  <option value="payment">Thanh toán</option>
+                  <option value="shipping">Vận chuyển</option>
+                  <option value="processing">Xử lý</option>
+                  <option value="completion">Hoàn thành</option>
+                </select>
+              </div>
+
+              <div className="space-y-3">
+                <Label>Thông báo</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  {/* <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="edit-zalo-notify" 
+                      checked={editStatusForm.notifications.zalo}
+                      onChange={(e) => setEditStatusForm(prev => ({
+                        ...prev,
+                        notifications: { ...prev.notifications, zalo: e.target.checked }
+                      }))}
+                    />
+                    <Label htmlFor="edit-zalo-notify" className="text-sm">Zalo</Label>
+                  </div> */}
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="edit-email-notify" 
+                      checked={editStatusForm.notifications.email}
+                      onChange={(e) => setEditStatusForm(prev => ({
+                        ...prev,
+                        notifications: { ...prev.notifications, email: e.target.checked }
+                      }))}
+                    />
+                    <Label htmlFor="edit-email-notify" className="text-sm">Email</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="checkbox" 
+                      id="edit-app-notify" 
+                      checked={editStatusForm.notifications.app}
+                      onChange={(e) => setEditStatusForm(prev => ({
+                        ...prev,
+                        notifications: { ...prev.notifications, app: e.target.checked }
+                      }))}
+                    />
+                    <Label htmlFor="edit-app-notify" className="text-sm">App</Label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditStatusModal(false)}>
+                Hủy
+              </Button>
+              <Button onClick={handleEditOrderStatusSubmit}>
+                Cập nhật
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Status with Data Transfer Modal */}
+        <Dialog open={showDeleteStatusModal} onOpenChange={setShowDeleteStatusModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex items-center space-x-2 text-red-600">
+                <AlertTriangle className="w-5 h-5" />
+                <span>Xóa trạng thái có dữ liệu</span>
+              </DialogTitle>
+              <DialogDescription>
+                Trạng thái "{statusToDelete?.name}" đang chứa dữ liệu đơn hàng. 
+                Vui lòng chọn trạng thái để chuyển toàn bộ đơn hàng trước khi xóa.
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="transfer-status">Chuyển đơn hàng sang trạng thái</Label>
+                <select
+                  id="transfer-status"
+                  className="w-full mt-1 p-2 border rounded"
+                  value={transferToStatusId}
+                  onChange={(e) => setTransferToStatusId(e.target.value)}
+                >
+                  <option value="">-- Chọn trạng thái đích --</option>
+                  {orderStatuses
+                    .filter(s => s.id !== statusToDelete?.id)
+                    .map(status => (
+                      <option key={status.id} value={status.id}>
+                        {status.name} ({status.category === 'payment' ? 'Thanh toán' :
+                         status.category === 'shipping' ? 'Vận chuyển' :
+                         status.category === 'processing' ? 'Xử lý' : 'Hoàn thành'})
+                      </option>
+                    ))}
+                </select>
+              </div>
+
+              <div className="bg-yellow-50 border border-yellow-200 rounded p-3">
+                <div className="flex items-center space-x-2 text-yellow-800">
+                  <AlertTriangle className="w-4 h-4" />
+                  <span className="font-medium">Cảnh báo</span>
+                </div>
+                <p className="text-sm text-yellow-700 mt-1">
+                  Hành động này sẽ chuyển toàn bộ đơn hàng trong trạng thái 
+                  "{statusToDelete?.name}" sang trạng thái được chọn và không thể hoàn tác.
+                </p>
+              </div>
+
+              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                <div className="flex items-center space-x-2 text-blue-800">
+                  <Info className="w-4 h-4" />
+                  <span className="font-medium">Lưu ý</span>
+                </div>
+                <p className="text-sm text-blue-700 mt-1">
+                  Hệ thống luôn phải có ít nhất một trạng thái đơn hàng.
+                </p>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => {
+                setShowDeleteStatusModal(false)
+                setStatusToDelete(null)
+                setTransferToStatusId('')
+              }}>
+                Hủy
+              </Button>
+              <Button 
+                variant="destructive"
+                disabled={!transferToStatusId}
+                onClick={handleConfirmDeleteStatus}
+              >
+                Chuyển đơn hàng và xóa
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Lead Distribution Section */}
+        <div className="space-y-6 mt-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900">Phân bổ Leads</h3>
+              <p className="text-gray-600">Cài đặt quy tắc phân bổ leads tự động cho nhóm bán hàng</p>
+            </div>
+            <Button onClick={() => setShowAddDistributionRule(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Thêm quy tắc
+            </Button>
+          </div>
+
+          {/* Distribution Rules List */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Quy tắc phân bổ</CardTitle>
+              <CardDescription>Danh sách các quy tắc phân bổ leads hiện tại</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {distributionRules.map((rule) => (
+                  <div key={rule.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                    <div className="flex items-center space-x-4">
+                      <div className={`w-3 h-3 rounded-full ${rule.isActive ? 'bg-green-500' : 'bg-gray-400'}`} />
+                      <div>
+                        <h4 className="font-medium text-gray-900">{rule.name}</h4>
+                        <p className="text-sm text-gray-500">{rule.description}</p>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <Badge variant="outline" className="text-xs">
+                            {rule.method === 'round_robin' ? 'Xoay vòng' : 
+                             rule.method === 'load_based' ? 'Theo tải' : 'Ngẫu nhiên'}
+                          </Badge>
+                          <Badge variant="secondary" className="text-xs">
+                            {rule.assignedTargets.join(', ')}
+                          </Badge>
+                          <Badge variant="outline" className="text-xs">
+                            {rule.assignmentType === 'department' ? 'Phòng ban' : 
+                             rule.assignmentType === 'team' ? 'Team' : 'Cá nhân'}
+                          </Badge>
+                          {rule.assignedTargets.length > 1 && (
+                            <Badge variant="default" className="text-xs bg-blue-100 text-blue-800">
+                              {rule.assignedTargets.length} đối tượng
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <div className="text-right text-sm">
+                        <p className="font-medium">{rule.leadsAssigned}</p>
+                        <p className="text-gray-500">leads được phân</p>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditDistributionRule(rule)}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDeleteDistributionRule(rule.id)}
+                        className="text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                      <Switch
+                        checked={rule.isActive}
+                        onCheckedChange={(checked) => handleToggleDistributionRule(rule.id, checked)}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {distributionRules.length === 0 && (
+                <div className="text-center py-8">
+                  <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có quy tắc phân bổ</h3>
+                  <p className="text-gray-500">Tạo quy tắc đầu tiên để bắt đầu phân bổ leads tự động.</p>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Add Distribution Rule Modal */}
+        <Dialog open={showAddDistributionRule} onOpenChange={setShowAddDistributionRule}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Thêm quy tắc phân bổ leads</DialogTitle>
+              <DialogDescription>
+                Tạo quy tắc mới để phân bổ leads tự động cho nhóm bán hàng
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="rule-name">Tên quy tắc</Label>
+                  <Input
+                    id="rule-name"
+                    placeholder="VD: Phân bổ leads mới"
+                    className="mt-2"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="assignment-type">Loại phân bổ</Label>
+                  <Select onValueChange={(value) => setSelectedAssignmentType(value)}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Chọn loại phân bổ" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="department">Theo phòng ban</SelectItem>
+                      <SelectItem value="team">Theo team</SelectItem>
+                      <SelectItem value="individual">Cá nhân</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="assigned-targets">
+                  {selectedAssignmentType === 'department' ? 'Phòng ban được phân' :
+                   selectedAssignmentType === 'team' ? 'Team được phân' : 'Cá nhân được phân'}
+                </Label>
+                <div className="mt-2 space-y-2 max-h-40 overflow-y-auto border rounded-lg p-3">
+                  {selectedAssignmentType === 'department' && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="dept-sales" value="dept-sales" />
+                        <label htmlFor="dept-sales" className="text-sm">Phòng Sales</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="dept-marketing" value="dept-marketing" />
+                        <label htmlFor="dept-marketing" className="text-sm">Phòng Marketing</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="dept-telesales" value="dept-telesales" />
+                        <label htmlFor="dept-telesales" className="text-sm">Phòng Telesales</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="dept-customer-service" value="dept-customer-service" />
+                        <label htmlFor="dept-customer-service" className="text-sm">Phòng Chăm sóc khách hàng</label>
+                      </div>
+                    </>
+                  )}
+                  
+                  {selectedAssignmentType === 'team' && (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="team-sales-a" value="team-sales-a" />
+                        <label htmlFor="team-sales-a" className="text-sm">Team Sales A</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="team-sales-b" value="team-sales-b" />
+                        <label htmlFor="team-sales-b" className="text-sm">Team Sales B</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="team-telesales-1" value="team-telesales-1" />
+                        <label htmlFor="team-telesales-1" className="text-sm">Team Telesales 1</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="team-telesales-2" value="team-telesales-2" />
+                        <label htmlFor="team-telesales-2" className="text-sm">Team Telesales 2</label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <input type="checkbox" id="team-marketing" value="team-marketing" />
+                        <label htmlFor="team-marketing" className="text-sm">Team Marketing</label>
+                      </div>
+                    </>
+                  )}
+
+                  {selectedAssignmentType === 'individual' && (
+                    <div className="space-y-3">
+                      {/* Search and Filter Controls */}
+                      <div className="flex space-x-2 pb-3 border-b">
+                        <div className="flex-1">
+                          <Input
+                            placeholder="Tìm kiếm nhân viên..."
+                            value={individualSearchTerm}
+                            onChange={(e) => setIndividualSearchTerm(e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+                        <Select value={individualFilterTeam} onValueChange={setIndividualFilterTeam}>
+                          <SelectTrigger className="w-40">
+                            <SelectValue placeholder="Lọc theo team" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tất cả team</SelectItem>
+                            <SelectItem value="sales-a">Team Sales A</SelectItem>
+                            <SelectItem value="sales-b">Team Sales B</SelectItem>
+                            <SelectItem value="telesales-1">Team Telesales 1</SelectItem>
+                            <SelectItem value="telesales-2">Team Telesales 2</SelectItem>
+                            <SelectItem value="customer-success">Team Customer Success</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      {/* Individual List */}
+                      <div className="space-y-2">
+                        {[
+                          { id: 'user-nguyen-van-a', name: 'Nguyễn Văn A', team: 'sales-a', title: 'Sales Manager', teamName: 'Team Sales A' },
+                          { id: 'user-tran-thi-b', name: 'Trần Thị B', team: 'sales-a', title: 'Sales Executive', teamName: 'Team Sales A' },
+                          { id: 'user-le-van-c', name: 'Lê Văn C', team: 'telesales-1', title: 'Telesales Specialist', teamName: 'Team Telesales 1' },
+                          { id: 'user-pham-thi-d', name: 'Phạm Thị D', team: 'sales-b', title: 'Account Manager', teamName: 'Team Sales B' },
+                          { id: 'user-hoang-van-e', name: 'Hoàng Văn E', team: 'sales-a', title: 'Senior Sales', teamName: 'Team Sales A' },
+                          { id: 'user-vo-thi-f', name: 'Võ Thị F', team: 'customer-success', title: 'Customer Success', teamName: 'Team Customer Success' },
+                          { id: 'user-dao-van-g', name: 'Đào Văn G', team: 'telesales-1', title: 'Telesales Lead', teamName: 'Team Telesales 1' },
+                          { id: 'user-bui-thi-h', name: 'Bùi Thị H', team: 'sales-b', title: 'Sales Representative', teamName: 'Team Sales B' },
+                          { id: 'user-nguyen-thi-i', name: 'Nguyễn Thị I', team: 'sales-a', title: 'Team Leader', teamName: 'Team Sales A' },
+                          { id: 'user-tran-van-j', name: 'Trần Văn J', team: 'sales-b', title: 'Key Account Manager', teamName: 'Team Sales B' },
+                          { id: 'user-le-thi-k', name: 'Lê Thị K', team: 'telesales-2', title: 'Telesales Executive', teamName: 'Team Telesales 2' },
+                          { id: 'user-pham-van-l', name: 'Phạm Văn L', team: 'sales-b', title: 'Business Development', teamName: 'Team Sales B' }
+                        ]
+                        .filter(person => {
+                          const matchesSearch = person.name.toLowerCase().includes(individualSearchTerm.toLowerCase()) ||
+                                              person.title.toLowerCase().includes(individualSearchTerm.toLowerCase()) ||
+                                              person.teamName.toLowerCase().includes(individualSearchTerm.toLowerCase())
+                          const matchesTeam = individualFilterTeam === 'all' || person.team === individualFilterTeam
+                          return matchesSearch && matchesTeam
+                        })
+                        .map(person => (
+                          <div key={person.id} className="flex items-center space-x-2 hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" id={person.id} value={person.id} />
+                            <label htmlFor={person.id} className="text-sm flex-1 cursor-pointer flex items-center justify-between">
+                              <span>{person.name}</span>
+                              <div className="flex items-center space-x-2">
+                                <span className="text-xs text-gray-500">{person.title}</span>
+                                <Badge variant="outline" className="text-xs">
+                                  {person.teamName}
+                                </Badge>
+                              </div>
+                            </label>
+                          </div>
+                        ))}
+                      </div>
+
+                      {/* No Results Message */}
+                      {[
+                        { id: 'user-nguyen-van-a', name: 'Nguyễn Văn A', team: 'sales-a', title: 'Sales Manager', teamName: 'Team Sales A' },
+                        { id: 'user-tran-thi-b', name: 'Trần Thị B', team: 'sales-a', title: 'Sales Executive', teamName: 'Team Sales A' },
+                        { id: 'user-le-van-c', name: 'Lê Văn C', team: 'telesales-1', title: 'Telesales Specialist', teamName: 'Team Telesales 1' },
+                        { id: 'user-pham-thi-d', name: 'Phạm Thị D', team: 'sales-b', title: 'Account Manager', teamName: 'Team Sales B' },
+                        { id: 'user-hoang-van-e', name: 'Hoàng Văn E', team: 'sales-a', title: 'Senior Sales', teamName: 'Team Sales A' },
+                        { id: 'user-vo-thi-f', name: 'Võ Thị F', team: 'customer-success', title: 'Customer Success', teamName: 'Team Customer Success' },
+                        { id: 'user-dao-van-g', name: 'Đào Văn G', team: 'telesales-1', title: 'Telesales Lead', teamName: 'Team Telesales 1' },
+                        { id: 'user-bui-thi-h', name: 'Bùi Thị H', team: 'sales-b', title: 'Sales Representative', teamName: 'Team Sales B' },
+                        { id: 'user-nguyen-thi-i', name: 'Nguyễn Thị I', team: 'sales-a', title: 'Team Leader', teamName: 'Team Sales A' },
+                        { id: 'user-tran-van-j', name: 'Trần Văn J', team: 'sales-b', title: 'Key Account Manager', teamName: 'Team Sales B' },
+                        { id: 'user-le-thi-k', name: 'Lê Thị K', team: 'telesales-2', title: 'Telesales Executive', teamName: 'Team Telesales 2' },
+                        { id: 'user-pham-van-l', name: 'Phạm Văn L', team: 'sales-b', title: 'Business Development', teamName: 'Team Sales B' }
+                      ]
+                      .filter(person => {
+                        const matchesSearch = person.name.toLowerCase().includes(individualSearchTerm.toLowerCase()) ||
+                                            person.title.toLowerCase().includes(individualSearchTerm.toLowerCase()) ||
+                                            person.teamName.toLowerCase().includes(individualSearchTerm.toLowerCase())
+                        const matchesTeam = individualFilterTeam === 'all' || person.team === individualFilterTeam
+                        return matchesSearch && matchesTeam
+                      }).length === 0 && (
+                        <div className="text-center py-4 text-gray-500 text-sm">
+                          <Users className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                          Không tìm thấy nhân viên phù hợp
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {!selectedAssignmentType && (
+                    <p className="text-gray-500 text-sm">Vui lòng chọn loại phân bổ trước</p>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="rule-description">Mô tả</Label>
+                <Input
+                  id="rule-description"
+                  placeholder="Mô tả ngắn về quy tắc này"
+                  className="mt-2"
+                />
+              </div>
+
+              <div>
+                <Label>Phương thức phân bổ</Label>
+                <div className="grid grid-cols-3 gap-4 mt-2">
+                  <div className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 hover:border-blue-300">
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" name="distribution-method" value="round_robin" />
+                      <div>
+                        <h4 className="font-medium">Xoay vòng</h4>
+                        <p className="text-sm text-gray-500">Phân đều cho từng thành viên</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 hover:border-blue-300">
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" name="distribution-method" value="load_based" />
+                      <div>
+                        <h4 className="font-medium">Theo tải</h4>
+                        <p className="text-sm text-gray-500">Dựa trên khối lượng công việc</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="border rounded-lg p-4 cursor-pointer hover:bg-blue-50 hover:border-blue-300">
+                    <div className="flex items-center space-x-2">
+                      <input type="radio" name="distribution-method" value="random" />
+                      <div>
+                        <h4 className="font-medium">Ngẫu nhiên</h4>
+                        <p className="text-sm text-gray-500">Phân bổ hoàn toàn ngẫu nhiên</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>Điều kiện áp dụng</Label>
+                <div className="space-y-3 mt-2">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="lead-source">Nguồn leads</Label>
+                      <Select>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Tất cả nguồn" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tất cả nguồn</SelectItem>
+                          <SelectItem value="website">Website</SelectItem>
+                          <SelectItem value="zalo">Zalo OA</SelectItem>
+                          <SelectItem value="facebook">Facebook</SelectItem>
+                          <SelectItem value="phone">Điện thoại</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div>
+                      <Label htmlFor="max-leads">Leads phân tối đa cho từng người</Label>
+                      <Input
+                        id="max-leads"
+                        type="number"
+                        placeholder="Không giới hạn"
+                        className="mt-1"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label htmlFor="time-range">Thời gian áp dụng</Label>
+                      <Select value={selectedTimeRange} onValueChange={setSelectedTimeRange}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="24/7" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">24/7</SelectItem>
+                          <SelectItem value="business">Giờ hành chính</SelectItem>
+                          <SelectItem value="custom">Tùy chỉnh</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      
+                      {selectedTimeRange === 'custom' && (
+                        <div className="mt-3 p-3 border rounded-lg bg-gray-50">
+                          <Label className="text-sm font-medium mb-2 block">Chọn khung giờ</Label>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label htmlFor="start-time" className="text-xs text-gray-600">Từ giờ</Label>
+                              <Select>
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="08:00" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="06:00">06:00</SelectItem>
+                                  <SelectItem value="07:00">07:00</SelectItem>
+                                  <SelectItem value="08:00">08:00</SelectItem>
+                                  <SelectItem value="09:00">09:00</SelectItem>
+                                  <SelectItem value="10:00">10:00</SelectItem>
+                                  <SelectItem value="11:00">11:00</SelectItem>
+                                  <SelectItem value="12:00">12:00</SelectItem>
+                                  <SelectItem value="13:00">13:00</SelectItem>
+                                  <SelectItem value="14:00">14:00</SelectItem>
+                                  <SelectItem value="15:00">15:00</SelectItem>
+                                  <SelectItem value="16:00">16:00</SelectItem>
+                                  <SelectItem value="17:00">17:00</SelectItem>
+                                  <SelectItem value="18:00">18:00</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label htmlFor="end-time" className="text-xs text-gray-600">Đến giờ</Label>
+                              <Select>
+                                <SelectTrigger className="mt-1">
+                                  <SelectValue placeholder="17:00" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="12:00">12:00</SelectItem>
+                                  <SelectItem value="13:00">13:00</SelectItem>
+                                  <SelectItem value="14:00">14:00</SelectItem>
+                                  <SelectItem value="15:00">15:00</SelectItem>
+                                  <SelectItem value="16:00">16:00</SelectItem>
+                                  <SelectItem value="17:00">17:00</SelectItem>
+                                  <SelectItem value="18:00">18:00</SelectItem>
+                                  <SelectItem value="19:00">19:00</SelectItem>
+                                  <SelectItem value="20:00">20:00</SelectItem>
+                                  <SelectItem value="21:00">21:00</SelectItem>
+                                  <SelectItem value="22:00">22:00</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </div>
+                          </div>
+                          <div className="mt-3">
+                            <Label className="text-xs text-gray-600 mb-2 block">Ngày trong tuần</Label>
+                            <div className="flex flex-wrap gap-2">
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="mon" defaultChecked />
+                                <label htmlFor="mon" className="text-xs">T2</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="tue" defaultChecked />
+                                <label htmlFor="tue" className="text-xs">T3</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="wed" defaultChecked />
+                                <label htmlFor="wed" className="text-xs">T4</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="thu" defaultChecked />
+                                <label htmlFor="thu" className="text-xs">T5</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="fri" defaultChecked />
+                                <label htmlFor="fri" className="text-xs">T6</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="sat" />
+                                <label htmlFor="sat" className="text-xs">T7</label>
+                              </div>
+                              <div className="flex items-center space-x-1">
+                                <input type="checkbox" id="sun" />
+                                <label htmlFor="sun" className="text-xs">CN</label>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div>
+                      <Label htmlFor="priority">Độ ưu tiên</Label>
+                      <Select>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Trung bình" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="high">Cao</SelectItem>
+                          <SelectItem value="medium">Trung bình</SelectItem>
+                          <SelectItem value="low">Thấp</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowAddDistributionRule(false)}>
+                Hủy
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implement add distribution rule logic
+                setShowAddDistributionRule(false)
+              }}>
+                Tạo quy tắc
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Edit Distribution Rule Modal */}
+        <Dialog open={showEditDistributionRule} onOpenChange={setShowEditDistributionRule}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Chỉnh sửa quy tắc phân bổ</DialogTitle>
+              <DialogDescription>
+                Cập nhật thông tin quy tắc phân bổ leads
+              </DialogDescription>
+            </DialogHeader>
+            
+            {selectedDistributionRule && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="edit-rule-name">Tên quy tắc</Label>
+                    <Input
+                      id="edit-rule-name"
+                      defaultValue={selectedDistributionRule.name}
+                      className="mt-2"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="edit-assignment-type">Loại phân bổ</Label>
+                    <Select defaultValue={selectedDistributionRule.assignmentType}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="department">Theo phòng ban</SelectItem>
+                        <SelectItem value="team">Theo team</SelectItem>
+                        <SelectItem value="individual">Cá nhân</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="edit-rule-description">Mô tả</Label>
+                  <Input
+                    id="edit-rule-description"
+                    defaultValue={selectedDistributionRule.description}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div>
+                  <Label>Phương thức phân bổ</Label>
+                  <div className="grid grid-cols-3 gap-4 mt-2">
+                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'round_robin' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                      <div className="flex items-center space-x-2">
+                        <input type="radio" name="edit-distribution-method" value="round_robin" defaultChecked={selectedDistributionRule.method === 'round_robin'} />
+                        <div>
+                          <h4 className="font-medium">Xoay vòng</h4>
+                          <p className="text-sm text-gray-500">Phân đều cho từng thành viên</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'load_based' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                      <div className="flex items-center space-x-2">
+                        <input type="radio" name="edit-distribution-method" value="load_based" defaultChecked={selectedDistributionRule.method === 'load_based'} />
+                        <div>
+                          <h4 className="font-medium">Theo tải</h4>
+                          <p className="text-sm text-gray-500">Dựa trên khối lượng công việc</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'random' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                      <div className="flex items-center space-x-2">
+                        <input type="radio" name="edit-distribution-method" value="random" defaultChecked={selectedDistributionRule.method === 'random'} />
+                        <div>
+                          <h4 className="font-medium">Ngẫu nhiên</h4>
+                          <p className="text-sm text-gray-500">Phân bổ hoàn toàn ngẫu nhiên</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Đối tượng được phân</Label>
+                  <div className="mt-2 p-3 border rounded-lg">
+                    <div className="flex flex-wrap gap-2">
+                      {selectedDistributionRule.assignedTargets.map((target, index) => (
+                        <Badge key={index} variant="secondary">
+                          {target}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <Label>Điều kiện áp dụng</Label>
+                  <div className="space-y-3 mt-2">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="edit-lead-source">Nguồn leads</Label>
+                        <Select defaultValue={selectedDistributionRule.conditions.source?.[0] || 'all'}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">Tất cả nguồn</SelectItem>
+                            <SelectItem value="website">Website</SelectItem>
+                            <SelectItem value="zalo">Zalo OA</SelectItem>
+                            <SelectItem value="facebook">Facebook</SelectItem>
+                            <SelectItem value="phone">Điện thoại</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-max-leads">Leads phân tối đa cho từng người</Label>
+                        <Input
+                          id="edit-max-leads"
+                          type="number"
+                          defaultValue={selectedDistributionRule.conditions.maxLeads}
+                          placeholder="Không giới hạn"
+                          className="mt-1"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <Label htmlFor="edit-time-range">Thời gian áp dụng</Label>
+                        <Select 
+                          value={editTimeRange} 
+                          onValueChange={setEditTimeRange}
+                          defaultValue={selectedDistributionRule.conditions.timeRange || 'all'}
+                        >
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="all">24/7</SelectItem>
+                            <SelectItem value="business">Giờ hành chính</SelectItem>
+                            <SelectItem value="custom">Tùy chỉnh</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        
+                        {editTimeRange === 'custom' && (
+                          <div className="mt-3 p-3 border rounded-lg bg-gray-50">
+                            <Label className="text-sm font-medium mb-2 block">Chọn khung giờ</Label>
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <Label htmlFor="edit-start-time" className="text-xs text-gray-600">Từ giờ</Label>
+                                <Select>
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue placeholder="08:00" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="06:00">06:00</SelectItem>
+                                    <SelectItem value="07:00">07:00</SelectItem>
+                                    <SelectItem value="08:00">08:00</SelectItem>
+                                    <SelectItem value="09:00">09:00</SelectItem>
+                                    <SelectItem value="10:00">10:00</SelectItem>
+                                    <SelectItem value="11:00">11:00</SelectItem>
+                                    <SelectItem value="12:00">12:00</SelectItem>
+                                    <SelectItem value="13:00">13:00</SelectItem>
+                                    <SelectItem value="14:00">14:00</SelectItem>
+                                    <SelectItem value="15:00">15:00</SelectItem>
+                                    <SelectItem value="16:00">16:00</SelectItem>
+                                    <SelectItem value="17:00">17:00</SelectItem>
+                                    <SelectItem value="18:00">18:00</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                              <div>
+                                <Label htmlFor="edit-end-time" className="text-xs text-gray-600">Đến giờ</Label>
+                                <Select>
+                                  <SelectTrigger className="mt-1">
+                                    <SelectValue placeholder="17:00" />
+                                  </SelectTrigger>
+                                  <SelectContent>
+                                    <SelectItem value="12:00">12:00</SelectItem>
+                                    <SelectItem value="13:00">13:00</SelectItem>
+                                    <SelectItem value="14:00">14:00</SelectItem>
+                                    <SelectItem value="15:00">15:00</SelectItem>
+                                    <SelectItem value="16:00">16:00</SelectItem>
+                                    <SelectItem value="17:00">17:00</SelectItem>
+                                    <SelectItem value="18:00">18:00</SelectItem>
+                                    <SelectItem value="19:00">19:00</SelectItem>
+                                    <SelectItem value="20:00">20:00</SelectItem>
+                                    <SelectItem value="21:00">21:00</SelectItem>
+                                    <SelectItem value="22:00">22:00</SelectItem>
+                                  </SelectContent>
+                                </Select>
+                              </div>
+                            </div>
+                            <div className="mt-3">
+                              <Label className="text-xs text-gray-600 mb-2 block">Ngày trong tuần</Label>
+                              <div className="flex flex-wrap gap-2">
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-mon" defaultChecked />
+                                  <label htmlFor="edit-mon" className="text-xs">T2</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-tue" defaultChecked />
+                                  <label htmlFor="edit-tue" className="text-xs">T3</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-wed" defaultChecked />
+                                  <label htmlFor="edit-wed" className="text-xs">T4</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-thu" defaultChecked />
+                                  <label htmlFor="edit-thu" className="text-xs">T5</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-fri" defaultChecked />
+                                  <label htmlFor="edit-fri" className="text-xs">T6</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-sat" />
+                                  <label htmlFor="edit-sat" className="text-xs">T7</label>
+                                </div>
+                                <div className="flex items-center space-x-1">
+                                  <input type="checkbox" id="edit-sun" />
+                                  <label htmlFor="edit-sun" className="text-xs">CN</label>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div>
+                        <Label htmlFor="edit-priority">Độ ưu tiên</Label>
+                        <Select defaultValue={selectedDistributionRule.conditions.priority || 'medium'}>
+                          <SelectTrigger className="mt-1">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="high">Cao</SelectItem>
+                            <SelectItem value="medium">Trung bình</SelectItem>
+                            <SelectItem value="low">Thấp</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowEditDistributionRule(false)}>
+                Hủy
+              </Button>
+              <Button onClick={() => {
+                // TODO: Implement edit distribution rule logic
+                setShowEditDistributionRule(false)
+              }}>
+                Cập nhật
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Delete Distribution Rule Confirmation Modal */}
+        <Dialog open={!!distributionRuleToDelete} onOpenChange={(open) => !open && setDistributionRuleToDelete(null)}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Xác nhận xóa quy tắc</DialogTitle>
+              <DialogDescription>
+                Bạn có chắc chắn muốn xóa quy tắc phân bổ này không? Hành động này không thể hoàn tác.
+              </DialogDescription>
+            </DialogHeader>
+            
+            {distributionRuleToDelete && (
+              <div className="py-4">
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <h4 className="font-medium text-gray-900">{distributionRuleToDelete.name}</h4>
+                  <p className="text-sm text-gray-600 mt-1">{distributionRuleToDelete.description}</p>
+                  <div className="flex items-center space-x-2 mt-2">
+                    <Badge variant="outline" className="text-xs">
+                      {distributionRuleToDelete.assignmentType === 'department' ? 'Phòng ban' : 
+                       distributionRuleToDelete.assignmentType === 'team' ? 'Team' : 'Cá nhân'}
+                    </Badge>
+                    <Badge variant="secondary" className="text-xs">
+                      {distributionRuleToDelete.leadsAssigned} leads đã phân
+                    </Badge>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDistributionRuleToDelete(null)}>
+                Hủy
+              </Button>
+              <Button variant="destructive" onClick={handleConfirmDeleteDistributionRule}>
+                Xóa quy tắc
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -1368,249 +2699,7 @@ export default function SettingsManagement() {
               </div>
             </CardContent>
           </Card>
-
-          {/* Language & Localization */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Ngôn ngữ & Địa phương</CardTitle>
-              <CardDescription>Cài đặt ngôn ngữ và định dạng</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Language Selection */}
-              <div>
-                <Label>Ngôn ngữ chính</Label>
-                <Select
-                  value={interfaceSettings.language}
-                  onValueChange={(value) => setInterfaceSettings(prev => ({ ...prev, language: value }))}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {languages.map((lang) => (
-                      <SelectItem key={lang.code} value={lang.code}>
-                        <div className="flex items-center space-x-2">
-                          <span>{lang.flag}</span>
-                          <span>{lang.nativeName}</span>
-                          <span className="text-gray-500">({lang.name})</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Timezone */}
-              <div>
-                <Label htmlFor="timezone">Múi giờ</Label>
-                <Select
-                  value={interfaceSettings.timezone}
-                  onValueChange={(value) => setInterfaceSettings(prev => ({ ...prev, timezone: value }))}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Asia/Ho_Chi_Minh">GMT+7 (Việt Nam)</SelectItem>
-                    <SelectItem value="Asia/Bangkok">GMT+7 (Bangkok)</SelectItem>
-                    <SelectItem value="Asia/Tokyo">GMT+9 (Tokyo)</SelectItem>
-                    <SelectItem value="America/New_York">GMT-5 (New York)</SelectItem>
-                    <SelectItem value="Europe/London">GMT+0 (London)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Date Format */}
-              <div>
-                <Label>Định dạng ngày</Label>
-                <Select
-                  value={interfaceSettings.dateFormat}
-                  onValueChange={(value) => setInterfaceSettings(prev => ({ ...prev, dateFormat: value }))}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {dateFormats.map((format) => (
-                      <SelectItem key={format.value} value={format.value}>
-                        {format.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Number Format */}
-              <div>
-                <Label>Định dạng số</Label>
-                <Select
-                  value={interfaceSettings.numberFormat}
-                  onValueChange={(value) => setInterfaceSettings(prev => ({ ...prev, numberFormat: value }))}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {numberFormats.map((format) => (
-                      <SelectItem key={format.value} value={format.value}>
-                        {format.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Currency */}
-              <div>
-                <Label>Đơn vị tiền tệ</Label>
-                <Select
-                  value={interfaceSettings.currency}
-                  onValueChange={(value) => setInterfaceSettings(prev => ({ ...prev, currency: value }))}
-                >
-                  <SelectTrigger className="mt-2">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {currencies.map((currency) => (
-                      <SelectItem key={currency.value} value={currency.value}>
-                        {currency.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </CardContent>
-          </Card>
         </div>
-
-        {/* Language Management */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quản lý Ngôn ngữ</CardTitle>
-            <CardDescription>Quản lý các ngôn ngữ được hỗ trợ trong hệ thống</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {languages.map((lang) => (
-                <div key={lang.code} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <span className="text-2xl">{lang.flag}</span>
-                    <div>
-                      <h4 className="font-medium">{lang.nativeName}</h4>
-                      <p className="text-sm text-gray-500">{lang.name}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    <div className="text-right">
-                      <p className="text-sm font-medium">{lang.progress}%</p>
-                      <Progress value={lang.progress} className="w-20" />
-                    </div>
-                    <Badge variant={lang.isActive ? "default" : "secondary"}>
-                      {lang.isActive ? "Đang dùng" : "Tắt"}
-                    </Badge>
-                    <Switch
-                      checked={lang.isActive}
-                      onCheckedChange={(checked) => {
-                        setLanguages(prev => prev.map(l => 
-                          l.code === lang.code ? { ...l, isActive: checked } : l
-                        ))
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4">
-              <Button variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Thêm ngôn ngữ mới
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Advanced Settings */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Cài đặt nâng cao</CardTitle>
-            <CardDescription>Các tùy chọn giao diện nâng cao</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="sidebar-collapsed">Thu gọn thanh bên mặc định</Label>
-                  <Switch
-                    id="sidebar-collapsed"
-                    checked={interfaceSettings.sidebarCollapsed}
-                    onCheckedChange={(checked) => 
-                      setInterfaceSettings(prev => ({ ...prev, sidebarCollapsed: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="auto-save">Tự động lưu</Label>
-                  <Switch
-                    id="auto-save"
-                    checked={interfaceSettings.autoSave}
-                    onCheckedChange={(checked) => 
-                      setInterfaceSettings(prev => ({ ...prev, autoSave: checked }))
-                    }
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <Label htmlFor="allow-customization">Cho phép người dùng tùy chỉnh</Label>
-                  <Switch
-                    id="allow-customization"
-                    checked={interfaceSettings.allowCustomization}
-                    onCheckedChange={(checked) => 
-                      setInterfaceSettings(prev => ({ ...prev, allowCustomization: checked }))
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="table-page-size">Số dòng trên mỗi trang</Label>
-                  <Select
-                    value={interfaceSettings.tablePageSize.toString()}
-                    onValueChange={(value) => 
-                      setInterfaceSettings(prev => ({ ...prev, tablePageSize: parseInt(value) }))
-                    }
-                  >
-                    <SelectTrigger className="mt-2">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="10">10 dòng</SelectItem>
-                      <SelectItem value="20">20 dòng</SelectItem>
-                      <SelectItem value="50">50 dòng</SelectItem>
-                      <SelectItem value="100">100 dòng</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-
-            {/* Custom CSS */}
-            <div className="mt-6">
-              <Label htmlFor="custom-css">CSS tùy chỉnh</Label>
-              <Textarea
-                id="custom-css"
-                value={interfaceSettings.customCSS}
-                onChange={(e) => setInterfaceSettings(prev => ({ ...prev, customCSS: e.target.value }))}
-                placeholder="/* Nhập CSS tùy chỉnh của bạn */"
-                className="mt-2 h-32 font-mono text-sm"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Lưu ý: CSS tùy chỉnh có thể ảnh hưởng đến giao diện hệ thống
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     )
   }
@@ -2887,6 +3976,7 @@ export default function SettingsManagement() {
     const [filterCategory, setFilterCategory] = useState('all')
     const [filterPerformer, setFilterPerformer] = useState('all')
     const [filterDateRange, setFilterDateRange] = useState('')
+    const [searchQuery, setSearchQuery] = useState('')
 
     const categories = [
       { value: 'all', label: 'Tất cả danh mục', icon: Settings },
@@ -2896,7 +3986,7 @@ export default function SettingsManagement() {
       { value: 'user_management', label: 'Quản lý Người dùng', icon: UserCog },
       { value: 'permissions', label: 'Phân quyền', icon: Shield },
       { value: 'workflow', label: 'Quy trình', icon: Workflow },
-      { value: 'integration', label: 'Tích hợp', icon: Zap },
+      // { value: 'integration', label: 'Tích hợp', icon: Zap },
       { value: 'interface', label: 'Giao diện', icon: Monitor },
       { value: 'system', label: 'Hệ thống', icon: Database }
     ]
@@ -2906,7 +3996,14 @@ export default function SettingsManagement() {
       const performerMatch = filterPerformer === 'all' || item.performedBy === filterPerformer
       const dateMatch = !filterDateRange || new Date(item.timestamp).toDateString() === new Date(filterDateRange).toDateString()
       
-      return categoryMatch && performerMatch && dateMatch
+      // Search trong details, performedBy, action
+      const searchMatch = !searchQuery || 
+        item.details.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.performedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.action.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.affectedEntities.some(entity => entity.toLowerCase().includes(searchQuery.toLowerCase()))
+      
+      return categoryMatch && performerMatch && dateMatch && searchMatch
     })
 
     const getCategoryIcon = (category: string) => {
@@ -2933,20 +4030,42 @@ export default function SettingsManagement() {
     return (
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900">Lịch sử Hệ thống</h2>
-            <p className="text-gray-600">Theo dõi tất cả thay đổi cấu hình và cài đặt hệ thống</p>
+        <div className="flex flex-col space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Lịch sử Hệ thống</h2>
+              <p className="text-gray-600">Theo dõi tất cả thay đổi cấu hình và cài đặt hệ thống</p>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Button variant="outline">
+                <Download className="w-4 h-4 mr-2" />
+                Xuất lịch sử
+              </Button>
+              <Button variant="outline">
+                <RefreshCw className="w-4 h-4 mr-2" />
+                Làm mới
+              </Button>
+            </div>
           </div>
-          <div className="flex items-center space-x-2">
-            <Button variant="outline">
-              <Download className="w-4 h-4 mr-2" />
-              Xuất lịch sử
-            </Button>
-            <Button variant="outline">
-              <RefreshCw className="w-4 h-4 mr-2" />
-              Làm mới
-            </Button>
+          
+          {/* Search Bar */}
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Tìm kiếm trong lịch sử..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -3009,8 +4128,15 @@ export default function SettingsManagement() {
         {/* Filters */}
         <Card>
           <CardHeader>
-            <CardTitle>Bộ lọc</CardTitle>
-            <CardDescription>Lọc lịch sử theo danh mục và người thực hiện</CardDescription>
+            <CardTitle>Bộ lọc & Tìm kiếm</CardTitle>
+            <CardDescription>
+              Lọc lịch sử theo danh mục, người thực hiện và tìm kiếm trong nội dung
+              {searchQuery && (
+                <span className="block mt-1 text-blue-600 font-medium">
+                  Tìm kiếm: "{searchQuery}" - {filteredHistory.length} kết quả
+                </span>
+              )}
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -3055,109 +4181,337 @@ export default function SettingsManagement() {
                 />
               </div>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* History Timeline */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Dòng thời gian Lịch sử ({filteredHistory.length})</CardTitle>
-            <CardDescription>Theo dõi chi tiết các thay đổi hệ thống theo thời gian</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {filteredHistory.map((item, index) => (
-                <div key={item.id} className="relative">
-                  {/* Timeline line */}
-                  {index !== filteredHistory.length - 1 && (
-                    <div className="absolute left-6 top-12 bottom-0 w-0.5 bg-gray-200" />
-                  )}
-                  
-                  <div className="flex items-start space-x-4">
-                    {/* Timeline dot */}
-                    <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${getCategoryColor(item.category)}`}>
-                      {getCategoryIcon(item.category)}
-                    </div>
-                    
-                    {/* Content */}
-                    <div className="flex-1 border rounded-lg p-4 bg-white hover:shadow-md transition-shadow">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-2">
-                          <Badge variant="outline">
-                            {categories.find(c => c.value === item.category)?.label || item.category}
-                          </Badge>
-                          <Badge variant={item.status === 'success' ? 'default' : 'destructive'}>
-                            {item.status === 'success' ? 'Thành công' : 'Thất bại'}
-                          </Badge>
-                        </div>
-                        <div className="text-sm text-gray-500">
-                          {new Date(item.timestamp).toLocaleString('vi-VN')}
-                        </div>
-                      </div>
-                      
-                      <h3 className="font-medium text-gray-900 mt-2">{item.details}</h3>
-                      
-                      <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                        <div>
-                          <span className="font-medium text-gray-700">Thực hiện bởi:</span>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span>{item.performedBy}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {item.performedByRole}
-                            </Badge>
-                          </div>
-                        </div>
-                        <div>
-                          <span className="font-medium text-gray-700">Đối tượng bị ảnh hưởng:</span>
-                          <div className="mt-1">
-                            {item.affectedEntities.map((entity, index) => (
-                              <Badge key={index} variant="outline" className="mr-1 text-xs">
-                                {entity}
-                              </Badge>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      {/* Changes Details */}
-                      {item.changes && (
-                        <div className="mt-4 p-3 bg-gray-50 rounded">
-                          <h4 className="font-medium text-sm text-gray-700 mb-2">Chi tiết thay đổi:</h4>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-                            <div>
-                              <span className="font-medium text-red-600">Trước:</span>
-                              <pre className="mt-1 text-gray-600 whitespace-pre-wrap">
-                                {item.changes.before ? JSON.stringify(item.changes.before, null, 2) : 'Không có'}
-                              </pre>
-                            </div>
-                            <div>
-                              <span className="font-medium text-green-600">Sau:</span>
-                              <pre className="mt-1 text-gray-600 whitespace-pre-wrap">
-                                {JSON.stringify(item.changes.after, null, 2)}
-                              </pre>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <div className="mt-3 text-xs text-gray-500">
-                        IP: {item.ip}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {filteredHistory.length === 0 && (
-              <div className="text-center py-8">
-                <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Không có lịch sử</h3>
-                <p className="text-gray-500">Không tìm thấy thay đổi nào phù hợp với bộ lọc.</p>
+            
+            {/* Clear Filters Button */}
+            {(searchQuery || filterCategory !== 'all' || filterPerformer !== 'all' || filterDateRange) && (
+              <div className="mt-4 pt-4 border-t">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    setSearchQuery('')
+                    setFilterCategory('all')
+                    setFilterPerformer('all')
+                    setFilterDateRange('')
+                  }}
+                  className="text-gray-600"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Xóa tất cả bộ lọc
+                </Button>
               </div>
             )}
           </CardContent>
         </Card>
+
+        {/* History Table */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Lịch sử Hệ thống ({filteredHistory.length})</CardTitle>
+            <CardDescription>Theo dõi chi tiết các thay đổi hệ thống theo thời gian</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b bg-gray-50">
+                    <th className="text-left p-3 font-medium text-gray-700">Thời gian</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Danh mục</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Hành động</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Người thực hiện</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Chi tiết</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Trạng thái</th>
+                    <th className="text-left p-3 font-medium text-gray-700">IP</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistory.map((item, index) => (
+                    <tr key={item.id} className={`border-b hover:bg-gray-50 ${index % 2 === 0 ? 'bg-white' : 'bg-gray-25'}`}>
+                      <td className="p-3 text-sm">
+                        <div className="font-medium text-gray-900">
+                          {new Date(item.timestamp).toLocaleDateString('vi-VN')}
+                        </div>
+                        <div className="text-gray-500 text-xs">
+                          {new Date(item.timestamp).toLocaleTimeString('vi-VN')}
+                        </div>
+                      </td>
+                      <td className="p-3">
+                        <div className="flex items-center space-x-2">
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${getCategoryColor(item.category)}`}>
+                            {getCategoryIcon(item.category)}
+                          </div>
+                          <span className="text-sm font-medium">
+                            {categories.find(c => c.value === item.category)?.label || item.category}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="p-3 text-sm">
+                        <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs font-medium">
+                          {item.action.replace(/_/g, ' ')}
+                        </span>
+                      </td>
+                      <td className="p-3 text-sm">
+                        <div className="font-medium text-gray-900">{item.performedBy}</div>
+                        <Badge variant="secondary" className="text-xs mt-1">
+                          {item.performedByRole}
+                        </Badge>
+                      </td>
+                      <td className="p-3 text-sm max-w-md">
+                        <div className="text-gray-900 line-clamp-2" title={item.details}>
+                          {item.details}
+                        </div>
+                        {item.affectedEntities.length > 0 && (
+                          <div className="mt-1 flex flex-wrap gap-1">
+                            {item.affectedEntities.slice(0, 2).map((entity, index) => (
+                              <Badge key={index} variant="outline" className="text-xs">
+                                {entity}
+                              </Badge>
+                            ))}
+                            {item.affectedEntities.length > 2 && (
+                              <Badge variant="outline" className="text-xs">
+                                +{item.affectedEntities.length - 2}
+                              </Badge>
+                            )}
+                          </div>
+                        )}
+                      </td>
+                      <td className="p-3">
+                        <Badge variant={item.status === 'success' ? 'default' : 'destructive'} className="text-xs">
+                          {item.status === 'success' ? 'Thành công' : 'Thất bại'}
+                        </Badge>
+                      </td>
+                      <td className="p-3 text-sm text-gray-500">
+                        {item.ip}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {filteredHistory.length === 0 && (
+              <div className="text-center py-12">
+                <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Không có lịch sử</h3>
+                <p className="text-gray-500">Không tìm thấy thay đổi nào phù hợp với bộ lọc.</p>
+              </div>
+            )}
+
+            {/* Pagination */}
+            {filteredHistory.length > 0 && (
+              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                <div className="text-sm text-gray-700">
+                  Hiển thị <span className="font-medium">{Math.min(filteredHistory.length, 20)}</span> trong tổng số{' '}
+                  <span className="font-medium">{filteredHistory.length}</span> kết quả
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Button variant="outline" size="sm" disabled>
+                    Trước
+                  </Button>
+                  <Button variant="outline" size="sm" disabled>
+                    Sau
+                  </Button>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Component: Product Management (Sản phẩm & Gói sản phẩm)
+  const ProductManagement = () => {
+    const [products, setProducts] = useState<any[]>([
+      { id: 'p1', name: 'Sản phẩm A', code: 'PROD-A', price: 1000000, description: 'Mô tả sản phẩm A' },
+      { id: 'p2', name: 'Sản phẩm B', code: 'PROD-B', price: 2000000, description: 'Mô tả sản phẩm B' }
+    ])
+
+    const [packages, setPackages] = useState<any[]>([
+      { id: 'pkg1', name: 'Gói Cơ bản', productIds: ['p1'], price: 900000, description: 'Gói cơ bản chứa 1 sản phẩm' }
+    ])
+
+    const [showProductModal, setShowProductModal] = useState(false)
+    const [showPackageModal, setShowPackageModal] = useState(false)
+    const [productForm, setProductForm] = useState({ name: '', code: '', price: '', description: '' })
+    const [packageForm, setPackageForm] = useState({ name: '', price: '', productIds: [] as string[], description: '' })
+
+    const handleAddProduct = () => {
+      const newProduct = {
+        id: 'p' + (products.length + 1),
+        name: productForm.name || `Sản phẩm ${products.length + 1}`,
+        code: productForm.code || `PROD-${products.length + 1}`,
+        price: Number(productForm.price) || 0,
+        description: productForm.description || ''
+      }
+      setProducts(prev => [newProduct, ...prev])
+      setProductForm({ name: '', code: '', price: '', description: '' })
+      setShowProductModal(false)
+    }
+
+    const handleAddPackage = () => {
+      const newPkg = {
+        id: 'pkg' + (packages.length + 1),
+        name: packageForm.name || `Gói ${packages.length + 1}`,
+        price: Number(packageForm.price) || 0,
+        productIds: packageForm.productIds,
+        description: packageForm.description || ''
+      }
+      setPackages(prev => [newPkg, ...prev])
+      setPackageForm({ name: '', price: '', productIds: [], description: '' })
+      setShowPackageModal(false)
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-gray-900">Sản phẩm & Gói sản phẩm</h2>
+            <p className="text-gray-600">Quản lý danh sách sản phẩm và các gói sản phẩm</p>
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button onClick={() => setShowPackageModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Thêm gói sản phẩm
+            </Button>
+            <Button onClick={() => setShowProductModal(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Thêm sản phẩm
+            </Button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div>
+                  <CardTitle>Danh sách Sản phẩm</CardTitle>
+                  <CardDescription>Quản lý các sản phẩm có trong hệ thống</CardDescription>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {products.map(p => (
+                  <div key={p.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">{p.name} <span className="text-xs text-gray-400">({p.code})</span></div>
+                      <div className="text-sm text-gray-500">{p.description}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{p.price?.toLocaleString?.('vi-VN') || p.price} ₫</div>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Button variant="ghost" size="sm"><Edit2 className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Danh sách Gói sản phẩm</CardTitle>
+              <CardDescription>Gói sản phẩm là tập hợp các sản phẩm với mức giá gộp</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                {packages.map(pkg => (
+                  <div key={pkg.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div>
+                      <div className="font-medium">{pkg.name}</div>
+                      <div className="text-sm text-gray-500">{pkg.description}</div>
+                      <div className="text-xs text-gray-500 mt-1">Sản phẩm: {pkg.productIds.map((id:any) => products.find(p=>p.id===id)?.name || id).join(', ')}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-medium">{pkg.price?.toLocaleString?.('vi-VN') || pkg.price} ₫</div>
+                      <div className="flex items-center space-x-2 mt-2">
+                        <Button variant="ghost" size="sm"><Edit2 className="w-4 h-4" /></Button>
+                        <Button variant="ghost" size="sm"><Trash2 className="w-4 h-4" /></Button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Add Product Modal */}
+        <Dialog open={showProductModal} onOpenChange={setShowProductModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Thêm sản phẩm</DialogTitle>
+              <DialogDescription>Nhập thông tin sản phẩm mới</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Tên sản phẩm</Label>
+                <Input value={productForm.name} onChange={(e:any)=>setProductForm(prev=>({...prev,name:e.target.value}))} />
+              </div>
+              <div>
+                <Label>Mã sản phẩm</Label>
+                <Input value={productForm.code} onChange={(e:any)=>setProductForm(prev=>({...prev,code:e.target.value}))} />
+              </div>
+              <div>
+                <Label>Giá</Label>
+                <Input value={productForm.price} onChange={(e:any)=>setProductForm(prev=>({...prev,price:e.target.value}))} />
+              </div>
+              <div>
+                <Label>Mô tả</Label>
+                <Textarea value={productForm.description} onChange={(e:any)=>setProductForm(prev=>({...prev,description:e.target.value}))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={()=>setShowProductModal(false)}>Hủy</Button>
+              <Button onClick={handleAddProduct}>Thêm</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add Package Modal */}
+        <Dialog open={showPackageModal} onOpenChange={setShowPackageModal}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Thêm gói sản phẩm</DialogTitle>
+              <DialogDescription>Tạo một gói sản phẩm mới gồm nhiều sản phẩm</DialogDescription>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div>
+                <Label>Tên gói</Label>
+                <Input value={packageForm.name} onChange={(e:any)=>setPackageForm(prev=>({...prev,name:e.target.value}))} />
+              </div>
+              <div>
+                <Label>Giá gói</Label>
+                <Input value={packageForm.price} onChange={(e:any)=>setPackageForm(prev=>({...prev,price:e.target.value}))} />
+              </div>
+              <div>
+                <Label>Sản phẩm trong gói</Label>
+                <Select onValueChange={(v:any)=>setPackageForm(prev=>({...prev,productIds: v ? v.split(',') : []}))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Chọn sản phẩm (vài sản phẩm bằng dấu phẩy)" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {products.map(p=> (
+                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>Mô tả</Label>
+                <Textarea value={packageForm.description} onChange={(e:any)=>setPackageForm(prev=>({...prev,description:e.target.value}))} />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={()=>setShowPackageModal(false)}>Hủy</Button>
+              <Button onClick={handleAddPackage}>Thêm gói</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
@@ -3176,12 +4530,13 @@ export default function SettingsManagement() {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-5">
           <TabsTrigger value="company">Công ty</TabsTrigger>
           <TabsTrigger value="workflow">Quy trình</TabsTrigger>
           <TabsTrigger value="interface">Giao diện</TabsTrigger>
-          <TabsTrigger value="integrations">Tích hợp</TabsTrigger>
-          <TabsTrigger value="templates">Mẫu dữ liệu</TabsTrigger>
+          <TabsTrigger value="products">Sản phẩm</TabsTrigger>
+          {/* <TabsTrigger value="integrations">Tích hợp</TabsTrigger> */}
+          {/* <TabsTrigger value="templates">Mẫu dữ liệu</TabsTrigger> */}
           <TabsTrigger value="history">Lịch sử</TabsTrigger>
         </TabsList>
 
@@ -3196,6 +4551,10 @@ export default function SettingsManagement() {
 
         <TabsContent value="interface" className="mt-6">
           <InterfaceManagement />
+        </TabsContent>
+
+        <TabsContent value="products" className="mt-6">
+          <ProductManagement />
         </TabsContent>
 
         <TabsContent value="integrations" className="mt-6">

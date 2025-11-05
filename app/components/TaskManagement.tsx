@@ -1,9 +1,9 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import CreateTaskModal from './CreateTaskModal'
+import CreateTaskModalSimple from './CreateTaskModalSimple'
 import TaskDetailModal from './TaskDetailModal'
-import CreateEventModal from './CreateEventModal'
+import CreateEventModalSimple from './CreateEventModalSimple'
 import { 
   Plus, 
   Search, 
@@ -48,13 +48,9 @@ import {
   List,
   Columns,
   ChevronUp,
-  Bot,
-  Brain,
   TrendingUp,
   BarChart3,
   PieChart,
-  Lightbulb,
-  Sparkles,
   ArrowRight,
   TrendingDown,
   MousePointer
@@ -65,7 +61,7 @@ interface TaskTemplate {
   id: string
   title: string
   description: string
-  category: 'lead' | 'order' | 'customer' | 'general'
+  category: 'lead' | 'customer' | 'general'
 }
 
 interface CustomView {
@@ -97,7 +93,7 @@ interface Task {
   tags: string[]
   
   // Related entities
-  relatedType?: 'lead' | 'order' | 'customer' | 'general'
+  relatedType?: 'lead' | 'customer' | 'general' | 'order'
   relatedId?: string
   relatedName?: string
   relatedInfo?: {
@@ -222,7 +218,7 @@ interface CalendarEvent {
   priority: 'low' | 'medium' | 'high'
   location?: string
   attendees: string[]
-  relatedType?: 'lead' | 'order' | 'customer'
+  relatedType?: 'lead' | 'customer' | 'general'
   relatedId?: string
   relatedName?: string
   isAllDay: boolean
@@ -236,7 +232,7 @@ interface CalendarEvent {
 }
 
 export default function TaskManagement() {
-  const [activeTab, setActiveTab] = useState('overview')
+  const [activeTab, setActiveTab] = useState('tasks')
   const [tasks, setTasks] = useState<Task[]>([])
   const [templates, setTemplates] = useState<TaskTemplate[]>([])
   const [employees, setEmployees] = useState<Employee[]>([])
@@ -285,7 +281,6 @@ export default function TaskManagement() {
     assignee: true,
     dueDate: true,
     priority: true,
-    progress: true,
     status: true,
     tags: true,
     createdDate: true,
@@ -382,9 +377,9 @@ export default function TaskManagement() {
         progress: 50,
         assignedTo: '1',
         tags: ['Hợp đồng'],
-        relatedType: 'order',
+        relatedType: 'general',
         relatedId: '1',
-        relatedName: 'ORD-001',
+        relatedName: 'Hợp đồng ABC',
         relatedInfo: { orderNumber: 'ORD-001', orderStatus: 'confirmed' },
         internalNotes: 'Đã trao đổi với khách về điều khoản thanh toán',
         progressNotes: [],
@@ -503,9 +498,9 @@ export default function TaskManagement() {
         progress: 0,
         assignedTo: '7',
         tags: ['Support', 'Training'],
-        relatedType: 'order',
+        relatedType: 'general',
         relatedId: '3',
-        relatedName: 'ORD-003',
+        relatedName: 'Đào tạo sử dụng sản phẩm',
         relatedInfo: { orderNumber: 'ORD-003', orderStatus: 'delivered' },
         internalNotes: 'Khách yêu cầu training cho 20 users',
         progressNotes: [],
@@ -782,8 +777,6 @@ export default function TaskManagement() {
     switch (category) {
       case 'lead':
         return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'order':
-        return 'bg-green-100 text-green-800 border-green-200'
       case 'customer':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'general':
@@ -797,14 +790,12 @@ export default function TaskManagement() {
     switch (category) {
       case 'lead':
         return 'Lead'
-      case 'order':
-        return 'Đơn hàng'
       case 'customer':
         return 'Khách hàng'
       case 'general':
-        return 'Tổng quát'
+        return 'Công việc chung'
       default:
-        return 'Khác'
+        return 'Công việc chung'
     }
   }
 
@@ -877,15 +868,85 @@ export default function TaskManagement() {
 
   const handleCreateTask = (newTask: Task) => {
     setTasks(prev => [...prev, newTask])
+    
+    // Tự động tạo calendar event cho task
+    const taskEvent: CalendarEvent = {
+      id: `task-${newTask.id}`,
+      title: `📋 ${newTask.title}`,
+      description: newTask.description,
+      startDate: new Date(newTask.dueDate).toISOString().split('T')[0],
+      endDate: new Date(newTask.dueDate).toISOString().split('T')[0],
+      startTime: new Date(newTask.dueDate).toTimeString().slice(0, 5),
+      endTime: new Date(new Date(newTask.dueDate).getTime() + 60*60*1000).toTimeString().slice(0, 5), // +1 hour
+      type: 'task' as any,
+      priority: newTask.priority,
+      location: '',
+      attendees: [newTask.assignedTo],
+      isAllDay: false,
+      isRecurring: false,
+      reminderMinutes: [15],
+      color: newTask.priority === 'high' ? '#EF4444' : newTask.priority === 'medium' ? '#F59E0B' : '#10B981',
+      createdBy: newTask.createdBy,
+      createdAt: newTask.createdAt,
+      updatedAt: newTask.updatedAt
+    }
+    
+    setCalendarEvents(prev => [...prev, taskEvent])
   }
 
   const handleUpdateTask = (updatedTask: Task) => {
     setTasks(prev => prev.map(task => task.id === updatedTask.id ? updatedTask : task))
+    
+    // Cập nhật calendar event tương ứng
+    setCalendarEvents(prev => prev.map(event => {
+      if (event.id === `task-${updatedTask.id}`) {
+        return {
+          ...event,
+          title: `📋 ${updatedTask.title}`,
+          description: updatedTask.description,
+          startDate: new Date(updatedTask.dueDate).toISOString().split('T')[0],
+          endDate: new Date(updatedTask.dueDate).toISOString().split('T')[0],
+          startTime: new Date(updatedTask.dueDate).toTimeString().slice(0, 5),
+          endTime: new Date(new Date(updatedTask.dueDate).getTime() + 60*60*1000).toTimeString().slice(0, 5),
+          attendees: [updatedTask.assignedTo],
+          color: updatedTask.priority === 'high' ? '#EF4444' : updatedTask.priority === 'medium' ? '#F59E0B' : '#10B981',
+          updatedAt: updatedTask.updatedAt
+        }
+      }
+      return event
+    }))
   }
 
   const handleCreateEvent = (newEvent: CalendarEvent) => {
-    // Handle event creation
-    console.log('New event created:', newEvent)
+    setCalendarEvents(prev => [...prev, newEvent])
+    
+    // Nếu là meeting với khách hàng, có thể tạo task follow-up tự động
+    if (newEvent.type === 'meeting' && newEvent.attendees.length > 0) {
+      const followUpTask: Task = {
+        id: `followup-${newEvent.id}`,
+        title: `Follow up: ${newEvent.title}`,
+        description: `Follow up sau cuộc họp: ${newEvent.description}`,
+        dueDate: new Date(new Date(newEvent.endDate).getTime() + 24*60*60*1000).toISOString(), // +1 day
+        priority: 'medium',
+        status: 'pending',
+        progress: 0,
+        assignedTo: newEvent.attendees[0] || newEvent.createdBy,
+        tags: ['follow-up', 'meeting'],
+        relatedType: 'general',
+        internalNotes: `Tự động tạo từ cuộc họp: ${newEvent.title}`,
+        progressNotes: [],
+        isAutoCreated: true,
+        reminders: [],
+        customReminders: [],
+        createdAt: new Date().toISOString(),
+        createdBy: 'system',
+        updatedAt: new Date().toISOString(),
+        history: []
+      }
+      
+      // Không tạo calendar event cho follow-up task để tránh loop vô tận
+      setTasks(prev => [...prev, followUpTask])
+    }
   }
 
   // Handle stats card click
@@ -1005,216 +1066,6 @@ export default function TaskManagement() {
         </div>
       </div>
 
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        <div 
-          className={`p-4 border border-blue-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'total' 
-              ? 'bg-gradient-to-br from-blue-100 to-blue-50 border-blue-300 transform scale-105' 
-              : 'bg-gradient-to-br from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 hover:border-blue-200'
-          }`}
-          onClick={() => handleStatsCardClick('total')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Tổng công việc</div>
-              <div className="text-2xl font-bold text-blue-600">{tasks.length}</div>
-              <div className="text-xs text-blue-500 mt-1">
-                {tasks.length > 15 ? '+' : ''}
-                {Math.abs(tasks.length - 15)} so với tháng trước
-              </div>
-            </div>
-            <FileText className="w-8 h-8 text-blue-600" />
-          </div>
-        </div>
-
-        <div 
-          className={`p-4 border border-gray-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'pending' 
-              ? 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300 transform scale-105' 
-              : 'bg-gradient-to-br from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 hover:border-gray-200'
-          }`}
-          onClick={() => handleStatsCardClick('pending')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Chưa làm</div>
-              <div className="text-2xl font-bold text-gray-600">{tasks.filter(t => t.status === 'pending').length}</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {tasks.filter(t => t.status === 'pending').length > 3 ? '+' : ''}
-                {Math.abs(tasks.filter(t => t.status === 'pending').length - 3)} so với tuần trước
-              </div>
-            </div>
-            <Circle className="w-8 h-8 text-gray-600" />
-          </div>
-        </div>
-
-        <div 
-          className={`p-4 border border-yellow-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'in_progress' 
-              ? 'bg-gradient-to-br from-yellow-100 to-yellow-50 border-yellow-300 transform scale-105' 
-              : 'bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50 hover:border-yellow-200'
-          }`}
-          onClick={() => handleStatsCardClick('in_progress')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Đang làm</div>
-              <div className="text-2xl font-bold text-yellow-600">{tasks.filter(t => t.status === 'in_progress').length}</div>
-              <div className="text-xs text-yellow-500 mt-1">
-                {tasks.filter(t => t.status === 'in_progress').length > 5 ? '+' : ''}
-                {Math.abs(tasks.filter(t => t.status === 'in_progress').length - 5)} so với tuần trước
-              </div>
-            </div>
-            <Play className="w-8 h-8 text-yellow-600" />
-          </div>
-        </div>
-
-        <div 
-          className={`p-4 border border-green-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'completed' 
-              ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-300 transform scale-105' 
-              : 'bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50 hover:border-green-200'
-          }`}
-          onClick={() => handleStatsCardClick('completed')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Hoàn tất</div>
-              <div className="text-2xl font-bold text-green-600">{tasks.filter(t => t.status === 'completed').length}</div>
-              <div className="text-xs text-green-500 mt-1">
-                +{Math.max(0, tasks.filter(t => t.status === 'completed').length - 8)} so với tuần trước
-              </div>
-            </div>
-            <CheckCircle className="w-8 h-8 text-green-600" />
-          </div>
-        </div>
-
-        <div 
-          className={`p-4 border border-red-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'overdue' 
-              ? 'bg-gradient-to-br from-red-100 to-red-50 border-red-300 transform scale-105' 
-              : 'bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50 hover:border-red-200'
-          }`}
-          onClick={() => handleStatsCardClick('overdue')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Quá hạn</div>
-              <div className="text-2xl font-bold text-red-600">{overdueTasks.length}</div>
-              <div className="text-xs text-red-500 mt-1">
-                {overdueTasks.length > 2 ? '+' : '-'}
-                {Math.abs(overdueTasks.length - 2)} so với tuần trước
-              </div>
-            </div>
-            <AlertTriangle className="w-8 h-8 text-red-600" />
-          </div>
-        </div>
-
-        <div 
-          className={`p-4 border border-orange-100 rounded-lg cursor-pointer transition-all duration-200 ${
-            selectedStatsFilter === 'urgent_priority' 
-              ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-300 transform scale-105' 
-              : 'bg-gradient-to-br from-orange-50 to-white hover:from-orange-100 hover:to-orange-50 hover:border-orange-200'
-          }`}
-          onClick={() => handleStatsCardClick('urgent_priority')}
-        >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Cần ưu tiên</div>
-              <div className="text-2xl font-bold text-orange-600">
-                {tasks.filter(t => 
-                  (t.priority === 'high') || 
-                  (new Date(t.dueDate) <= new Date(Date.now() + 24*60*60*1000) && t.status !== 'completed')
-                ).length}
-              </div>
-              <div className="text-xs text-orange-500 mt-1">
-                Khẩn cấp + hết hạn sớm
-              </div>
-            </div>
-            <Zap className="w-8 h-8 text-orange-600" />
-          </div>
-        </div>
-      </div>
-
-      {/* AI Suggestions Row */}
-      <div className="bg-gradient-to-br from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Bot className="w-5 h-5 text-purple-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Gợi ý từ AI</h3>
-              <p className="text-sm text-gray-600">Phân tích thông minh từ dữ liệu công việc</p>
-            </div>
-          </div>
-          <div className="flex items-center space-x-1 text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded-full">
-            <Sparkles className="w-3 h-3" />
-            <span>Smart</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Priority Tasks Analysis */}
-          <div className="bg-blue-50 p-4 rounded-lg border border-blue-100">
-            <h4 className="font-medium text-blue-800 mb-2">Công việc ưu tiên</h4>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <AlertTriangle className="w-4 h-4 text-red-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Hoàn thiện báo cáo quý II - Deadline: 16/06/2025</span>
-              </li>
-              <li className="flex items-start">
-                <AlertTriangle className="w-4 h-4 text-red-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Cập nhật nội dung website mới - Deadline: 18/06/2025</span>
-              </li>
-              <li className="flex items-start">
-                <AlertTriangle className="w-4 h-4 text-red-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Liên hệ với khách hàng VIP về gia hạn hợp đồng - Deadline: 20/06/2025</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Workload Distribution */}
-          <div className="bg-green-50 p-4 rounded-lg border border-green-100">
-            <h4 className="font-medium text-green-800 mb-2">Phân công tối ưu</h4>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <User className="w-4 h-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Phân công Trần Thị B xử lý các công việc liên quan đến thiết kế</span>
-              </li>
-              <li className="flex items-start">
-                <User className="w-4 h-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Lê Văn C đang quá tải, nên phân bổ lại 2 công việc</span>
-              </li>
-              <li className="flex items-start">
-                <User className="w-4 h-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Phạm Thị D có thể đảm nhận thêm nhiệm vụ kỹ thuật</span>
-              </li>
-            </ul>
-          </div>
-
-          {/* Process Improvement Suggestions */}
-          <div className="bg-purple-50 p-4 rounded-lg border border-purple-100">
-            <h4 className="font-medium text-purple-800 mb-2">Cải thiện quy trình</h4>
-            <ul className="space-y-2">
-              <li className="flex items-start">
-                <Lightbulb className="w-4 h-4 text-purple-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Tạo mẫu báo cáo tiến độ hàng tuần để tiết kiệm thời gian</span>
-              </li>
-              <li className="flex items-start">
-                <Lightbulb className="w-4 h-4 text-purple-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Áp dụng quy trình phê duyệt 2 cấp cho các công việc quan trọng</span>
-              </li>
-              <li className="flex items-start">
-                <Lightbulb className="w-4 h-4 text-purple-500 mt-1 mr-2 flex-shrink-0" />
-                <span className="text-sm text-gray-700">Tổ chức họp đánh giá tiến độ ngắn (15 phút) vào đầu ngày</span>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-
       {/* Detailed Priority Insights */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Priority Tasks Analysis */}
@@ -1225,7 +1076,7 @@ export default function TaskManagement() {
             </div>
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Công việc cần ưu tiên</h3>
-              <p className="text-sm text-gray-600">Phân tích độ ưu tiên và thời hạn</p>
+              <p className="text-sm text-gray-600">Theo dõi độ ưu tiên và thời hạn</p>
             </div>
           </div>
           
@@ -1425,17 +1276,9 @@ export default function TaskManagement() {
                       <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Lead & KH</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-blue-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.relatedType === 'lead' || t.relatedType === 'customer').length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-blue-600 min-w-[2rem]">
-                        {tasks.filter(t => t.relatedType === 'lead' || t.relatedType === 'customer').length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-blue-600 min-w-[2rem]">
+                      {tasks.filter(t => t.relatedType === 'lead' || t.relatedType === 'customer').length}
+                    </span>
                   </div>
                 </div>
 
@@ -1444,19 +1287,11 @@ export default function TaskManagement() {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-green-500 rounded-full"></div>
-                      <span className="text-sm font-medium text-gray-700">Đơn hàng</span>
+                      <span className="text-sm font-medium text-gray-700">Công việc chung</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-green-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.relatedType === 'order').length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-green-600 min-w-[2rem]">
-                        {tasks.filter(t => t.relatedType === 'order').length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-green-600 min-w-[2rem]">
+                      {tasks.filter(t => t.relatedType === 'general').length}
+                    </span>
                   </div>
                 </div>
 
@@ -1467,17 +1302,9 @@ export default function TaskManagement() {
                       <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Nội bộ & Khác</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-purple-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.relatedType === 'general' || !t.relatedType).length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-purple-600 min-w-[2rem]">
-                        {tasks.filter(t => t.relatedType === 'general' || !t.relatedType).length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-purple-600 min-w-[2rem]">
+                      {tasks.filter(t => t.relatedType === 'general' || !t.relatedType).length}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -1494,17 +1321,9 @@ export default function TaskManagement() {
                       <div className="w-4 h-4 bg-red-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Cao</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-red-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.priority === 'high').length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-red-600 min-w-[2rem]">
-                        {tasks.filter(t => t.priority === 'high').length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-red-600 min-w-[2rem]">
+                      {tasks.filter(t => t.priority === 'high').length}
+                    </span>
                   </div>
                 </div>
 
@@ -1515,17 +1334,9 @@ export default function TaskManagement() {
                       <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Trung bình</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-yellow-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.priority === 'medium').length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-yellow-600 min-w-[2rem]">
-                        {tasks.filter(t => t.priority === 'medium').length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-yellow-600 min-w-[2rem]">
+                      {tasks.filter(t => t.priority === 'medium').length}
+                    </span>
                   </div>
                 </div>
 
@@ -1536,38 +1347,11 @@ export default function TaskManagement() {
                       <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Thấp</span>
                     </div>
-                    <div className="flex items-center space-x-3">
-                      <div className="w-24 h-2 bg-gray-200 rounded-full">
-                        <div 
-                          className="h-2 bg-gray-500 rounded-full transition-all duration-1000 ease-out" 
-                          style={{ width: `${tasks.length > 0 ? (tasks.filter(t => t.priority === 'low').length / tasks.length) * 100 : 0}%` }}
-                        ></div>
-                      </div>
-                      <span className="text-lg font-bold text-gray-600 min-w-[2rem]">
-                        {tasks.filter(t => t.priority === 'low').length}
-                      </span>
-                    </div>
+                    <span className="text-lg font-bold text-gray-600 min-w-[2rem]">
+                      {tasks.filter(t => t.priority === 'low').length}
+                    </span>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Progress Overview - Keep as grid */}
-          <div>
-            <h4 className="text-sm font-medium text-gray-700 mb-3">Tình trạng tiến độ</h4>
-            <div className="grid grid-cols-3 gap-3">
-              <div className="text-center p-3 bg-red-50 rounded-lg">
-                <div className="text-lg font-bold text-red-600">{tasks.filter(t => t.progress < 30).length}</div>
-                <div className="text-xs text-red-600">Chậm tiến độ</div>
-              </div>
-              <div className="text-center p-3 bg-yellow-50 rounded-lg">
-                <div className="text-lg font-bold text-yellow-600">{tasks.filter(t => t.progress >= 30 && t.progress < 70).length}</div>
-                <div className="text-xs text-yellow-600">Đang tiến hành</div>
-              </div>
-              <div className="text-center p-3 bg-green-50 rounded-lg">
-                <div className="text-lg font-bold text-green-600">{tasks.filter(t => t.progress >= 70).length}</div>
-                <div className="text-xs text-green-600">Sắp hoàn thành</div>
               </div>
             </div>
           </div>
@@ -1650,7 +1434,7 @@ export default function TaskManagement() {
 
   // Calendar-related state and functions
   const [currentDate, setCurrentDate] = useState(new Date())
-  const [calendarView, setCalendarView] = useState<'month' | 'week' | 'day'>('month')
+  const [calendarView, setCalendarView] = useState<'day' | 'week' | 'month'>('month')
   const [showLunar, setShowLunar] = useState(false)
   const [showHolidays, setShowHolidays] = useState(true)
   const [eventTypeFilter, setEventTypeFilter] = useState('')
@@ -1686,7 +1470,7 @@ export default function TaskManagement() {
     }
   ]
 
-  const renderCalendar = () => {
+    const renderCalendar = () => {
     // Get first day of month
     const firstDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
     const lastDayOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
@@ -1703,10 +1487,27 @@ export default function TaskManagement() {
     
     const navigateMonth = (direction: 'prev' | 'next') => {
       const newDate = new Date(currentDate)
-      if (direction === 'prev') {
-        newDate.setMonth(newDate.getMonth() - 1)
+      if (calendarView === 'day') {
+        // Navigate by day
+        if (direction === 'prev') {
+          newDate.setDate(newDate.getDate() - 1)
+        } else {
+          newDate.setDate(newDate.getDate() + 1)
+        }
+      } else if (calendarView === 'week') {
+        // Navigate by week
+        if (direction === 'prev') {
+          newDate.setDate(newDate.getDate() - 7)
+        } else {
+          newDate.setDate(newDate.getDate() + 7)
+        }
       } else {
-        newDate.setMonth(newDate.getMonth() + 1)
+        // Navigate by month
+        if (direction === 'prev') {
+          newDate.setMonth(newDate.getMonth() - 1)
+        } else {
+          newDate.setMonth(newDate.getMonth() + 1)
+        }
       }
       setCurrentDate(newDate)
     }
@@ -1792,276 +1593,231 @@ export default function TaskManagement() {
     }
     
     return (
-      <div className="space-y-6">
-        {/* Calendar Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div className="flex items-center space-x-4">
-            <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-              Lịch Công việc - {currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}
-            </h2>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => navigateMonth('prev')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                ←
-              </button>
-              <button
-                onClick={() => setCurrentDate(new Date())}
-                className="px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100"
-              >
-                Hôm nay
-              </button>
-              <button
-                onClick={() => navigateMonth('next')}
-                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-              >
-                →
-              </button>
-            </div>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            {/* Calendar Options */}
-            <div className="flex items-center space-x-2">
-              <label className="flex items-center space-x-1 text-sm">
-                <input
-                  type="checkbox"
-                  checked={showLunar}
-                  onChange={(e) => setShowLunar(e.target.checked)}
-                  className="rounded"
-                />
-                <Moon className="w-4 h-4" />
-                <span>Âm lịch</span>
-              </label>
-              <label className="flex items-center space-x-1 text-sm">
-                <input
-                  type="checkbox"
-                  checked={showHolidays}
-                  onChange={(e) => setShowHolidays(e.target.checked)}
-                  className="rounded"
-                />
-                <TreePine className="w-4 h-4" />
-                <span>Nghỉ lễ</span>
-              </label>
-            </div>
-
-            {/* Event Type Filter */}
-            <select
-              value={eventTypeFilter}
-              onChange={(e) => setEventTypeFilter(e.target.value)}
-              className="px-3 py-1 border border-gray-300 rounded-md text-sm"
-            >
-              <option value="">Tất cả sự kiện</option>
-              <option value="task">Công việc</option>
-              <option value="meeting">Gặp khách hàng</option>
-              <option value="internal">Nội bộ</option>
-              <option value="personal">Cá nhân</option>
-              <option value="holiday">Nghỉ lễ</option>
-            </select>
-
-            {/* View Toggle */}
-            <div className="flex items-center bg-gray-100 rounded-md p-1">
-              <button
-                onClick={() => setCalendarView('month')}
-                className={`px-3 py-1 text-sm rounded ${calendarView === 'month' ? 'bg-white shadow-sm' : ''}`}
-              >
-                Tháng
-              </button>
-              <button
-                onClick={() => setCalendarView('week')}
-                className={`px-3 py-1 text-sm rounded ${calendarView === 'week' ? 'bg-white shadow-sm' : ''}`}
-              >
-                Tuần
-              </button>
-            </div>
-
-            {/* Create Event Button */}
-            <button
-              onClick={() => {
-                setSelectedEventDate(new Date())
-                setShowCreateEventModal(true)
-              }}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo lịch</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Quick Event Templates */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Tạo lịch nhanh</h3>
-          <div className="flex flex-wrap gap-2">
-            {quickTemplates.map(template => (
-              <button
-                key={template.id}
-                onClick={() => handleQuickEvent(template, new Date())}
-                className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                style={{ borderLeftColor: template.color, borderLeftWidth: '3px' }}
-              >
-                {template.type === 'meeting' && <Users className="w-4 h-4" />}
-                {template.type === 'internal' && <Building className="w-4 h-4" />}
-                {template.type === 'personal' && <Coffee className="w-4 h-4" />}
-                <span>{template.title}</span>
-                <span className="text-gray-500">({template.duration}p)</span>
-              </button>
-            ))}
-          </div>
-        </div>
-        
-        {calendarView === 'month' ? (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            {/* Calendar weekday headers */}
-            <div className="grid grid-cols-7 border-b border-gray-200">
-              {['Chủ Nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7'].map(day => (
-                <div key={day} className="px-2 py-3 text-center text-sm font-medium text-gray-500 bg-gray-50">
-                  {day}
+      <div className="h-full bg-white">
+        {/* Lark-style Header */}
+        <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              {/* Left section - Month/Year */}
+              <div className="flex items-center space-x-4">
+                <h1 className="text-2xl font-semibold text-gray-900">
+                  {calendarView === 'day' 
+                    ? currentDate.toLocaleDateString('vi-VN', { 
+                        weekday: 'long',
+                        year: 'numeric', 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })
+                    : calendarView === 'week'
+                    ? `Tuần ${Math.ceil(currentDate.getDate() / 7)} - ${currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })}`
+                    : currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
+                  }
+                </h1>
+                <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+                  <button
+                    onClick={() => navigateMonth('prev')}
+                    className="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => setCurrentDate(new Date())}
+                    className="px-3 py-2 text-sm text-gray-700 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200 font-medium"
+                  >
+                    Hôm nay
+                  </button>
+                  <button
+                    onClick={() => navigateMonth('next')}
+                    className="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200"
+                  >
+                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
                 </div>
-              ))}
-            </div>
-            
-            {/* Calendar grid */}
-            <div className="grid grid-cols-7">
-              {calendarDays.map((date, index) => {
-                const { tasks: dayTasks, events } = getEventsForDate(date)
-                const holiday = showHolidays ? isHoliday(date) : null
-                const lunarDate = showLunar ? getLunarDate(date) : null
-                const isWeekend = date.getDay() === 0 || date.getDay() === 6
-                
-                return (
-                  <div
-                    key={index}
-                    className={`min-h-[140px] p-2 border-r border-b border-gray-200 relative group ${
-                      !isCurrentMonth(date) ? 'bg-gray-50' : 
-                      isToday(date) ? 'bg-blue-50' : 
-                      holiday ? 'bg-red-50' :
-                      isWeekend ? 'bg-orange-50' : 'bg-white'
+              </div>
+
+              {/* Right section - Actions */}
+              <div className="flex items-center space-x-3">
+                {/* View toggle */}
+                <div className="flex items-center bg-gray-50 rounded-lg p-1">
+                  <button
+                    onClick={() => setCalendarView('day')}
+                    className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
+                      calendarView === 'day' 
+                        ? 'bg-white shadow-sm text-blue-600' 
+                        : 'text-gray-600 hover:text-gray-900'
                     }`}
                   >
-                    {/* Date header */}
-                    <div className="flex items-center justify-between mb-2">
-                      <div className={`text-sm font-medium ${
-                        !isCurrentMonth(date) ? 'text-gray-400' : 
-                        isToday(date) ? 'text-blue-600' : 
-                        holiday ? 'text-red-600' :
-                        isWeekend ? 'text-orange-600' : 'text-gray-900'
-                      }`}>
-                        {date.getDate()}
-                      </div>
-                      
-                      {/* Quick add button */}
-                      <button
-                        onClick={() => {
-                          setSelectedEventDate(date)
-                          setShowCreateEventModal(true)
-                        }}
-                        className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 transition-all"
-                        title="Thêm sự kiện"
-                      >
-                        <Plus className="w-3 h-3" />
-                      </button>
-                    </div>
-                    
-                    {/* Lunar calendar */}
-                    {showLunar && lunarDate && (
-                      <div className="text-xs text-gray-500 mb-1">
-                        {lunarDate.lunarDay}/{lunarDate.lunarMonth} {lunarDate.can} {lunarDate.chi}
-                      </div>
-                    )}
-                    
-                    {/* Holiday */}
-                    {holiday && (
-                      <div className="text-xs text-red-600 font-medium mb-1 flex items-center">
-                        <TreePine className="w-3 h-3 mr-1" />
-                        {holiday.name}
-                      </div>
-                    )}
-                    
-                    {/* Events and tasks */}
-                    <div className="space-y-1">
-                      {/* Tasks */}
-                      {dayTasks.slice(0, 2).map(task => (
-                        <div
-                          key={`task-${task.id}`}
-                          onClick={() => {
-                            setSelectedTask(task)
-                            setShowDetailModal(true)
-                          }}
-                          className={`text-xs p-1 rounded cursor-pointer truncate border-l-2 ${
-                            task.priority === 'high' 
-                              ? 'bg-red-100 text-red-700 border-red-400' 
-                              : task.priority === 'medium'
-                              ? 'bg-yellow-100 text-yellow-700 border-yellow-400'
-                              : 'bg-gray-100 text-gray-700 border-gray-400'
-                          }`}
-                          title={task.title}
-                        >
-                          <div className="flex items-center">
-                            <CheckCircle className="w-3 h-3 mr-1" />
-                            {task.title}
-                          </div>
-                        </div>
-                      ))}
-                      
-                      {/* Events */}
-                      {events.slice(0, 3 - dayTasks.slice(0, 2).length).map(event => (
-                        <div
-                          key={`event-${event.id}`}
-                          className="text-xs p-1 rounded cursor-pointer truncate border-l-2"
-                          style={{ 
-                            backgroundColor: event.color + '20', 
-                            color: event.color,
-                            borderLeftColor: event.color
-                          }}
-                          title={event.title}
-                        >
-                          <div className="flex items-center">
-                            {event.type === 'meeting' && <Users className="w-3 h-3 mr-1" />}
-                            {event.type === 'internal' && <Building className="w-3 h-3 mr-1" />}
-                            {event.type === 'personal' && <User className="w-3 h-3 mr-1" />}
-                            <span className="truncate">{event.title}</span>
-                          </div>
-                          {!event.isAllDay && (
-                            <div className="text-xs opacity-75">
-                              {event.startTime} - {event.endTime}
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                      
-                      {/* More indicator */}
-                      {(dayTasks.length + events.length) > 3 && (
-                        <div className="text-xs text-gray-500 font-medium">
-                          +{(dayTasks.length + events.length) - 3} khác
-                        </div>
-                      )}
-                    </div>
+                    Ngày
+                  </button>
+                  <button
+                    onClick={() => setCalendarView('week')}
+                    className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
+                      calendarView === 'week' 
+                        ? 'bg-white shadow-sm text-blue-600' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Tuần
+                  </button>
+                  <button
+                    onClick={() => setCalendarView('month')}
+                    className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
+                      calendarView === 'month' 
+                        ? 'bg-white shadow-sm text-blue-600' 
+                        : 'text-gray-600 hover:text-gray-900'
+                    }`}
+                  >
+                    Tháng
+                  </button>
+                </div>
 
-                    {/* Quick event templates on hover */}
-                    <div className="absolute top-2 right-2 opacity-0 hover:opacity-100 transition-opacity">
-                      <div className="relative group">
-                        <button className="p-1 text-gray-400 hover:text-blue-600">
-                          <Plus className="w-3 h-3" />
-                        </button>
-                        <div className="absolute right-0 top-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-10 min-w-48 hidden group-hover:block">
-                          {quickTemplates.slice(0, 3).map(template => (
+                {/* Create event button */}
+                <button
+                  onClick={() => {
+                    setSelectedEventDate(new Date())
+                    setShowCreateEventModal(true)
+                  }}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Tạo sự kiện</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {calendarView === 'day' ? (
+          /* Day view */
+          <div className="flex-1 bg-white">
+            <div className="border-b border-gray-100 p-4">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {currentDate.toLocaleDateString('vi-VN', { 
+                  weekday: 'long',
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </h3>
+            </div>
+            
+            {/* Time slots */}
+            <div className="overflow-y-auto" style={{ height: 'calc(100vh - 300px)' }}>
+              {Array.from({ length: 24 }, (_, hour) => {
+                const timeSlot = new Date(currentDate)
+                timeSlot.setHours(hour, 0, 0, 0)
+                
+                const { tasks: dayTasks, events } = getEventsForDate(currentDate)
+                const hourTasks = dayTasks.filter(task => {
+                  const taskHour = new Date(task.dueDate).getHours()
+                  return taskHour === hour
+                })
+                const hourEvents = events.filter(event => {
+                  const eventHour = parseInt(event.startTime.split(':')[0])
+                  return eventHour === hour
+                })
+                
+                return (
+                  <div key={hour} className="flex border-b border-gray-50 hover:bg-gray-25">
+                    {/* Time column */}
+                    <div className="w-20 p-3 text-sm text-gray-500 font-medium border-r border-gray-100">
+                      {hour.toString().padStart(2, '0')}:00
+                    </div>
+                    
+                    {/* Events column */}
+                    <div className="flex-1 p-3 min-h-[60px]">
+                      <div className="space-y-2">
+                        {/* Tasks for this hour */}
+                        {hourTasks.map(task => (
+                          <div
+                            key={`task-${task.id}`}
+                            onClick={() => {
+                              setSelectedTask(task)
+                              setShowDetailModal(true)
+                            }}
+                            className={`p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm ${
+                              task.priority === 'high' 
+                                ? 'bg-red-50 border-red-400 text-red-700 hover:bg-red-100' 
+                                : task.priority === 'medium'
+                                ? 'bg-yellow-50 border-yellow-400 text-yellow-700 hover:bg-yellow-100'
+                                : 'bg-gray-50 border-gray-400 text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              {task.status === 'completed' ? (
+                                <CheckCircle className="w-4 h-4 text-green-600" />
+                              ) : task.status === 'in_progress' ? (
+                                <Play className="w-4 h-4 text-blue-600" />
+                              ) : (
+                                <Circle className="w-4 h-4" />
+                              )}
+                              <div className="flex-1">
+                                <div className="font-medium">{task.title}</div>
+                                <div className="text-sm opacity-75 mt-1">{task.description}</div>
+                                <div className="text-xs mt-2 flex items-center space-x-2">
+                                  <span>{new Date(task.dueDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                                  {task.relatedName && (
+                                    <span className="bg-white bg-opacity-50 px-2 py-1 rounded">
+                                      {task.relatedName}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Events for this hour */}
+                        {hourEvents.map(event => (
+                          <div
+                            key={`event-${event.id}`}
+                            className="p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm"
+                            style={{ 
+                              backgroundColor: event.color + '15', 
+                              borderLeftColor: event.color,
+                              color: event.color
+                            }}
+                          >
+                            <div className="flex items-center space-x-3">
+                              {event.type === 'meeting' && <Users className="w-4 h-4" />}
+                              {event.type === 'internal' && <Building className="w-4 h-4" />}
+                              {event.type === 'personal' && <User className="w-4 h-4" />}
+                              <div className="flex-1">
+                                <div className="font-medium">{event.title}</div>
+                                <div className="text-sm opacity-75 mt-1">{event.description}</div>
+                                <div className="text-xs mt-2 flex items-center space-x-2">
+                                  <span>{event.startTime} - {event.endTime}</span>
+                                  {event.location && (
+                                    <span className="bg-white bg-opacity-50 px-2 py-1 rounded">
+                                      📍 {event.location}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Empty slot - show add button on hover */}
+                        {hourTasks.length === 0 && hourEvents.length === 0 && (
+                          <div className="group">
                             <button
-                              key={template.id}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleQuickEvent(template, date)
+                              onClick={() => {
+                                const eventDate = new Date(currentDate)
+                                eventDate.setHours(hour, 0, 0, 0)
+                                setSelectedEventDate(eventDate)
+                                setShowCreateEventModal(true)
                               }}
-                              className="w-full text-left px-3 py-2 text-xs hover:bg-gray-50 flex items-center space-x-2"
+                              className="w-full p-2 text-left text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-all opacity-0 group-hover:opacity-100"
                             >
-                              {template.type === 'meeting' && <Users className="w-3 h-3" />}
-                              {template.type === 'internal' && <Building className="w-3 h-3" />}
-                              {template.type === 'personal' && <Coffee className="w-3 h-3" />}
-                              <span>{template.title}</span>
+                              + Thêm sự kiện lúc {hour.toString().padStart(2, '0')}:00
                             </button>
-                          ))}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -2069,49 +1825,309 @@ export default function TaskManagement() {
               })}
             </div>
           </div>
+        ) : calendarView === 'week' ? (
+          /* Week view */
+          <div className="flex-1 bg-white">
+            {/* Week header */}
+            <div className="border-b border-gray-100">
+              <div className="grid grid-cols-8 text-center">
+                <div className="p-3 border-r border-gray-100"></div>
+                {Array.from({ length: 7 }, (_, dayIndex) => {
+                  const weekStart = new Date(currentDate)
+                  weekStart.setDate(currentDate.getDate() - currentDate.getDay() + dayIndex)
+                  const isToday = weekStart.toDateString() === new Date().toDateString()
+                  
+                  return (
+                    <div key={dayIndex} className="p-3 border-r border-gray-100">
+                      <div className={`text-sm font-medium ${isToday ? 'text-blue-600' : 'text-gray-700'}`}>
+                        {weekStart.toLocaleDateString('vi-VN', { weekday: 'short' })}
+                      </div>
+                      <div className={`text-lg font-semibold mt-1 ${isToday ? 'text-blue-600' : 'text-gray-900'}`}>
+                        {weekStart.getDate()}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+            
+            {/* Week time slots */}
+            <div className="overflow-y-auto" style={{ height: 'calc(100vh - 350px)' }}>
+              {Array.from({ length: 24 }, (_, hour) => (
+                <div key={hour} className="grid grid-cols-8 border-b border-gray-50">
+                  {/* Time column */}
+                  <div className="p-2 text-sm text-gray-500 font-medium border-r border-gray-100 bg-gray-25">
+                    {hour.toString().padStart(2, '0')}:00
+                  </div>
+                  
+                  {/* Day columns */}
+                  {Array.from({ length: 7 }, (_, dayIndex) => {
+                    const weekDay = new Date(currentDate)
+                    weekDay.setDate(currentDate.getDate() - currentDate.getDay() + dayIndex)
+                    
+                    const { tasks: dayTasks, events } = getEventsForDate(weekDay)
+                    const hourTasks = dayTasks.filter(task => {
+                      const taskHour = new Date(task.dueDate).getHours()
+                      return taskHour === hour
+                    })
+                    const hourEvents = events.filter(event => {
+                      const eventHour = parseInt(event.startTime.split(':')[0])
+                      return eventHour === hour
+                    })
+                    
+                    return (
+                      <div key={dayIndex} className="p-1 border-r border-gray-100 min-h-[50px] hover:bg-gray-25">
+                        {/* Tasks */}
+                        {hourTasks.map(task => (
+                          <div
+                            key={`task-${task.id}`}
+                            onClick={() => {
+                              setSelectedTask(task)
+                              setShowDetailModal(true)
+                            }}
+                            className={`text-xs p-1 mb-1 rounded cursor-pointer ${
+                              task.priority === 'high' 
+                                ? 'bg-red-100 text-red-700' 
+                                : task.priority === 'medium'
+                                ? 'bg-yellow-100 text-yellow-700'
+                                : 'bg-gray-100 text-gray-700'
+                            }`}
+                            title={task.title}
+                          >
+                            <div className="truncate font-medium">{task.title}</div>
+                          </div>
+                        ))}
+                        
+                        {/* Events */}
+                        {hourEvents.map(event => (
+                          <div
+                            key={`event-${event.id}`}
+                            className="text-xs p-1 mb-1 rounded cursor-pointer"
+                            style={{ 
+                              backgroundColor: event.color + '20', 
+                              color: event.color
+                            }}
+                            title={event.title}
+                          >
+                            <div className="truncate font-medium">{event.title}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : calendarView === 'month' ? (
+          <div className="flex-1">
+            {/* Calendar Grid */}
+            <div className="bg-white">
+              {/* Weekday headers - Lark style */}
+              <div className="grid grid-cols-7 border-b border-gray-100">
+                {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day, index) => (
+                  <div key={day} className="px-4 py-3 text-center bg-gray-50">
+                    <div className={`text-xs font-semibold ${
+                      index === 0 || index === 6 
+                        ? 'text-red-500' 
+                        : 'text-gray-700'
+                    }`}>
+                      {day}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              
+              {/* Calendar body */}
+              <div className="grid grid-cols-7">
+                {calendarDays.map((date, index) => {
+                  const { tasks: dayTasks, events } = getEventsForDate(date)
+                  const holiday = showHolidays ? isHoliday(date) : null
+                  const lunarDate = showLunar ? getLunarDate(date) : null
+                  const isWeekend = date.getDay() === 0 || date.getDay() === 6
+                  const dayIsToday = isToday(date)
+                  const dayIsCurrentMonth = isCurrentMonth(date)
+                  
+                  return (
+                    <div
+                      key={index}
+                      className={`relative min-h-[120px] border-b border-r border-gray-100 group hover:bg-gray-50 transition-colors ${
+                        !dayIsCurrentMonth ? 'bg-gray-25' : 'bg-white'
+                      }`}
+                    >
+                      {/* Date header */}
+                      <div className="flex items-center justify-between p-3">
+                        <div className="flex items-center space-x-2">
+                          <div className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-medium transition-colors ${
+                            dayIsToday
+                              ? 'bg-blue-600 text-white'
+                              : !dayIsCurrentMonth
+                              ? 'text-gray-400'
+                              : holiday
+                              ? 'text-red-600 hover:bg-red-50'
+                              : isWeekend
+                              ? 'text-orange-600 hover:bg-orange-50'
+                              : 'text-gray-900 hover:bg-gray-100'
+                          }`}>
+                            {date.getDate()}
+                          </div>
+                          
+                          {/* Lunar date */}
+                          {showLunar && lunarDate && dayIsCurrentMonth && (
+                            <div className="text-xs text-gray-500">
+                              {lunarDate.lunarDay}/{lunarDate.lunarMonth}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Quick add button */}
+                        <button
+                          onClick={() => {
+                            setSelectedEventDate(date)
+                            setShowCreateEventModal(true)
+                          }}
+                          className="opacity-0 group-hover:opacity-100 p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded transition-all"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </button>
+                      </div>
+                      
+                      {/* Holiday indicator */}
+                      {holiday && (
+                        <div className="px-3 pb-1">
+                          <div className="text-xs text-red-600 font-medium bg-red-50 px-2 py-1 rounded-full flex items-center">
+                            <TreePine className="w-3 h-3 mr-1" />
+                            {holiday.name}
+                          </div>
+                        </div>
+                      )}
+                      
+                      {/* Events and tasks */}
+                      <div className="px-3 pb-3 space-y-1">
+                        {/* Tasks */}
+                        {dayTasks.slice(0, 2).map(task => (
+                          <div
+                            key={`task-${task.id}`}
+                            onClick={() => {
+                              setSelectedTask(task)
+                              setShowDetailModal(true)
+                            }}
+                            className={`group/item cursor-pointer p-2 rounded-md text-xs transition-all hover:shadow-sm ${
+                              task.priority === 'high' 
+                                ? 'bg-red-50 border-l-2 border-red-400 text-red-700 hover:bg-red-100' 
+                                : task.priority === 'medium'
+                                ? 'bg-yellow-50 border-l-2 border-yellow-400 text-yellow-700 hover:bg-yellow-100'
+                                : 'bg-gray-50 border-l-2 border-gray-400 text-gray-700 hover:bg-gray-100'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-2">
+                              {task.status === 'completed' ? (
+                                <CheckCircle className="w-3 h-3 text-green-600 flex-shrink-0" />
+                              ) : task.status === 'in_progress' ? (
+                                <Play className="w-3 h-3 text-blue-600 flex-shrink-0" />
+                              ) : (
+                                <Circle className="w-3 h-3 text-gray-400 flex-shrink-0" />
+                              )}
+                              <span className="truncate font-medium">{task.title}</span>
+                            </div>
+                            <div className="mt-1 text-xs opacity-75">
+                              {new Date(task.dueDate).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        {/* Events */}
+                        {events.slice(0, 3 - dayTasks.slice(0, 2).length).map(event => (
+                          <div
+                            key={`event-${event.id}`}
+                            className="cursor-pointer p-2 rounded-md text-xs transition-all hover:shadow-sm"
+                            style={{ 
+                              backgroundColor: event.color + '15', 
+                              borderLeft: `3px solid ${event.color}`
+                            }}
+                          >
+                            <div className="flex items-center space-x-2">
+                              {event.type === 'meeting' && <Users className="w-3 h-3 flex-shrink-0" />}
+                              {event.type === 'internal' && <Building className="w-3 h-3 flex-shrink-0" />}
+                              {event.type === 'personal' && <User className="w-3 h-3 flex-shrink-0" />}
+                              <span className="truncate font-medium" style={{ color: event.color }}>
+                                {event.title}
+                              </span>
+                            </div>
+                            {!event.isAllDay && (
+                              <div className="mt-1 text-xs opacity-75" style={{ color: event.color }}>
+                                {event.startTime} - {event.endTime}
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        
+                        {/* More indicator */}
+                        {(dayTasks.length + events.length) > 3 && (
+                          <div className="text-xs text-gray-500 px-2 py-1 hover:bg-gray-100 rounded cursor-pointer">
+                            +{(dayTasks.length + events.length) - 3} sự kiện khác
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
         ) : (
-          <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div className="p-4 text-center text-gray-500">
-              Chế độ xem tuần đang phát triển...
+          /* Default fallback */
+          <div className="flex-1 flex items-center justify-center bg-gray-50">
+            <div className="text-center">
+              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <div className="text-gray-500 text-lg font-medium">Chế độ xem không hợp lệ</div>
             </div>
           </div>
         )}
 
-        {/* Legend */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
-          <h3 className="text-sm font-medium text-gray-900 mb-3">Chú thích</h3>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+        {/* Bottom toolbar - Lark style */}
+        <div className="border-t border-gray-100 bg-white px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left side - Quick templates */}
             <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-blue-500 rounded"></div>
-              <span>Gặp khách hàng</span>
+              <span className="text-sm text-gray-600 font-medium">Tạo nhanh:</span>
+              {quickTemplates.slice(0, 3).map(template => (
+                <button
+                  key={template.id}
+                  onClick={() => handleQuickEvent(template, new Date())}
+                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  style={{ borderLeftColor: template.color, borderLeftWidth: '3px' }}
+                >
+                  {template.type === 'meeting' && <Users className="w-4 h-4" />}
+                  {template.type === 'internal' && <Building className="w-4 h-4" />}
+                  {template.type === 'personal' && <Coffee className="w-4 h-4" />}
+                  <span>{template.title}</span>
+                </button>
+              ))}
             </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-green-500 rounded"></div>
-              <span>Nội bộ</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-gray-500 rounded"></div>
-              <span>Cá nhân</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <div className="w-3 h-3 bg-red-500 rounded"></div>
-              <span>Ưu tiên cao</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <TreePine className="w-3 h-3 text-red-600" />
-              <span>Nghỉ lễ</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Moon className="w-3 h-3 text-blue-600" />
-              <span>Âm lịch</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Sun className="w-3 h-3 text-orange-600" />
-              <span>Cuối tuần</span>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Star className="w-3 h-3 text-blue-600" />
-              <span>Hôm nay</span>
+
+            {/* Right side - Options */}
+            <div className="flex items-center space-x-4">
+              <label className="flex items-center space-x-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={showLunar}
+                  onChange={(e) => setShowLunar(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <Moon className="w-4 h-4" />
+                <span>Âm lịch</span>
+              </label>
+              <label className="flex items-center space-x-2 text-sm text-gray-600">
+                <input
+                  type="checkbox"
+                  checked={showHolidays}
+                  onChange={(e) => setShowHolidays(e.target.checked)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <TreePine className="w-4 h-4" />
+                <span>Lễ tết</span>
+              </label>
             </div>
           </div>
         </div>
@@ -2121,6 +2137,138 @@ export default function TaskManagement() {
 
   const renderTasks = () => (
     <div className="space-y-4">
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        <div 
+          className={`p-4 border border-blue-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'total' 
+              ? 'bg-gradient-to-br from-blue-100 to-blue-50 border-blue-300 transform scale-105' 
+              : 'bg-gradient-to-br from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 hover:border-blue-200'
+          }`}
+          onClick={() => handleStatsCardClick('total')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Tổng công việc</div>
+              <div className="text-2xl font-bold text-blue-600">{tasks.length}</div>
+              <div className="text-xs text-blue-500 mt-1">
+                {tasks.length > 15 ? '+' : ''}
+                {Math.abs(tasks.length - 15)} so với tháng trước
+              </div>
+            </div>
+            <FileText className="w-8 h-8 text-blue-600" />
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border border-gray-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'pending' 
+              ? 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300 transform scale-105' 
+              : 'bg-gradient-to-br from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 hover:border-gray-200'
+          }`}
+          onClick={() => handleStatsCardClick('pending')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Chưa làm</div>
+              <div className="text-2xl font-bold text-gray-600">{tasks.filter(t => t.status === 'pending').length}</div>
+              <div className="text-xs text-gray-500 mt-1">
+                {tasks.filter(t => t.status === 'pending').length > 3 ? '+' : ''}
+                {Math.abs(tasks.filter(t => t.status === 'pending').length - 3)} so với tuần trước
+              </div>
+            </div>
+            <Circle className="w-8 h-8 text-gray-600" />
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border border-yellow-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'in_progress' 
+              ? 'bg-gradient-to-br from-yellow-100 to-yellow-50 border-yellow-300 transform scale-105' 
+              : 'bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50 hover:border-yellow-200'
+          }`}
+          onClick={() => handleStatsCardClick('in_progress')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Đang làm</div>
+              <div className="text-2xl font-bold text-yellow-600">{tasks.filter(t => t.status === 'in_progress').length}</div>
+              <div className="text-xs text-yellow-500 mt-1">
+                {tasks.filter(t => t.status === 'in_progress').length > 5 ? '+' : ''}
+                {Math.abs(tasks.filter(t => t.status === 'in_progress').length - 5)} so với tuần trước
+              </div>
+            </div>
+            <Play className="w-8 h-8 text-yellow-600" />
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border border-green-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'completed' 
+              ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-300 transform scale-105' 
+              : 'bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50 hover:border-green-200'
+          }`}
+          onClick={() => handleStatsCardClick('completed')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Hoàn tất</div>
+              <div className="text-2xl font-bold text-green-600">{tasks.filter(t => t.status === 'completed').length}</div>
+              <div className="text-xs text-green-500 mt-1">
+                +{Math.max(0, tasks.filter(t => t.status === 'completed').length - 8)} so với tuần trước
+              </div>
+            </div>
+            <CheckCircle className="w-8 h-8 text-green-600" />
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border border-red-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'overdue' 
+              ? 'bg-gradient-to-br from-red-100 to-red-50 border-red-300 transform scale-105' 
+              : 'bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50 hover:border-red-200'
+          }`}
+          onClick={() => handleStatsCardClick('overdue')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Quá hạn</div>
+              <div className="text-2xl font-bold text-red-600">{tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length}</div>
+              <div className="text-xs text-red-500 mt-1">
+                {tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length > 2 ? '+' : '-'}
+                {Math.abs(tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length - 2)} so với tuần trước
+              </div>
+            </div>
+            <AlertTriangle className="w-8 h-8 text-red-600" />
+          </div>
+        </div>
+
+        <div 
+          className={`p-4 border border-orange-100 rounded-lg cursor-pointer transition-all duration-200 ${
+            selectedStatsFilter === 'urgent_priority' 
+              ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-300 transform scale-105' 
+              : 'bg-gradient-to-br from-orange-50 to-white hover:from-orange-100 hover:to-orange-50 hover:border-orange-200'
+          }`}
+          onClick={() => handleStatsCardClick('urgent_priority')}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="text-sm text-gray-600">Cần ưu tiên</div>
+              <div className="text-2xl font-bold text-orange-600">
+                {tasks.filter(t => 
+                  (t.priority === 'high') || 
+                  (new Date(t.dueDate) <= new Date(Date.now() + 24*60*60*1000) && t.status !== 'completed')
+                ).length}
+              </div>
+              <div className="text-xs text-orange-500 mt-1">
+                Khẩn cấp + hết hạn sớm
+              </div>
+            </div>
+            <Zap className="w-8 h-8 text-orange-600" />
+          </div>
+        </div>
+      </div>
+
       {/* Header and filters */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex items-center gap-4">
@@ -2442,11 +2590,6 @@ export default function TaskManagement() {
                     Ưu tiên
                   </th>
                 )}
-                {visibleColumns.progress && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Tiến độ
-                  </th>
-                )}
                 {visibleColumns.status && (
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Trạng thái
@@ -2500,8 +2643,8 @@ export default function TaskManagement() {
                             <div className="font-medium text-gray-900">{task.relatedName}</div>
                             <div className="text-sm text-gray-500">
                               {task.relatedType === 'lead' && 'Lead'}
-                              {task.relatedType === 'order' && 'Đơn hàng'}
                               {task.relatedType === 'customer' && 'Khách hàng'}
+                              {task.relatedType === 'general' && 'Công việc chung'}
                             </div>
                             {task.relatedInfo?.phone && (
                               <div className="text-xs text-gray-400">{task.relatedInfo.phone}</div>
@@ -2540,23 +2683,6 @@ export default function TaskManagement() {
                         <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(task.priority)}`}>
                           {getPriorityText(task.priority)}
                         </span>
-                      </td>
-                    )}
-                    
-                    {visibleColumns.progress && (
-                      <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="w-full">
-                          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                            <span>Tiến độ</span>
-                            <span>{task.progress}%</span>
-                          </div>
-                          <div className="w-full h-2 rounded-full bg-gray-200">
-                            <div 
-                              className="h-2 rounded-full transition-all duration-300 bg-blue-500"
-                              style={{ width: `${task.progress}%` }}
-                            />
-                          </div>
-                        </div>
                       </td>
                     )}
                     
@@ -2735,20 +2861,6 @@ export default function TaskManagement() {
                         <h4 className="font-medium text-gray-900 text-sm">{task.title}</h4>
                         <p className="text-xs text-gray-600 line-clamp-2">{task.description}</p>
                         
-                        {/* Progress Bar */}
-                        <div className="w-full">
-                          <div className="flex items-center justify-between text-xs text-gray-500 mb-1">
-                            <span>Tiến độ</span>
-                            <span>{task.progress}%</span>
-                          </div>
-                          <div className="w-full h-2 rounded-full bg-gray-200">
-                            <div 
-                              className="h-2 rounded-full transition-all duration-300 bg-blue-500"
-                              style={{ width: `${task.progress}%` }}
-                            />
-                          </div>
-                        </div>
-                        
                         <div className="flex items-center justify-between">
                           <span className={`px-2 py-1 text-xs font-medium rounded-full border ${getPriorityColor(task.priority)}`}>
                             {getPriorityText(task.priority)}
@@ -2893,16 +3005,6 @@ export default function TaskManagement() {
       <div className="border-b border-gray-200">
         <nav className="-mb-px flex space-x-8 overflow-x-auto">
           <button
-            onClick={() => setActiveTab('overview')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-              activeTab === 'overview'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            Tổng quan
-          </button>
-          <button
             onClick={() => setActiveTab('tasks')}
             className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
               activeTab === 'tasks'
@@ -2926,7 +3028,6 @@ export default function TaskManagement() {
       </div>
 
       {/* Tab Content */}
-      {activeTab === 'overview' && renderOverview()}
       {activeTab === 'tasks' && renderTasks()}
       {activeTab === 'calendar' && renderCalendar()}
 
@@ -3120,15 +3221,11 @@ export default function TaskManagement() {
         </div>
       )}
 
-      <CreateTaskModal
+      <CreateTaskModalSimple
         isOpen={showCreateModal}
         onClose={() => setShowCreateModal(false)}
         onSave={handleCreateTask}
-        templates={templates}
         employees={employees}
-        leads={leads}
-        orders={orders}
-        customers={customers}
       />
 
       <TaskDetailModal
@@ -3139,15 +3236,12 @@ export default function TaskManagement() {
         employees={employees}
       />
 
-      <CreateEventModal
+      <CreateEventModalSimple
         isOpen={showCreateEventModal}
         onClose={() => setShowCreateEventModal(false)}
         onSave={handleCreateEvent}
         selectedDate={selectedEventDate}
         employees={employees}
-        leads={leads}
-        orders={orders}
-        customers={customers}
       />
     </div>
   )

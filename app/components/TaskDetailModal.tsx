@@ -138,10 +138,6 @@ export default function TaskDetailModal({
   const [isEditing, setIsEditing] = useState(false)
   const [editForm, setEditForm] = useState<Partial<Task>>({})
   
-  // Progress update
-  const [newProgress, setNewProgress] = useState('')
-  const [progressNote, setProgressNote] = useState('')
-  
   // New reminder
   const [newReminder, setNewReminder] = useState({
     type: 'app' as 'zalo' | 'email' | 'app',
@@ -159,8 +155,6 @@ export default function TaskDetailModal({
       setEditForm(task)
       setActiveTab('overview')
       setIsEditing(false)
-      setNewProgress('')
-      setProgressNote('')
       setNewReminder({
         type: 'app',
         scheduledAt: '',
@@ -246,44 +240,6 @@ export default function TaskDetailModal({
       ]
     }
     onUpdate(updatedTask)
-  }
-
-  const handleProgressUpdate = () => {
-    if (!newProgress || isNaN(parseInt(newProgress))) return
-    
-    const progress = Math.min(100, Math.max(0, parseInt(newProgress)))
-    const newStatus: 'pending' | 'in_progress' | 'completed' = progress === 100 ? 'completed' : progress > 0 ? 'in_progress' : 'pending'
-    
-    const progressNoteObj: TaskProgressNote = {
-      id: Date.now().toString(),
-      progress,
-      note: progressNote || `Cập nhật tiến độ: ${progress}%`,
-      createdAt: new Date().toISOString(),
-      createdBy: 'current_user'
-    }
-
-    const updatedTask = {
-      ...task,
-      progress,
-      status: newStatus,
-      completedAt: progress === 100 ? new Date().toISOString() : undefined,
-      progressNotes: [...task.progressNotes, progressNoteObj],
-      updatedAt: new Date().toISOString(),
-      history: [
-        ...task.history,
-        {
-          id: Date.now().toString(),
-          action: 'progress_update',
-          details: `Tiến độ được cập nhật thành ${progress}%${progressNote ? `: ${progressNote}` : ''}`,
-          createdAt: new Date().toISOString(),
-          createdBy: 'current_user'
-        }
-      ]
-    }
-    
-    onUpdate(updatedTask)
-    setNewProgress('')
-    setProgressNote('')
   }
 
   const handleSaveEdit = () => {
@@ -393,23 +349,6 @@ export default function TaskDetailModal({
           )}
         </div>
 
-        {/* Progress Bar */}
-        <div>
-          <div className="flex items-center justify-between text-sm text-gray-600 mb-2">
-            <span>Tiến độ</span>
-            <span>{task.progress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-3">
-            <div 
-              className={`h-3 rounded-full transition-all duration-300 ${
-                task.progress === 0 ? 'bg-gray-400' :
-                task.progress < 50 ? 'bg-red-500' :
-                task.progress < 100 ? 'bg-yellow-500' : 'bg-green-500'
-              }`}
-              style={{ width: `${task.progress}%` }}
-            />
-          </div>
-        </div>
       </div>
 
       {/* Task Information */}
@@ -568,76 +507,6 @@ export default function TaskDetailModal({
               {task.internalNotes}
             </div>
           )}
-        </div>
-      )}
-
-      {/* Progress Update */}
-      {task.status !== 'completed' && !isEditing && (
-        <div className="border-t border-gray-200 pt-4">
-          <label className="text-sm font-medium text-gray-700 mb-2 block">Cập nhật tiến độ</label>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            <div>
-              <input
-                type="number"
-                min="0"
-                max="100"
-                value={newProgress}
-                onChange={(e) => setNewProgress(e.target.value)}
-                placeholder="Tiến độ (%)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            <div>
-              <input
-                type="text"
-                value={progressNote}
-                onChange={(e) => setProgressNote(e.target.value)}
-                placeholder="Ghi chú tiến độ (tùy chọn)"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                maxLength={500}
-              />
-            </div>
-            <div>
-              <button
-                onClick={handleProgressUpdate}
-                disabled={!newProgress}
-                className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-              >
-                <Target className="w-4 h-4" />
-                <span>Cập nhật</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-
-  const renderProgressNotes = () => (
-    <div className="space-y-4">
-      <h3 className="text-lg font-medium text-gray-900">Ghi chú tiến độ</h3>
-      
-      {task.progressNotes.length === 0 ? (
-        <div className="text-center py-8 text-gray-500">
-          <FileText className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-          <p>Chưa có ghi chú tiến độ nào</p>
-        </div>
-      ) : (
-        <div className="space-y-3">
-          {task.progressNotes.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(note => (
-            <div key={note.id} className="bg-white border border-gray-200 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="text-lg font-bold text-blue-600">{note.progress}%</div>
-                  <div className="text-sm text-gray-500">{formatDateTime(note.createdAt)}</div>
-                </div>
-                <div className="text-sm text-gray-500">
-                  {employees.find(e => e.id === note.createdBy)?.name || 'Hệ thống'}
-                </div>
-              </div>
-              <div className="text-gray-900">{note.note}</div>
-            </div>
-          ))}
         </div>
       )}
     </div>
@@ -910,7 +779,6 @@ export default function TaskDetailModal({
           <nav className="-mb-px flex space-x-8 px-6 overflow-x-auto">
             {[
               { id: 'overview', label: 'Tổng quan', icon: FileText },
-              { id: 'progress', label: 'Tiến độ', icon: Target },
               { id: 'reminders', label: 'Nhắc nhở', icon: Bell },
               { id: 'history', label: 'Lịch sử', icon: History }
             ].map(tab => (
@@ -933,7 +801,6 @@ export default function TaskDetailModal({
         {/* Tab Content */}
         <div className="overflow-y-auto max-h-[60vh] p-6">
           {activeTab === 'overview' && renderOverview()}
-          {activeTab === 'progress' && renderProgressNotes()}
           {activeTab === 'reminders' && renderReminders()}
           {activeTab === 'history' && renderHistory()}
         </div>

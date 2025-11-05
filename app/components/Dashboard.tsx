@@ -200,11 +200,12 @@ export default function Dashboard() {
   }
 
   const conversionData = [
-    { stage: 'Tiềm năng', count: 254, percentage: 100 },
-    { stage: 'Liên hệ', count: 186, percentage: 73.2 },
+    { stage: 'Lead mới', count: 254, percentage: 100 },
+    { stage: 'Đang tư vấn', count: 186, percentage: 73.2 },
+    { stage: 'Đã gửi ĐX', count: 132, percentage: 52.0 },
     { stage: 'Đàm phán', count: 124, percentage: 48.8 },
-    { stage: 'Đã xuất', count: 89, percentage: 35.0 },
-    { stage: 'Chốt', count: 42, percentage: 16.5 },
+    { stage: 'Chờ thanh toán', count: 89, percentage: 35.0 },
+    { stage: 'Chuyển đổi thành công', count: 42, percentage: 16.5 },
   ]
 
   const activityData = [
@@ -616,19 +617,19 @@ export default function Dashboard() {
               <div className="flex items-center justify-between mb-2">
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-md"></div>
-                  <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">Doanh thu hiện tại</span>
+                  <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">Doanh thu hôm nay</span>
                 </div>
                 <div className="p-1.5 bg-blue-100 rounded-full">
                   <TrendingUp className="w-3 h-3 text-blue-600" />
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-[#151D48] text-[24px] font-semibold">{(summaryStats.currentRevenue * 1000000000).toLocaleString('vi-VN')}</span>
+                <span className="text-[#151D48] text-[24px] font-semibold">310.000.000</span>
               </div>
               <div className="flex items-center space-x-1 mt-1">
                 <ArrowUpRight className="w-3 h-3 text-green-600" />
-                <span className="text-sm font-semibold text-green-600">+{summaryStats.avgGrowth}%</span>
-                <span className="text-xs text-gray-500">so với kỳ trước</span>
+                <span className="text-sm font-semibold text-green-600">+5.5%</span>
+                <span className="text-xs text-gray-500">so với hôm qua</span>
               </div>
             </div>
             
@@ -637,11 +638,7 @@ export default function Dashboard() {
                 <div className="flex items-center space-x-2">
                   <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-md"></div>
                   <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">
-                    Mục tiêu {
-                      selectedPeriod === '12months' ? 'năm' : 
-                      selectedPeriod === 'thismonth' ? 'tháng' : 
-                      'kỳ'
-                    }
+                    KPI hôm nay
                   </span>
                 </div>
                 <div className="p-1.5 bg-green-100 rounded-full">
@@ -649,13 +646,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-[#151D48] text-[24px] font-semibold">{(summaryStats.currentTarget * 1000000000).toLocaleString('vi-VN')}</span>
+                <span className="text-[#151D48] text-[24px] font-semibold">150.000.000</span>
               </div>
               <div className="flex items-center space-x-1 mt-1">
-                <div className={`w-3 h-3 rounded-full ${parseFloat(summaryStats.achievementRate) >= 100 ? 'bg-green-500' : 'bg-orange-500'}`}></div>
-                <span className={`text-sm font-semibold ${parseFloat(summaryStats.achievementRate) >= 100 ? 'text-green-600' : 'text-orange-600'}`}>
-                  {summaryStats.achievementRate}% hoàn thành
-                </span>
+                <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                <span className="text-sm font-semibold text-green-600">206.7% hoàn thành</span>
               </div>
             </div>
             
@@ -670,15 +665,11 @@ export default function Dashboard() {
                 </div>
               </div>
               <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-black text-gray-900">+{summaryStats.avgGrowth}</span>
+                <span className="text-2xl font-black text-gray-900">+5.5</span>
                 <span className="text-lg font-semibold text-gray-600">%</span>
               </div>
               <div className="flex items-center space-x-1 mt-1">
-                <span className="text-xs text-gray-500">
-                  {selectedPeriod === '12months' ? 'Trung bình 12 tháng' : 
-                   selectedPeriod === 'thismonth' ? 'Trung bình hàng ngày' : 
-                   'Trung bình 6 tháng'}
-                </span>
+                <span className="text-xs text-gray-500">Trung bình hàng ngày</span>
               </div>
             </div>
           </div>
