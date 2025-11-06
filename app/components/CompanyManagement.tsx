@@ -77,8 +77,11 @@ interface Employee {
   departmentId: number
   teamId: number
   teamName: string
+  roleId: number
+  roleName: string
   hireDate: string
   officialDate: string // Ngày lên chính thức
+  resignDate?: string // Ngày nghỉ việc
   salary: number
   status: 'active' | 'inactive' | 'probation'
   performance: number
@@ -171,6 +174,8 @@ const sampleEmployees: Employee[] = [
     departmentId: 1,
     teamId: 1,
     teamName: "Sales Team A",
+    roleId: 2,
+    roleName: "Quản lý",
     hireDate: "2023-01-15",
     officialDate: "2023-04-15",
     salary: 25000000,
@@ -188,6 +193,8 @@ const sampleEmployees: Employee[] = [
     departmentId: 1,
     teamId: 2,
     teamName: "Sales Team B",
+    roleId: 1,
+    roleName: "Giám đốc",
     hireDate: "2022-03-20",
     officialDate: "2022-06-20",
     salary: 35000000,
@@ -205,6 +212,8 @@ const sampleEmployees: Employee[] = [
     departmentId: 2,
     teamId: 3,
     teamName: "Marketing Team",
+    roleId: 3,
+    roleName: "Nhân viên",
     hireDate: "2023-06-10",
     officialDate: "2023-09-10",
     salary: 18000000,
@@ -221,6 +230,8 @@ const sampleEmployees: Employee[] = [
     departmentId: 3,
     teamId: 4,
     teamName: "HR Team",
+    roleId: 2,
+    roleName: "Quản lý",
     hireDate: "2022-11-05",
     officialDate: "2023-02-05",
     salary: 22000000,
@@ -237,11 +248,32 @@ const sampleEmployees: Employee[] = [
     departmentId: 4,
     teamId: 5,
     teamName: "Dev Team",
+    roleId: 3,
+    roleName: "Nhân viên",
     hireDate: "2024-01-20",
     officialDate: "2024-04-20",
     salary: 15000000,
     status: "probation",
     performance: 78
+  },
+  {
+    id: 6,
+    name: "Vũ Thị Hoa",
+    email: "vu.thi.hoa@company.com",
+    phone: "0901234572",
+    position: "Accountant",
+    department: "Kế toán",
+    departmentId: 5,
+    teamId: 6,
+    teamName: "Accounting Team",
+    roleId: 3,
+    roleName: "Nhân viên",
+    hireDate: "2023-03-15",
+    officialDate: "2023-06-15",
+    resignDate: "2024-10-30",
+    salary: 16000000,
+    status: "inactive",
+    performance: 75
   }
 ]
 
@@ -737,27 +769,33 @@ export default function CompanyManagement() {
       department: '',
       teamId: 1,
       teamName: 'Default Team',
+      roleId: '',
+      roleName: '',
       hireDate: new Date().toISOString().split('T')[0],
       officialDate: '',
+      resignDate: '',
       salary: 0,
-      status: 'probation' as Employee['status'],
-      performance: 0
+      status: 'probation' as Employee['status']
+      // performance sẽ được set tự động là 0 khi submit
     })
 
     const handleSubmit = (e: React.FormEvent) => {
       e.preventDefault()
-      if (!formData.name || !formData.email || !formData.departmentId) {
+      if (!formData.name || !formData.email || !formData.departmentId || !formData.teamId || !formData.roleId) {
         alert('Vui lòng điền đầy đủ thông tin bắt buộc')
         return
       }
 
       const dept = departments.find(d => d.id === parseInt(formData.departmentId))
+      const role = roles.find(r => r.id === parseInt(formData.roleId))
       onSubmit({
         ...formData,
         departmentId: parseInt(formData.departmentId),
         department: dept?.name || '',
+        roleId: parseInt(formData.roleId),
+        roleName: role?.name || '',
         salary: Number(formData.salary),
-        performance: Number(formData.performance)
+        performance: 0 // Hiệu suất mặc định cho nhân viên mới
       })
     }
 
@@ -810,7 +848,9 @@ export default function CompanyManagement() {
               setFormData({
                 ...formData, 
                 departmentId: value,
-                department: dept?.name || ''
+                department: dept?.name || '',
+                teamId: 1, // Reset team khi thay đổi phòng ban
+                teamName: 'Default Team'
               })
             }}>
               <SelectTrigger>
@@ -820,6 +860,63 @@ export default function CompanyManagement() {
                 {departments.map((dept) => (
                   <SelectItem key={dept.id} value={dept.id.toString()}>
                     {dept.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="team">Team *</Label>
+            <Select 
+              value={formData.teamId.toString()} 
+              onValueChange={(value) => {
+                const team = teams.find(t => t.id === parseInt(value))
+                setFormData({
+                  ...formData, 
+                  teamId: parseInt(value),
+                  teamName: team?.name || ''
+                })
+              }}
+              disabled={!formData.departmentId}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={formData.departmentId ? "Chọn team" : "Chọn phòng ban trước"} />
+              </SelectTrigger>
+              <SelectContent>
+                {teams
+                  .filter(team => team.departmentId === parseInt(formData.departmentId))
+                  .map((team) => (
+                    <SelectItem key={team.id} value={team.id.toString()}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{team.name}</span>
+                        <span className="text-xs text-gray-500">{team.description}</span>
+                        <span className="text-xs text-blue-600">Trưởng nhóm: {team.leaderName}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Label htmlFor="role">Vai trò *</Label>
+            <Select value={formData.roleId} onValueChange={(value) => {
+              const role = roles.find(r => r.id === parseInt(value))
+              setFormData({
+                ...formData, 
+                roleId: value,
+                roleName: role?.name || ''
+              })
+            }}>
+              <SelectTrigger>
+                <SelectValue placeholder="Chọn vai trò" />
+              </SelectTrigger>
+              <SelectContent>
+                {roles.filter(role => role.status === 'active').map((role) => (
+                  <SelectItem key={role.id} value={role.id.toString()}>
+                    <div className="flex flex-col">
+                      <span className="font-medium">{role.name}</span>
+                      <span className="text-xs text-gray-500">{role.description}</span>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -866,19 +963,14 @@ export default function CompanyManagement() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="performance">Hiệu suất (%)</Label>
-            <Input
-              id="performance"
-              type="number"
-              min="0"
-              max="100"
-              value={formData.performance}
-              onChange={(e) => setFormData({...formData, performance: Number(e.target.value)})}
-              placeholder="0"
-            />
-          </div>
         </div>
+        
+        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+          <p className="text-sm text-blue-700">
+            <strong>Lưu ý:</strong> Hiệu xuất công việc sẽ được tính toán tự động từ hệ thống sau khi nhân viên bắt đầu làm việc.
+          </p>
+        </div>
+        
         <DialogFooter>
           <Button type="button" variant="outline" onClick={onCancel}>
             Hủy
@@ -1855,20 +1947,26 @@ export default function CompanyManagement() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>STT</TableHead>
               <TableHead>Nhân viên</TableHead>
               <TableHead>Vị trí</TableHead>
+              <TableHead>Vai trò</TableHead>
               <TableHead>Phòng ban</TableHead>
               <TableHead>Ngày vào</TableHead>
               <TableHead>Ngày chính thức</TableHead>
+              <TableHead>Ngày nghỉ việc</TableHead>
               <TableHead>Lương</TableHead>
-              <TableHead>Hiệu suất</TableHead>
+              <TableHead>Hiệu xuất công việc</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead className="text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredEmployees.map((employee) => (
+            {filteredEmployees.map((employee, index) => (
               <TableRow key={employee.id}>
+                <TableCell>
+                  <span className="font-medium text-gray-600">{index + 1}</span>
+                </TableCell>
                 <TableCell>
                   <div className="flex items-center space-x-3">
                     <Avatar>
@@ -1886,6 +1984,11 @@ export default function CompanyManagement() {
                   <span className="font-medium">{employee.position}</span>
                 </TableCell>
                 <TableCell>
+                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    {employee.roleName}
+                  </Badge>
+                </TableCell>
+                <TableCell>
                   <div>
                     <p className="font-medium">{employee.department}</p>
                     <p className="text-sm text-gray-500">{employee.teamName}</p>
@@ -1893,9 +1996,22 @@ export default function CompanyManagement() {
                 </TableCell>
                 <TableCell>{formatDate(employee.hireDate)}</TableCell>
                 <TableCell>
-                  <span className="font-medium text-green-600">
-                    {formatDate(employee.officialDate)}
-                  </span>
+                  {employee.status === 'probation' ? (
+                    <span className="text-yellow-600 italic">Chưa chính thức</span>
+                  ) : (
+                    <span className="font-medium text-green-600">
+                      {formatDate(employee.officialDate)}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {employee.status === 'inactive' && employee.resignDate ? (
+                    <span className="font-medium text-red-600">
+                      {formatDate(employee.resignDate)}
+                    </span>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
                 </TableCell>
                 <TableCell>{formatCurrency(employee.salary)}</TableCell>
                 <TableCell>
@@ -2851,7 +2967,9 @@ export default function CompanyManagement() {
                   setEditFormData({
                     ...editFormData, 
                     departmentId: parseInt(value),
-                    department: dept?.name || ''
+                    department: dept?.name || '',
+                    teamId: undefined, // Reset team khi thay đổi phòng ban
+                    teamName: ''
                   })
                 }}
               >
@@ -2862,6 +2980,66 @@ export default function CompanyManagement() {
                   {sampleDepartments.map((dept) => (
                     <SelectItem key={dept.id} value={dept.id.toString()}>
                       {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-team">Team</Label>
+              <Select 
+                value={editFormData.teamId?.toString() || ''} 
+                onValueChange={(value) => {
+                  const team = teams.find(t => t.id === parseInt(value))
+                  setEditFormData({
+                    ...editFormData, 
+                    teamId: parseInt(value),
+                    teamName: team?.name || ''
+                  })
+                }}
+                disabled={!editFormData.departmentId}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={editFormData.departmentId ? "Chọn team" : "Chọn phòng ban trước"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {teams
+                    .filter(team => team.departmentId === editFormData.departmentId)
+                    .map((team) => (
+                      <SelectItem key={team.id} value={team.id.toString()}>
+                        <div className="flex flex-col">
+                          <span className="font-medium">{team.name}</span>
+                          <span className="text-xs text-gray-500">{team.description}</span>
+                          <span className="text-xs text-blue-600">Trưởng nhóm: {team.leaderName}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="edit-role">Vai trò</Label>
+              <Select 
+                value={editFormData.roleId?.toString() || ''} 
+                onValueChange={(value) => {
+                  const role = roles.find(r => r.id === parseInt(value))
+                  setEditFormData({
+                    ...editFormData, 
+                    roleId: parseInt(value),
+                    roleName: role?.name || ''
+                  })
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn vai trò" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roles.filter(role => role.status === 'active').map((role) => (
+                    <SelectItem key={role.id} value={role.id.toString()}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{role.name}</span>
+                        <span className="text-xs text-gray-500">{role.description}</span>
+                      </div>
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -2895,6 +3073,15 @@ export default function CompanyManagement() {
               />
             </div>
             <div>
+              <Label htmlFor="edit-resignDate">Ngày nghỉ việc</Label>
+              <Input
+                id="edit-resignDate"
+                type="date"
+                value={editFormData.resignDate || ''}
+                onChange={(e) => setEditFormData({...editFormData, resignDate: e.target.value})}
+              />
+            </div>
+            <div>
               <Label htmlFor="edit-status">Trạng thái</Label>
               <Select 
                 value={editFormData.status || ''} 
@@ -2911,15 +3098,20 @@ export default function CompanyManagement() {
               </Select>
             </div>
             <div>
-              <Label htmlFor="edit-performance">Hiệu suất (%)</Label>
+              <Label htmlFor="edit-performance">Hiệu xuất công việc (%)</Label>
               <Input
                 id="edit-performance"
                 type="number"
                 min="0"
                 max="100"
                 value={editFormData.performance || ''}
-                onChange={(e) => setEditFormData({...editFormData, performance: parseInt(e.target.value)})}
+                readOnly
+                disabled
+                className="bg-gray-50 cursor-not-allowed"
               />
+              <p className="text-xs text-gray-500 mt-1">
+                Hiệu xuất được tính toán tự động từ hệ thống
+              </p>
             </div>
           </div>
           <DialogFooter>
