@@ -43,6 +43,8 @@ import {
   Phone,
   Bell,
   Key,
+  ArrowUp,
+  ArrowDown,
   RefreshCw,
   ExternalLink,
   Copy,
@@ -682,6 +684,15 @@ export default function SettingsManagement() {
   const [statusToDelete, setStatusToDelete] = useState<OrderStatus | null>(null)
   const [transferToStatusId, setTransferToStatusId] = useState<string>('')
   
+  // New stage form state
+  const [newStageForm, setNewStageForm] = useState({
+    name: '',
+    description: '',
+    color: '#3B82F6',
+    position: 'end' as 'start' | 'end' | 'after',
+    afterStageId: ''
+  })
+  
   // Edit status form state
   const [editStatusForm, setEditStatusForm] = useState({
     name: '',
@@ -840,6 +851,91 @@ export default function SettingsManagement() {
     const handleEditSalesStage = (stage: SalesStage) => {
       setSelectedStage(stage)
       setShowEditStageModal(true)
+    }
+
+    const handleAddSalesStage = () => {
+      if (!newStageForm.name.trim()) return
+
+      // Calculate new order based on position
+      let newOrder = 1
+      const nonFixedStages = salesStages.filter(s => !s.isFixed)
+
+      if (newStageForm.position === 'start') {
+        // Insert at beginning of non-fixed stages
+        const firstNonFixedOrder = Math.min(...nonFixedStages.map(s => s.order))
+        newOrder = firstNonFixedOrder - 0.5
+      } else if (newStageForm.position === 'end') {
+        // Insert at end
+        newOrder = Math.max(...salesStages.map(s => s.order)) + 1
+      } else if (newStageForm.position === 'after' && newStageForm.afterStageId) {
+        // Insert after specific stage
+        const afterStage = salesStages.find(s => s.id === newStageForm.afterStageId)
+        if (afterStage) {
+          const nextStages = salesStages.filter(s => s.order > afterStage.order).sort((a, b) => a.order - b.order)
+          if (nextStages.length > 0) {
+            newOrder = (afterStage.order + nextStages[0].order) / 2
+          } else {
+            newOrder = afterStage.order + 1
+          }
+        }
+      }
+
+      const newStage: SalesStage = {
+        id: `custom_${Date.now()}`,
+        name: newStageForm.name,
+        description: newStageForm.description,
+        color: newStageForm.color,
+        order: newOrder,
+        isActive: true,
+        isFixed: false,
+        autoTransition: {
+          enabled: false,
+          days: 0,
+          nextStage: ''
+        }
+      }
+
+      setSalesStages(prev => [...prev, newStage].sort((a, b) => a.order - b.order))
+      
+      // Reset form
+      setNewStageForm({
+        name: '',
+        description: '',
+        color: '#3B82F6',
+        position: 'end',
+        afterStageId: ''
+      })
+      setShowStageModal(false)
+    }
+
+    const handleMoveStage = (stageId: string, direction: 'up' | 'down') => {
+      const stage = salesStages.find(s => s.id === stageId)
+      if (!stage || stage.isFixed) return
+
+      const nonFixedStages = salesStages.filter(s => !s.isFixed).sort((a, b) => a.order - b.order)
+      const currentIndex = nonFixedStages.findIndex(s => s.id === stageId)
+      
+      if (direction === 'up' && currentIndex > 0) {
+        // Swap with previous stage
+        const targetIndex = currentIndex - 1
+        const targetStage = nonFixedStages[targetIndex]
+        
+        setSalesStages(prev => prev.map(s => {
+          if (s.id === stage.id) return { ...s, order: targetStage.order }
+          if (s.id === targetStage.id) return { ...s, order: stage.order }
+          return s
+        }))
+      } else if (direction === 'down' && currentIndex < nonFixedStages.length - 1) {
+        // Swap with next stage
+        const targetIndex = currentIndex + 1
+        const targetStage = nonFixedStages[targetIndex]
+        
+        setSalesStages(prev => prev.map(s => {
+          if (s.id === stage.id) return { ...s, order: targetStage.order }
+          if (s.id === targetStage.id) return { ...s, order: stage.order }
+          return s
+        }))
+      }
     }
 
     const handleConfirmDeleteStage = () => {
@@ -1002,6 +1098,33 @@ export default function SettingsManagement() {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline">{stage.order}</Badge>
+                    
+                    {/* Move buttons for non-fixed stages */}
+                    {!stage.isFixed && (
+                      <div className="flex flex-col">
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 px-1"
+                          onClick={() => handleMoveStage(stage.id, 'up')}
+                          disabled={salesStages.filter(s => !s.isFixed && s.order < stage.order).length === 0}
+                          title="Di chuyển lên"
+                        >
+                          <ArrowUp className="w-3 h-3" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          className="h-6 px-1"
+                          onClick={() => handleMoveStage(stage.id, 'down')}
+                          disabled={salesStages.filter(s => !s.isFixed && s.order > stage.order).length === 0}
+                          title="Di chuyển xuống"
+                        >
+                          <ArrowDown className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )}
+                    
                     <Button 
                       variant="ghost" 
                       size="sm"
@@ -1285,6 +1408,8 @@ export default function SettingsManagement() {
                 <Input
                   id="stage-name"
                   placeholder="Nhập tên giai đoạn"
+                  value={newStageForm.name}
+                  onChange={(e) => setNewStageForm(prev => ({ ...prev, name: e.target.value }))}
                 />
               </div>
 
@@ -1293,8 +1418,55 @@ export default function SettingsManagement() {
                 <Input
                   id="stage-description"
                   placeholder="Mô tả chi tiết về giai đoạn"
+                  value={newStageForm.description}
+                  onChange={(e) => setNewStageForm(prev => ({ ...prev, description: e.target.value }))}
                 />
               </div>
+
+              <div>
+                <Label>Vị trí giai đoạn</Label>
+                <Select
+                  value={newStageForm.position}
+                  onValueChange={(value) => setNewStageForm(prev => ({ 
+                    ...prev, 
+                    position: value as 'start' | 'end' | 'after',
+                    afterStageId: value !== 'after' ? '' : prev.afterStageId
+                  }))}
+                >
+                  <SelectTrigger className="mt-2">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="start">Đầu quy trình (sau các giai đoạn cố định đầu)</SelectItem>
+                    <SelectItem value="end">Cuối quy trình</SelectItem>
+                    <SelectItem value="after">Sau giai đoạn cụ thể</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {newStageForm.position === 'after' && (
+                <div>
+                  <Label>Chọn giai đoạn</Label>
+                  <Select
+                    value={newStageForm.afterStageId}
+                    onValueChange={(value) => setNewStageForm(prev => ({ ...prev, afterStageId: value }))}
+                  >
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Chọn giai đoạn để chèn sau" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {salesStages
+                        .filter(stage => !stage.isFixed || ['new', 'qualified'].includes(stage.id))
+                        .sort((a, b) => a.order - b.order)
+                        .map((stage) => (
+                        <SelectItem key={stage.id} value={stage.id}>
+                          {stage.name} {stage.isFixed ? '(Cố định)' : ''}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
 
               <div>
                 <Label>Màu sắc</Label>
@@ -1305,8 +1477,11 @@ export default function SettingsManagement() {
                   ].map((color) => (
                     <button
                       key={color}
-                      className="w-8 h-8 rounded border-2 border-gray-200 hover:border-gray-400"
+                      className={`w-8 h-8 rounded border-2 transition-colors ${
+                        newStageForm.color === color ? 'border-gray-800' : 'border-gray-200 hover:border-gray-400'
+                      }`}
                       style={{ backgroundColor: color }}
+                      onClick={() => setNewStageForm(prev => ({ ...prev, color }))}
                     />
                   ))}
                 </div>
@@ -1314,13 +1489,22 @@ export default function SettingsManagement() {
             </div>
 
             <DialogFooter>
-              <Button variant="outline" onClick={() => setShowStageModal(false)}>
+              <Button variant="outline" onClick={() => {
+                setShowStageModal(false)
+                setNewStageForm({
+                  name: '',
+                  description: '',
+                  color: '#3B82F6',
+                  position: 'end',
+                  afterStageId: ''
+                })
+              }}>
                 Hủy
               </Button>
-              <Button onClick={() => {
-                // TODO: Implement add stage logic
-                setShowStageModal(false)
-              }}>
+              <Button 
+                onClick={handleAddSalesStage}
+                disabled={!newStageForm.name.trim() || (newStageForm.position === 'after' && !newStageForm.afterStageId)}
+              >
                 Thêm giai đoạn
               </Button>
             </DialogFooter>

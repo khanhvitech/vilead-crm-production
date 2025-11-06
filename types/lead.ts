@@ -4,6 +4,10 @@ export interface Lead {
   phone: string;
   email: string;
   
+  // Thông tin công ty
+  company?: string;
+  position?: string;
+  
   // Nguồn và phân loại
   source: string;
   region: string;
@@ -22,4 +26,12 @@ export interface Lead {
   lastContact: string;
   createdAt: string;
   updatedAt: string;
+  
+  // Files đính kèm
+  files?: Array<{
+    name: string;
+    size: string;
+    type: string;
+    uploadedAt: string;
+  }>;
 } 

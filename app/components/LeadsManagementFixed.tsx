@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Edit, Trash2, X } from 'lucide-react'
+import { useState, useMemo, useEffect } from 'react'
+import { Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Edit, Trash2, X, Download, CheckSquare, Square, Users, Tag, Send, UserPlus } from 'lucide-react'
 
 interface Lead {
   id: number
@@ -31,11 +31,21 @@ interface Lead {
 
 export default function LeadsManagement() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [selectedLeadIds, setSelectedLeadIds] = useState<number[]>([])
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [showBulkActionModal, setShowBulkActionModal] = useState(false)
+  const [bulkActionType, setBulkActionType] = useState('')
+  const [bulkActionData, setBulkActionData] = useState('')
+  const [showQuickActionsDropdown, setShowQuickActionsDropdown] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [stageFilter, setStageFilter] = useState('all')
   const [regionFilter, setRegionFilter] = useState('all')
+  
+  // Debug selectedLeadIds changes
+  useEffect(() => {
+    console.log('Selected leads changed:', selectedLeadIds)
+  }, [selectedLeadIds])
   
   const [leads] = useState<Lead[]>([
     {
@@ -221,6 +231,282 @@ export default function LeadsManagement() {
     setIsDetailModalOpen(true)
   }
 
+  // Handle selecting/deselecting leads
+  const handleSelectLead = (leadId: number) => {
+    console.log('Selecting lead:', leadId, 'Current selected:', selectedLeadIds)
+    setSelectedLeadIds(prev => 
+      prev.includes(leadId) 
+        ? prev.filter(id => id !== leadId)
+        : [...prev, leadId]
+    )
+  }
+
+  // Handle select all leads
+  const handleSelectAll = () => {
+    console.log('Select all clicked. Current:', selectedLeadIds.length, 'Filtered:', filteredLeads.length)
+    if (selectedLeadIds.length === filteredLeads.length) {
+      setSelectedLeadIds([])
+    } else {
+      setSelectedLeadIds(filteredLeads.map(lead => lead.id))
+    }
+  }
+
+  // Export selected leads to CSV or Excel
+  const handleExportLeads = (format: 'csv' | 'excel' = 'csv') => {
+    if (selectedLeadIds.length === 0) {
+      alert('Vui lòng chọn ít nhất một lead để xuất!')
+      return
+    }
+
+    const selectedLeads = leads.filter(lead => selectedLeadIds.includes(lead.id))
+    
+    if (format === 'csv') {
+      // Create CSV content
+      const headers = [
+        'ID', 'Tên', 'Email', 'Điện thoại', 'Nguồn', 'Khu vực', 
+        'Sản phẩm', 'Nội dung', 'Trạng thái', 'Giai đoạn', 
+        'Phân công', 'Giá trị (VND)', 'Ghi chú', 'Ngày tạo', 'Liên hệ cuối'
+      ]
+      
+      const csvContent = [
+        headers.join(','),
+        ...selectedLeads.map(lead => [
+          lead.id,
+          `"${lead.name}"`,
+          lead.email,
+          lead.phone,
+          `"${lead.source}"`,
+          `"${lead.region}"`,
+          `"${lead.product}"`,
+          `"${lead.content.replace(/"/g, '""')}"`,
+          `"${getStatusText(lead.status)}"`,
+          `"${lead.stage}"`,
+          `"${lead.assignedTo}"`,
+          lead.value,
+          `"${lead.notes.replace(/"/g, '""')}"`,
+          lead.createdAt,
+          lead.lastContact
+        ].join(','))
+      ].join('\n')
+
+      // Create and download CSV file
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `leads_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    } else {
+      // For Excel format, create a more detailed table in HTML format
+      const htmlContent = `
+        <html>
+          <head>
+            <meta charset="utf-8">
+            <style>
+              table { border-collapse: collapse; width: 100%; font-family: Arial, sans-serif; }
+              th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+              th { background-color: #f2f2f2; font-weight: bold; }
+              .number { text-align: right; }
+            </style>
+          </head>
+          <body>
+            <h2>Báo cáo Leads - ${new Date().toLocaleDateString('vi-VN')}</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Tên</th>
+                  <th>Email</th>
+                  <th>Điện thoại</th>
+                  <th>Nguồn</th>
+                  <th>Khu vực</th>
+                  <th>Sản phẩm</th>
+                  <th>Nội dung</th>
+                  <th>Trạng thái</th>
+                  <th>Giai đoạn</th>
+                  <th>Phân công</th>
+                  <th>Giá trị (VND)</th>
+                  <th>Ghi chú</th>
+                  <th>Ngày tạo</th>
+                  <th>Liên hệ cuối</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${selectedLeads.map(lead => `
+                  <tr>
+                    <td>${lead.id}</td>
+                    <td>${lead.name}</td>
+                    <td>${lead.email}</td>
+                    <td>${lead.phone}</td>
+                    <td>${lead.source}</td>
+                    <td>${lead.region}</td>
+                    <td>${lead.product}</td>
+                    <td>${lead.content}</td>
+                    <td>${getStatusText(lead.status)}</td>
+                    <td>${lead.stage}</td>
+                    <td>${lead.assignedTo}</td>
+                    <td class="number">${lead.value.toLocaleString('vi-VN')}</td>
+                    <td>${lead.notes}</td>
+                    <td>${lead.createdAt}</td>
+                    <td>${lead.lastContact}</td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </body>
+        </html>
+      `
+
+      const blob = new Blob([htmlContent], { type: 'application/vnd.ms-excel;charset=utf-8' })
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `leads_export_${new Date().toISOString().split('T')[0]}.xls`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+    
+    // Reset selection after export
+    setSelectedLeadIds([])
+    alert(`Đã xuất ${selectedLeads.length} leads thành công dưới định dạng ${format.toUpperCase()}!`)
+  }
+
+  // Quick select functions
+  const handleQuickSelect = (criteria: string) => {
+    let selectedIds: number[] = []
+    
+    switch (criteria) {
+      case 'all-filtered':
+        selectedIds = filteredLeads.map(lead => lead.id)
+        break
+      case 'new':
+        selectedIds = filteredLeads.filter(lead => lead.status === 'new').map(lead => lead.id)
+        break
+      case 'hot':
+        selectedIds = filteredLeads.filter(lead => lead.tags.includes('hot-lead')).map(lead => lead.id)
+        break
+      case 'high-value':
+        selectedIds = filteredLeads.filter(lead => lead.value >= 100000000).map(lead => lead.id)
+        break
+      case 'no-contact':
+        selectedIds = filteredLeads.filter(lead => {
+          const daysSinceContact = Math.floor((new Date().getTime() - new Date(lead.lastContact).getTime()) / (1000 * 60 * 60 * 24))
+          return daysSinceContact > 7
+        }).map(lead => lead.id)
+        break
+      default:
+        selectedIds = []
+    }
+    
+    setSelectedLeadIds(selectedIds)
+  }
+
+  // Bulk operations for selected leads
+  const handleBulkOperation = (operation: string) => {
+    if (selectedLeadIds.length === 0) {
+      alert('Vui lòng chọn ít nhất một lead!')
+      return
+    }
+
+    setBulkActionType(operation)
+    setBulkActionData('')
+    
+    // For operations requiring input, show modal
+    if (['change-status', 'assign', 'add-tag', 'create-tasks'].includes(operation)) {
+      setShowBulkActionModal(true)
+    } else {
+      // For simple operations, execute directly
+      const selectedLeads = leads.filter(lead => selectedLeadIds.includes(lead.id))
+      
+      switch (operation) {
+        case 'send-email':
+          console.log(`Sending email to ${selectedLeads.length} leads`)
+          alert(`Chức năng gửi email hàng loạt cho ${selectedLeads.length} leads sẽ được mở`)
+          break
+
+        case 'mark-contacted':
+          console.log(`Marking ${selectedLeads.length} leads as contacted`)
+          alert(`Đã đánh dấu ${selectedLeads.length} leads là đã liên hệ`)
+          setSelectedLeadIds([])
+          break
+
+        case 'delete':
+          if (confirm(`Bạn có chắc chắn muốn xóa ${selectedLeads.length} leads đã chọn?`)) {
+            console.log(`Deleting ${selectedLeads.length} leads`)
+            alert(`Đã xóa ${selectedLeads.length} leads`)
+            setSelectedLeadIds([])
+          }
+          break
+
+        default:
+          break
+      }
+    }
+  }
+
+  const executeBulkAction = (operation: string, data: string) => {
+    const selectedLeads = leads.filter(lead => selectedLeadIds.includes(lead.id))
+    
+    switch (operation) {
+      case 'change-status':
+        if (data && ['new', 'contacted', 'qualified', 'proposal', 'negotiation', 'won', 'lost'].includes(data)) {
+          console.log(`Changing status of ${selectedLeads.length} leads to: ${data}`)
+          alert(`Đã thay đổi trạng thái của ${selectedLeads.length} leads thành "${getStatusText(data)}"`)
+          setSelectedLeadIds([])
+        }
+        break
+
+      case 'assign':
+        if (data && data.trim()) {
+          console.log(`Assigning ${selectedLeads.length} leads to: ${data}`)
+          alert(`Đã phân công ${selectedLeads.length} leads cho "${data.trim()}"`)
+          setSelectedLeadIds([])
+        }
+        break
+
+      case 'add-tag':
+        if (data && data.trim()) {
+          console.log(`Adding tag "${data}" to ${selectedLeads.length} leads`)
+          alert(`Đã thêm tag "${data.trim()}" cho ${selectedLeads.length} leads`)
+          setSelectedLeadIds([])
+        }
+        break
+
+      case 'create-tasks':
+        if (data && data.trim()) {
+          console.log(`Creating task "${data}" for ${selectedLeads.length} leads`)
+          alert(`Đã tạo công việc "${data.trim()}" cho ${selectedLeads.length} leads`)
+          setSelectedLeadIds([])
+        }
+        break
+
+      default:
+        break
+    }
+    
+    setShowBulkActionModal(false)
+    setBulkActionData('')
+  }
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (showQuickActionsDropdown) {
+        setShowQuickActionsDropdown(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showQuickActionsDropdown])
+
   // Filter leads based on search and filters
   const filteredLeads = leads.filter(lead => {
     const matchesSearch = lead.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -246,12 +532,42 @@ export default function LeadsManagement() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Quản lý Leads</h1>
-          <p className="text-gray-600">Quản lý và theo dõi tất cả khách hàng tiềm năng</p>
+          <p className="text-gray-600">
+            Quản lý và theo dõi tất cả khách hàng tiềm năng
+            {selectedLeadIds.length > 0 && (
+              <span className="ml-2 text-blue-600 font-medium">
+                ({selectedLeadIds.length} leads đã chọn)
+              </span>
+            )}
+          </p>
         </div>
-        <button className="btn-primary flex items-center space-x-2">
-          <Plus className="w-4 h-4" />
-          <span>Thêm Lead mới</span>
-        </button>
+        <div className="flex items-center space-x-3">
+          {selectedLeadIds.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <button 
+                onClick={() => handleExportLeads('csv')}
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-200 rounded-lg hover:bg-green-200 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>CSV</span>
+              </button>
+              <button 
+                onClick={() => handleExportLeads('excel')}
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-lg hover:bg-blue-200 transition-colors"
+              >
+                <Download className="w-4 h-4" />
+                <span>Excel</span>
+              </button>
+              <span className="text-sm text-gray-600">
+                ({selectedLeadIds.length} leads)
+              </span>
+            </div>
+          )}
+          <button className="btn-primary flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span>Thêm Lead mới</span>
+          </button>
+        </div>
       </div>      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -347,17 +663,181 @@ export default function LeadsManagement() {
               <option key={region} value={region}>{region}</option>
             ))}
           </select>
+
+          {/* Quick Select Dropdown */}
+          <select
+            onChange={(e) => {
+              if (e.target.value) {
+                handleQuickSelect(e.target.value)
+                e.target.value = '' // Reset dropdown
+              }
+            }}
+            className="px-3 py-2 border border-orange-300 bg-orange-50 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-orange-700"
+            defaultValue=""
+          >
+            <option value="">🎯 Chọn nhanh...</option>
+            <option value="all-filtered">✅ Tất cả đang hiển thị ({filteredLeads.length})</option>
+            <option value="new">🆕 Leads mới ({filteredLeads.filter(l => l.status === 'new').length})</option>
+            <option value="hot">🔥 Leads nóng ({filteredLeads.filter(l => l.tags.includes('hot-lead')).length})</option>
+            <option value="high-value">💰 Giá trị cao (≥100M) ({filteredLeads.filter(l => l.value >= 100000000).length})</option>
+            <option value="no-contact">⏰ Chưa liên hệ {'>'}7 ngày ({filteredLeads.filter(l => {
+              const daysSinceContact = Math.floor((new Date().getTime() - new Date(l.lastContact).getTime()) / (1000 * 60 * 60 * 24))
+              return daysSinceContact > 7
+            }).length})</option>
+          </select>
         </div>
 
-        <div className="text-sm text-gray-600">
-          Hiển thị {filteredLeads.length} / {leads.length} leads
+        <div className="flex items-center space-x-4">
+          <div className="text-sm text-gray-600">
+            Hiển thị {filteredLeads.length} / {leads.length} leads
+          </div>
+          {selectedLeadIds.length > 0 && (
+            <div className="flex items-center space-x-2">
+              <div className="text-sm text-blue-600 font-medium">
+                {selectedLeadIds.length} leads đã chọn
+              </div>
+              <button
+                onClick={() => setSelectedLeadIds([])}
+                className="text-xs text-gray-500 hover:text-gray-700 underline"
+              >
+                Bỏ chọn tất cả
+              </button>
+            </div>
+          )}
         </div>
-      </div>{/* Leads Table */}
+      </div>
+
+      {/* Bulk Actions Toolbar */}
+      {selectedLeadIds.length > 0 && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 shadow-sm mb-4">
+          <div className="flex items-center justify-between flex-wrap gap-4">
+            <div className="flex items-center space-x-4">
+              <div className="text-sm font-bold text-blue-900 bg-blue-100 px-3 py-1 rounded-full">
+                🎯 {selectedLeadIds.length} leads đã chọn - Thanh công cụ đang hoạt động!
+              </div>
+              
+              {/* Quick Actions - Always visible */}
+              <div className="flex items-center space-x-2 flex-wrap">
+                <button
+                  onClick={() => handleBulkOperation('change-status')}
+                  className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 transition-colors"
+                >
+                  📊 Đổi trạng thái
+                </button>
+                
+                <button
+                  onClick={() => handleBulkOperation('assign')}
+                  className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-lg hover:bg-green-200 transition-colors"
+                >
+                  👤 Phân công
+                </button>
+                
+                <button
+                  onClick={() => handleBulkOperation('add-tag')}
+                  className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 border border-purple-300 rounded-lg hover:bg-purple-200 transition-colors"
+                >
+                  🏷️ Thêm tag
+                </button>
+                
+                <button
+                  onClick={() => handleBulkOperation('mark-contacted')}
+                  className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 border border-yellow-300 rounded-lg hover:bg-yellow-200 transition-colors"
+                >
+                  ✅ Đã liên hệ
+                </button>
+                
+                <button
+                  onClick={() => handleBulkOperation('send-email')}
+                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 border border-indigo-300 rounded-lg hover:bg-indigo-200 transition-colors"
+                >
+                  📧 Gửi email
+                </button>
+                
+                <button
+                  onClick={() => handleBulkOperation('create-tasks')}
+                  className="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-100 border border-teal-300 rounded-lg hover:bg-teal-200 transition-colors"
+                >
+                  📋 Tạo task
+                </button>
+              </div>
+
+              {/* Dropdown for more actions */}
+              <div className="relative">
+                <button
+                  onClick={() => setShowQuickActionsDropdown(!showQuickActionsDropdown)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-1"
+                >
+                  <MoreVertical className="w-4 h-4" />
+                  <span>Thêm...</span>
+                </button>
+                
+                {showQuickActionsDropdown && (
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                    <div className="py-1">
+                      <button
+                        onClick={() => {
+                          handleExportLeads('csv')
+                          setShowQuickActionsDropdown(false)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        📄 Xuất CSV
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleExportLeads('excel')
+                          setShowQuickActionsDropdown(false)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                      >
+                        📊 Xuất Excel
+                      </button>
+                      <hr className="my-1" />
+                      <button
+                        onClick={() => {
+                          handleBulkOperation('delete')
+                          setShowQuickActionsDropdown(false)
+                        }}
+                        className="w-full text-left px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                      >
+                        🗑️ Xóa tất cả
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setSelectedLeadIds([])}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                ❌ Bỏ chọn tất cả
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Leads Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="table-header w-12">
+                  <button
+                    onClick={handleSelectAll}
+                    className="flex items-center justify-center w-full"
+                  >
+                    {selectedLeadIds.length === filteredLeads.length && filteredLeads.length > 0 ? (
+                      <CheckSquare className="w-4 h-4 text-blue-600" />
+                    ) : (
+                      <Square className="w-4 h-4 text-gray-400" />
+                    )}
+                  </button>
+                </th>
                 <th className="table-header">STT</th>
                 <th className="table-header">Khách hàng</th>
                 <th className="table-header">Điện thoại</th>
@@ -376,6 +856,18 @@ export default function LeadsManagement() {
             </thead>            <tbody className="bg-white divide-y divide-gray-200">
               {filteredLeads.map((lead, index) => (
                 <tr key={lead.id} className="hover:bg-gray-50">
+                  <td className="table-cell">
+                    <button
+                      onClick={() => handleSelectLead(lead.id)}
+                      className="flex items-center justify-center w-full"
+                    >
+                      {selectedLeadIds.includes(lead.id) ? (
+                        <CheckSquare className="w-4 h-4 text-blue-600" />
+                      ) : (
+                        <Square className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                  </td>
                   <td className="table-cell">
                     <div className="font-medium text-gray-900">{index + 1}</div>
                   </td>
@@ -463,6 +955,117 @@ export default function LeadsManagement() {
             </tbody>          </table>
         </div>
       </div>
+
+      {/* Bulk Action Modal */}
+      {showBulkActionModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b">
+              <h2 className="text-lg font-bold text-gray-900">
+                {bulkActionType === 'change-status' && '📊 Thay đổi trạng thái'}
+                {bulkActionType === 'assign' && '👤 Phân công lead'}
+                {bulkActionType === 'add-tag' && '🏷️ Thêm tag'}
+                {bulkActionType === 'create-tasks' && '📋 Tạo công việc'}
+              </h2>
+              <button
+                onClick={() => setShowBulkActionModal(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Áp dụng cho {selectedLeadIds.length} leads đã chọn
+              </div>
+
+              {bulkActionType === 'change-status' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Chọn trạng thái mới:
+                  </label>
+                  <select
+                    value={bulkActionData}
+                    onChange={(e) => setBulkActionData(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  >
+                    <option value="">-- Chọn trạng thái --</option>
+                    <option value="new">🆕 Mới</option>
+                    <option value="contacted">📞 Đã liên hệ</option>
+                    <option value="qualified">✅ Tiềm năng</option>
+                    <option value="proposal">📄 Đã báo giá</option>
+                    <option value="negotiation">🤝 Đang đàm phán</option>
+                    <option value="won">🎉 Thành công</option>
+                    <option value="lost">❌ Thất bại</option>
+                  </select>
+                </div>
+              )}
+
+              {bulkActionType === 'assign' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tên người phụ trách:
+                  </label>
+                  <input
+                    type="text"
+                    value={bulkActionData}
+                    onChange={(e) => setBulkActionData(e.target.value)}
+                    placeholder="Nhập tên người phụ trách..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              )}
+
+              {bulkActionType === 'add-tag' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tag mới:
+                  </label>
+                  <input
+                    type="text"
+                    value={bulkActionData}
+                    onChange={(e) => setBulkActionData(e.target.value)}
+                    placeholder="Nhập tag mới..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              )}
+
+              {bulkActionType === 'create-tasks' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Tiêu đề công việc:
+                  </label>
+                  <input
+                    type="text"
+                    value={bulkActionData}
+                    onChange={(e) => setBulkActionData(e.target.value)}
+                    placeholder="Nhập tiêu đề công việc..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+              )}
+
+              <div className="flex justify-end space-x-3 pt-4">
+                <button
+                  onClick={() => setShowBulkActionModal(false)}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => executeBulkAction(bulkActionType, bulkActionData)}
+                  disabled={!bulkActionData.trim()}
+                  className="px-4 py-2 text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Lead Detail Modal */}
       {isDetailModalOpen && selectedLead && (

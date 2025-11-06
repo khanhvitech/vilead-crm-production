@@ -181,6 +181,13 @@ export default function OrderManagement() {
   })
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  
+  // Edit and Cancel Order states
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null)
+  const [showCancelModal, setShowCancelModal] = useState(false)
+  const [cancelingOrder, setCancelingOrder] = useState<Order | null>(null)
+  const [cancelReason, setCancelReason] = useState('')
 
   // Sample data
   const [customers] = useState<Customer[]>([
@@ -464,6 +471,152 @@ export default function OrderManagement() {
       type: 'success'
     })
     setTimeout(() => setNotification(null), 3000)
+  }
+
+  // Handle edit order
+  const handleEditOrder = (order: Order) => {
+    setEditingOrder(order)
+    setShowEditModal(true)
+  }
+
+  const handleSaveEditOrder = (updatedOrderData: any) => {
+    if (!editingOrder) return
+
+    const updatedOrder: Order = {
+      ...editingOrder,
+      ...updatedOrderData,
+      updatedAt: new Date().toISOString(),
+      history: [
+        ...editingOrder.history,
+        {
+          id: Date.now(),
+          action: 'status_changed',
+          timestamp: new Date().toISOString(),
+          performedBy: 'Nguyễn Sales Manager',
+          oldValue: editingOrder.status,
+          newValue: updatedOrderData.status,
+          details: 'Chỉnh sửa thông tin đơn hàng'
+        }
+      ]
+    }
+
+    setOrders(prev => prev.map(order => 
+      order.id === editingOrder.id ? updatedOrder : order
+    ))
+
+    setNotification({
+      message: `Đơn hàng ${editingOrder.orderNumber} đã được cập nhật thành công!`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+
+    setShowEditModal(false)
+    setEditingOrder(null)
+  }
+
+  // Handle cancel order
+  const handleCancelOrder = (order: Order) => {
+    setCancelingOrder(order)
+    setCancelReason('')
+    setShowCancelModal(true)
+  }
+
+  const handleConfirmCancelOrder = () => {
+    if (!cancelingOrder || !cancelReason.trim()) {
+      alert('Vui lòng nhập lý do hủy đơn hàng!')
+      return
+    }
+
+    const updatedOrder: Order = {
+      ...cancelingOrder,
+      status: 'cancelled',
+      updatedAt: new Date().toISOString(),
+      history: [
+        ...cancelingOrder.history,
+        {
+          id: Date.now(),
+          action: 'cancelled',
+          timestamp: new Date().toISOString(),
+          performedBy: 'Nguyễn Sales Manager',
+          oldValue: cancelingOrder.status,
+          newValue: 'cancelled',
+          reason: cancelReason,
+          details: `Hủy đơn hàng: ${cancelReason}`
+        }
+      ]
+    }
+
+    setOrders(prev => prev.map(order => 
+      order.id === cancelingOrder.id ? updatedOrder : order
+    ))
+
+    setNotification({
+      message: `Đơn hàng ${cancelingOrder.orderNumber} đã được hủy thành công!`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+
+    setShowCancelModal(false)
+    setCancelingOrder(null)
+    setCancelReason('')
+  }
+
+  // Handle payment reminder
+  const handleSendPaymentReminder = (order: Order) => {
+    // Check if payment reminder is applicable
+    if (order.paymentStatus === 'paid') {
+      alert('Đơn hàng này đã được thanh toán đầy đủ!')
+      return
+    }
+    
+    if (order.status === 'cancelled') {
+      alert('Không thể gửi nhắc nhở cho đơn hàng đã hủy!')
+      return
+    }
+
+    // Simulate sending payment reminder
+    const reminderMessage = `Kính chào ${order.customer.name},
+    
+Chúng tôi xin nhắc nhở về việc thanh toán cho đơn hàng ${order.orderNumber} với số tiền ${order.total.toLocaleString('vi-VN')} VNĐ.
+
+Trạng thái hiện tại: ${
+  order.paymentStatus === 'unpaid' ? 'Chưa thanh toán' :
+  order.paymentStatus === 'partial' ? 'Thanh toán một phần' : 'Đã thanh toán'
+}
+
+Vui lòng liên hệ với chúng tôi nếu bạn cần hỗ trợ thêm.
+
+Trân trọng,
+Đội ngũ bán hàng`
+
+    // Update order with reminder sent
+    const updatedOrder: Order = {
+      ...order,
+      remindersSent: order.remindersSent + 1,
+      updatedAt: new Date().toISOString(),
+      history: [
+        ...order.history,
+        {
+          id: Date.now(),
+          action: 'note_added',
+          timestamp: new Date().toISOString(),
+          performedBy: 'Nguyễn Sales Manager',
+          details: `Gửi nhắc nhở thanh toán lần thứ ${order.remindersSent + 1}`
+        }
+      ]
+    }
+
+    setOrders(prev => prev.map(o => 
+      o.id === order.id ? updatedOrder : o
+    ))
+
+    setNotification({
+      message: `Đã gửi nhắc nhở thanh toán cho đơn hàng ${order.orderNumber}`,
+      type: 'success'
+    })
+    setTimeout(() => setNotification(null), 3000)
+
+    console.log('Payment reminder sent:', reminderMessage)
   }
 
   // Handle bulk operations
@@ -1288,11 +1441,29 @@ export default function OrderManagement() {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button className="p-1 text-gray-400 hover:text-green-600 transition-colors" title="Gửi tin nhắn">
-                        <MessageSquare className="w-4 h-4" />
+                      <button 
+                        onClick={() => handleEditOrder(order)}
+                        className="p-1 text-gray-400 hover:text-green-600 transition-colors" 
+                        title="Chỉnh sửa đơn hàng"
+                        disabled={order.status === 'cancelled' || order.status === 'completed'}
+                      >
+                        <Edit className="w-4 h-4" />
                       </button>
-                      <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                        <MoreVertical className="w-4 h-4" />
+                      <button 
+                        onClick={() => handleCancelOrder(order)}
+                        className="p-1 text-gray-400 hover:text-red-600 transition-colors" 
+                        title="Hủy đơn hàng"
+                        disabled={order.status === 'cancelled' || order.status === 'completed'}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                      <button 
+                        onClick={() => handleSendPaymentReminder(order)}
+                        className="p-1 text-gray-400 hover:text-orange-600 transition-colors" 
+                        title="Gửi nhắc nhở thanh toán"
+                        disabled={order.paymentStatus === 'paid' || order.status === 'cancelled'}
+                      >
+                        <Bell className="w-4 h-4" />
                       </button>
                     </div>
                   </td>
@@ -1414,6 +1585,199 @@ export default function OrderManagement() {
             setSelectedOrder(null)
           }}
         />
+      )}
+
+      {/* Edit Order Modal */}
+      {showEditModal && editingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa đơn hàng</h3>
+                <p className="text-sm text-gray-600 mt-1">Đơn hàng: {editingOrder.orderNumber}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowEditModal(false)
+                  setEditingOrder(null)
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Order Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Trạng thái đơn hàng
+                  </label>
+                  <select
+                    defaultValue={editingOrder.status}
+                    onChange={(e) => {
+                      setEditingOrder(prev => prev ? {...prev, status: e.target.value as Order['status']} : null)
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="draft">Nháp</option>
+                    <option value="pending">Chờ xử lý</option>
+                    <option value="confirmed">Đã xác nhận</option>
+                    <option value="processing">Đang xử lý</option>
+                    <option value="completed">Hoàn thành</option>
+                  </select>
+                </div>
+
+                {/* Payment Status */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Trạng thái thanh toán
+                  </label>
+                  <select
+                    defaultValue={editingOrder.paymentStatus}
+                    onChange={(e) => {
+                      setEditingOrder(prev => prev ? {...prev, paymentStatus: e.target.value as Order['paymentStatus']} : null)
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="unpaid">Chưa thanh toán</option>
+                    <option value="partial">Thanh toán một phần</option>
+                    <option value="paid">Đã thanh toán</option>
+                    <option value="refunded">Đã hoàn tiền</option>
+                  </select>
+                </div>
+
+                {/* Payment Method */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phương thức thanh toán
+                  </label>
+                  <select
+                    defaultValue={editingOrder.paymentMethod}
+                    onChange={(e) => {
+                      setEditingOrder(prev => prev ? {...prev, paymentMethod: e.target.value as Order['paymentMethod']} : null)
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="cash">Tiền mặt</option>
+                    <option value="transfer">Chuyển khoản</option>
+                    <option value="installment">Trả góp</option>
+                    <option value="momo">MoMo</option>
+                    <option value="custom">Khác</option>
+                  </select>
+                </div>
+
+                {/* Deadline */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hạn hoàn thành
+                  </label>
+                  <input
+                    type="date"
+                    defaultValue={editingOrder.deadline?.split('T')[0] || ''}
+                    onChange={(e) => {
+                      setEditingOrder(prev => prev ? {...prev, deadline: e.target.value} : null)
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-3 mt-6">
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingOrder(null)
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={() => handleSaveEditOrder(editingOrder)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                >
+                  <Check className="w-4 h-4" />
+                  Lưu thay đổi
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel Order Modal */}
+      {showCancelModal && cancelingOrder && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Hủy đơn hàng</h3>
+                <p className="text-sm text-gray-600 mt-1">Đơn hàng: {cancelingOrder.orderNumber}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowCancelModal(false)
+                  setCancelingOrder(null)
+                  setCancelReason('')
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <div className="flex items-center space-x-2 text-orange-600 mb-3">
+                  <AlertTriangle className="w-5 h-5" />
+                  <span className="font-medium">Cảnh báo</span>
+                </div>
+                <p className="text-gray-600 text-sm mb-4">
+                  Bạn có chắc chắn muốn hủy đơn hàng <strong>{cancelingOrder.orderNumber}</strong>? 
+                  Hành động này không thể hoàn tác.
+                </p>
+              </div>
+
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Lý do hủy đơn hàng <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  value={cancelReason}
+                  onChange={(e) => setCancelReason(e.target.value)}
+                  placeholder="Nhập lý do hủy đơn hàng..."
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                />
+              </div>
+
+              {/* Actions */}
+              <div className="flex justify-end space-x-3">
+                <button
+                  onClick={() => {
+                    setShowCancelModal(false)
+                    setCancelingOrder(null)
+                    setCancelReason('')
+                  }}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                >
+                  Không hủy
+                </button>
+                <button
+                  onClick={handleConfirmCancelOrder}
+                  disabled={!cancelReason.trim()}
+                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Xác nhận hủy
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

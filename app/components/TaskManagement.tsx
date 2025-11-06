@@ -254,6 +254,11 @@ export default function TaskManagement() {
   const [assigneeFilter, setAssigneeFilter] = useState('')
   const [tagFilter, setTagFilter] = useState('')
   const [dueDateFilter, setDueDateFilter] = useState('')
+  const [dateRangeFilter, setDateRangeFilter] = useState({
+    startDate: '',
+    endDate: '',
+    preset: '' // 'today', 'tomorrow', 'this_week', 'next_week', 'this_month', 'custom'
+  })
   const [selectedStatsFilter, setSelectedStatsFilter] = useState<string>('')
   const [showCreateViewModal, setShowCreateViewModal] = useState(false)
   const [customViews, setCustomViews] = useState<CustomView[]>([])
@@ -272,6 +277,10 @@ export default function TaskManagement() {
 
   // Task view state
   const [taskView, setTaskView] = useState<'table' | 'kanban'>('table')
+  
+  // Drag and drop state
+  const [draggedTask, setDraggedTask] = useState<Task | null>(null)
+  const [dragOverColumn, setDragOverColumn] = useState<string | null>(null)
   
   // Column visibility state
   const [visibleColumns, setVisibleColumns] = useState({
@@ -717,6 +726,40 @@ export default function TaskManagement() {
     return new Date(dateString).toLocaleString('vi-VN')
   }
 
+  // Drag and Drop handlers
+  const handleDragStart = (e: React.DragEvent, task: Task) => {
+    setDraggedTask(task)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  const handleDragOver = (e: React.DragEvent, column: string) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'move'
+    setDragOverColumn(column)
+  }
+
+  const handleDragLeave = () => {
+    setDragOverColumn(null)
+  }
+
+  const handleDrop = (e: React.DragEvent, newStatus: string) => {
+    e.preventDefault()
+    setDragOverColumn(null)
+    
+    if (draggedTask && draggedTask.status !== newStatus) {
+      // Update task status
+      setTasks(prevTasks => 
+        prevTasks.map(task => 
+          task.id === draggedTask.id 
+            ? { ...task, status: newStatus as 'pending' | 'in_progress' | 'completed' }
+            : task
+        )
+      )
+    }
+    
+    setDraggedTask(null)
+  }
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('vi-VN')
   }
@@ -831,7 +874,73 @@ export default function TaskManagement() {
       }
     })()
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesTag && matchesDueDate
+    // Date range filter
+    const matchesDateRange = (() => {
+      if (!dateRangeFilter.preset && !dateRangeFilter.startDate && !dateRangeFilter.endDate) {
+        return true
+      }
+
+      const taskDate = new Date(task.dueDate)
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      // Handle preset filters
+      if (dateRangeFilter.preset) {
+        switch (dateRangeFilter.preset) {
+          case 'today':
+            const todayEnd = new Date(today)
+            todayEnd.setHours(23, 59, 59, 999)
+            return taskDate >= today && taskDate <= todayEnd
+          case 'tomorrow':
+            const tomorrow = new Date(today.getTime() + 24 * 60 * 60 * 1000)
+            const tomorrowEnd = new Date(tomorrow)
+            tomorrowEnd.setHours(23, 59, 59, 999)
+            return taskDate >= tomorrow && taskDate <= tomorrowEnd
+          case 'this_week':
+            const startOfWeek = new Date(today)
+            startOfWeek.setDate(today.getDate() - today.getDay())
+            const endOfWeek = new Date(startOfWeek)
+            endOfWeek.setDate(startOfWeek.getDate() + 6)
+            endOfWeek.setHours(23, 59, 59, 999)
+            return taskDate >= startOfWeek && taskDate <= endOfWeek
+          case 'next_week':
+            const nextWeekStart = new Date(today)
+            nextWeekStart.setDate(today.getDate() + (7 - today.getDay()))
+            const nextWeekEnd = new Date(nextWeekStart)
+            nextWeekEnd.setDate(nextWeekStart.getDate() + 6)
+            nextWeekEnd.setHours(23, 59, 59, 999)
+            return taskDate >= nextWeekStart && taskDate <= nextWeekEnd
+          case 'this_month':
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1)
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+            endOfMonth.setHours(23, 59, 59, 999)
+            return taskDate >= startOfMonth && taskDate <= endOfMonth
+          default:
+            return true
+        }
+      }
+
+      // Handle custom date range
+      if (dateRangeFilter.startDate || dateRangeFilter.endDate) {
+        const startDate = dateRangeFilter.startDate ? new Date(dateRangeFilter.startDate) : null
+        const endDate = dateRangeFilter.endDate ? new Date(dateRangeFilter.endDate) : null
+        
+        if (startDate) startDate.setHours(0, 0, 0, 0)
+        if (endDate) endDate.setHours(23, 59, 59, 999)
+
+        if (startDate && endDate) {
+          return taskDate >= startDate && taskDate <= endDate
+        } else if (startDate) {
+          return taskDate >= startDate
+        } else if (endDate) {
+          return taskDate <= endDate
+        }
+      }
+
+      return true
+    })()
+
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssignee && matchesTag && matchesDueDate && matchesDateRange
   })
 
   // Filter tasks based on selected stats filter
@@ -963,6 +1072,7 @@ export default function TaskManagement() {
       setAssigneeFilter('')
       setTagFilter('')
       setDueDateFilter('')
+      setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
     }
   }
 
@@ -2349,6 +2459,55 @@ export default function TaskManagement() {
               ))}
             </select>
             
+            {/* Date Range Filter */}
+            <div className="flex items-center gap-2 border border-gray-300 rounded px-3 py-2 bg-white">
+              <Calendar className="w-4 h-4 text-gray-400" />
+              <select 
+                value={dateRangeFilter.preset}
+                onChange={(e) => setDateRangeFilter(prev => ({
+                  ...prev,
+                  preset: e.target.value,
+                  startDate: e.target.value === 'custom' ? prev.startDate : '',
+                  endDate: e.target.value === 'custom' ? prev.endDate : ''
+                }))}
+                className="text-sm bg-transparent focus:outline-none min-w-[120px]"
+              >
+                <option value="">Tất cả ngày</option>
+                <option value="today">Hôm nay</option>
+                <option value="tomorrow">Ngày mai</option>
+                <option value="this_week">Tuần này</option>
+                <option value="next_week">Tuần sau</option>
+                <option value="this_month">Tháng này</option>
+                <option value="custom">Tùy chọn</option>
+              </select>
+            </div>
+            
+            {/* Custom Date Range Inputs */}
+            {dateRangeFilter.preset === 'custom' && (
+              <>
+                <input
+                  type="date"
+                  value={dateRangeFilter.startDate}
+                  onChange={(e) => setDateRangeFilter(prev => ({
+                    ...prev,
+                    startDate: e.target.value
+                  }))}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Từ ngày"
+                />
+                <input
+                  type="date"
+                  value={dateRangeFilter.endDate}
+                  onChange={(e) => setDateRangeFilter(prev => ({
+                    ...prev,
+                    endDate: e.target.value
+                  }))}
+                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  placeholder="Đến ngày"
+                />
+              </>
+            )}
+            
             <button 
               onClick={() => setShowCreateModal(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
@@ -2372,6 +2531,7 @@ export default function TaskManagement() {
               setPriorityFilter('')
               setTagFilter('')
               setDueDateFilter('')
+              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
               setSelectedStatsFilter('')
               setActiveViewType('all')
             }}
@@ -2393,6 +2553,7 @@ export default function TaskManagement() {
               setPriorityFilter('')
               setTagFilter('')
               setDueDateFilter('')
+              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
               setSelectedStatsFilter('leads')
               setActiveViewType('leads')
             }}
@@ -2414,6 +2575,7 @@ export default function TaskManagement() {
               setPriorityFilter('')
               setTagFilter('')
               setDueDateFilter('')
+              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
               setSelectedStatsFilter('customers')
               setActiveViewType('customers')
             }}
@@ -2477,6 +2639,7 @@ export default function TaskManagement() {
               setPriorityFilter('')
               setTagFilter('')
               setDueDateFilter('')
+              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
               setSelectedStatsFilter('other')
               setActiveViewType('other')
             }}
@@ -2749,7 +2912,14 @@ export default function TaskManagement() {
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Chưa làm Column */}
-            <div className="bg-slate-50 rounded-lg p-4">
+            <div 
+              className={`bg-slate-50 rounded-lg p-4 transition-colors ${
+                dragOverColumn === 'pending' ? 'bg-slate-100 ring-2 ring-gray-400 ring-dashed' : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, 'pending')}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'pending')}
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
                   <div className="w-3 h-3 bg-gray-400 rounded-full mr-2"></div>
@@ -2759,7 +2929,7 @@ export default function TaskManagement() {
                   {displayTasks.filter(task => task.status === 'pending').length}
                 </span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 min-h-[200px]">
                 {displayTasks.filter(task => task.status === 'pending').map((task) => {
                   const isOverdue = new Date(task.dueDate) < new Date()
                   const assignee = employees.find(e => e.id === task.assignedTo)
@@ -2767,9 +2937,11 @@ export default function TaskManagement() {
                   return (
                     <div 
                       key={task.id} 
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-shadow cursor-pointer ${
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-gray-300'
-                      }`}
+                      } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
                         setSelectedTask(task)
                         setShowDetailModal(true)
@@ -2831,7 +3003,14 @@ export default function TaskManagement() {
             </div>
 
             {/* Đang làm Column */}
-            <div className="bg-blue-50 rounded-lg p-4">
+            <div 
+              className={`bg-blue-50 rounded-lg p-4 transition-colors ${
+                dragOverColumn === 'in_progress' ? 'bg-blue-100 ring-2 ring-blue-400 ring-dashed' : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, 'in_progress')}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'in_progress')}
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
@@ -2841,7 +3020,7 @@ export default function TaskManagement() {
                   {displayTasks.filter(task => task.status === 'in_progress').length}
                 </span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 min-h-[200px]">
                 {displayTasks.filter(task => task.status === 'in_progress').map((task) => {
                   const isOverdue = new Date(task.dueDate) < new Date()
                   const assignee = employees.find(e => e.id === task.assignedTo)
@@ -2849,9 +3028,11 @@ export default function TaskManagement() {
                   return (
                     <div 
                       key={task.id} 
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-shadow cursor-pointer ${
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-blue-300'
-                      }`}
+                      } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
                         setSelectedTask(task)
                         setShowDetailModal(true)
@@ -2913,7 +3094,14 @@ export default function TaskManagement() {
             </div>
 
             {/* Hoàn tất Column */}
-            <div className="bg-green-50 rounded-lg p-4">
+            <div 
+              className={`bg-green-50 rounded-lg p-4 transition-colors ${
+                dragOverColumn === 'completed' ? 'bg-green-100 ring-2 ring-green-400 ring-dashed' : ''
+              }`}
+              onDragOver={(e) => handleDragOver(e, 'completed')}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, 'completed')}
+            >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
                   <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
@@ -2923,14 +3111,18 @@ export default function TaskManagement() {
                   {displayTasks.filter(task => task.status === 'completed').length}
                 </span>
               </div>
-              <div className="space-y-3">
+              <div className="space-y-3 min-h-[200px]">
                 {displayTasks.filter(task => task.status === 'completed').map((task) => {
                   const assignee = employees.find(e => e.id === task.assignedTo)
                   
                   return (
                     <div 
                       key={task.id} 
-                      className="bg-white p-3 rounded-lg shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-shadow cursor-pointer opacity-90"
+                      draggable
+                      onDragStart={(e) => handleDragStart(e, task)}
+                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-all cursor-move opacity-90 ${
+                        draggedTask?.id === task.id ? 'opacity-30 transform scale-95' : ''
+                      }`}
                       onClick={() => {
                         setSelectedTask(task)
                         setShowDetailModal(true)

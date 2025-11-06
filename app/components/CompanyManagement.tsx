@@ -465,6 +465,11 @@ export default function CompanyManagement() {
   const [newOfficialDate, setNewOfficialDate] = useState('')
   const [newSalary, setNewSalary] = useState('')
 
+  // Data transfer states
+  const [showDataTransferModal, setShowDataTransferModal] = useState(false)
+  const [transferToEmployeeId, setTransferToEmployeeId] = useState('')
+  const [selectedDataTypes, setSelectedDataTypes] = useState<string[]>([])
+
   // Edit form data
   const [editFormData, setEditFormData] = useState<Partial<Employee>>({})
 
@@ -535,6 +540,13 @@ export default function CompanyManagement() {
   const handleQuickAction = (action: string) => {
     if (!selectedEmployee) return
 
+    // If setting status to inactive, show data transfer modal first
+    if (action === 'status' && newStatus === 'inactive') {
+      setShowStatusModal(false)
+      setShowDataTransferModal(true)
+      return
+    }
+
     const updatedEmployees = employees.map(emp => {
       if (emp.id === selectedEmployee.id) {
         switch (action) {
@@ -573,6 +585,32 @@ export default function CompanyManagement() {
     setShowStatusModal(false)
     setShowOfficialDateModal(false)
     setShowSalaryModal(false)
+    setSelectedEmployee(null)
+  }
+
+  const handleDataTransfer = () => {
+    if (!selectedEmployee || !transferToEmployeeId) return
+
+    // Here you would implement the actual data transfer logic
+    // For now, we'll just simulate it
+    console.log('Transferring data from', selectedEmployee.name, 'to employee ID', transferToEmployeeId)
+    console.log('Data types to transfer:', selectedDataTypes)
+
+    // Update employee status after data transfer
+    const updatedEmployees = employees.map(emp => {
+      if (emp.id === selectedEmployee.id) {
+        return { ...emp, status: 'inactive' as Employee['status'] }
+      }
+      return emp
+    })
+
+    setEmployees(updatedEmployees)
+
+    // Reset states and close modals
+    setTransferToEmployeeId('')
+    setSelectedDataTypes([])
+    setShowDataTransferModal(false)
+    setNewStatus('')
     setSelectedEmployee(null)
   }
 
@@ -2553,6 +2591,108 @@ export default function CompanyManagement() {
             </Button>
             <Button onClick={() => handleQuickAction('salary')}>
               Cập nhật
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Data Transfer Modal */}
+      <Dialog open={showDataTransferModal} onOpenChange={setShowDataTransferModal}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Chuyển dữ liệu nhân viên</DialogTitle>
+            <DialogDescription>
+              Khi ngừng hoạt động nhân viên <strong>{selectedEmployee?.name}</strong>, bạn có thể chuyển dữ liệu của họ cho nhân viên khác.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-6">
+            {/* Select employee to transfer to */}
+            <div>
+              <Label htmlFor="transferTo">Chuyển dữ liệu cho nhân viên</Label>
+              <Select value={transferToEmployeeId} onValueChange={setTransferToEmployeeId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Chọn nhân viên tiếp nhận" />
+                </SelectTrigger>
+                <SelectContent>
+                  {employees
+                    .filter(emp => emp.id !== selectedEmployee?.id && emp.status === 'active')
+                    .map(emp => (
+                      <SelectItem key={emp.id} value={emp.id.toString()}>
+                        {emp.name} - {emp.position} ({emp.department})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Select data types to transfer */}
+            <div>
+              <Label>Chọn loại dữ liệu cần chuyển</Label>
+              <div className="grid grid-cols-2 gap-4 mt-2">
+                {[
+                  { value: 'leads', label: 'Leads được phân công', icon: '👥' },
+                  { value: 'customers', label: 'Khách hàng phụ trách', icon: '🏢' },
+                  { value: 'tasks', label: 'Công việc chưa hoàn thành', icon: '✅' },
+                  { value: 'orders', label: 'Đơn hàng đang xử lý', icon: '📦' },
+                  { value: 'reports', label: 'Báo cáo cá nhân', icon: '📊' },
+                  { value: 'calendar', label: 'Lịch hẹn sắp tới', icon: '📅' }
+                ].map(dataType => (
+                  <div
+                    key={dataType.value}
+                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                      selectedDataTypes.includes(dataType.value)
+                        ? 'border-blue-500 bg-blue-50 text-blue-700'
+                        : 'border-gray-200 hover:border-gray-300'
+                    }`}
+                    onClick={() => {
+                      if (selectedDataTypes.includes(dataType.value)) {
+                        setSelectedDataTypes(prev => prev.filter(item => item !== dataType.value))
+                      } else {
+                        setSelectedDataTypes(prev => [...prev, dataType.value])
+                      }
+                    }}
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-lg">{dataType.icon}</span>
+                      <span className="text-sm font-medium">{dataType.label}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Warning message */}
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="flex items-start space-x-2">
+                <div className="text-yellow-600">⚠️</div>
+                <div className="text-sm text-yellow-800">
+                  <p className="font-medium mb-1">Lưu ý quan trọng:</p>
+                  <ul className="list-disc list-inside space-y-1 text-xs">
+                    <li>Việc chuyển dữ liệu không thể hoàn tác</li>
+                    <li>Nhân viên tiếp nhận sẽ có quyền truy cập đầy đủ vào dữ liệu được chuyển</li>
+                    <li>Hệ thống sẽ ghi log tất cả thay đổi để audit</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
+                setShowDataTransferModal(false)
+                setTransferToEmployeeId('')
+                setSelectedDataTypes([])
+              }}
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={handleDataTransfer}
+              disabled={!transferToEmployeeId || selectedDataTypes.length === 0}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Xác nhận chuyển dữ liệu và ngừng hoạt động
             </Button>
           </DialogFooter>
         </DialogContent>

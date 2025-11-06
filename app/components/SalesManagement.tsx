@@ -40,7 +40,12 @@ import {
   Columns,
   MapPin,
   Percent,
-  ChevronDown
+  ChevronDown,
+  StickyNote,
+  Upload,
+  FileText,
+  Download as DownloadIcon,
+  Paperclip
 } from 'lucide-react'
 
 interface Lead {
@@ -63,6 +68,7 @@ interface Lead {
   updatedAt: string
   type: 'lead'
   company?: string
+  position?: string
   nextAction: string
   nextActionDate: string
   careCount?: number
@@ -84,6 +90,13 @@ interface Lead {
   winProbability?: number
   interactionCount: number
   lastInteractionAt: string | null
+  // Files đính kèm
+  files?: Array<{
+    name: string
+    size: string
+    type: string
+    uploadedAt: string
+  }>
 }
 
 interface MetricData {
@@ -118,10 +131,23 @@ export default function SalesManagement() {
   const [selectedProduct, setSelectedProduct] = useState('')
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
+  const [discountPercent, setDiscountPercent] = useState(0)
+  const [paymentMethod, setPaymentMethod] = useState('cash')
   const [isEditMode, setIsEditMode] = useState(false)
   const [editedLead, setEditedLead] = useState<Lead | null>(null)
   const [showDragConvertModal, setShowDragConvertModal] = useState(false)
   const [dragTargetStatus, setDragTargetStatus] = useState<string>('')
+  const [memberDailyLimits, setMemberDailyLimits] = useState<{[memberId: number]: number}>({
+    1: 5, // Minh Expert: 5 leads/day  
+    2: 3, // An Expert: 3 leads/day
+    3: 8, // An Sales: 8 leads/day
+    4: 2, // Trần Văn Support: 2 leads/day
+    5: 4, // Đỗ Thị Analytics: 4 leads/day
+    6: 3, // Lê Thị Inventory: 3 leads/day
+    7: 2, // Nguyễn Văn HR: 2 leads/day
+    8: 5, // Trần Thị Finance: 5 leads/day
+    9: 6  // Võ Văn Project: 6 leads/day
+  })
   const [originalTargetStatus, setOriginalTargetStatus] = useState<string>('') // Track trạng thái gốc user kéo vào
   const [pendingDragLead, setPendingDragLead] = useState<Lead | null>(null)
   
@@ -237,7 +263,8 @@ export default function SalesManagement() {
     customerType: false,
     salesOwner: true,
     tags: true,
-    notes: false,
+    notes: true,
+    files: true,
     createdDate: true,
     lastModified: false,
     interactionCount: false,
@@ -249,12 +276,20 @@ export default function SalesManagement() {
   const [showEditLeadModal, setShowEditLeadModal] = useState(false)
   const [showColumnModal, setShowColumnModal] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
+  const [showAddNoteModal, setShowAddNoteModal] = useState(false)
+  const [selectedLeadForNote, setSelectedLeadForNote] = useState<Lead | null>(null)
+  const [newNoteContent, setNewNoteContent] = useState('')
   const [selectedLeadIds, setSelectedLeadIds] = useState<number[]>([])
   const [selectAllChecked, setSelectAllChecked] = useState(false)
   const [showAssignSalesModal, setShowAssignSalesModal] = useState(false)
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
   const [selectedTaskType, setSelectedTaskType] = useState('')
   const [selectedTaskObj, setSelectedTaskObj] = useState<any | null>(null)
+  
+  // File management states
+  const [showFileModal, setShowFileModal] = useState(false)
+  const [selectedLeadForFile, setSelectedLeadForFile] = useState<Lead | null>(null)
+  const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null)
   
   // Import states
   const [importFile, setImportFile] = useState<File | null>(null)
@@ -454,7 +489,7 @@ export default function SalesManagement() {
     setIsAddingQuickNote(false)
     
     setNotification({
-      message: 'Đã thêm ghi chú nhanh và cập nhật số lần chăm sóc!',
+      message: 'Đã thêm tương tác nhanh và cập nhật số lần chăm sóc!',
       type: 'success'
     })
     setTimeout(() => setNotification(null), 3000)
@@ -508,6 +543,15 @@ export default function SalesManagement() {
     }
 
     if (selectedLead) {
+      const totalAmount = selectedProducts.reduce((sum, productId) => {
+        const product = availableProducts.find(p => p.id === productId)
+        const selectedPackageId = selectedPackages[productId]
+        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+        return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+      }, 0)
+      
+      const finalAmount = totalAmount * (100 - discountPercent) / 100
+      
       const updatedLeads = leads.map(l => 
         l.id === selectedLead.id 
           ? { 
@@ -515,8 +559,18 @@ export default function SalesManagement() {
               status: 'payment_pending' as Lead['status'], // Chuyển vào chờ thanh toán
               stage: 'payment_pending',
               product: selectedProducts.join(', '), // Combine multiple products
+              value: finalAmount, // Cập nhật giá trị sau giảm giá
               updatedAt: new Date().toISOString(),
-              nextAction: 'Theo dõi thanh toán từ khách hàng'
+              nextAction: `Theo dõi thanh toán ${paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản'} từ khách hàng`,
+              // Thêm thông tin thanh toán
+              paymentInfo: {
+                method: paymentMethod,
+                originalAmount: totalAmount,
+                discountPercent: discountPercent,
+                finalAmount: finalAmount,
+                products: selectedProducts,
+                packages: selectedPackages
+              }
             }
           : l
       )
@@ -533,6 +587,8 @@ export default function SalesManagement() {
     setSelectedProduct('')
     setSelectedProducts([]) // Reset multiple products selection
     setSelectedPackages({}) // Reset package selection
+    setDiscountPercent(0) // Reset discount
+    setPaymentMethod('cash') // Reset payment method
   }
 
   // Payment success handler
@@ -645,6 +701,15 @@ export default function SalesManagement() {
     ]
   }
 
+  // Helper function to get today's assigned leads count per member
+  const getTodayAssignedCount = (memberName: string) => {
+    const today = new Date().toDateString()
+    return leads.filter(lead => 
+      lead.assignedTo === memberName && 
+      new Date(lead.updatedAt || lead.createdAt).toDateString() === today
+    ).length
+  }
+
   const autoAssignLeads = (strategy: string, filters: any) => {
     const salesPersons = getAvailableSalesPersons()
     const unassignedLeads = leads.filter(lead => !lead.assignedTo || lead.assignedTo === '')
@@ -723,18 +788,91 @@ export default function SalesManagement() {
         })
         break
         
-      default:
-        // Default to balanced
-        unassignedLeads.forEach((lead, index) => {
-          const salesPerson = salesPersons[index % salesPersons.length]
-          const leadIndex = updatedLeads.findIndex(l => l.id === lead.id)
-          if (leadIndex !== -1) {
-            updatedLeads[leadIndex] = {
-              ...updatedLeads[leadIndex],
-              assignedTo: salesPerson.name,
-              updatedAt: new Date().toISOString()
+      case 'round_robin':
+        // Round-robin với daily limits
+        let currentSalesPersonIndex = 0
+        unassignedLeads.forEach(lead => {
+          let assigned = false
+          let attempts = 0
+          
+          while (!assigned && attempts < salesPersons.length) {
+            const salesPerson = salesPersons[currentSalesPersonIndex]
+            const memberId = salesTeam.find(m => m.name === salesPerson.name)?.id
+            const dailyLimit = memberDailyLimits[memberId || 0] || 3
+            const todayCount = getTodayAssignedCount(salesPerson.name)
+            
+            if (todayCount < dailyLimit) {
+              const leadIndex = updatedLeads.findIndex(l => l.id === lead.id)
+              if (leadIndex !== -1) {
+                updatedLeads[leadIndex] = {
+                  ...updatedLeads[leadIndex],
+                  assignedTo: salesPerson.name,
+                  updatedAt: new Date().toISOString()
+                }
+                assignmentCount++
+                assigned = true
+              }
             }
-            assignmentCount++
+            
+            currentSalesPersonIndex = (currentSalesPersonIndex + 1) % salesPersons.length
+            attempts++
+          }
+        })
+        break
+        
+      case 'workload_based':
+        // Dựa trên khối lượng công việc với daily limits
+        unassignedLeads.forEach(lead => {
+          const availableMembers = salesPersons.filter(sp => {
+            const memberId = salesTeam.find(m => m.name === sp.name)?.id
+            const dailyLimit = memberDailyLimits[memberId || 0] || 3
+            const todayCount = getTodayAssignedCount(sp.name)
+            return todayCount < dailyLimit
+          }).sort((a, b) => a.currentLeads - b.currentLeads)
+          
+          if (availableMembers.length > 0) {
+            const salesPerson = availableMembers[0]
+            const leadIndex = updatedLeads.findIndex(l => l.id === lead.id)
+            if (leadIndex !== -1) {
+              updatedLeads[leadIndex] = {
+                ...updatedLeads[leadIndex],
+                assignedTo: salesPerson.name,
+                updatedAt: new Date().toISOString()
+              }
+              assignmentCount++
+            }
+          }
+        })
+        break
+        
+      default:
+        // Default round-robin với daily limits
+        let defaultIndex = 0
+        unassignedLeads.forEach(lead => {
+          let assigned = false
+          let attempts = 0
+          
+          while (!assigned && attempts < salesPersons.length) {
+            const salesPerson = salesPersons[defaultIndex]
+            const memberId = salesTeam.find(m => m.name === salesPerson.name)?.id
+            const dailyLimit = memberDailyLimits[memberId || 0] || 3
+            const todayCount = getTodayAssignedCount(salesPerson.name)
+            
+            if (todayCount < dailyLimit) {
+              const leadIndex = updatedLeads.findIndex(l => l.id === lead.id)
+              if (leadIndex !== -1) {
+                updatedLeads[leadIndex] = {
+                  ...updatedLeads[leadIndex],
+                  assignedTo: salesPerson.name,
+                  updatedAt: new Date().toISOString()
+                }
+                assignmentCount++
+                assigned = true
+              }
+            }
+            
+            defaultIndex = (defaultIndex + 1) % salesPersons.length
+            attempts++
           }
         })
     }
@@ -929,7 +1067,7 @@ export default function SalesManagement() {
               email: leadData['Email'].toLowerCase(),
               company: leadData['Công ty'] || '',
               source: 'excel_import',
-              region: leadData['Khu vực'] || 'hanoi',
+              region: leadData['Tỉnh thành'] || 'hanoi',
               product: leadData['Sản phẩm quan tâm'] || '',
               content: leadData['Nội dung'] || 'Import từ file Excel',
               position: leadData['Chức vụ'] || '',
@@ -1027,7 +1165,7 @@ export default function SalesManagement() {
   const downloadTemplate = () => {
     // Template CSV khớp với các trường trong phần mềm
     const csvContent = [
-      'Tên,Số điện thoại,Email,Công ty,Loại khách hàng,Chức vụ,Ngành nghề,Quy mô công ty,Website,Địa chỉ,Nguồn,Khu vực,Sản phẩm quan tâm,Nội dung,Ghi chú',
+      'Tên,Số điện thoại,Email,Công ty,Loại khách hàng,Chức vụ,Ngành nghề,Quy mô công ty,Website,Địa chỉ,Nguồn,Tỉnh thành,Sản phẩm quan tâm,Nội dung,Ghi chú',
       'Nguyễn Văn A,0901234567,nguyenvana@email.com,Công ty ABC,business,CEO,technology,51-200,https://congtyabc.com,Hà Nội,website,hanoi,CRM Solution,Quan tâm giải pháp CRM,Khách hàng tiềm năng cao',
       'Trần Thị B,0907654321,tranthib@email.com,Công ty XYZ,business,Marketing Manager,marketing,11-50,https://companyxyz.vn,TP HCM,facebook,hcm,Marketing Automation,Cần tự động hóa marketing,Liên hệ trong tuần này',
       'Lê Văn C,0909876543,levanc@personal.com,,individual,,,,,Đà Nẵng,referral,danang,Website Development,Cần làm website cá nhân,Giới thiệu từ bạn bè'
@@ -1050,11 +1188,21 @@ export default function SalesManagement() {
     const salesPersons = getAvailableSalesPersons()
     const avgLeadsPerPerson = Math.ceil(unassignedLeads.length / salesPersons.length)
     
+    // Calculate daily capacity
+    const totalDailyCapacity = Object.values(memberDailyLimits).reduce((sum, limit) => sum + limit, 0)
+    const usedCapacityToday = salesTeam.reduce((sum, member) => {
+      return sum + getTodayAssignedCount(member.name)
+    }, 0)
+    const remainingCapacityToday = totalDailyCapacity - usedCapacityToday
+    
     return {
       totalLeads: leads.length,
       unassignedLeads: unassignedLeads.length,
       activeSalesPeople: salesPersons.length,
-      avgLeadsPerPerson: avgLeadsPerPerson
+      avgLeadsPerPerson: avgLeadsPerPerson,
+      totalDailyCapacity,
+      usedCapacityToday,
+      remainingCapacityToday
     }
   }
   
@@ -1144,7 +1292,7 @@ export default function SalesManagement() {
     switch(strategy) {
       case 'round_robin': return 'Round-Robin (Phân đều)';
       case 'workload_based': return 'Theo khối lượng công việc';
-      case 'territory_based': return 'Theo khu vực địa lý';
+      case 'territory_based': return 'Theo tỉnh thành địa lý';
       case 'source_based': return 'Theo nguồn lead';
       case 'shift_based': return 'Theo ca làm việc';
       default: return strategy;
@@ -1168,13 +1316,14 @@ export default function SalesManagement() {
     company: '🏢 Công ty',
     address: '📍 Địa chỉ',
     source: '🌐 Nguồn',
-    region: '🗺️ Khu vực',
+    region: '🗺️ Tỉnh thành',
     stage: '🎯 Giai đoạn',
     product: '🛍️ Sản phẩm quan tâm',
     customerType: '👥 Loại khách hàng',
     salesOwner: '👨‍💼 Sales phụ trách',
     tags: '🏷️ Tags/Nhãn',
     notes: '📝 Ghi chú',
+    files: '📎 Tệp đính kèm',
     createdDate: '📅 Ngày tạo',
     lastModified: '🕐 Ngày cập nhật',
     interactionCount: '🔄 Số lần tương tác',
@@ -1228,7 +1377,12 @@ export default function SalesManagement() {
       customerType: 'business',
       winProbability: 85,
       interactionCount: 8,
-      lastInteractionAt: '2024-01-20T14:30:00'
+      lastInteractionAt: '2024-01-20T14:30:00',
+      files: [
+        { name: 'proposal_ABC_Corp.pdf', size: '2.5MB', type: 'pdf', uploadedAt: '2024-01-20T11:00:00' },
+        { name: 'requirement_specification.docx', size: '1.2MB', type: 'docx', uploadedAt: '2024-01-18T15:30:00' },
+        { name: 'demo_presentation.pptx', size: '8.7MB', type: 'pptx', uploadedAt: '2024-01-18T09:30:00' }
+      ]
     },
     {
       id: 2,
@@ -1264,7 +1418,11 @@ export default function SalesManagement() {
       customerType: 'business',
       winProbability: 60,
       interactionCount: 5,
-      lastInteractionAt: '2024-01-19T16:45:00'
+      lastInteractionAt: '2024-01-19T16:45:00',
+      files: [
+        { name: 'startup_case_study.pdf', size: '1.8MB', type: 'pdf', uploadedAt: '2024-01-17T10:30:00' },
+        { name: 'marketing_workflow_demo.mp4', size: '15.2MB', type: 'mp4', uploadedAt: '2024-01-18T14:00:00' }
+      ]
     },
     {
       id: 3,
@@ -1809,6 +1967,127 @@ export default function SalesManagement() {
     }
   ])
 
+  // Note handling functions
+  function handleAddNote(lead: Lead) {
+    setSelectedLeadForNote(lead)
+    setNewNoteContent('')
+    setShowAddNoteModal(true)
+  }
+
+  function handleSubmitNote() {
+    if (!selectedLeadForNote || !newNoteContent.trim()) {
+      alert('Vui lòng nhập nội dung ghi chú!')
+      return
+    }
+
+    // Update lead with new note
+    const updatedLeads = leads.map(lead => {
+      if (lead.id === selectedLeadForNote.id) {
+        const newNote = {
+          content: newNoteContent.trim(),
+          timestamp: new Date().toISOString(),
+          author: 'Người dùng hiện tại' // In real app, get from auth context
+        }
+        
+        return {
+          ...lead,
+          quickNotes: [...(lead.quickNotes || []), newNote],
+          content: lead.content + (lead.content ? '\n' : '') + `[${new Date().toLocaleDateString('vi-VN')}] ${newNoteContent.trim()}`,
+          updatedAt: new Date().toISOString()
+        }
+      }
+      return lead
+    })
+
+    setLeads(updatedLeads)
+    setShowAddNoteModal(false)
+    setSelectedLeadForNote(null)
+    setNewNoteContent('')
+    alert('Đã thêm tương tác thành công!')
+  }
+
+  // File management functions
+  const handleViewFiles = (lead: Lead) => {
+    setSelectedLeadForFile(lead)
+    setShowFileModal(true)
+  }
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files
+    if (files && files.length > 0) {
+      setSelectedFiles(files)
+    }
+  }
+
+  const handleSubmitFiles = () => {
+    if (!selectedFiles || !selectedLeadForFile) return
+
+    const newFiles = Array.from(selectedFiles).map(file => ({
+      name: file.name,
+      size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+      type: file.type || 'unknown',
+      uploadedAt: new Date().toISOString()
+    }))
+
+    const updatedLeads = leads.map(lead => {
+      if (lead.id === selectedLeadForFile.id) {
+        return {
+          ...lead,
+          files: [...(lead.files || []), ...newFiles]
+        }
+      }
+      return lead
+    })
+
+    setLeads(updatedLeads)
+    setSelectedFiles(null)
+    setShowFileModal(false)
+    setSelectedLeadForFile(null)
+    alert('Đã upload file thành công!')
+  }
+
+  const handleDeleteFile = (fileIndex: number) => {
+    if (!selectedLeadForFile) return
+
+    const updatedLeads = leads.map(lead => {
+      if (lead.id === selectedLeadForFile.id) {
+        const updatedFiles = lead.files?.filter((_, index) => index !== fileIndex) || []
+        return {
+          ...lead,
+          files: updatedFiles
+        }
+      }
+      return lead
+    })
+
+    setLeads(updatedLeads)
+    setSelectedLeadForFile({
+      ...selectedLeadForFile,
+      files: selectedLeadForFile.files?.filter((_, index) => index !== fileIndex) || []
+    })
+  }
+
+  function handleSaveLeadEdit() {
+    if (!editedLead || !selectedLead) return;
+    
+    // Update the lead in the leads array
+    const updatedLeads = leads.map(lead => {
+      if (lead.id === selectedLead.id) {
+        return {
+          ...lead,
+          ...editedLead,
+          updatedAt: new Date().toISOString()
+        };
+      }
+      return lead;
+    });
+    
+    setLeads(updatedLeads);
+    setSelectedLead({...editedLead});
+    setIsEditMode(false);
+    alert('Đã lưu thông tin lead thành công!');
+  }
+
   // Calculate metrics with realistic previous month data
   const calculateMetrics = () => {
     const currentMonth = new Date().getMonth()
@@ -2020,6 +2299,77 @@ export default function SalesManagement() {
 
     const handleCreateTaskQuick = () => {
       setShowCreateTaskModal(true)
+    }
+
+    const handleExportSelectedLeads = () => {
+      if (selectedLeadIds.length === 0) {
+        alert('Vui lòng chọn ít nhất một lead để xuất!')
+        return
+      }
+
+      // Get selected leads
+      const selectedLeads = leads.filter(lead => selectedLeadIds.includes(lead.id))
+      
+      // Prepare CSV data
+      const csvHeaders = [
+        'ID',
+        'Tên',
+        'Email', 
+        'Điện thoại',
+        'Công ty',
+        'Chức vụ',
+        'Nguồn',
+        'Trạng thái',
+        'Độ ưu tiên',
+        'Sales phụ trách',
+        'Giá trị dự kiến',
+        'Ngày tạo',
+        'Ngày cập nhật',
+        'Ghi chú',
+        'Số tệp đính kèm'
+      ]
+
+      const csvData = selectedLeads.map(lead => [
+        lead.id,
+        lead.name || '',
+        lead.email || '',
+        lead.phone || '',
+        lead.company || '',
+        lead.position || '',
+        lead.source || '',
+        lead.status || '',
+        lead.priority || '',
+        lead.assignedTo || '',
+        lead.value || '',
+        lead.createdAt || '',
+        lead.updatedAt || '',
+        (lead.notes || '').replace(/"/g, '""'), // Escape quotes in notes
+        lead.files ? lead.files.length : 0 // Number of files
+      ])
+
+      // Create CSV content
+      const csvContent = [
+        csvHeaders.join(','),
+        ...csvData.map(row => row.map(cell => `"${cell}"`).join(','))
+      ].join('\n')
+
+      // Create and download file
+      const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' }) // \uFEFF for UTF-8 BOM
+      const link = document.createElement('a')
+      const url = URL.createObjectURL(blob)
+      link.setAttribute('href', url)
+      link.setAttribute('download', `leads_export_${new Date().toISOString().split('T')[0]}.csv`)
+      link.style.visibility = 'hidden'
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Show success message
+      alert(`Đã xuất thành công ${selectedLeads.length} leads ra file CSV!`)
+      
+      // Clear selection after export
+      setSelectedLeadIds([])
+      setSelectAllChecked(false)
     }
 
     return (
@@ -2454,7 +2804,7 @@ export default function SalesManagement() {
                 onChange={(e) => setLeadRegionFilter(e.target.value)}
                 className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
-                <option value="all">Tất cả khu vực</option>
+                <option value="all">Tất cả tỉnh thành</option>
                 <option value="ha_noi">Hà Nội</option>
                 <option value="ho_chi_minh">TP.HCM</option>
                 <option value="da_nang">Đà Nẵng</option>
@@ -2531,7 +2881,7 @@ export default function SalesManagement() {
                             checkbox: true, stt: true, customerName: true, phone: true, email: true,
                             company: false, address: false, source: true, region: false, stage: true,
                             product: false,
-                            customerType: false, salesOwner: true, tags: true, notes: false,
+                            customerType: false, salesOwner: true, tags: true, notes: false, files: false,
                             createdDate: true, lastModified: false, interactionCount: false,
                             lastInteraction: false, actions: true
                           })}
@@ -2817,6 +3167,13 @@ export default function SalesManagement() {
                       <Plus className="w-4 h-4" />
                       Tạo task nhanh
                     </button>
+                    <button
+                      onClick={handleExportSelectedLeads}
+                      className="px-3 py-1.5 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors flex items-center gap-1"
+                    >
+                      <Download className="w-4 h-4" />
+                      Xuất leads
+                    </button>
                   </div>
                 </div>
               </div>
@@ -2890,7 +3247,7 @@ export default function SalesManagement() {
                   {/* 9. Khu vực */}
                   {visibleColumns.region && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
-                      🗺️ Khu vực
+                      🗺️ Tỉnh thành
                     </th>
                   )}
                   
@@ -2937,35 +3294,42 @@ export default function SalesManagement() {
                     </th>
                   )}
                   
-                  {/* 19. Ngày tạo */}
+                  {/* 19. Tệp đính kèm */}
+                  {visibleColumns.files && (
+                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                      📎 Tệp
+                    </th>
+                  )}
+                  
+                  {/* 20. Ngày tạo */}
                   {visibleColumns.createdDate && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28 border-r border-gray-200">
                       📅 Ngày tạo
                     </th>
                   )}
                   
-                  {/* 20. Ngày cập nhật */}
+                  {/* 21. Ngày cập nhật */}
                   {visibleColumns.lastModified && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
                       🕐 Cập nhật cuối
                     </th>
                   )}
                   
-                  {/* 21. Số lần tương tác */}
+                  {/* 22. Số lần tương tác */}
                   {visibleColumns.interactionCount && (
                     <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24 border-r border-gray-200">
                       🔄 Tương tác
                     </th>
                   )}
                   
-                  {/* 22. Lần tương tác cuối */}
+                  {/* 23. Lần tương tác cuối */}
                   {visibleColumns.lastInteraction && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
                       ⏰ TT cuối cùng
                     </th>
                   )}
                   
-                  {/* 23. Hành động */}
+                  {/* 24. Hành động */}
                   {visibleColumns.actions && (
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 shadow-lg z-20 w-28">
                       ⚙️ Hành động
@@ -3063,7 +3427,7 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 9. Khu vực */}
+                    {/* 9. Tỉnh thành */}
                     {visibleColumns.region && (
                       <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
                         <div className="text-sm text-gray-900">
@@ -3173,7 +3537,32 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 19. Ngày tạo */}
+                    {/* 19. Tệp đính kèm */}
+                    {visibleColumns.files && (
+                      <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200 text-center">
+                        <div className="flex items-center justify-center">
+                          {lead.files && lead.files.length > 0 ? (
+                            <button
+                              onClick={() => handleViewFiles(lead)}
+                              className="flex items-center gap-1 hover:bg-blue-50 px-2 py-1 rounded transition-colors"
+                            >
+                              <span className="text-blue-600 text-sm font-medium">{lead.files.length}</span>
+                              <Paperclip className="w-4 h-4 text-blue-600" />
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleViewFiles(lead)}
+                              className="flex items-center gap-1 hover:bg-gray-50 px-2 py-1 rounded transition-colors"
+                            >
+                              <span className="text-gray-400 text-sm">0</span>
+                              <Paperclip className="w-4 h-4 text-gray-400" />
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    )}
+                    
+                    {/* 20. Ngày tạo */}
                     {visibleColumns.createdDate && (
                       <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
                         <div className="text-sm text-gray-900">
@@ -3182,7 +3571,7 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 20. Ngày cập nhật */}
+                    {/* 21. Ngày cập nhật */}
                     {visibleColumns.lastModified && (
                       <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
                         <div className="text-sm text-gray-900">
@@ -3197,7 +3586,7 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 21. Số lần tương tác */}
+                    {/* 22. Số lần tương tác */}
                     {visibleColumns.interactionCount && (
                       <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200 text-center">
                         <div className="text-sm font-medium text-gray-900">
@@ -3206,7 +3595,7 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 22. Lần tương tác cuối */}
+                    {/* 23. Lần tương tác cuối */}
                     {visibleColumns.lastInteraction && (
                       <td className="px-6 py-4 whitespace-nowrap border-r border-gray-200">
                         {lead.lastInteractionAt ? (
@@ -3229,7 +3618,7 @@ export default function SalesManagement() {
                       </td>
                     )}
                     
-                    {/* 23. Hành động */}
+                    {/* 24. Hành động */}
                     {visibleColumns.actions && (
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium sticky right-0 bg-white group-hover:bg-gray-50 shadow-lg z-10">
                         <div className="flex items-center space-x-1">
@@ -3239,6 +3628,13 @@ export default function SalesManagement() {
                             title="Xem chi tiết & Chỉnh sửa"
                           >
                             <Eye className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleAddNote(lead)}
+                            className="p-2 text-slate-600 hover:text-white hover:bg-yellow-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                            title="Thêm tương tác"
+                          >
+                            <StickyNote className="w-4 h-4" />
                           </button>
                           <button 
                             onClick={() => handleConvertLead(lead)}
@@ -3413,7 +3809,7 @@ export default function SalesManagement() {
                                 {/* Source & Region */}
                                 <div className="text-xs text-gray-500 space-y-1">
                                   <p><span className="font-medium">Nguồn:</span> {lead.source}</p>
-                                  <p><span className="font-medium">Khu vực:</span> {lead.region}</p>
+                                  <p><span className="font-medium">Tỉnh thành:</span> {lead.region}</p>
                                 </div>
                                 
                                 {/* Tags */}
@@ -3453,20 +3849,7 @@ export default function SalesManagement() {
                                     {/* Hiển thị buttons khác nhau tùy theo status */}
                                     {(lead.status as string) === 'payment_pending' ? (
                                       <>
-                                        <button 
-                                          onClick={() => handlePaymentSuccess(lead)}
-                                          className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                          title="Thanh toán thành công"
-                                        >
-                                          <CheckCircle className="w-3.5 h-3.5" />
-                                        </button>
-                                        <button 
-                                          onClick={() => handlePaymentFailed(lead)}
-                                          className="p-1.5 text-slate-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                                          title="Thanh toán thất bại"
-                                        >
-                                          <XCircle className="w-3.5 h-3.5" />
-                                        </button>
+                                        {/* Chỉ giữ lại nút xem chi tiết, đã có ở trên */}
                                       </>
                                     ) : lead.status !== 'converted' && lead.status !== 'lost' ? (
                                       <button 
@@ -3863,7 +4246,7 @@ export default function SalesManagement() {
                   </div>
                   
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Khu vực</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
                     <select
                       value={newLead.region}
                       onChange={(e) => setNewLead(prev => ({ ...prev, region: e.target.value }))}
@@ -4207,10 +4590,10 @@ export default function SalesManagement() {
                         onChange={(e) => setAutoAssignStrategy(e.target.value)}
                       />
                       <div className="flex-1">
-                        <div className="font-medium text-sm text-gray-900">🗺️ Territory-based (Theo khu vực địa lý)</div>
+                        <div className="font-medium text-sm text-gray-900">🗺️ Territory-based (Theo tỉnh thành địa lý)</div>
                         <p className="text-xs text-gray-600 mt-1">Phân theo tỉnh/thành phố mà sales phụ trách</p>
                         <div className="text-xs text-gray-500 mt-1">
-                          <strong>Ưu điểm:</strong> Chuyên môn khu vực | <strong>Nhược điểm:</strong> Cần setup territory
+                          <strong>Ưu điểm:</strong> Chuyên môn tỉnh thành | <strong>Nhược điểm:</strong> Cần setup territory
                         </div>
                       </div>
                     </label>
@@ -4328,9 +4711,9 @@ export default function SalesManagement() {
                   </div>
                   
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Khu vực</label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
                     <select name="region" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
-                      <option value="">Tất cả khu vực</option>
+                      <option value="">Tất cả tỉnh thành</option>
                       <option value="hanoi">Hà Nội</option>
                       <option value="hcm">TP.HCM</option>
                       <option value="danang">Đà Nẵng</option>
@@ -4460,6 +4843,83 @@ export default function SalesManagement() {
                 </div>
               </div>
 
+              {/* Daily Limits Configuration */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <h4 className="text-sm font-medium text-gray-900">Giới hạn leads mỗi ngày</h4>
+                  <div 
+                    className="relative"
+                    onMouseEnter={() => setShowAutoAssignTooltip('daily-limits-section')}
+                    onMouseLeave={() => setShowAutoAssignTooltip(null)}
+                  >
+                    <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
+                    {showAutoAssignTooltip === 'daily-limits-section' && (
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="max-w-xs">
+                          <p className="font-medium mb-1">📊 Cân bằng khối lượng công việc</p>
+                          <p className="text-gray-300">Đặt giới hạn số leads tối đa mỗi người có thể nhận trong 1 ngày để đảm bảo chất lượng xử lý.</p>
+                        </div>
+                        <div className="absolute top-[-4px] left-3 w-2 h-2 bg-black transform rotate-45"></div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+                
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-2">
+                    <svg className="w-4 h-4 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                    </svg>
+                    <div className="text-xs text-blue-700">
+                      <p className="font-medium">💡 Lợi ích của việc đặt giới hạn:</p>
+                      <ul className="mt-1 space-y-1">
+                        <li>• Đảm bảo chất lượng chăm sóc lead</li>
+                        <li>• Tránh quá tải cho nhân viên</li>
+                        <li>• Phân bổ đều workload trong team</li>
+                        <li>• Tăng tỷ lệ chuyển đổi</li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-3 max-h-60 overflow-y-auto">
+                  {salesTeam.map(member => (
+                    <div key={member.id} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+                          {member.avatar}
+                        </div>
+                        <div>
+                          <div className="font-medium text-sm text-gray-900">{member.name}</div>
+                          <div className="text-xs text-gray-500">{member.title}</div>
+                          <div className="text-xs text-gray-400">Leads hiện tại: {member.activeLeads}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xs text-gray-500">Tối đa/ngày:</span>
+                        <input
+                          type="number"
+                          min="1"
+                          max="20"
+                          value={memberDailyLimits[member.id] || 3}
+                          onChange={(e) => setMemberDailyLimits(prev => ({
+                            ...prev,
+                            [member.id]: parseInt(e.target.value) || 1
+                          }))}
+                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <span className="text-xs text-gray-500">leads</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-3 text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                  <p><strong>Tổng capacity mỗi ngày:</strong> {Object.values(memberDailyLimits).reduce((sum, limit) => sum + limit, 0)} leads</p>
+                  <p className="mt-1">Hệ thống sẽ dừng phân công khi đạt giới hạn để đảm bảo chất lượng.</p>
+                </div>
+              </div>
+
               {/* Preview */}
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -4486,6 +4946,8 @@ export default function SalesManagement() {
                   <div>• Leads chưa phân công: <span className="font-medium text-gray-900">{getPreviewData().unassignedLeads} leads</span></div>
                   <div>• Nhân viên sales hoạt động: <span className="font-medium text-gray-900">{getPreviewData().activeSalesPeople} người</span></div>
                   <div>• Trung bình mỗi người: <span className="font-medium text-gray-900">{getPreviewData().avgLeadsPerPerson} leads</span></div>
+                  <div>• Capacity hôm nay: <span className="font-medium text-gray-900">{getPreviewData().usedCapacityToday}/{getPreviewData().totalDailyCapacity} leads</span></div>
+                  <div>• Còn lại hôm nay: <span className={`font-medium ${getPreviewData().remainingCapacityToday > 0 ? 'text-green-600' : 'text-red-600'}`}>{getPreviewData().remainingCapacityToday} leads</span></div>
                 </div>
                 
                 {getPreviewData().unassignedLeads === 0 && (
@@ -4575,10 +5037,7 @@ export default function SalesManagement() {
                   ) : (
                     <div className="flex items-center gap-2">
                       <button
-                        onClick={() => {
-                          // Save changes logic here
-                          setIsEditMode(false)
-                        }}
+                        onClick={handleSaveLeadEdit}
                         className="px-3 py-1 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-1"
                       >
                         <Save className="w-4 h-4" />
@@ -4744,7 +5203,7 @@ export default function SalesManagement() {
 
                 {/* Thông tin khác */}
                 <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags, Nguồn & Khu vực</h4>
+                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags, Nguồn & Tỉnh thành</h4>
                   <div className="space-y-3">
                     <div>
                       <p className="text-xs text-gray-500 mb-2">Tags</p>
@@ -4817,14 +5276,14 @@ export default function SalesManagement() {
                       )}
                     </div>
                     <div>
-                      <p className="text-xs text-gray-500 mb-1">Khu vực</p>
+                      <p className="text-xs text-gray-500 mb-1">Tỉnh thành</p>
                       {isEditMode ? (
                         <select
                           value={editedLead?.region || ''}
                           onChange={(e) => setEditedLead(prev => prev ? {...prev, region: e.target.value} : null)}
                           className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
                         >
-                          <option value="">Chọn khu vực</option>
+                          <option value="">Chọn tỉnh thành</option>
                           <option value="Hà Nội">Hà Nội</option>
                           <option value="TP.HCM">TP.HCM</option>
                           <option value="Đà Nẵng">Đà Nẵng</option>
@@ -4840,18 +5299,51 @@ export default function SalesManagement() {
                 </div>
               </div>
 
-              {/* Notes */}
+              {/* Notes & Content */}
               <div className="mt-6 space-y-4">
                 <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Ghi chú & Nội dung</h4>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-sm text-gray-700">{selectedLead.content || 'Không có nội dung'}</p>
+                
+                {/* Content Section */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600">Nội dung mô tả:</label>
+                  {isEditMode ? (
+                    <textarea
+                      value={editedLead?.content || ''}
+                      onChange={(e) => setEditedLead(prev => prev ? {...prev, content: e.target.value} : null)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      rows={4}
+                      placeholder="Nhập nội dung mô tả về lead..."
+                    />
+                  ) : (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedLead.content || 'Không có nội dung'}</p>
+                    </div>
+                  )}
                 </div>
-                {selectedLead.notes && (
-                  <div className="bg-blue-50 rounded-lg p-4">
-                    <p className="text-sm text-blue-900 font-medium mb-1">Ghi chú:</p>
-                    <p className="text-sm text-blue-800">{selectedLead.notes}</p>
-                  </div>
-                )}
+
+                {/* Notes Section */}
+                <div className="space-y-2">
+                  <label className="text-xs font-medium text-gray-600">Ghi chú:</label>
+                  {isEditMode ? (
+                    <textarea
+                      value={editedLead?.notes || ''}
+                      onChange={(e) => setEditedLead(prev => prev ? {...prev, notes: e.target.value} : null)}
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      rows={3}
+                      placeholder="Nhập ghi chú về lead..."
+                    />
+                  ) : (
+                    selectedLead.notes ? (
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <p className="text-sm text-blue-800 whitespace-pre-wrap">{selectedLead.notes}</p>
+                      </div>
+                    ) : (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-gray-500 italic">Không có ghi chú</p>
+                      </div>
+                    )
+                  )}
+                </div>
               </div>
 
               {/* Interaction History */}
@@ -5263,10 +5755,10 @@ export default function SalesManagement() {
                     </select>
                   </div>
 
-                  {/* Khu vực */}
+                  {/* Tỉnh thành */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Khu vực
+                      Tỉnh thành
                     </label>
                     <select
                       value={editingLead.region}
@@ -5514,6 +6006,99 @@ export default function SalesManagement() {
                   <p className="mt-1 text-xs text-red-500">Vui lòng chọn ít nhất một sản phẩm trước khi chuyển đổi</p>
                 )}
               </div>
+
+              {/* Payment Information */}
+              <div className="mb-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
+                <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
+                
+                {/* Discount */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Giảm giá (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={discountPercent}
+                    onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                {/* Payment Method */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình thức thanh toán
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="cash"
+                        checked={paymentMethod === 'cash'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        value="transfer"
+                        checked={paymentMethod === 'transfer'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Total calculation */}
+                {selectedProducts.length > 0 && (
+                  <div className="bg-white rounded-md p-3 border border-blue-200">
+                    <div className="flex justify-between text-sm">
+                      <span>Tổng tiền hàng:</span>
+                      <span>{formatCurrency(
+                        selectedProducts.reduce((sum, productId) => {
+                          const product = availableProducts.find(p => p.id === productId)
+                          const selectedPackageId = selectedPackages[productId]
+                          const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                        }, 0).toString()
+                      )} VNĐ</span>
+                    </div>
+                    {discountPercent > 0 && (
+                      <div className="flex justify-between text-sm text-red-600">
+                        <span>Giảm giá ({discountPercent}%):</span>
+                        <span>-{formatCurrency(
+                          (selectedProducts.reduce((sum, productId) => {
+                            const product = availableProducts.find(p => p.id === productId)
+                            const selectedPackageId = selectedPackages[productId]
+                            const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                            return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                          }, 0) * discountPercent / 100).toString()
+                        )} VNĐ</span>
+                      </div>
+                    )}
+                    <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
+                      <span>Thành tiền:</span>
+                      <span className="text-green-600">{formatCurrency(
+                        (selectedProducts.reduce((sum, productId) => {
+                          const product = availableProducts.find(p => p.id === productId)
+                          const selectedPackageId = selectedPackages[productId]
+                          const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                        }, 0) * (100 - discountPercent) / 100).toString()
+                      )} VNĐ</span>
+                    </div>
+                  </div>
+                )}
+              </div>
               
               <div className="bg-green-50 rounded-lg p-4 mb-4">
                 <h5 className="text-sm font-medium text-green-900 mb-2">Điều gì sẽ xảy ra:</h5>
@@ -5522,16 +6107,24 @@ export default function SalesManagement() {
                   <li>• Deal mới sẽ được tạo trong hệ thống</li>
                   <li>• Bắt đầu quy trình theo dõi thanh toán</li>
                   {selectedProducts.length > 0 && (
-                    <li>• Tổng giá trị đơn hàng: <span className="font-medium">
-                      {formatCurrency(
-                        selectedProducts.reduce((sum, productId) => {
-                          const product = availableProducts.find(p => p.id === productId)
-                          const selectedPackageId = selectedPackages[productId]
-                          const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
-                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
-                        }, 0).toString()
-                      )} VNĐ
-                    </span></li>
+                    <>
+                      <li>• Hình thức thanh toán: <span className="font-medium">
+                        {paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
+                      </span></li>
+                      {discountPercent > 0 && (
+                        <li>• Giảm giá: <span className="font-medium text-red-600">{discountPercent}%</span></li>
+                      )}
+                      <li>• Tổng giá trị đơn hàng: <span className="font-medium">
+                        {formatCurrency(
+                          (selectedProducts.reduce((sum, productId) => {
+                            const product = availableProducts.find(p => p.id === productId)
+                            const selectedPackageId = selectedPackages[productId]
+                            const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                            return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                          }, 0) * (100 - discountPercent) / 100).toString()
+                        )} VNĐ
+                      </span></li>
+                    </>
                   )}
                 </ul>
               </div>
@@ -5548,6 +6141,8 @@ export default function SalesManagement() {
                   setSelectedProduct('') // Reset single product when closing modal
                   setSelectedProducts([]) // Reset multiple products when closing modal
                   setSelectedPackages({}) // Reset packages when closing modal
+                  setDiscountPercent(0) // Reset discount
+                  setPaymentMethod('cash') // Reset payment method
                 }}
                 className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
@@ -6110,13 +6705,14 @@ export default function SalesManagement() {
                 company: '🏢 Công ty',
                 address: '📍 Địa chỉ',
                 source: '🌐 Nguồn',
-                region: '🗺️ Khu vực',
+                region: '🗺️ Tỉnh thành',
                 stage: '🎯 Giai đoạn',
                 product: '🛍️ Sản phẩm quan tâm',
                 customerType: '👥 Loại khách hàng',
                 salesOwner: '👨‍💼 Sales phụ trách',
                 tags: '🏷️ Tags/Nhãn',
                 notes: '📝 Ghi chú',
+                files: '📎 Tệp đính kèm',
                 createdDate: '📅 Ngày tạo',
                 lastModified: '🕐 Ngày cập nhật',
                 interactionCount: '🔄 Số lần tương tác',
@@ -6172,6 +6768,209 @@ export default function SalesManagement() {
                 className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 Áp dụng
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* File Management Modal */}
+      {showFileModal && selectedLeadForFile && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Quản lý tệp</h3>
+                <p className="text-sm text-gray-600 mt-1">Lead: {selectedLeadForFile.name}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowFileModal(false)
+                  setSelectedLeadForFile(null)
+                  setSelectedFiles(null)
+                }}
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              {/* Upload Section */}
+              <div className="mb-6">
+                <h4 className="text-md font-medium text-gray-900 mb-3">Thêm tệp mới</h4>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                  <div className="text-center">
+                    <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                    <label className="cursor-pointer">
+                      <span className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                        Chọn tệp để upload
+                      </span>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        accept="*/*"
+                      />
+                    </label>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Hoặc kéo thả tệp vào đây
+                    </p>
+                  </div>
+                  
+                  {selectedFiles && (
+                    <div className="mt-4">
+                      <h5 className="text-sm font-medium text-gray-700 mb-2">Tệp đã chọn:</h5>
+                      {Array.from(selectedFiles).map((file, index) => (
+                        <div key={index} className="flex items-center justify-between bg-gray-50 p-2 rounded text-sm">
+                          <div className="flex items-center gap-2">
+                            <FileText className="w-4 h-4 text-gray-600" />
+                            <span>{file.name}</span>
+                            <span className="text-gray-500">({(file.size / 1024 / 1024).toFixed(2)} MB)</span>
+                          </div>
+                        </div>
+                      ))}
+                      <button
+                        onClick={handleSubmitFiles}
+                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                      >
+                        Upload tệp
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Existing Files */}
+              <div>
+                <h4 className="text-md font-medium text-gray-900 mb-3">
+                  Tệp hiện có ({selectedLeadForFile.files?.length || 0})
+                </h4>
+                {selectedLeadForFile.files && selectedLeadForFile.files.length > 0 ? (
+                  <div className="space-y-2">
+                    {selectedLeadForFile.files.map((file, index) => (
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <FileText className="w-5 h-5 text-blue-600" />
+                          <div>
+                            <p className="text-sm font-medium text-gray-900">{file.name}</p>
+                            <p className="text-xs text-gray-500">
+                              {file.size} • {file.type} • {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              // Create a download link for the file
+                              alert('Chức năng download sẽ được triển khai sau')
+                            }}
+                            className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
+                            title="Tải xuống"
+                          >
+                            <DownloadIcon className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteFile(index)}
+                            className="p-1 text-red-600 hover:text-red-700 transition-colors"
+                            title="Xóa tệp"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-500">
+                    <FileText className="mx-auto h-12 w-12 text-gray-300 mb-3" />
+                    <p>Chưa có tệp nào được upload</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Note Modal */}
+      {showAddNoteModal && selectedLeadForNote && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="flex items-center justify-between p-6 border-b">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác</h3>
+                <p className="text-sm text-gray-600 mt-1">Lead: {selectedLeadForNote.name}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowAddNoteModal(false)
+                  setSelectedLeadForNote(null)
+                  setNewNoteContent('')
+                }}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-6">
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nội dung ghi chú
+                </label>
+                <textarea
+                  value={newNoteContent}
+                  onChange={(e) => setNewNoteContent(e.target.value)}
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  placeholder="Nhập nội dung ghi chú..."
+                />
+              </div>
+              
+              {/* Show existing notes preview */}
+              {selectedLeadForNote.quickNotes && selectedLeadForNote.quickNotes.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ghi chú hiện có ({selectedLeadForNote.quickNotes.length})
+                  </label>
+                  <div className="max-h-32 overflow-y-auto bg-gray-50 rounded-md p-3">
+                    {selectedLeadForNote.quickNotes.slice(-3).map((note, index) => (
+                      <div key={index} className="text-xs text-gray-600 mb-2 last:mb-0">
+                        <div className="font-medium">
+                          {new Date(note.timestamp).toLocaleDateString('vi-VN')} - {note.author}
+                        </div>
+                        <div className="text-gray-800">{note.content}</div>
+                      </div>
+                    ))}
+                    {selectedLeadForNote.quickNotes.length > 3 && (
+                      <div className="text-xs text-gray-500 italic">
+                        ... và {selectedLeadForNote.quickNotes.length - 3} ghi chú khác
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex items-center justify-end gap-3 p-6 border-t bg-gray-50 rounded-b-lg">
+              <button
+                onClick={() => {
+                  setShowAddNoteModal(false)
+                  setSelectedLeadForNote(null)
+                  setNewNoteContent('')
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSubmitNote}
+                disabled={!newNoteContent.trim()}
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              >
+                Thêm tương tác
               </button>
             </div>
           </div>

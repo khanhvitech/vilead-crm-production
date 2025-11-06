@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Building2, 
   User, Calendar, Tag, Clock, TrendingUp, TrendingDown, AlertTriangle,
@@ -30,6 +30,19 @@ interface CustomerInteraction {
   date: string
   status: 'success' | 'pending' | 'failed'
   aiSummary?: string
+  editHistory?: InteractionEditLog[]
+}
+
+interface InteractionEditLog {
+  id: string
+  editedBy: string
+  editedAt: string
+  changes: {
+    field: string
+    oldValue: string
+    newValue: string
+  }[]
+  reason?: string
 }
 
 interface CustomerProduct {
@@ -198,7 +211,11 @@ export default function CustomersManagement() {
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
   const [newOrderData, setNewOrderData] = useState({
-    notes: ''
+    notes: '',
+    discountPercent: 0,
+    paymentMethod: 'cash',
+    totalAmount: 0,
+    finalAmount: 0
   })
 
   // Available products and packages list
@@ -247,6 +264,14 @@ export default function CustomersManagement() {
       { id: 'mobile-unlimited', name: 'Gói Unlimited', price: 150000, description: 'Unlimited users + premium features' }
     ]
   }
+  
+  // Auto-calculate order totals when products/packages change
+  useEffect(() => {
+    if (showCreateOrderModal) {
+      handleOrderDiscountChange(newOrderData.discountPercent)
+    }
+  }, [selectedProducts, selectedPackages, showCreateOrderModal])
+
   const [showFilters, setShowFilters] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('')
@@ -266,6 +291,26 @@ export default function CustomersManagement() {
   const [filterDepartment, setFilterDepartment] = useState('')
   const [filterTeam, setFilterTeam] = useState('')
   const [filterAssignedPerson, setFilterAssignedPerson] = useState('')
+  
+  // Quick interaction states
+  const [showQuickInteractionModal, setShowQuickInteractionModal] = useState(false)
+  const [selectedCustomerForInteraction, setSelectedCustomerForInteraction] = useState<Customer | null>(null)
+  const [quickInteractionContent, setQuickInteractionContent] = useState('')
+  const [quickInteractionTitle, setQuickInteractionTitle] = useState('')
+  const [quickInteractionType, setQuickInteractionType] = useState<'call' | 'email' | 'meeting' | 'note'>('note')
+  
+  // Edit interaction states
+  const [showEditInteractionModal, setShowEditInteractionModal] = useState(false)
+  const [editingInteraction, setEditingInteraction] = useState<CustomerInteraction | null>(null)
+  const [editInteractionData, setEditInteractionData] = useState({
+    title: '',
+    summary: '',
+    type: 'email' as CustomerInteraction['type'],
+    channel: '',
+    status: 'success' as CustomerInteraction['status']
+  })
+  const [editReason, setEditReason] = useState('')
+  
   const [showColumnSelector, setShowColumnSelector] = useState(false)
   const [visibleColumns, setVisibleColumns] = useState({
     checkbox: true,
@@ -467,7 +512,10 @@ export default function CustomersManagement() {
       price: number,
       features: string[]
     }>,
-    totalAmount: 0
+    totalAmount: 0,
+    discountPercent: 0,
+    paymentMethod: 'cash',
+    finalAmount: 0
   })
 
   // Temporary state for adding new product
@@ -506,11 +554,13 @@ export default function CustomersManagement() {
 
     const updatedProducts = [...newCustomerData.selectedProducts, newProduct]
     const newTotal = updatedProducts.reduce((sum, product) => sum + product.price, 0)
+    const newFinalAmount = newTotal * (100 - newCustomerData.discountPercent) / 100
 
     setNewCustomerData(prev => ({
       ...prev,
       selectedProducts: updatedProducts,
-      totalAmount: newTotal
+      totalAmount: newTotal,
+      finalAmount: newFinalAmount
     }))
 
     // Reset temp product
@@ -523,11 +573,31 @@ export default function CustomersManagement() {
   const removeProductFromCustomer = (productId: string, packageId: string) => {
     const updatedProducts = newCustomerData.selectedProducts.filter(p => !(p.productId === productId && p.packageId === packageId))
     const newTotal = updatedProducts.reduce((sum, product) => sum + product.price, 0)
+    const newFinalAmount = newTotal * (100 - newCustomerData.discountPercent) / 100
 
     setNewCustomerData(prev => ({
       ...prev,
       selectedProducts: updatedProducts,
-      totalAmount: newTotal
+      totalAmount: newTotal,
+      finalAmount: newFinalAmount
+    }))
+  }
+
+  // Handle discount change
+  const handleDiscountChange = (discount: number) => {
+    const newFinalAmount = newCustomerData.totalAmount * (100 - discount) / 100
+    setNewCustomerData(prev => ({
+      ...prev,
+      discountPercent: discount,
+      finalAmount: newFinalAmount
+    }))
+  }
+
+  // Handle payment method change
+  const handlePaymentMethodChange = (method: string) => {
+    setNewCustomerData(prev => ({
+      ...prev,
+      paymentMethod: method
     }))
   }
 
@@ -575,6 +645,44 @@ export default function CustomersManagement() {
         benefits: prev[tier as keyof typeof prev].benefits.filter((_, index) => index !== benefitIndex)
       }
     }))
+  }
+
+  // Helper functions for order payment
+  const handleOrderDiscountChange = (discountPercent: number) => {
+    const totalAmount = calculateOrderTotal()
+    const finalAmount = totalAmount * (1 - discountPercent / 100)
+    setNewOrderData(prev => ({
+      ...prev,
+      discountPercent,
+      totalAmount,
+      finalAmount
+    }))
+  }
+
+  const handleOrderPaymentMethodChange = (paymentMethod: string) => {
+    setNewOrderData(prev => ({
+      ...prev,
+      paymentMethod
+    }))
+  }
+
+  const calculateOrderTotal = () => {
+    let total = 0
+    selectedProducts.forEach(productId => {
+      const product = availableProducts.find(p => p.id === productId)
+      if (product) {
+        total += product.price
+        
+        const packageId = selectedPackages[productId]
+        if (packageId) {
+          const packageData = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === packageId)
+          if (packageData) {
+            total += packageData.price
+          }
+        }
+      }
+    })
+    return total
   }
   
   // Product and package data
@@ -2729,7 +2837,10 @@ export default function CustomersManagement() {
       customer: selectedCustomerForOrder,
       products: orderProducts,
       orderDetails: newOrderData,
-      totalAmount
+      totalAmount: newOrderData.totalAmount,
+      discountPercent: newOrderData.discountPercent,
+      paymentMethod: newOrderData.paymentMethod,
+      finalAmount: newOrderData.finalAmount
     })
 
     // Update customer's products if in selected customer detail
@@ -2738,21 +2849,178 @@ export default function CustomersManagement() {
         ...selectedCustomer,
         products: [...(selectedCustomer.products || []), ...orderProducts],
         totalOrders: (selectedCustomer.totalOrders || 0) + 1,
-        totalSpent: (selectedCustomer.totalSpent || 0) + totalAmount,
+        totalSpent: (selectedCustomer.totalSpent || 0) + newOrderData.finalAmount,
         lastPurchaseDate: new Date().toISOString().split('T')[0]
       }
       setSelectedCustomer(updatedCustomer)
     }
 
+    // Prepare payment info for alert
+    let paymentInfo = `\nTổng tiền hàng: ${newOrderData.totalAmount.toLocaleString('vi-VN')} VND`
+    if (newOrderData.discountPercent > 0) {
+      paymentInfo += `\nGiảm giá (${newOrderData.discountPercent}%): -${(newOrderData.totalAmount * newOrderData.discountPercent / 100).toLocaleString('vi-VN')} VND`
+    }
+    paymentInfo += `\nThành tiền: ${newOrderData.finalAmount.toLocaleString('vi-VN')} VND`
+    paymentInfo += `\nHình thức thanh toán: ${newOrderData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}`
+
     // Reset form and close modal
     setNewOrderData({
-      notes: ''
+      notes: '',
+      discountPercent: 0,
+      paymentMethod: 'cash',
+      totalAmount: 0,
+      finalAmount: 0
     })
     setSelectedProducts([])
     setSelectedPackages({})
     setSelectedCustomerForOrder(null)
     setShowCreateOrderModal(false)
-    alert(`Đã tạo đơn hàng cho khách hàng ${selectedCustomerForOrder?.name} thành công!`)
+    alert(`Đã tạo đơn hàng cho khách hàng ${selectedCustomerForOrder?.name} thành công!${paymentInfo}`)
+  }
+
+  // Quick interaction handlers
+  const handleQuickInteraction = (customer: Customer) => {
+    setSelectedCustomerForInteraction(customer)
+    setShowQuickInteractionModal(true)
+  }
+
+  const handleSubmitQuickInteraction = () => {
+    if (!quickInteractionTitle.trim() || !quickInteractionContent.trim() || !selectedCustomerForInteraction) {
+      alert('Vui lòng nhập đầy đủ tiêu đề và nội dung tương tác!')
+      return
+    }
+
+    const newInteraction: CustomerInteraction = {
+      id: `interaction_${Date.now()}`,
+      type: quickInteractionType === 'note' ? 'support' : quickInteractionType,
+      channel: quickInteractionType === 'call' ? 'phone' : 
+               quickInteractionType === 'email' ? 'email' : 
+               quickInteractionType === 'meeting' ? 'in-person' : 'note',
+      title: quickInteractionTitle,
+      summary: quickInteractionContent,
+      date: new Date().toISOString(),
+      status: 'success'
+    }
+
+    console.log('Quick interaction added:', newInteraction)
+    
+    // Reset and close modal
+    setQuickInteractionContent('')
+    setQuickInteractionTitle('')
+    setQuickInteractionType('note')
+    setSelectedCustomerForInteraction(null)
+    setShowQuickInteractionModal(false)
+    
+    alert(`Đã thêm tương tác thành công cho khách hàng ${selectedCustomerForInteraction.name}!`)
+  }
+
+  // Edit interaction handlers
+  const handleEditInteraction = (interaction: CustomerInteraction) => {
+    setEditingInteraction(interaction)
+    setEditInteractionData({
+      title: interaction.title,
+      summary: interaction.summary,
+      type: interaction.type,
+      channel: interaction.channel,
+      status: interaction.status
+    })
+    setEditReason('')
+    setShowEditInteractionModal(true)
+  }
+
+  const handleSubmitEditInteraction = () => {
+    if (!editingInteraction || !selectedCustomer || !editReason.trim()) {
+      alert('Vui lòng nhập lý do chỉnh sửa!')
+      return
+    }
+
+    // Track changes
+    const changes: { field: string; oldValue: string; newValue: string }[] = []
+    
+    if (editInteractionData.title !== editingInteraction.title) {
+      changes.push({
+        field: 'title',
+        oldValue: editingInteraction.title,
+        newValue: editInteractionData.title
+      })
+    }
+    
+    if (editInteractionData.summary !== editingInteraction.summary) {
+      changes.push({
+        field: 'summary',
+        oldValue: editingInteraction.summary,
+        newValue: editInteractionData.summary
+      })
+    }
+    
+    if (editInteractionData.type !== editingInteraction.type) {
+      changes.push({
+        field: 'type',
+        oldValue: editingInteraction.type,
+        newValue: editInteractionData.type
+      })
+    }
+    
+    if (editInteractionData.channel !== editingInteraction.channel) {
+      changes.push({
+        field: 'channel',
+        oldValue: editingInteraction.channel,
+        newValue: editInteractionData.channel
+      })
+    }
+    
+    if (editInteractionData.status !== editingInteraction.status) {
+      changes.push({
+        field: 'status',
+        oldValue: editingInteraction.status,
+        newValue: editInteractionData.status
+      })
+    }
+
+    if (changes.length === 0) {
+      alert('Không có thay đổi nào để lưu!')
+      return
+    }
+
+    // Create edit log
+    const editLog: InteractionEditLog = {
+      id: `edit_${Date.now()}`,
+      editedBy: 'Current User', // Replace with actual user
+      editedAt: new Date().toISOString(),
+      changes,
+      reason: editReason
+    }
+
+    // Update interaction
+    const updatedInteraction: CustomerInteraction = {
+      ...editingInteraction,
+      ...editInteractionData,
+      editHistory: [...(editingInteraction.editHistory || []), editLog]
+    }
+
+    // Update customer's interactions
+    const updatedCustomer = {
+      ...selectedCustomer,
+      interactions: selectedCustomer.interactions.map(int => 
+        int.id === editingInteraction.id ? updatedInteraction : int
+      )
+    }
+
+    setSelectedCustomer(updatedCustomer)
+    
+    // Reset and close modal
+    setEditingInteraction(null)
+    setEditInteractionData({
+      title: '',
+      summary: '',
+      type: 'email',
+      channel: '',
+      status: 'success'
+    })
+    setEditReason('')
+    setShowEditInteractionModal(false)
+    
+    alert('Đã cập nhật tương tác thành công!')
   }
 
   const handleExportData = (format: 'csv' | 'excel') => {
@@ -2866,6 +3134,9 @@ export default function CustomersManagement() {
       customerName: newCustomer.name,
       items: orderItems,
       totalAmount: newCustomerData.totalAmount,
+      discountPercent: newCustomerData.discountPercent,
+      paymentMethod: newCustomerData.paymentMethod,
+      finalAmount: newCustomerData.finalAmount,
       status: 'pending_payment', // Chờ thanh toán
       createdDate: new Date().toISOString().split('T')[0],
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
@@ -2877,7 +3148,14 @@ export default function CustomersManagement() {
     // For now, we'll just show a success message
     const productsSummary = orderItems.map(item => `• ${item.productName} - ${item.packageName}: ${item.price.toLocaleString('vi-VN')} VND`).join('\n')
     
-    alert(`Khách hàng mới đã được thêm thành công!\n\nĐơn hàng ${newOrder.id} đã được tạo với trạng thái "Chờ thanh toán"\n\nSản phẩm:\n${productsSummary}\n\nTổng giá trị: ${newCustomerData.totalAmount.toLocaleString('vi-VN')} VND`)
+    let paymentInfo = `\nTổng tiền hàng: ${newCustomerData.totalAmount.toLocaleString('vi-VN')} VND`
+    if (newCustomerData.discountPercent > 0) {
+      paymentInfo += `\nGiảm giá (${newCustomerData.discountPercent}%): -${(newCustomerData.totalAmount * newCustomerData.discountPercent / 100).toLocaleString('vi-VN')} VND`
+    }
+    paymentInfo += `\nThành tiền: ${newCustomerData.finalAmount.toLocaleString('vi-VN')} VND`
+    paymentInfo += `\nHình thức thanh toán: ${newCustomerData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}`
+    
+    alert(`Khách hàng mới đã được thêm thành công!\n\nĐơn hàng ${newOrder.id} đã được tạo với trạng thái "Chờ thanh toán"\n\nSản phẩm:\n${productsSummary}${paymentInfo}`)
     
     console.log('New Customer:', newCustomer)
     console.log('New Order:', newOrder)
@@ -2904,7 +3182,10 @@ export default function CustomersManagement() {
       marketingConsent: false,
       smsConsent: false,
       selectedProducts: [],
-      totalAmount: 0
+      totalAmount: 0,
+      discountPercent: 0,
+      paymentMethod: 'cash',
+      finalAmount: 0
     })
     setShowAddCustomerModal(false)
   }
@@ -4119,10 +4400,83 @@ export default function CustomersManagement() {
                     {/* Total Amount */}
                     <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-900">Tổng giá trị đơn hàng:</span>
+                        <span className="text-sm font-medium text-green-900">Tổng giá trị hàng:</span>
                         <span className="text-lg font-bold text-green-600">
                           {newCustomerData.totalAmount.toLocaleString('vi-VN')} VND
                         </span>
+                      </div>
+                    </div>
+
+                    {/* Payment Information */}
+                    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                      <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
+                      
+                      {/* Discount */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Giảm giá (%)
+                        </label>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={newCustomerData.discountPercent}
+                          onChange={(e) => handleDiscountChange(Number(e.target.value))}
+                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          placeholder="0"
+                        />
+                      </div>
+
+                      {/* Payment Method */}
+                      <div className="mb-3">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">
+                          Hình thức thanh toán
+                        </label>
+                        <div className="space-y-2">
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="customerPaymentMethod"
+                              value="cash"
+                              checked={newCustomerData.paymentMethod === 'cash'}
+                              onChange={(e) => handlePaymentMethodChange(e.target.value)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
+                          </label>
+                          <label className="flex items-center">
+                            <input
+                              type="radio"
+                              name="customerPaymentMethod"
+                              value="transfer"
+                              checked={newCustomerData.paymentMethod === 'transfer'}
+                              onChange={(e) => handlePaymentMethodChange(e.target.value)}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            />
+                            <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
+                          </label>
+                        </div>
+                      </div>
+
+                      {/* Final Amount */}
+                      <div className="bg-white rounded-md p-3 border border-blue-200">
+                        <div className="flex justify-between text-sm">
+                          <span>Tổng tiền hàng:</span>
+                          <span>{newCustomerData.totalAmount.toLocaleString('vi-VN')} VND</span>
+                        </div>
+                        {newCustomerData.discountPercent > 0 && (
+                          <div className="flex justify-between text-sm text-red-600">
+                            <span>Giảm giá ({newCustomerData.discountPercent}%):</span>
+                            <span>-{(newCustomerData.totalAmount * newCustomerData.discountPercent / 100).toLocaleString('vi-VN')} VND</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
+                          <span>Thành tiền:</span>
+                          <span className="text-green-600">{newCustomerData.finalAmount.toLocaleString('vi-VN')} VND</span>
+                        </div>
+                        <div className="text-xs text-gray-600 mt-1">
+                          Hình thức: {newCustomerData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -5853,8 +6207,9 @@ export default function CustomersManagement() {
                               <ShoppingCart className="w-3 h-3" />
                             </button>
                             <button 
+                              onClick={() => handleQuickInteraction(customer)}
                               className="p-1.5 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
-                              title="📝 Ghi chú nhanh"
+                              title="�️ Thêm tương tác nhanh"
                             >
                               <StickyNote className="w-3 h-3" />
                             </button>
@@ -6673,21 +7028,84 @@ export default function CustomersManagement() {
                               interaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></span>
                             <span className="font-medium text-gray-900">{interaction.title}</span>
+                            {interaction.editHistory && interaction.editHistory.length > 0 && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800">
+                                <Edit className="w-3 h-3 mr-1" />
+                                Đã chỉnh sửa ({interaction.editHistory.length})
+                              </span>
+                            )}
                           </div>
-                          <span className="text-sm text-gray-500">{formatDate(interaction.date)}</span>
+                          <div className="flex items-center space-x-2">
+                            <span className="text-sm text-gray-500">{formatDate(interaction.date)}</span>
+                            <button
+                              onClick={() => handleEditInteraction(interaction)}
+                              className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
+                              title="Chỉnh sửa tương tác"
+                            >
+                              <Edit className="w-4 h-4" />
+                            </button>
+                          </div>
                         </div>
                         <p className="text-gray-600 text-sm mb-2">{interaction.summary}</p>
-                        <div className="flex items-center space-x-4 text-xs text-gray-500">
-                          <span>Loại: {interaction.type}</span>
-                          <span>Kênh: {interaction.channel}</span>
-                          <span className={`px-2 py-1 rounded-full ${
-                            interaction.status === 'success' ? 'bg-green-100 text-green-800' :
-                            interaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
-                          }`}>
-                            {interaction.status === 'success' ? 'Thành công' :
-                             interaction.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
-                          </span>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4 text-xs text-gray-500">
+                            <span>Loại: {interaction.type}</span>
+                            <span>Kênh: {interaction.channel}</span>
+                            <span className={`px-2 py-1 rounded-full ${
+                              interaction.status === 'success' ? 'bg-green-100 text-green-800' :
+                              interaction.status === 'pending' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                            }`}>
+                              {interaction.status === 'success' ? 'Thành công' :
+                               interaction.status === 'pending' ? 'Đang xử lý' : 'Thất bại'}
+                            </span>
+                          </div>
                         </div>
+                        
+                        {/* Edit History */}
+                        {interaction.editHistory && interaction.editHistory.length > 0 && (
+                          <div className="mt-3 pt-3 border-t border-gray-100">
+                            <details className="group">
+                              <summary className="cursor-pointer text-xs text-gray-500 hover:text-gray-700 flex items-center">
+                                <History className="w-3 h-3 mr-1" />
+                                Lịch sử chỉnh sửa ({interaction.editHistory.length} lần)
+                                <ChevronDown className="w-3 h-3 ml-1 group-open:rotate-180 transition-transform" />
+                              </summary>
+                              <div className="mt-2 space-y-2">
+                                {interaction.editHistory.map((edit, editIndex) => (
+                                  <div key={editIndex} className="bg-gray-50 rounded p-2 text-xs">
+                                    <div className="flex items-center justify-between mb-1">
+                                      <span className="font-medium text-gray-700">
+                                        Chỉnh sửa bởi: {edit.editedBy}
+                                      </span>
+                                      <span className="text-gray-500">
+                                        {formatDate(edit.editedAt)}
+                                      </span>
+                                    </div>
+                                    {edit.reason && (
+                                      <p className="text-gray-600 mb-1">
+                                        <strong>Lý do:</strong> {edit.reason}
+                                      </p>
+                                    )}
+                                    <div className="space-y-1">
+                                      {edit.changes.map((change, changeIndex) => (
+                                        <div key={changeIndex} className="text-gray-600">
+                                          <strong>{change.field}:</strong>{' '}
+                                          <span className="bg-red-100 text-red-800 px-1 rounded">
+                                            {change.oldValue}
+                                          </span>
+                                          {' → '}
+                                          <span className="bg-green-100 text-green-800 px-1 rounded">
+                                            {change.newValue}
+                                          </span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -6932,6 +7350,10 @@ export default function CustomersManagement() {
                               return newPackages
                             })
                           }
+                          // Recalculate totals after product change
+                          setTimeout(() => {
+                            handleOrderDiscountChange(newOrderData.discountPercent)
+                          }, 0)
                         }}
                         className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                       />
@@ -6956,10 +7378,16 @@ export default function CustomersManagement() {
                         </label>
                         <select
                           value={selectedPackages[product.id] || ''}
-                          onChange={(e) => setSelectedPackages(prev => ({
-                            ...prev,
-                            [product.id]: e.target.value
-                          }))}
+                          onChange={(e) => {
+                            setSelectedPackages(prev => ({
+                              ...prev,
+                              [product.id]: e.target.value
+                            }))
+                            // Recalculate totals after package change
+                            setTimeout(() => {
+                              handleOrderDiscountChange(newOrderData.discountPercent)
+                            }, 0)
+                          }}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
                         >
                           {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
@@ -7064,6 +7492,81 @@ export default function CustomersManagement() {
                 </div>
               )}
             </div>
+
+            {/* Payment Information */}
+            {selectedProducts.length > 0 && (
+              <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
+                <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
+                
+                {/* Discount */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Giảm giá (%)
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={newOrderData.discountPercent}
+                    onChange={(e) => handleOrderDiscountChange(Number(e.target.value))}
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    placeholder="0"
+                  />
+                </div>
+
+                {/* Payment Method */}
+                <div className="mb-3">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình thức thanh toán
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="orderPaymentMethod"
+                        value="cash"
+                        checked={newOrderData.paymentMethod === 'cash'}
+                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="orderPaymentMethod"
+                        value="transfer"
+                        checked={newOrderData.paymentMethod === 'transfer'}
+                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Final Amount */}
+                <div className="bg-white rounded-md p-3 border border-blue-200">
+                  <div className="flex justify-between text-sm">
+                    <span>Tổng tiền hàng:</span>
+                    <span>{newOrderData.totalAmount.toLocaleString('vi-VN')} VND</span>
+                  </div>
+                  {newOrderData.discountPercent > 0 && (
+                    <div className="flex justify-between text-sm text-red-600">
+                      <span>Giảm giá ({newOrderData.discountPercent}%):</span>
+                      <span>-{(newOrderData.totalAmount * newOrderData.discountPercent / 100).toLocaleString('vi-VN')} VND</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
+                    <span>Thành tiền:</span>
+                    <span className="text-green-600">{newOrderData.finalAmount.toLocaleString('vi-VN')} VND</span>
+                  </div>
+                  <div className="text-xs text-gray-600 mt-1">
+                    Hình thức: {newOrderData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
@@ -7080,6 +7583,286 @@ export default function CustomersManagement() {
             >
               Tạo đơn hàng
             </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Quick Interaction Modal */}
+    {showQuickInteractionModal && selectedCustomerForInteraction && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="flex items-center justify-between p-6 border-b">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác nhanh</h3>
+              <p className="text-sm text-gray-600 mt-1">Khách hàng: {selectedCustomerForInteraction.name}</p>
+            </div>
+            <button
+              onClick={() => {
+                setShowQuickInteractionModal(false)
+                setSelectedCustomerForInteraction(null)
+                setQuickInteractionContent('')
+                setQuickInteractionType('note')
+              }}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="p-6">
+            {/* Interaction Type */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Loại tương tác
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                {[
+                  { value: 'note', label: '📝 Ghi chú', color: 'bg-gray-100 text-gray-800' },
+                  { value: 'call', label: '📞 Gọi điện', color: 'bg-green-100 text-green-800' },
+                  { value: 'email', label: '📧 Email', color: 'bg-blue-100 text-blue-800' },
+                  { value: 'meeting', label: '🤝 Gặp mặt', color: 'bg-purple-100 text-purple-800' }
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => setQuickInteractionType(type.value as any)}
+                    className={`p-2 text-xs font-medium rounded-lg border-2 transition-all ${
+                      quickInteractionType === type.value
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300'
+                    } ${type.color}`}
+                  >
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Title */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tiêu đề tương tác <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                value={quickInteractionTitle}
+                onChange={(e) => setQuickInteractionTitle(e.target.value)}
+                placeholder={`Nhập tiêu đề ${
+                  quickInteractionType === 'call' ? 'cuộc gọi' :
+                  quickInteractionType === 'email' ? 'email' :
+                  quickInteractionType === 'meeting' ? 'cuộc gặp' :
+                  'ghi chú'
+                }...`}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            {/* Content */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nội dung tương tác <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={quickInteractionContent}
+                onChange={(e) => setQuickInteractionContent(e.target.value)}
+                placeholder={`Nhập nội dung ${
+                  quickInteractionType === 'call' ? 'cuộc gọi' :
+                  quickInteractionType === 'email' ? 'email' :
+                  quickInteractionType === 'meeting' ? 'cuộc gặp' :
+                  'ghi chú'
+                }...`}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowQuickInteractionModal(false)
+                  setSelectedCustomerForInteraction(null)
+                  setQuickInteractionContent('')
+                  setQuickInteractionTitle('')
+                  setQuickInteractionType('note')
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSubmitQuickInteraction}
+                disabled={!quickInteractionTitle.trim() || !quickInteractionContent.trim()}
+                className="px-4 py-2 bg-orange-600 text-white rounded-md hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                <StickyNote className="w-4 h-4" />
+                Thêm tương tác
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+
+    {/* Edit Interaction Modal */}
+    {showEditInteractionModal && editingInteraction && (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between p-6 border-b">
+            <div>
+              <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa tương tác</h3>
+              <p className="text-sm text-gray-600 mt-1">ID: {editingInteraction.id}</p>
+            </div>
+            <button
+              onClick={() => {
+                setShowEditInteractionModal(false)
+                setEditingInteraction(null)
+                setEditInteractionData({
+                  title: '',
+                  summary: '',
+                  type: 'email',
+                  channel: '',
+                  status: 'success'
+                })
+                setEditReason('')
+              }}
+              className="text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          
+          <div className="p-6">
+            {/* Edit Reason */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lý do chỉnh sửa <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={editReason}
+                onChange={(e) => setEditReason(e.target.value)}
+                placeholder="Nhập lý do chỉnh sửa tương tác..."
+                rows={2}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Tiêu đề
+                </label>
+                <input
+                  type="text"
+                  value={editInteractionData.title}
+                  onChange={(e) => setEditInteractionData(prev => ({ ...prev, title: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Type */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Loại tương tác
+                </label>
+                <select
+                  value={editInteractionData.type}
+                  onChange={(e) => setEditInteractionData(prev => ({ ...prev, type: e.target.value as CustomerInteraction['type'] }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="email">Email</option>
+                  <option value="call">Gọi điện</option>
+                  <option value="meeting">Gặp mặt</option>
+                  <option value="sms">SMS</option>
+                  <option value="chat">Chat</option>
+                  <option value="support">Hỗ trợ</option>
+                </select>
+              </div>
+
+              {/* Channel */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Kênh
+                </label>
+                <input
+                  type="text"
+                  value={editInteractionData.channel}
+                  onChange={(e) => setEditInteractionData(prev => ({ ...prev, channel: e.target.value }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              {/* Status */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trạng thái
+                </label>
+                <select
+                  value={editInteractionData.status}
+                  onChange={(e) => setEditInteractionData(prev => ({ ...prev, status: e.target.value as CustomerInteraction['status'] }))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="success">Thành công</option>
+                  <option value="pending">Đang xử lý</option>
+                  <option value="failed">Thất bại</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Summary */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Nội dung tương tác
+              </label>
+              <textarea
+                value={editInteractionData.summary}
+                onChange={(e) => setEditInteractionData(prev => ({ ...prev, summary: e.target.value }))}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* Original Data Preview */}
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h4 className="text-sm font-medium text-gray-700 mb-2">Dữ liệu gốc:</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
+                <div><strong>Tiêu đề:</strong> {editingInteraction.title}</div>
+                <div><strong>Loại:</strong> {editingInteraction.type}</div>
+                <div><strong>Kênh:</strong> {editingInteraction.channel}</div>
+                <div><strong>Trạng thái:</strong> {editingInteraction.status}</div>
+                <div className="md:col-span-2"><strong>Nội dung:</strong> {editingInteraction.summary}</div>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => {
+                  setShowEditInteractionModal(false)
+                  setEditingInteraction(null)
+                  setEditInteractionData({
+                    title: '',
+                    summary: '',
+                    type: 'email',
+                    channel: '',
+                    status: 'success'
+                  })
+                  setEditReason('')
+                }}
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={handleSubmitEditInteraction}
+                disabled={!editReason.trim()}
+                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Lưu thay đổi
+              </button>
+            </div>
           </div>
         </div>
       </div>
