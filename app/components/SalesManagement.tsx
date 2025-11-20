@@ -97,6 +97,9 @@ interface Lead {
     type: string
     uploadedAt: string
   }>
+  // Discount fields
+  discountPercent?: number
+  originalValue?: number
 }
 
 interface MetricData {
@@ -127,6 +130,9 @@ export default function SalesManagement() {
   const [showAutoAssignTooltip, setShowAutoAssignTooltip] = useState<string | null>(null)
   const [showLeadDetailModal, setShowLeadDetailModal] = useState(false)
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
+  const [activeDetailTab, setActiveDetailTab] = useState<'contact' | 'history' | 'notes'>('contact')
+  const [showEditModal, setShowEditModal] = useState(false)
+  const [editingLead, setEditingLead] = useState<Lead | null>(null)
   const [showConvertModal, setShowConvertModal] = useState(false)
   const [selectedProduct, setSelectedProduct] = useState('')
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
@@ -283,6 +289,10 @@ export default function SalesManagement() {
   const [selectAllChecked, setSelectAllChecked] = useState(false)
   const [showAssignSalesModal, setShowAssignSalesModal] = useState(false)
   const [showCreateTaskModal, setShowCreateTaskModal] = useState(false)
+  const [showBulkStatusModal, setShowBulkStatusModal] = useState(false)
+  const [selectedBulkStatus, setSelectedBulkStatus] = useState('')
+  const [showBulkConvertModal, setShowBulkConvertModal] = useState(false)
+  const [bulkConvertTargetStatus, setBulkConvertTargetStatus] = useState('')
   const [selectedTaskType, setSelectedTaskType] = useState('')
   const [selectedTaskObj, setSelectedTaskObj] = useState<any | null>(null)
   
@@ -303,10 +313,10 @@ export default function SalesManagement() {
     const d = new Date(); d.setDate(d.getDate() + 1); return d.toISOString().slice(0,10)
   })
   const [taskDeadlineTime, setTaskDeadlineTime] = useState<string>('09:00')
+  const [taskAssignedTo, setTaskAssignedTo] = useState('')
   const [taskExtraNote, setTaskExtraNote] = useState<string>('')
   const [salesSearchTerm, setSalesSearchTerm] = useState('')
   const [salesCurrentPage, setSalesCurrentPage] = useState(1)
-  const [editingLead, setEditingLead] = useState<Lead | null>(null)
   const [quickNote, setQuickNote] = useState('')
   const [isAddingQuickNote, setIsAddingQuickNote] = useState(false)
   const [newLead, setNewLead] = useState({
@@ -659,6 +669,16 @@ export default function SalesManagement() {
         stage = 'deal_closed'
       }
 
+      // Tính toán tổng tiền với discount
+      const totalAmount = selectedProducts.reduce((sum, productId) => {
+        const product = availableProducts.find(p => p.id === productId)
+        const selectedPackageId = selectedPackages[productId]
+        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+        return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+      }, 0)
+      
+      const finalAmount = totalAmount * (100 - discountPercent) / 100
+
       const updatedLeads = leads.map(l => 
         l.id === pendingDragLead.id 
           ? { 
@@ -667,14 +687,26 @@ export default function SalesManagement() {
               stage: stage,
               product: selectedProducts.join(', '),
               updatedAt: new Date().toISOString(),
-              nextAction: nextAction
+              nextAction: `Theo dõi thanh toán ${paymentMethod === 'cash' ? 'tiền mặt' : 'chuyển khoản'} từ khách hàng`,
+              value: finalAmount,
+              discountPercent: discountPercent,
+              originalValue: totalAmount,
+              paymentInfo: {
+                method: paymentMethod,
+                originalAmount: totalAmount,
+                discountPercent: discountPercent,
+                finalAmount: finalAmount,
+                products: selectedProducts,
+                packages: selectedPackages
+              }
             }
           : l
       )
       setLeads(updatedLeads)
       
+      const discountMessage = discountPercent > 0 ? ` (giảm ${discountPercent}%)` : ''
       setNotification({
-        message: `Đã chuyển "${pendingDragLead.name}" sang "${getStatusName(dragTargetStatus)}" với ${selectedProducts.length} sản phẩm!`,
+        message: `Đã chuyển "${pendingDragLead.name}" sang "${getStatusName(dragTargetStatus)}" với ${selectedProducts.length} sản phẩm${discountMessage}!`,
         type: 'success'
       })
       setTimeout(() => setNotification(null), 3000)
@@ -687,6 +719,8 @@ export default function SalesManagement() {
     setOriginalTargetStatus('')
     setSelectedProducts([])
     setSelectedPackages({})
+    setDiscountPercent(0) // Reset discount
+    setPaymentMethod('cash') // Reset payment method
   }
 
   // Auto assignment logic
@@ -1222,7 +1256,8 @@ export default function SalesManagement() {
     taskType: { id: string, name: string, icon: string },
     deadlineDate?: string,
     deadlineTime?: string,
-    extraNote?: string
+    extraNote?: string,
+    assignedTo?: string
   ) => {
     const now = new Date().toISOString()
     let deadlineText = ''
@@ -1239,7 +1274,7 @@ export default function SalesManagement() {
     setLeads(prev => prev.map(l => {
       if (!selectedLeadIds.includes(l.id)) return l
       const notes = Array.isArray(l.quickNotes) ? l.quickNotes : (l.quickNotes ? [l.quickNotes] : [])
-      const noteContent = `${taskType.icon} ${taskType.name}${deadlineText}${extraNote ? ' - ' + extraNote : ''}`
+      const noteContent = `${taskType.icon} ${taskType.name}${deadlineText}${extraNote ? ' - ' + extraNote : ''}${assignedTo ? ` (Phụ trách: ${assignedTo})` : ''}`
       return {
         ...l,
         quickNotes: [...notes, { content: noteContent, timestamp: now, author: 'System' }],
@@ -1255,11 +1290,88 @@ export default function SalesManagement() {
     setSelectedTaskType('')
     setSelectedTaskObj(null)
     setTaskExtraNote('')
+    setTaskAssignedTo('')
     // reset deadline to default next day
     const nd = new Date(); nd.setDate(nd.getDate() + 1)
     setTaskDeadlineDate(nd.toISOString().slice(0,10))
     setTaskDeadlineTime('09:00')
     setTimeout(() => setNotification(null), 3000)
+  }
+
+  // Bulk status change function
+  const confirmBulkStatusChange = (newStatus: string) => {
+    // Nếu chuyển sang converted hoặc payment_pending, cần popup xác nhận với sản phẩm
+    if (newStatus === 'converted' || newStatus === 'payment_pending') {
+      setShowBulkStatusModal(false)
+      setShowBulkConvertModal(true)
+      setBulkConvertTargetStatus(newStatus)
+      return
+    }
+
+    const updatedLeads = leads.map(lead => {
+      if (selectedLeadIds.includes(lead.id)) {
+        return {
+          ...lead,
+          status: newStatus as Lead['status'],
+          updatedAt: new Date().toISOString()
+        }
+      }
+      return lead
+    })
+    
+    setLeads(updatedLeads)
+    setNotification({ 
+      message: `Đã chuyển ${selectedLeadIds.length} leads sang trạng thái "${getStatusName(newStatus)}"`, 
+      type: 'success' 
+    })
+    
+    // Reset selection and modal state
+    setSelectedLeadIds([])
+    setSelectAllChecked(false)
+    setShowBulkStatusModal(false)
+    setSelectedBulkStatus('')
+    setTimeout(() => setNotification(null), 3000)
+  }
+
+  // Bulk convert function  
+  const confirmBulkConvert = () => {
+    if (selectedProducts.length === 0) {
+      setNotification({ message: 'Vui lòng chọn ít nhất một sản phẩm', type: 'error' })
+      setTimeout(() => setNotification(null), 3000)
+      return
+    }
+
+    const actualStatus = bulkConvertTargetStatus === 'converted' ? 'payment_pending' : bulkConvertTargetStatus
+
+    const updatedLeads = leads.map(lead => {
+      if (selectedLeadIds.includes(lead.id)) {
+        return {
+          ...lead,
+          status: actualStatus as Lead['status'],
+          updatedAt: new Date().toISOString()
+        }
+      }
+      return lead
+    })
+    
+    setLeads(updatedLeads)
+    
+    const statusMessage = bulkConvertTargetStatus === 'converted' 
+      ? `Đã chuyển ${selectedLeadIds.length} leads sang "Chờ thanh toán" với ${selectedProducts.length} sản phẩm được chọn. Sau khi xác nhận thanh toán, leads sẽ tự động chuyển sang "Chuyển đổi thành công".`
+      : `Đã chuyển ${selectedLeadIds.length} leads sang "${getStatusName(actualStatus)}" với ${selectedProducts.length} sản phẩm được chọn.`
+    
+    setNotification({ message: statusMessage, type: 'success' })
+    
+    // Reset all states
+    setSelectedLeadIds([])
+    setSelectAllChecked(false)
+    setShowBulkConvertModal(false)
+    setBulkConvertTargetStatus('')
+    setSelectedProducts([])
+    setSelectedPackages({})
+    setDiscountPercent(0)
+    setPaymentMethod('cash')
+    setTimeout(() => setNotification(null), 5000)
   }
 
   // Sales filtering and pagination
@@ -1308,27 +1420,27 @@ export default function SalesManagement() {
   
   // Column labels for selector
   const columnLabels = {
-    checkbox: '☐ Checkbox',
-    stt: '# STT',
-    customerName: '👤 Tên khách hàng',
-    phone: '📱 Số điện thoại',
-    email: '✉️ Email',
-    company: '🏢 Công ty',
-    address: '📍 Địa chỉ',
-    source: '🌐 Nguồn',
-    region: '🗺️ Tỉnh thành',
-    stage: '🎯 Giai đoạn',
-    product: '🛍️ Sản phẩm quan tâm',
-    customerType: '👥 Loại khách hàng',
-    salesOwner: '👨‍💼 Sales phụ trách',
-    tags: '🏷️ Tags/Nhãn',
-    notes: '📝 Ghi chú',
-    files: '📎 Tệp đính kèm',
-    createdDate: '📅 Ngày tạo',
-    lastModified: '🕐 Ngày cập nhật',
-    interactionCount: '🔄 Số lần tương tác',
-    lastInteraction: '⏰ Lần tương tác cuối',
-    actions: '⚙️ Hành động'
+    checkbox: 'Checkbox',
+    stt: 'STT',
+    customerName: 'Tên khách hàng',
+    phone: 'Số điện thoại',
+    email: 'Email',
+    company: 'Công ty',
+    address: 'Địa chỉ',
+    source: 'Nguồn',
+    region: 'Tỉnh thành',
+    stage: 'Giai đoạn',
+    product: 'Sản phẩm quan tâm',
+    customerType: 'Loại khách hàng',
+    salesOwner: 'Sales phụ trách',
+    tags: 'Tags/Nhãn',
+    notes: 'Ghi chú',
+    files: 'Tệp đính kèm',
+    createdDate: 'Ngày tạo',
+    lastModified: 'Ngày cập nhật',
+    interactionCount: 'Số lần tương tác',
+    lastInteraction: 'Lần tương tác cuối',
+    actions: 'Hành động'
   }
   
   // Filter states
@@ -1980,7 +2092,7 @@ export default function SalesManagement() {
       return
     }
 
-    // Update lead with new note
+    // Update lead with new note and files
     const updatedLeads = leads.map(lead => {
       if (lead.id === selectedLeadForNote.id) {
         const newNote = {
@@ -1989,10 +2101,27 @@ export default function SalesManagement() {
           author: 'Người dùng hiện tại' // In real app, get from auth context
         }
         
+        // Handle file uploads
+        let fileInfo = ''
+        const newFiles = []
+        if (selectedFiles && selectedFiles.length > 0) {
+          for (let i = 0; i < selectedFiles.length; i++) {
+            const file = selectedFiles[i]
+            newFiles.push({
+              name: file.name,
+              size: (file.size / 1024 / 1024).toFixed(2) + ' MB',
+              type: file.type || 'unknown',
+              uploadedAt: new Date().toISOString()
+            })
+          }
+          fileInfo = ` [Đính kèm: ${newFiles.map(f => f.name).join(', ')}]`
+        }
+        
         return {
           ...lead,
           quickNotes: [...(lead.quickNotes || []), newNote],
-          content: lead.content + (lead.content ? '\n' : '') + `[${new Date().toLocaleDateString('vi-VN')}] ${newNoteContent.trim()}`,
+          files: [...(lead.files || []), ...newFiles],
+          content: lead.content + (lead.content ? '\n' : '') + `[${new Date().toLocaleDateString('vi-VN')}] ${newNoteContent.trim()}${fileInfo}`,
           updatedAt: new Date().toISOString()
         }
       }
@@ -2003,7 +2132,14 @@ export default function SalesManagement() {
     setShowAddNoteModal(false)
     setSelectedLeadForNote(null)
     setNewNoteContent('')
-    alert('Đã thêm tương tác thành công!')
+    setSelectedFiles(null)
+    
+    const message = selectedFiles && selectedFiles.length > 0 
+      ? `Đã thêm ghi chú thành công với ${selectedFiles.length} file đính kèm!`
+      : 'Đã thêm ghi chú thành công!'
+    
+    setNotification({ message, type: 'success' })
+    setTimeout(() => setNotification(null), 3000)
   }
 
   // File management functions
@@ -2207,6 +2343,53 @@ export default function SalesManagement() {
     }
     
     // Clear notification after 3 seconds
+    setTimeout(() => setNotification(null), 3000)
+  }
+
+  // Handle pipeline stage click
+  const handlePipelineStageClick = (stage: string) => {
+    setSelectedPipelineStage(selectedPipelineStage === stage ? null : stage)
+    
+    // Filter leads based on selected stage
+    let statusFilter = 'all'
+    switch(stage) {
+      case 'new':
+        statusFilter = 'new'
+        break
+      case 'contacted':
+        statusFilter = 'contacted'
+        break
+      case 'qualified':
+        statusFilter = 'qualified'
+        break
+      case 'proposal':
+        statusFilter = 'proposal'
+        break
+      case 'negotiation':
+        statusFilter = 'negotiation'
+        break
+      case 'converted':
+        statusFilter = 'converted'
+        break
+    }
+    
+    // Update lead status filter to show relevant data
+    setLeadStatusFilter(statusFilter)
+    
+    // Show notification
+    const stageNames = {
+      'new': 'Mới',
+      'contacted': 'Đã liên hệ', 
+      'qualified': 'Đã xác định',
+      'proposal': 'Báo giá',
+      'negotiation': 'Đàm phán',
+      'converted': 'Đã chuyển đổi'
+    }
+    
+    setNotification({
+      message: `Đang hiển thị ${leads.filter(l => l.status === stage).length} leads ở giai đoạn "${stageNames[stage as keyof typeof stageNames]}"`,
+      type: 'success'
+    })
     setTimeout(() => setNotification(null), 3000)
   }
 
@@ -2837,9 +3020,8 @@ export default function SalesManagement() {
               <div className="relative">
                 <button
                   onClick={() => setShowColumnSelector(!showColumnSelector)}
-                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 hover:text-indigo-800 transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 hover:text-indigo-800 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
-                  <Columns className="w-4 h-4" />
                   Hiển thị cột
                 </button>
                 
@@ -2874,7 +3056,7 @@ export default function SalesManagement() {
                           }}
                           className="text-xs text-green-600 hover:text-green-800 font-medium"
                         >
-                          ✅ Tất cả
+                          Tất cả
                         </button>
                         <button
                           onClick={() => setVisibleColumns({
@@ -3161,6 +3343,13 @@ export default function SalesManagement() {
                       Gán Sales nhanh
                     </button>
                     <button
+                      onClick={() => setShowBulkStatusModal(true)}
+                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
+                    >
+                      <TrendingUp className="w-4 h-4" />
+                      Chuyển trạng thái
+                    </button>
+                    <button
                       onClick={handleCreateTaskQuick}
                       className="px-3 py-1.5 bg-orange-600 text-white text-sm rounded-md hover:bg-orange-700 transition-colors flex items-center gap-1"
                     >
@@ -3197,63 +3386,63 @@ export default function SalesManagement() {
                   
                   {/* 2. STT */}
                   {visibleColumns.stt && (
-                    <th className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16 border-r border-gray-200">
+                    <th className="px-3 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-16 border-r border-gray-200">
                       STT
                     </th>
                   )}
                   
                   {/* 3. Tên khách hàng */}
                   {visibleColumns.customerName && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
                       👤 Tên khách hàng
                     </th>
                   )}
                   
                   {/* 4. Số điện thoại */}
                   {visibleColumns.phone && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-32 border-r border-gray-200">
                       📱 Số điện thoại
                     </th>
                   )}
                   
                   {/* 5. Email */}
                   {visibleColumns.email && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
                       ✉️ Email
                     </th>
                   )}
                   
                   {/* 6. Công ty */}
                   {visibleColumns.company && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-44 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-44 border-r border-gray-200">
                       🏢 Công ty
                     </th>
                   )}
                   
                   {/* 7. Địa chỉ */}
                   {visibleColumns.address && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
                       📍 Địa chỉ
                     </th>
                   )}
                   
                   {/* 8. Nguồn */}
                   {visibleColumns.source && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-32 border-r border-gray-200">
                       🌐 Nguồn
                     </th>
                   )}
                   
                   {/* 9. Khu vực */}
                   {visibleColumns.region && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-32 border-r border-gray-200">
                       🗺️ Tỉnh thành
                     </th>
                   )}
                   
                   {/* 10. Giai đoạn */}
                   {visibleColumns.stage && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-36 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-36 border-r border-gray-200">
                       🎯 Giai đoạn
                     </th>
                   )}
@@ -3261,77 +3450,77 @@ export default function SalesManagement() {
                   
                   {/* 14. Sản phẩm quan tâm */}
                   {visibleColumns.product && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-40 border-r border-gray-200">
                       🛍️ Sản phẩm quan tâm
                     </th>
                   )}
                   
                   {/* 15. Loại khách hàng */}
                   {visibleColumns.customerType && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-32 border-r border-gray-200">
                       👥 Loại KH
                     </th>
                   )}
                   
                   {/* 16. Sales phụ trách */}
                   {visibleColumns.salesOwner && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-40 border-r border-gray-200">
                       👨‍💼 Sales phụ trách
                     </th>
                   )}
                   
                   {/* 17. Tags/Nhãn */}
                   {visibleColumns.tags && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-40 border-r border-gray-200">
                       🏷️ Tags
                     </th>
                   )}
                   
                   {/* 18. Ghi chú */}
                   {visibleColumns.notes && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider min-w-[200px] border-r border-gray-200">
                       📝 Ghi chú
                     </th>
                   )}
                   
                   {/* 19. Tệp đính kèm */}
                   {visibleColumns.files && (
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-32 border-r border-gray-200">
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-32 border-r border-gray-200">
                       📎 Tệp
                     </th>
                   )}
                   
                   {/* 20. Ngày tạo */}
                   {visibleColumns.createdDate && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-28 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-28 border-r border-gray-200">
                       📅 Ngày tạo
                     </th>
                   )}
                   
                   {/* 21. Ngày cập nhật */}
                   {visibleColumns.lastModified && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-40 border-r border-gray-200">
                       🕐 Cập nhật cuối
                     </th>
                   )}
                   
                   {/* 22. Số lần tương tác */}
                   {visibleColumns.interactionCount && (
-                    <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider w-24 border-r border-gray-200">
+                    <th className="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase tracking-wider w-24 border-r border-gray-200">
                       🔄 Tương tác
                     </th>
                   )}
                   
                   {/* 23. Lần tương tác cuối */}
                   {visibleColumns.lastInteraction && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40 border-r border-gray-200">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider w-40 border-r border-gray-200">
                       ⏰ TT cuối cùng
                     </th>
                   )}
                   
                   {/* 24. Hành động */}
                   {visibleColumns.actions && (
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider sticky right-0 bg-gray-50 shadow-lg z-20 w-28">
+                    <th className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider sticky right-0 bg-gray-50 shadow-lg z-20 w-28">
                       ⚙️ Hành động
                     </th>
                   )}
@@ -3625,14 +3814,24 @@ export default function SalesManagement() {
                           <button 
                             onClick={() => handleViewLeadDetail(lead)}
                             className="p-2 text-slate-600 hover:text-white hover:bg-blue-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                            title="Xem chi tiết & Chỉnh sửa"
+                            title="Xem chi tiết"
                           >
                             <Eye className="w-4 h-4" />
                           </button>
                           <button 
+                            onClick={() => {
+                              setEditingLead(lead)
+                              setShowEditModal(true)
+                            }}
+                            className="p-2 text-slate-600 hover:text-white hover:bg-purple-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
+                            title="Chỉnh sửa"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
                             onClick={() => handleAddNote(lead)}
                             className="p-2 text-slate-600 hover:text-white hover:bg-yellow-600 rounded-lg transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md" 
-                            title="Thêm tương tác"
+                            title="Thêm ghi chú"
                           >
                             <StickyNote className="w-4 h-4" />
                           </button>
@@ -3880,52 +4079,7 @@ export default function SalesManagement() {
     )
   }
 
-  // Handle pipeline stage click
-  const handlePipelineStageClick = (stage: string) => {
-    setSelectedPipelineStage(selectedPipelineStage === stage ? null : stage)
-    
-    // Filter leads based on selected stage
-    let statusFilter = 'all'
-    switch(stage) {
-      case 'new':
-        statusFilter = 'new'
-        break
-      case 'contacted':
-        statusFilter = 'contacted'
-        break
-      case 'qualified':
-        statusFilter = 'qualified'
-        break
-      case 'proposal':
-        statusFilter = 'proposal'
-        break
-      case 'negotiation':
-        statusFilter = 'negotiation'
-        break
-      case 'converted':
-        statusFilter = 'converted'
-        break
-    }
-    
-    // Update lead status filter to show relevant data
-    setLeadStatusFilter(statusFilter)
-    
-    // Show notification
-    const stageNames = {
-      'new': 'Mới',
-      'contacted': 'Đã liên hệ', 
-      'qualified': 'Đã xác định',
-      'proposal': 'Báo giá',
-      'negotiation': 'Đàm phán',
-      'converted': 'Đã chuyển đổi'
-    }
-    
-    setNotification({
-      message: `Đang hiển thị ${leads.filter(l => l.status === stage).length} leads ở giai đoạn "${stageNames[stage as keyof typeof stageNames]}"`,
-      type: 'success'
-    })
-    setTimeout(() => setNotification(null), 3000)
-  }
+
 
   return (
     <div className="p-4 space-y-4">
@@ -4423,12 +4577,12 @@ export default function SalesManagement() {
 
       {/* Auto Assign Modal */}
       {showAutoAssignModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl w-[800px] max-w-[95vw] mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">Phân leads tự động</h3>
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phân leads tự động</h3>
                   <div 
                     className="relative"
                     onMouseEnter={() => setShowAutoAssignTooltip('main-title')}
@@ -4464,7 +4618,7 @@ export default function SalesManagement() {
               </div>
             </div>
 
-            <div className="p-6 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6 flex-1 overflow-y-auto">
               {/* Auto-assign Toggle */}
               <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
@@ -5006,12 +5160,13 @@ export default function SalesManagement() {
       {/* Lead Detail Modal */}
       {showLeadDetailModal && selectedLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-lg shadow-xl max-w-5xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
-                    {isEditMode ? 'Chỉnh sửa Lead' : 'Chi tiết Lead'} - {selectedLead.name}
+                    Chi tiết Lead - {selectedLead.name}
                   </h3>
                   <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                     selectedLead.status === 'converted' ? 'bg-green-100 text-green-800' :
@@ -5025,426 +5180,604 @@ export default function SalesManagement() {
                     {getStatusName(selectedLead.status)}
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
-                  {!isEditMode ? (
-                    <button
-                      onClick={() => setIsEditMode(true)}
-                      className="px-3 py-1 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-1"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Chỉnh sửa
-                    </button>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <button
-                        onClick={handleSaveLeadEdit}
-                        className="px-3 py-1 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-1"
-                      >
-                        <Save className="w-4 h-4" />
-                        Lưu
-                      </button>
-                      <button
-                        onClick={() => {
-                          setEditedLead({...selectedLead}) // Reset về giá trị ban đầu
-                          setIsEditMode(false)
-                        }}
-                        className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
-                      >
-                        Hủy
-                      </button>
-                    </div>
-                  )}
-                  <button
-                    onClick={() => {
-                      setShowLeadDetailModal(false)
-                      setIsAddingQuickNote(false)
-                      setQuickNote('')
-                      setIsEditMode(false)
-                    }}
-                    className="text-gray-400 hover:text-gray-600 transition-colors"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                </div>
+                <button
+                  onClick={() => {
+                    setShowLeadDetailModal(false)
+                    setActiveDetailTab('contact')
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              {/* Tabs Navigation */}
+              <div className="flex border-b border-gray-200 mt-4 -mb-px">
+                <button
+                  onClick={() => setActiveDetailTab('contact')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeDetailTab === 'contact'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Thông tin liên hệ
+                </button>
+                <button
+                  onClick={() => setActiveDetailTab('history')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeDetailTab === 'history'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Lịch sử tương tác
+                </button>
+                <button
+                  onClick={() => setActiveDetailTab('notes')}
+                  className={`px-4 py-2 text-sm font-medium border-b-2 transition-colors ${
+                    activeDetailTab === 'notes'
+                      ? 'border-blue-500 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  Ghi chú & Nội dung
+                </button>
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Thông tin liên hệ */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin liên hệ</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{selectedLead.name}</p>
-                        <p className="text-xs text-gray-500">{selectedLead.company || 'Cá nhân'}</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Tên không thể thay đổi
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Phone className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-900">{selectedLead.phone}</p>
-                        <p className="text-xs text-gray-500">Số điện thoại</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Số điện thoại không thể thay đổi
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Mail className="w-4 h-4 text-gray-400" />
-                      <div className="flex-1">
-                        <p className="text-sm text-gray-900">{selectedLead.email}</p>
-                        <p className="text-xs text-gray-500">Email</p>
-                        {isEditMode && (
-                          <p className="text-xs text-amber-600 mt-1">
-                            <AlertCircle className="w-3 h-3 inline mr-1" />
-                            Email không thể thay đổi
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Thông tin bán hàng */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin bán hàng</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Briefcase className="w-4 h-4 text-blue-500" />
-                      <div className="flex-1">
-                        {isEditMode ? (
-                          <select
-                            value={editedLead?.product || ''}
-                            onChange={(e) => setEditedLead(prev => prev ? {...prev, product: e.target.value} : null)}
-                            className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                          >
-                            <option value="">Chọn sản phẩm</option>
-                            <option value="CRM Premium">CRM Premium</option>
-                            <option value="CRM Enterprise">CRM Enterprise</option>
-                            <option value="Marketing Automation">Marketing Automation</option>
-                            <option value="Sales Analytics">Sales Analytics</option>
-                            <option value="Custom Solution">Custom Solution</option>
-                          </select>
-                        ) : (
-                          <p className="text-sm text-gray-900">{selectedLead.product}</p>
-                        )}
-                        <p className="text-xs text-gray-500">Sản phẩm quan tâm</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Users className="w-4 h-4 text-purple-500" />
-                      <div className="flex-1">
-                        {isEditMode ? (
-                          <select
-                            value={editedLead?.assignedTo || ''}
-                            onChange={(e) => setEditedLead(prev => prev ? {...prev, assignedTo: e.target.value} : null)}
-                            className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                          >
-                            <option value="">Chưa phân công</option>
-                            {salesTeam.map(member => (
-                              <option key={member.id} value={member.name}>{member.name}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <p className="text-sm text-gray-900">{selectedLead.assignedTo || 'Chưa phân công'}</p>
-                        )}
-                        <p className="text-xs text-gray-500">Người phụ trách</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Thông tin thời gian */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Thông tin thời gian & Chăm sóc</h4>
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <Calendar className="w-4 h-4 text-gray-400" />
+            {/* Tab Content */}
+            <div className="flex-1 overflow-y-auto">
+              {/* Thông tin liên hệ Tab */}
+              {activeDetailTab === 'contact' && (
+                <div className="p-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Thông tin cơ bản */}
+                    <div className="space-y-6">
                       <div>
-                        <p className="text-sm text-gray-900">{new Date(selectedLead.createdAt).toLocaleString('vi-VN')}</p>
-                        <p className="text-xs text-gray-500">Ngày tạo</p>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <User className="w-5 h-5 text-blue-500" />
+                          Thông tin cơ bản
+                        </h4>
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Tên khách hàng:</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedLead.name}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Công ty:</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedLead.company || 'Cá nhân'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Loại khách hàng:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {selectedLead.customerType === 'business' ? 'Doanh nghiệp' : 'Cá nhân'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Địa chỉ:</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedLead.address || 'Chưa có'}</span>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Clock className="w-4 h-4 text-gray-400" />
-                      <div>
-                        <p className="text-sm text-gray-900">
-                          {selectedLead.lastContactedAt 
-                            ? new Date(selectedLead.lastContactedAt).toLocaleString('vi-VN')
-                            : 'Chưa liên hệ'
-                          }
-                        </p>
-                        <p className="text-xs text-gray-500">Lần liên hệ cuối</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <Activity className="w-4 h-4 text-blue-500" />
-                      <div>
-                        <p className="text-sm font-medium text-blue-900">{selectedLead.careCount || 0} lần</p>
-                        <p className="text-xs text-gray-500">Số lần chăm sóc</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
 
-                {/* Thông tin khác */}
-                <div className="space-y-4">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Tags, Nguồn & Tỉnh thành</h4>
-                  <div className="space-y-3">
-                    <div>
-                      <p className="text-xs text-gray-500 mb-2">Tags</p>
-                      {isEditMode ? (
-                        <div className="space-y-2">
+                      {/* Thông tin liên hệ */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Phone className="w-5 h-5 text-green-500" />
+                          Thông tin liên hệ
+                        </h4>
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Số điện thoại:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900">{selectedLead.phone}</span>
+                              <button
+                                onClick={() => window.open(`tel:${selectedLead.phone}`, '_self')}
+                                className="p-1 text-green-600 hover:bg-green-100 rounded"
+                              >
+                                <Phone className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Email:</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900">{selectedLead.email}</span>
+                              <button
+                                onClick={() => window.open(`mailto:${selectedLead.email}`, '_blank')}
+                                className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Nguồn:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {selectedLead.source === 'facebook' ? 'Facebook' :
+                               selectedLead.source === 'google' ? 'Google Ads' :
+                               selectedLead.source === 'website' ? 'Website' :
+                               selectedLead.source === 'referral' ? 'Giới thiệu' :
+                               selectedLead.source === 'cold_call' ? 'Cold Call' :
+                               selectedLead.source}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Tỉnh thành:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {selectedLead.region === 'ha_noi' ? 'Hà Nội' :
+                               selectedLead.region === 'ho_chi_minh' ? 'Hồ Chí Minh' :
+                               selectedLead.region === 'da_nang' ? 'Đà Nẵng' :
+                               selectedLead.region}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Thông tin bán hàng */}
+                    <div className="space-y-6">
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Briefcase className="w-5 h-5 text-purple-500" />
+                          Thông tin bán hàng
+                        </h4>
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Sản phẩm quan tâm:</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedLead.product}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Sales phụ trách:</span>
+                            <span className="text-sm font-medium text-gray-900">{selectedLead.assignedTo || 'Chưa phân công'}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Giá trị lead:</span>
+                            <span className="text-sm font-medium text-green-600">
+                              {selectedLead.value ? formatCurrency(selectedLead.value.toString()) + ' VNĐ' : 'Chưa xác định'}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Xác suất thành công:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {selectedLead.winProbability ? selectedLead.winProbability + '%' : 'Chưa đánh giá'}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Thông tin thời gian */}
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Clock className="w-5 h-5 text-orange-500" />
+                          Thông tin thời gian
+                        </h4>
+                        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Ngày tạo:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {new Date(selectedLead.createdAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Cập nhật cuối:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {new Date(selectedLead.updatedAt).toLocaleDateString('vi-VN')}
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Lần liên hệ cuối:</span>
+                            <span className="text-sm font-medium text-gray-900">
+                              {selectedLead.lastContactedAt 
+                                ? new Date(selectedLead.lastContactedAt).toLocaleDateString('vi-VN')
+                                : 'Chưa liên hệ'
+                              }
+                            </span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-sm text-gray-600">Số lần tương tác:</span>
+                            <span className="text-sm font-medium text-blue-600">{selectedLead.interactionCount || 0} lần</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Tags */}
+                      {selectedLead.tags && selectedLead.tags.length > 0 && (
+                        <div>
+                          <h4 className="text-lg font-semibold text-gray-900 mb-4">Tags/Nhãn</h4>
                           <div className="flex flex-wrap gap-2">
-                            {['hot', 'warm', 'cold', 'enterprise', 'potential', 'follow-up'].map((tag) => (
-                              <label key={tag} className="flex items-center space-x-1 cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={editedLead?.tags?.includes(tag) || false}
-                                  onChange={(e) => {
-                                    if (!editedLead) return;
-                                    const currentTags = editedLead.tags || [];
-                                    const newTags = e.target.checked 
-                                      ? [...currentTags, tag]
-                                      : currentTags.filter(t => t !== tag);
-                                    setEditedLead({...editedLead, tags: newTags});
-                                  }}
-                                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                                />
-                                <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            {selectedLead.tags.map((tag, index) => (
+                              <span
+                                key={index}
+                                className={`px-2 py-1 text-xs font-medium rounded-full ${
                                   tag === 'hot' ? 'bg-red-100 text-red-800' :
-                                  tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
+                                  tag === 'warm' ? 'bg-orange-100 text-orange-800' :
                                   tag === 'cold' ? 'bg-blue-100 text-blue-800' :
                                   tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
                                   'bg-gray-100 text-gray-800'
-                                }`}>
-                                  {tag}
-                                </span>
-                              </label>
+                                }`}
+                              >
+                                {tag}
+                              </span>
                             ))}
                           </div>
                         </div>
-                      ) : (
-                        <div className="flex flex-wrap gap-1">
-                          {selectedLead.tags.map((tag, index) => (
-                            <span key={index} className={`px-2 py-1 text-xs font-medium rounded-full ${
-                              tag === 'hot' ? 'bg-red-100 text-red-800' :
-                              tag === 'warm' ? 'bg-yellow-100 text-yellow-800' :
-                              tag === 'cold' ? 'bg-blue-100 text-blue-800' :
-                              tag === 'enterprise' ? 'bg-purple-100 text-purple-800' :
-                              'bg-gray-100 text-gray-800'
-                            }`}>
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Nguồn</p>
-                      {isEditMode ? (
-                        <select
-                          value={editedLead?.source || ''}
-                          onChange={(e) => setEditedLead(prev => prev ? {...prev, source: e.target.value} : null)}
-                          className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                        >
-                          <option value="">Chọn nguồn</option>
-                          <option value="Website">Website</option>
-                          <option value="Facebook">Facebook</option>
-                          <option value="Google Ads">Google Ads</option>
-                          <option value="Referral">Referral</option>
-                          <option value="Cold Call">Cold Call</option>
-                          <option value="Event">Event</option>
-                          <option value="Other">Other</option>
-                        </select>
-                      ) : (
-                        <span className="text-gray-900 font-medium">{selectedLead.source}</span>
-                      )}
-                    </div>
-                    <div>
-                      <p className="text-xs text-gray-500 mb-1">Tỉnh thành</p>
-                      {isEditMode ? (
-                        <select
-                          value={editedLead?.region || ''}
-                          onChange={(e) => setEditedLead(prev => prev ? {...prev, region: e.target.value} : null)}
-                          className="text-sm text-gray-900 bg-white border border-gray-300 rounded px-2 py-1 focus:ring-2 focus:ring-blue-500 focus:border-transparent w-full"
-                        >
-                          <option value="">Chọn tỉnh thành</option>
-                          <option value="Hà Nội">Hà Nội</option>
-                          <option value="TP.HCM">TP.HCM</option>
-                          <option value="Đà Nẵng">Đà Nẵng</option>
-                          <option value="Hải Phòng">Hải Phòng</option>
-                          <option value="Cần Thơ">Cần Thơ</option>
-                          <option value="Khác">Khác</option>
-                        </select>
-                      ) : (
-                        <span className="text-gray-900 font-medium">{selectedLead.region}</span>
                       )}
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
-              {/* Notes & Content */}
-              <div className="mt-6 space-y-4">
-                <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Ghi chú & Nội dung</h4>
-                
-                {/* Content Section */}
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-600">Nội dung mô tả:</label>
-                  {isEditMode ? (
-                    <textarea
-                      value={editedLead?.content || ''}
-                      onChange={(e) => setEditedLead(prev => prev ? {...prev, content: e.target.value} : null)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      rows={4}
-                      placeholder="Nhập nội dung mô tả về lead..."
-                    />
-                  ) : (
-                    <div className="bg-gray-50 rounded-lg p-4">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{selectedLead.content || 'Không có nội dung'}</p>
-                    </div>
-                  )}
-                </div>
-
-                {/* Notes Section */}
-                <div className="space-y-2">
-                  <label className="text-xs font-medium text-gray-600">Ghi chú:</label>
-                  {isEditMode ? (
-                    <textarea
-                      value={editedLead?.notes || ''}
-                      onChange={(e) => setEditedLead(prev => prev ? {...prev, notes: e.target.value} : null)}
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                      rows={3}
-                      placeholder="Nhập ghi chú về lead..."
-                    />
-                  ) : (
-                    selectedLead.notes ? (
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <p className="text-sm text-blue-800 whitespace-pre-wrap">{selectedLead.notes}</p>
-                      </div>
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4">
-                        <p className="text-sm text-gray-500 italic">Không có ghi chú</p>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* Interaction History */}
-              <div className="mt-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-gray-900 border-b pb-2 flex-1">Lịch sử tương tác</h4>
-                  <button
-                    onClick={() => setIsAddingQuickNote(true)}
-                    className="ml-4 px-3 py-1 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 hover:border-blue-300 transition-all duration-200 flex items-center gap-1"
-                  >
-                    <MessageSquarePlus className="w-3 h-3" />
-                    Thêm tương tác
-                  </button>
-                </div>
-
-                {isAddingQuickNote && (
-                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
-                    <div className="flex items-start gap-3">
-                      <textarea
-                        value={quickNote}
-                        onChange={(e) => setQuickNote(e.target.value)}
-                        placeholder="Ghi lại nội dung tương tác với khách hàng (cuộc gọi, email, meeting...)..."
-                        className="flex-1 px-3 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
-                        rows={3}
-                        autoFocus
-                      />
-                      <div className="flex flex-col gap-2">
-                        <button
-                          onClick={handleAddQuickNote}
-                          disabled={!quickNote.trim()}
-                          className="px-3 py-2 text-xs font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-1"
-                        >
-                          <Send className="w-3 h-3" />
-                          Lưu
-                        </button>
-                        <button
-                          onClick={() => {
-                            setIsAddingQuickNote(false)
-                            setQuickNote('')
-                          }}
-                          className="px-3 py-2 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
-                        >
-                          Hủy
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {selectedLead.quickNotes && selectedLead.quickNotes.length > 0 ? (
-                  <div className="space-y-2 max-h-60 overflow-y-auto">
-                    {selectedLead.quickNotes.slice().reverse().map((note, index) => (
-                      <div key={index} className="bg-white rounded-lg p-3 border border-gray-200 shadow-sm">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <p className="text-sm text-gray-900">{note.content}</p>
-                            <div className="flex items-center gap-2 mt-2 text-xs text-gray-500">
-                              <span>{new Date(note.timestamp).toLocaleString('vi-VN')}</span>
-                              <span>•</span>
-                              <span className="font-medium">{note.author}</span>
+              {/* Lịch sử tương tác Tab */}
+              {activeDetailTab === 'history' && (
+                <div className="p-6">
+                  <div className="max-w-4xl mx-auto">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                      <Activity className="w-5 h-5 text-blue-500" />
+                      Lịch sử tương tác và chăm sóc khách hàng
+                    </h4>
+                    
+                    {selectedLead.quickNotes && selectedLead.quickNotes.length > 0 ? (
+                      <div className="space-y-4">
+                        {selectedLead.quickNotes.slice().reverse().map((note, index) => (
+                          <div key={index} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow">
+                            <div className="flex items-start gap-4">
+                              <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <MessageSquarePlus className="w-5 h-5 text-blue-600" />
+                              </div>
+                              <div className="flex-1">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h5 className="text-sm font-semibold text-gray-900">{note.author}</h5>
+                                  <span className="text-xs text-gray-500">
+                                    {new Date(note.timestamp).toLocaleString('vi-VN')}
+                                  </span>
+                                </div>
+                                <p className="text-sm text-gray-700 leading-relaxed">{note.content}</p>
+                              </div>
                             </div>
                           </div>
-                          <div className="ml-3">
-                            <MessageSquarePlus className="w-4 h-4 text-gray-400" />
-                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-12 bg-gray-50 rounded-lg">
+                        <Activity className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h5 className="text-lg font-medium text-gray-900 mb-2">Chưa có lịch sử tương tác</h5>
+                        <p className="text-gray-500">
+                          Lead này chưa có lịch sử tương tác nào. Hãy bắt đầu liên hệ và ghi chú để theo dõi tiến trình chăm sóc khách hàng.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Ghi chú & Nội dung Tab */}
+              {activeDetailTab === 'notes' && (
+                <div className="p-6">
+                  <div className="max-w-4xl mx-auto space-y-6">
+                    {/* Nội dung mô tả lead */}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <FileText className="w-5 h-5 text-green-500" />
+                        Nội dung mô tả lead
+                      </h4>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                          {selectedLead.content || 'Chưa có nội dung mô tả'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Ghi chú bổ sung */}
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                        <StickyNote className="w-5 h-5 text-yellow-500" />
+                        Ghi chú bổ sung
+                      </h4>
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <p className="text-sm text-gray-700 leading-relaxed">
+                          {selectedLead.notes || 'Chưa có ghi chú bổ sung'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* File đính kèm */}
+                    {selectedLead.files && selectedLead.files.length > 0 && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Paperclip className="w-5 h-5 text-blue-500" />
+                          File đính kèm ({selectedLead.files.length})
+                        </h4>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          {selectedLead.files.map((file, index) => (
+                            <div key={index} className="bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                              <div className="flex items-center gap-3">
+                                <div className="w-8 h-8 bg-blue-100 rounded flex items-center justify-center">
+                                  <Paperclip className="w-4 h-4 text-blue-600" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {file.size} • {new Date(file.uploadedAt).toLocaleDateString('vi-VN')}
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
-                    ))}
+                    )}
+
+                    {/* Hành động tiếp theo */}
+                    {selectedLead.nextAction && (
+                      <div>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                          <Target className="w-5 h-5 text-red-500" />
+                          Hành động tiếp theo
+                        </h4>
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <p className="text-sm text-red-800 font-medium mb-2">{selectedLead.nextAction}</p>
+                          {selectedLead.nextActionDate && (
+                            <p className="text-xs text-red-600">
+                              Hạn: {new Date(selectedLead.nextActionDate).toLocaleDateString('vi-VN')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-lg p-4 text-center">
-                    <MessageSquarePlus className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                    <p className="text-sm text-gray-500">Chưa có lịch sử tương tác nào</p>
-                    <p className="text-xs text-gray-400 mt-1">Nhấn "Thêm tương tác" để ghi lại cuộc liên hệ với khách hàng</p>
-                  </div>
-                )}
-              </div>
+                </div>
+              )}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
               <button
                 onClick={() => {
                   setShowLeadDetailModal(false)
-                  setIsAddingQuickNote(false)
-                  setQuickNote('')
+                  setActiveDetailTab('contact')
                 }}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200"
               >
                 Đóng
               </button>
               <button
                 onClick={() => {
                   setShowLeadDetailModal(false)
-                  setIsAddingQuickNote(false)
-                  setQuickNote('')
+                  setActiveDetailTab('contact')
                   handleConvertLead(selectedLead)
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2"
               >
-                <User className="w-4 h-4" />
+                <TrendingUp className="w-4 h-4" />
                 Chuyển đổi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Lead Modal */}
+      {showEditModal && editingLead && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa Lead - {editingLead.name}</h3>
+                <button
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingLead(null)
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6">
+              <div className="space-y-6">
+                {/* Thông tin cơ bản (read-only) */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <h4 className="text-sm font-semibold text-gray-700 mb-3">Thông tin cơ bản (không thể thay đổi)</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-600">Tên khách hàng:</span>
+                      <span className="ml-2 font-medium text-gray-900">{editingLead.name}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Số điện thoại:</span>
+                      <span className="ml-2 font-medium text-gray-900">{editingLead.phone}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Email:</span>
+                      <span className="ml-2 font-medium text-gray-900">{editingLead.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-gray-600">Công ty:</span>
+                      <span className="ml-2 font-medium text-gray-900">{editingLead.company || 'Cá nhân'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Nguồn lead */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Nguồn lead</label>
+                  <select
+                    value={editingLead.source}
+                    onChange={(e) => setEditingLead({...editingLead, source: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="facebook">Facebook</option>
+                    <option value="google">Google Ads</option>
+                    <option value="website">Website</option>
+                    <option value="referral">Giới thiệu</option>
+                    <option value="cold_call">Cold Call</option>
+                    <option value="other">Khác</option>
+                  </select>
+                </div>
+
+                {/* Giai đoạn */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Giai đoạn</label>
+                  <select
+                    value={editingLead.status}
+                    onChange={(e) => setEditingLead({...editingLead, status: e.target.value as Lead['status']})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="new">Mới</option>
+                    <option value="contacted">Đã liên hệ</option>
+                    <option value="qualified">Đủ điều kiện</option>
+                    <option value="negotiation">Đàm phán</option>
+                    <option value="proposal">Đã gửi đề xuất</option>
+                    <option value="payment_pending">Chờ thanh toán</option>
+                    <option value="converted">Đã chuyển đổi</option>
+                    <option value="lost">Thất bại</option>
+                  </select>
+                </div>
+
+                {/* Sales phụ trách */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sales phụ trách</label>
+                  <select
+                    value={editingLead.assignedTo || ''}
+                    onChange={(e) => setEditingLead({...editingLead, assignedTo: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Chưa phân công</option>
+                    {salesTeam.map(member => (
+                      <option key={member.id} value={member.name}>{member.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Sản phẩm quan tâm */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Sản phẩm quan tâm</label>
+                  <select
+                    value={editingLead.product}
+                    onChange={(e) => setEditingLead({...editingLead, product: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="CRM Premium">CRM Premium</option>
+                    <option value="CRM Enterprise">CRM Enterprise</option>
+                    <option value="Marketing Automation">Marketing Automation</option>
+                    <option value="Sales Analytics">Sales Analytics</option>
+                    <option value="Custom Solution">Custom Solution</option>
+                  </select>
+                </div>
+
+                {/* Tỉnh/Thành phố */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tỉnh/Thành phố</label>
+                  <select
+                    value={editingLead.region}
+                    onChange={(e) => setEditingLead({...editingLead, region: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="ha_noi">Hà Nội</option>
+                    <option value="ho_chi_minh">Hồ Chí Minh</option>
+                    <option value="da_nang">Đà Nẵng</option>
+                    <option value="hai_phong">Hải Phòng</option>
+                    <option value="can_tho">Cần Thơ</option>
+                    <option value="other">Khác</option>
+                  </select>
+                </div>
+
+                {/* Địa chỉ */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ chi tiết</label>
+                  <input
+                    type="text"
+                    value={editingLead.address || ''}
+                    onChange={(e) => setEditingLead({...editingLead, address: e.target.value})}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Nhập địa chỉ chi tiết"
+                  />
+                </div>
+
+                {/* Tags */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Tags/Nhãn</label>
+                  <div className="space-y-2">
+                    <div className="flex flex-wrap gap-2">
+                      {['hot', 'warm', 'cold', 'enterprise', 'urgent', 'follow_up'].map(tag => (
+                        <button
+                          key={tag}
+                          onClick={() => {
+                            const currentTags = editingLead.tags || []
+                            const newTags = currentTags.includes(tag)
+                              ? currentTags.filter(t => t !== tag)
+                              : [...currentTags, tag]
+                            setEditingLead({...editingLead, tags: newTags})
+                          }}
+                          className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                            (editingLead.tags || []).includes(tag)
+                              ? tag === 'hot' ? 'bg-red-600 text-white' :
+                                tag === 'warm' ? 'bg-orange-600 text-white' :
+                                tag === 'cold' ? 'bg-blue-600 text-white' :
+                                tag === 'enterprise' ? 'bg-purple-600 text-white' :
+                                tag === 'urgent' ? 'bg-pink-600 text-white' :
+                                'bg-green-600 text-white'
+                              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                          }`}
+                        >
+                          {tag === 'hot' ? '🔥 Hot' :
+                           tag === 'warm' ? '☀️ Warm' :
+                           tag === 'cold' ? '❄️ Cold' :
+                           tag === 'enterprise' ? '🏢 Enterprise' :
+                           tag === 'urgent' ? '⚡ Urgent' :
+                           '👀 Follow Up'}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Ghi chú */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú bổ sung</label>
+                  <textarea
+                    value={editingLead.notes || ''}
+                    onChange={(e) => setEditingLead({...editingLead, notes: e.target.value})}
+                    rows={4}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    placeholder="Nhập ghi chú bổ sung về lead này..."
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+              <button
+                onClick={() => {
+                  setShowEditModal(false)
+                  setEditingLead(null)
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  if (editingLead) {
+                    setLeads(prev => prev.map(l => l.id === editingLead.id ? {...editingLead, updatedAt: new Date().toISOString()} : l))
+                    setShowEditModal(false)
+                    setEditingLead(null)
+                    // Show success notification
+                    const notification = document.createElement('div')
+                    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in'
+                    notification.innerHTML = '<div class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Cập nhật lead thành công!</span></div>'
+                    document.body.appendChild(notification)
+                    setTimeout(() => notification.remove(), 3000)
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+              >
+                <Save className="w-4 h-4" />
+                Lưu thay đổi
               </button>
             </div>
           </div>
@@ -6048,8 +6381,8 @@ export default function SalesManagement() {
                       <input
                         type="radio"
                         name="paymentMethod"
-                        value="transfer"
-                        checked={paymentMethod === 'transfer'}
+                        value="bank_transfer"
+                        checked={paymentMethod === 'bank_transfer'}
                         onChange={(e) => setPaymentMethod(e.target.value)}
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                       />
@@ -6167,8 +6500,8 @@ export default function SalesManagement() {
 
       {/* Drag Convert Modal */}
       {showDragConvertModal && pendingDragLead && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-2 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
             <div className="px-6 py-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">
                 Chuyển sang "{getStatusName(dragTargetStatus)}"
@@ -6293,6 +6626,106 @@ export default function SalesManagement() {
                   <p className="mt-1 text-xs text-red-500">Vui lòng chọn ít nhất một sản phẩm</p>
                 )}
               </div>
+
+              {/* Discount Section */}
+              {selectedProducts.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Mã giảm giá (%)
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="number"
+                      min="0"
+                      max="100"
+                      value={discountPercent}
+                      onChange={(e) => setDiscountPercent(Number(e.target.value))}
+                      placeholder="0"
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    />
+                    <span className="text-sm text-gray-500">%</span>
+                  </div>
+                  <p className="mt-1 text-xs text-gray-500">Nhập từ 0-100% để áp dụng giảm giá</p>
+                </div>
+              )}
+
+              {/* Payment Method */}
+              {selectedProducts.length > 0 && (
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Hình thức thanh toán
+                  </label>
+                  <div className="space-y-2">
+                    <label className="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="radio"
+                        name="dragPaymentMethod"
+                        value="cash"
+                        checked={paymentMethod === 'cash'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
+                    </label>
+                    <label className="flex items-center p-2 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50">
+                      <input
+                        type="radio"
+                        name="dragPaymentMethod"
+                        value="bank_transfer"
+                        checked={paymentMethod === 'bank_transfer'}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                      />
+                      <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
+                    </label>
+                  </div>
+                </div>
+              )}
+
+              {/* Total Summary with Discount */}
+              {selectedProducts.length > 0 && (
+                <div className="mb-4">
+                  {discountPercent > 0 && (
+                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="space-y-1 text-xs">
+                        <div className="flex justify-between">
+                          <span>Tổng tiền gốc:</span>
+                          <span className="font-medium">
+                            {formatCurrency(selectedProducts.reduce((sum, productId) => {
+                              const product = availableProducts.find(p => p.id === productId)
+                              const selectedPackageId = selectedPackages[productId]
+                              const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                              return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                            }, 0).toString())} VNĐ
+                          </span>
+                        </div>
+                        <div className="flex justify-between text-red-600">
+                          <span>Giảm giá ({discountPercent}%):</span>
+                          <span className="font-medium">
+                            -{formatCurrency((selectedProducts.reduce((sum, productId) => {
+                              const product = availableProducts.find(p => p.id === productId)
+                              const selectedPackageId = selectedPackages[productId]
+                              const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                              return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                            }, 0) * discountPercent / 100).toString())} VNĐ
+                          </span>
+                        </div>
+                        <div className="flex justify-between font-medium text-green-700 border-t border-green-300 pt-1">
+                          <span>Thành tiền:</span>
+                          <span className="text-base">
+                            {formatCurrency((selectedProducts.reduce((sum, productId) => {
+                              const product = availableProducts.find(p => p.id === productId)
+                              const selectedPackageId = selectedPackages[productId]
+                              const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                              return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                            }, 0) * (100 - discountPercent) / 100).toString())} VNĐ
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
               
               <p className="text-sm text-gray-600">
                 {dragTargetStatus === 'converted' ? 
@@ -6304,7 +6737,7 @@ export default function SalesManagement() {
               </p>
             </div>
             
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => {
                   setShowDragConvertModal(false)
@@ -6313,15 +6746,17 @@ export default function SalesManagement() {
                   setOriginalTargetStatus('')
                   setSelectedProducts([])
                   setSelectedPackages({})
+                  setDiscountPercent(0) // Reset discount
+                  setPaymentMethod('cash') // Reset payment method
                 }}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmDragConvert}
                 disabled={selectedProducts.length === 0}
-                className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${
                   selectedProducts.length > 0
                     ? dragTargetStatus === 'converted' 
                       ? 'text-white bg-green-600 hover:bg-green-700'
@@ -6330,12 +6765,14 @@ export default function SalesManagement() {
                 }`}
               >
                 <CheckCircle className="w-4 h-4" />
-                {selectedProducts.length > 0 ? 
-                  dragTargetStatus === 'converted' 
-                    ? `Xác nhận hoàn tất (${selectedProducts.length} sản phẩm)` 
-                    : `Xác nhận chuyển (${selectedProducts.length} sản phẩm)`
-                  : 'Chọn sản phẩm để tiếp tục'
-                }
+                <span className="truncate">
+                  {selectedProducts.length > 0 ? 
+                    dragTargetStatus === 'converted' 
+                      ? `Xác nhận hoàn tất (${selectedProducts.length} SP)` 
+                      : `Xác nhận chuyển (${selectedProducts.length} SP)`
+                    : 'Chọn sản phẩm để tiếp tục'
+                  }
+                </span>
               </button>
             </div>
           </div>
@@ -6344,8 +6781,8 @@ export default function SalesManagement() {
 
       {/* Create Task Modal */}
       {showCreateTaskModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[80vh] overflow-hidden">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
             <div className="px-6 py-4 border-b border-gray-200">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-900">
@@ -6365,7 +6802,7 @@ export default function SalesManagement() {
             </div>
             
             {/* Task Types Grid */}
-            <div className="px-6 py-4 overflow-y-auto max-h-96">
+            <div className="px-4 sm:px-6 py-4 overflow-y-auto flex-1 min-h-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {taskTypes.map((task) => (
                   <div 
@@ -6374,6 +6811,7 @@ export default function SalesManagement() {
                       setSelectedTaskType(task.id)
                       setSelectedTaskObj(task)
                       setTaskExtraNote('')
+                      setTaskAssignedTo('')
                     }}
                     className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
                       selectedTaskType === task.id 
@@ -6402,11 +6840,11 @@ export default function SalesManagement() {
 
             {/* Deadline & confirm area (appears after selecting a task) */}
             {selectedTaskObj && (
-              <div className="px-6 py-4 border-t border-gray-100 bg-white">
+              <div className="px-4 sm:px-6 py-4 border-t border-gray-100 bg-white flex-shrink-0">
                 <h4 className="font-medium">Xác nhận: {selectedTaskObj.icon} {selectedTaskObj.name}</h4>
                 <p className="text-sm text-gray-600 mb-3">{selectedTaskObj.description}</p>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 items-end">
                   <div>
                     <label className="text-xs text-gray-600">Hạn hoàn thành</label>
                     <input
@@ -6427,7 +6865,24 @@ export default function SalesManagement() {
                     />
                   </div>
 
-                  <div className="sm:col-span-3">
+                  <div className="sm:col-span-1 lg:col-span-1">
+                    <label className="text-xs text-gray-600">Người phụ trách</label>
+                    <select
+                      value={taskAssignedTo}
+                      onChange={(e) => setTaskAssignedTo(e.target.value)}
+                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                    >
+                      <option value="">Chọn người phụ trách</option>
+                      <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                      <option value="Trần Thị B">Trần Thị B</option>
+                      <option value="Lê Văn C">Lê Văn C</option>
+                      <option value="Phạm Thị D">Phạm Thị D</option>
+                      <option value="Hoàng Văn E">Hoàng Văn E</option>
+                      <option value="Đỗ Thị F">Đỗ Thị F</option>
+                    </select>
+                  </div>
+
+                  <div className="col-span-full">
                     <label className="text-xs text-gray-600">Ghi chú thêm (tuỳ chọn)</label>
                     <input
                       type="text"
@@ -6439,20 +6894,21 @@ export default function SalesManagement() {
                   </div>
                 </div>
 
-                <div className="mt-4 flex justify-end gap-2">
+                <div className="mt-4 flex flex-col sm:flex-row justify-end gap-2">
                   <button
                     onClick={() => {
                       setSelectedTaskObj(null)
                       setSelectedTaskType('')
                       setTaskExtraNote('')
+                      setTaskAssignedTo('')
                     }}
-                    className="px-3 py-2 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                    className="w-full sm:w-auto px-3 py-2 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50"
                   >
                     Bỏ chọn
                   </button>
                   <button
-                    onClick={() => confirmCreateTask(selectedTaskObj, taskDeadlineDate, taskDeadlineTime, taskExtraNote)}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    onClick={() => confirmCreateTask(selectedTaskObj, taskDeadlineDate, taskDeadlineTime, taskExtraNote, taskAssignedTo)}
+                    className="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
                   >
                     Tạo task
                   </button>
@@ -6460,9 +6916,9 @@ export default function SalesManagement() {
               </div>
             )}
             
-            <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <div className="flex justify-between items-center">
-                <div className="text-sm text-gray-600">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="text-sm text-gray-600 text-center sm:text-left">
                   💡 Mẹo: Task sẽ được thêm vào lịch sử tương tác của từng lead
                 </div>
                 <button
@@ -6470,7 +6926,7 @@ export default function SalesManagement() {
                     setShowCreateTaskModal(false)
                     setSelectedTaskType('')
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
                 >
                   Hủy
                 </button>
@@ -6482,11 +6938,11 @@ export default function SalesManagement() {
 
       {/* Assign Sales Modal */}
       {showAssignSalesModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[80vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
               <div className="flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Gán Sales cho {selectedLeadIds.length} leads đã chọn
                 </h3>
                 <button
@@ -6504,7 +6960,7 @@ export default function SalesManagement() {
             </div>
             
             {/* Search Bar */}
-            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 bg-gray-50 flex-shrink-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -6526,9 +6982,9 @@ export default function SalesManagement() {
             </div>
             
             {/* Sales List */}
-            <div className="px-6 py-4 overflow-y-auto max-h-96">
+            <div className="px-4 sm:px-6 py-4 overflow-y-auto flex-1 min-h-0">
               {paginatedSalesTeam.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                   {paginatedSalesTeam.map((sales) => (
                     <div 
                       key={sales.id}
@@ -6570,38 +7026,43 @@ export default function SalesManagement() {
             
             {/* Pagination */}
             {totalSalesPages > 1 && (
-              <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
+              <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+                  <div className="text-sm text-gray-600 text-center sm:text-left">
                     Hiển thị {Math.min((salesCurrentPage - 1) * SALES_PER_PAGE + 1, filteredSalesTeam.length)}-{Math.min(salesCurrentPage * SALES_PER_PAGE, filteredSalesTeam.length)} trong {filteredSalesTeam.length} sales
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => setSalesCurrentPage(prev => Math.max(1, prev - 1))}
                       disabled={salesCurrentPage === 1}
-                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Trước
                     </button>
                     <div className="flex space-x-1">
-                      {Array.from({ length: totalSalesPages }, (_, i) => i + 1).map(page => (
-                        <button
-                          key={page}
-                          onClick={() => setSalesCurrentPage(page)}
-                          className={`px-3 py-1 text-sm rounded-md ${
-                            page === salesCurrentPage
-                              ? 'bg-blue-600 text-white'
-                              : 'bg-white border border-gray-300 hover:bg-gray-50'
-                          }`}
-                        >
-                          {page}
-                        </button>
-                      ))}
+                      {Array.from({ length: Math.min(5, totalSalesPages) }, (_, i) => {
+                        const startPage = Math.max(1, salesCurrentPage - 2);
+                        const page = startPage + i;
+                        if (page > totalSalesPages) return null;
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => setSalesCurrentPage(page)}
+                            className={`px-2 sm:px-3 py-1 text-sm rounded-md ${
+                              page === salesCurrentPage
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-white border border-gray-300 hover:bg-gray-50'
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
                     </div>
                     <button
                       onClick={() => setSalesCurrentPage(prev => Math.min(totalSalesPages, prev + 1))}
                       disabled={salesCurrentPage === totalSalesPages}
-                      className="px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-2 sm:px-3 py-1 text-sm bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       Sau
                     </button>
@@ -6610,16 +7071,395 @@ export default function SalesManagement() {
               </div>
             )}
             
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end">
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex-shrink-0 flex justify-end">
               <button
                 onClick={() => {
                   setShowAssignSalesModal(false)
                   setSalesSearchTerm('')
                   setSalesCurrentPage(1)
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
               >
                 Hủy
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Status Change Modal */}
+      {showBulkStatusModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+              <div className="flex justify-between items-center">
+                <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                  Chuyển trạng thái cho {selectedLeadIds.length} leads
+                </h3>
+                <button
+                  onClick={() => {
+                    setShowBulkStatusModal(false)
+                    setSelectedBulkStatus('')
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Chọn trạng thái mới cho các leads đã chọn</p>
+            </div>
+
+            <div className="px-4 sm:px-6 py-4 flex-1 overflow-y-auto">
+              <div className="space-y-3">
+                {[
+                  { value: 'new', name: 'Lead mới', color: 'bg-gray-100 border-gray-300', icon: '🆕', description: 'Lead mới vừa được tạo, chưa được xử lý' },
+                  { value: 'contacted', name: 'Đang tư vấn', color: 'bg-blue-100 border-blue-300', icon: '📞', description: 'Đã liên hệ và đang tư vấn khách hàng' },
+                  { value: 'qualified', name: 'Đã gửi ĐX', color: 'bg-yellow-100 border-yellow-300', icon: '📋', description: 'Đã gửi đề xuất/báo giá cho khách hàng' },
+                  { value: 'negotiation', name: 'Đàm phán', color: 'bg-orange-100 border-orange-300', icon: '🤝', description: 'Đang trong quá trình thương lượng và đàm phán' },
+                  { value: 'payment_pending', name: 'Chờ thanh toán', color: 'bg-purple-100 border-purple-300', icon: '💳', description: 'Đã thống nhất, chờ khách hàng thanh toán' },
+                  { value: 'converted', name: 'Chuyển đổi thành công', color: 'bg-green-100 border-green-300', icon: '✅', description: 'Đã thanh toán và chuyển đổi thành công' },
+                  { value: 'lost', name: 'Thất bại', color: 'bg-red-100 border-red-300', icon: '❌', description: 'Lead không thành công, đã đóng' }
+                ].map((status) => (
+                  <div 
+                    key={status.value}
+                    onClick={() => setSelectedBulkStatus(status.value)}
+                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${
+                      selectedBulkStatus === status.value 
+                        ? 'border-blue-500 bg-blue-50' 
+                        : `border-gray-200 hover:border-gray-300 ${status.color}`
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <div className="text-2xl">{status.icon}</div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-gray-900">{status.name}</h4>
+                        <p className="text-sm text-gray-600 mt-1">{status.description}</p>
+                      </div>
+                      <div className="flex items-center">
+                        {selectedBulkStatus === status.value ? (
+                          <CheckCircle className="w-5 h-5 text-blue-500" />
+                        ) : (
+                          <ArrowRight className="w-5 h-5 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
+                <div className="text-sm text-gray-600 text-center sm:text-left">
+                  💡 Mẹo: Việc chuyển trạng thái sẽ được ghi lại trong lịch sử tương tác
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={() => {
+                      setShowBulkStatusModal(false)
+                      setSelectedBulkStatus('')
+                    }}
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={() => confirmBulkStatusChange(selectedBulkStatus)}
+                    disabled={!selectedBulkStatus}
+                    className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${
+                      selectedBulkStatus
+                        ? 'text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                        : 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                    }`}
+                  >
+                    <TrendingUp className="w-4 h-4" />
+                    {selectedBulkStatus ? `Chuyển sang "${
+                      [
+                        { value: 'new', name: 'Lead mới' },
+                        { value: 'contacted', name: 'Đã liên hệ' },
+                        { value: 'qualified', name: 'Đủ điều kiện' },
+                        { value: 'proposal', name: 'Đã báo giá' },
+                        { value: 'negotiation', name: 'Thương lượng' },
+                        { value: 'converted', name: 'Chuyển đổi thành công' },
+                        { value: 'lost', name: 'Thất bại' }
+                      ].find(s => s.value === selectedBulkStatus)?.name || ''
+                    }"` : 'Chọn trạng thái để tiếp tục'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk Convert Modal */}
+      {showBulkConvertModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
+          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-gray-200">
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900">
+                Chuyển đổi {selectedLeadIds.length} leads sang "{getStatusName(bulkConvertTargetStatus)}"
+              </h3>
+              {bulkConvertTargetStatus === 'converted' && (
+                <p className="text-sm text-amber-600 mt-1">
+                  ℹ️ Leads sẽ được chuyển về "Chờ thanh toán" để xác nhận thanh toán trước khi hoàn tất chuyển đổi.
+                </p>
+              )}
+              <p className="text-sm text-gray-600 mt-2">
+                <strong>Lưu ý quan trọng:</strong> Toàn bộ {selectedLeadIds.length} leads sẽ tạo đơn hàng giống nhau với các sản phẩm được chọn bên dưới.
+              </p>
+            </div>
+            
+            <div className="px-4 sm:px-6 py-4">
+              {/* Product Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  {bulkConvertTargetStatus === 'converted' ? 
+                    'Chọn sản phẩm đã bán cho tất cả leads' : 
+                    'Chọn sản phẩm chuyển đổi cho tất cả leads'
+                  } <span className="text-red-500">*</span>
+                </label>
+                <div className="max-h-64 overflow-y-auto space-y-3 border border-gray-300 rounded-lg p-3">
+                  {availableProducts.map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white">
+                      {/* Product Selection */}
+                      <label className="flex items-start space-x-3 cursor-pointer mb-2">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(prev => [...prev, product.id])
+                              // Set default package to standard
+                              setSelectedPackages(prev => ({
+                                ...prev,
+                                [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                              }))
+                            } else {
+                              setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                              setSelectedPackages(prev => {
+                                const newPackages = {...prev}
+                                delete newPackages[product.id]
+                                return newPackages
+                              })
+                            }
+                          }}
+                        />
+                        <div className="flex-1">
+                          <h4 className="font-medium text-gray-900">{product.name}</h4>
+                          <p className="text-sm text-gray-600">{product.description}</p>
+                          <p className="text-sm font-semibold text-green-600">{formatCurrency(product.price.toString())} VNĐ</p>
+                        </div>
+                      </label>
+                      
+                      {/* Package Selection */}
+                      {selectedProducts.includes(product.id) && availablePackages[product.id as keyof typeof availablePackages] && (
+                        <div className="ml-6 mt-2 p-2 bg-gray-50 rounded">
+                          <label className="block text-xs font-medium text-gray-700 mb-1">Chọn gói:</label>
+                          <select
+                            value={selectedPackages[product.id] || ''}
+                            onChange={(e) => setSelectedPackages(prev => ({
+                              ...prev,
+                              [product.id]: e.target.value
+                            }))}
+                            className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                          >
+                            {availablePackages[product.id as keyof typeof availablePackages]?.map(pkg => (
+                              <option key={pkg.id} value={pkg.id}>
+                                {pkg.name} {pkg.price > 0 ? `(+${formatCurrency(pkg.price.toString())} VNĐ)` : ''} - {pkg.description}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+              
+              {/* Payment & Discount Info for all statuses */}
+              {selectedProducts.length > 0 && (
+                <div className="space-y-4">
+                  {/* Discount Section */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Mã giảm giá (%)
+                    </label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max="100"
+                        value={discountPercent}
+                        onChange={(e) => setDiscountPercent(Math.max(0, Math.min(100, parseInt(e.target.value) || 0)))}
+                        placeholder="0"
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      <span className="text-sm text-gray-500">%</span>
+                    </div>
+                    <p className="mt-1 text-xs text-gray-500">Nhập từ 0-100% để áp dụng giảm giá cho tất cả {selectedLeadIds.length} leads</p>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Hình thức thanh toán chung
+                    </label>
+                    <div className="grid grid-cols-2 gap-3">
+                      <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="bulkPaymentMethod"
+                          value="cash"
+                          checked={paymentMethod === 'cash'}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
+                      </label>
+                      <label className="flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                        <input
+                          type="radio"
+                          name="bulkPaymentMethod"
+                          value="bank_transfer"
+                          checked={paymentMethod === 'bank_transfer'}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
+                      </label>
+                    </div>
+                  </div>
+
+                  {/* Selected Products Summary */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <h5 className="text-sm font-medium text-blue-800 mb-2">
+                      Đã chọn {selectedProducts.length} sản phẩm cho {selectedLeadIds.length} leads:
+                    </h5>
+                    <div className="space-y-1">
+                      {selectedProducts.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
+                        
+                        return product ? (
+                          <div key={productId} className="flex justify-between text-xs text-blue-700">
+                            <span>{product.name} ({selectedPackage?.name || 'Standard'})</span>
+                            <span className="font-medium">
+                              {formatCurrency(totalPrice.toString())} VNĐ / lead
+                            </span>
+                          </div>
+                        ) : null
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Total Price Summary with Discount */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h5 className="text-sm font-medium text-green-800 mb-2">Tổng hợp giá trị đơn hàng</h5>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between">
+                        <span>Giá sản phẩm / 1 lead:</span>
+                        <span className="font-medium">
+                          {formatCurrency((selectedProducts.reduce((sum, productId) => {
+                            const product = availableProducts.find(p => p.id === productId)
+                            const selectedPackageId = selectedPackages[productId]
+                            const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                            return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                          }, 0)).toString())} VNĐ
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-blue-600">
+                        <span>Tổng tiền gốc ({selectedLeadIds.length} leads):</span>
+                        <span className="font-medium">
+                          {formatCurrency((selectedProducts.reduce((sum, productId) => {
+                            const product = availableProducts.find(p => p.id === productId)
+                            const selectedPackageId = selectedPackages[productId]
+                            const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                            return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                          }, 0) * selectedLeadIds.length).toString())} VNĐ
+                        </span>
+                      </div>
+                      {discountPercent > 0 && (
+                        <div className="flex justify-between text-red-600">
+                          <span>Giảm giá ({discountPercent}%):</span>
+                          <span className="font-medium">
+                            -{formatCurrency((selectedProducts.reduce((sum, productId) => {
+                              const product = availableProducts.find(p => p.id === productId)
+                              const selectedPackageId = selectedPackages[productId]
+                              const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                              return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                            }, 0) * discountPercent / 100 * selectedLeadIds.length).toString())} VNĐ
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex justify-between font-medium text-green-700 border-t border-green-300 pt-2">
+                        <span>Tổng thành tiền ({selectedLeadIds.length} đơn hàng):</span>
+                        <span className="text-base">
+                          {formatCurrency((selectedProducts.reduce((sum, productId) => {
+                            const product = availableProducts.find(p => p.id === productId)
+                            const selectedPackageId = selectedPackages[productId]
+                            const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                            return sum + (product?.price || 0) + (selectedPackage?.price || 0)
+                          }, 0) * (100 - discountPercent) / 100 * selectedLeadIds.length).toString())} VNĐ
+                        </span>
+                      </div>
+                      <div className="text-xs text-green-600 mt-1">
+                        💰 Phương thức thanh toán: <span className="font-medium">
+                          {paymentMethod === 'cash' ? 'Tiền mặt' :
+                           paymentMethod === 'bank_transfer' ? 'Chuyển khoản' : 'Không xác định'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <p className="text-sm text-gray-600 mt-4">
+                {bulkConvertTargetStatus === 'converted' ? 
+                  `Xác nhận tất cả ${selectedLeadIds.length} leads đã thanh toán thành công và hoàn tất giao dịch với các sản phẩm đã chọn.` :
+                  bulkConvertTargetStatus === 'payment_pending' ? 
+                  `Tất cả ${selectedLeadIds.length} leads sẽ được chuyển sang trạng thái "Chờ thanh toán" với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển sang "Chuyển đổi thành công".` :
+                  `Tất cả ${selectedLeadIds.length} leads sẽ được chuyển sang trạng thái "${getStatusName(bulkConvertTargetStatus)}" với các sản phẩm đã chọn.`
+                }
+              </p>
+            </div>
+            
+            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+              <button
+                onClick={() => {
+                  setShowBulkConvertModal(false)
+                  setBulkConvertTargetStatus('')
+                  setSelectedProducts([])
+                  setSelectedPackages({})
+                  setDiscountPercent(0)
+                  setPaymentMethod('cash')
+                }}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={confirmBulkConvert}
+                disabled={selectedProducts.length === 0}
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${
+                  selectedProducts.length > 0
+                    ? bulkConvertTargetStatus === 'converted' 
+                      ? 'text-white bg-green-600 hover:bg-green-700'
+                      : 'text-white bg-blue-600 hover:bg-blue-700'
+                    : 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span className="truncate">
+                  {selectedProducts.length > 0 ? 
+                    bulkConvertTargetStatus === 'converted' 
+                      ? `Xác nhận hoàn tất (${selectedProducts.length} SP cho ${selectedLeadIds.length} leads)` 
+                      : `Xác nhận chuyển (${selectedProducts.length} SP cho ${selectedLeadIds.length} leads)`
+                    : 'Chọn sản phẩm để tiếp tục'
+                  }
+                </span>
               </button>
             </div>
           </div>
@@ -6900,7 +7740,7 @@ export default function SalesManagement() {
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Thêm ghi chú</h3>
                 <p className="text-sm text-gray-600 mt-1">Lead: {selectedLeadForNote.name}</p>
               </div>
               <button
@@ -6908,6 +7748,7 @@ export default function SalesManagement() {
                   setShowAddNoteModal(false)
                   setSelectedLeadForNote(null)
                   setNewNoteContent('')
+                  setSelectedFiles(null)
                 }}
                 className="text-gray-400 hover:text-gray-600"
               >
@@ -6927,6 +7768,49 @@ export default function SalesManagement() {
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Nhập nội dung ghi chú..."
                 />
+              </div>
+
+              {/* Quick File Upload */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Đính kèm file (tùy chọn)
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png,.gif"
+                    onChange={(e) => {
+                      const files = e.target.files
+                      if (files) {
+                        // Handle file upload logic here
+                        setSelectedFiles(files)
+                        setNotification({ 
+                          message: `Đã chọn ${files.length} file để đính kèm`, 
+                          type: 'success' 
+                        })
+                        setTimeout(() => setNotification(null), 2000)
+                      }
+                    }}
+                    className="hidden"
+                    id="note-file-input"
+                  />
+                  <label
+                    htmlFor="note-file-input"
+                    className="flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                  >
+                    <Paperclip className="w-4 h-4 mr-2 text-gray-600" />
+                    <span className="text-sm text-gray-700">Chọn file</span>
+                  </label>
+                  {selectedFiles && selectedFiles.length > 0 && (
+                    <span className="text-sm text-green-600">
+                      {selectedFiles.length} file đã chọn
+                    </span>
+                  )}
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Hỗ trợ: PDF, Word, Excel, hình ảnh. Tối đa 10MB/file.
+                </p>
               </div>
               
               {/* Show existing notes preview */}
@@ -6960,6 +7844,7 @@ export default function SalesManagement() {
                   setShowAddNoteModal(false)
                   setSelectedLeadForNote(null)
                   setNewNoteContent('')
+                  setSelectedFiles(null)
                 }}
                 className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
               >
@@ -6968,9 +7853,13 @@ export default function SalesManagement() {
               <button
                 onClick={handleSubmitNote}
                 disabled={!newNoteContent.trim()}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-yellow-600 text-white rounded-md hover:bg-yellow-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
-                Thêm tương tác
+                <StickyNote className="w-4 h-4" />
+                Thêm ghi chú
+                {selectedFiles && selectedFiles.length > 0 && (
+                  <span className="text-xs">({selectedFiles.length} file)</span>
+                )}
               </button>
             </div>
           </div>
