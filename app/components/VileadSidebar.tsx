@@ -1,11 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { 
-  LayoutDashboard, 
-  UserPlus, 
-  Target, 
-  BarChart3, 
+import {
+  LayoutDashboard,
+  UserPlus,
+  Target,
+  BarChart3,
   Settings,
   Building2,
   UserCheck,
@@ -15,7 +15,9 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  CreditCard
+  CreditCard,
+  MessageSquare,
+  Mail
 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import {
@@ -103,7 +105,24 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       roles: ["admin", "ceo", "leader"],
       disabled: false
     },
-    /*
+    {
+      id: 'chat',
+      icon: MessageSquare,
+      label: "Chat đa kênh",
+      iconText: "💬",
+      tooltip: "Chat đa kênh: Tin nhắn và hội thoại với khách hàng",
+      roles: ["admin", "ceo", "leader", "sale"],
+      disabled: false
+    },
+    {
+      id: 'email-marketing',
+      icon: Mail,
+      label: "Email Marketing",
+      iconText: "📧",
+      tooltip: "Email Marketing: Chiến dịch và mẫu email",
+      roles: ["admin", "leader", "sale"],
+      disabled: false
+    },
     {
       id: 'reports',
       icon: FileText,
@@ -111,9 +130,8 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       iconText: "📊",
       tooltip: "Báo cáo: Doanh số, hiệu suất và KPIs",
       roles: ["admin", "ceo", "leader", "accountant"],
-      disabled: true
+      disabled: false
     },
-    */
     {
       id: 'settings',
       icon: Settings,
@@ -231,8 +249,8 @@ export default function VileadSidebar({
           </Button>
         </div>
 
-        {/* Role Switcher */}
-        {!isCollapsed && (
+        {/* Role Switcher - Hidden for now */}
+        {/* {!isCollapsed && (
           <div className="px-4 py-3 border-b border-gray-200">
             <div className="space-y-2">
               <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
@@ -252,7 +270,7 @@ export default function VileadSidebar({
               </Select>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-2 overflow-y-auto">

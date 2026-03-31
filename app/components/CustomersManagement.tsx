@@ -210,6 +210,16 @@ export default function CustomersManagement() {
   const [selectedCustomerForOrder, setSelectedCustomerForOrder] = useState<Customer | null>(null)
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
+  const [productQuantities, setProductQuantities] = useState<{[productId: string]: number}>({}) // Track quantity for each product
+  const [orderNotes, setOrderNotes] = useState('') // Order notes
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả') // Category filter
+  const [paymentDeadline, setPaymentDeadline] = useState('')
+  const [discountPercent, setDiscountPercent] = useState(0)
+  const [discountType, setDiscountType] = useState<'%' | 'VND'>('%')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [paymentMode, setPaymentMode] = useState<'full' | 'installment'>('full')
+  const [paymentInstallments, setPaymentInstallments] = useState(1)
+  const [installmentData, setInstallmentData] = useState([{amount: 0, date: ''}])
   const [newOrderData, setNewOrderData] = useState({
     notes: '',
     discountPercent: 0,
@@ -312,6 +322,7 @@ export default function CustomersManagement() {
   const [editReason, setEditReason] = useState('')
   
   const [showColumnSelector, setShowColumnSelector] = useState(false)
+  const [openActionMenu, setOpenActionMenu] = useState<number | null>(null)
   const [visibleColumns, setVisibleColumns] = useState({
     checkbox: true,
     no: true,
@@ -384,6 +395,7 @@ export default function CustomersManagement() {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
   const [showQuickTaskModal, setShowQuickTaskModal] = useState(false)
+  const [showExportDropdown, setShowExportDropdown] = useState(false)
   const [quickTaskData, setQuickTaskData] = useState({
     title: '',
     description: '',
@@ -5158,45 +5170,10 @@ export default function CustomersManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Chăm sóc Khách hàng</h1>
           <p className="text-gray-600">Quản lý thông tin chi tiết và hành vi khách hàng</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="relative group">
-            <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              <Download className="w-4 h-4" />
-              <span>Xuất dữ liệu ({filteredCustomers.length})</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-              <div className="py-2">
-                <button
-                  onClick={() => handleExportData('csv')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <FileText className="w-4 h-4 text-green-600" />
-                  <span>Xuất CSV</span>
-                </button>
-                <button
-                  onClick={() => handleExportData('excel')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <span>Xuất Excel</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button 
-            onClick={() => setShowAddCustomerModal(true)}
-            className="btn-primary flex items-center space-x-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Thêm khách hàng</span>
-          </button>
-        </div>
       </div>
 
-      {/* Customer Classification Section */}
-      <div className="mb-6">
+      {/* Section 1: Tổng quan - Phân loại khách hàng */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Phân loại khách hàng</h2>
           <div className="flex items-center space-x-3">
@@ -5218,214 +5195,129 @@ export default function CustomersManagement() {
                 </button>
               </div>
             )}
-            <button 
-              onClick={() => setFilterCustomerType('')}
-              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                !filterCustomerType 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Tất cả ({customers.filter(c => c.products && c.products.length > 0 && c.totalSpent > 0).length})
-            </button>
-            <button 
-              onClick={() => setShowRankingDefinitionModal(true)}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              <Info className="w-4 h-4 mr-2" />
-              <span>Cài đặt phân hạng</span>
-            </button>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {/* VIP Customer */}
+          {/* VIP Customer - Kim cương */}
           <div 
             onClick={() => handleCustomerTypeFilter('diamond')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'diamond' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'diamond' ? 'ring-4 ring-purple-300' : ''
             }`}
           >
-            <div className="h-2 bg-purple-500 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-purple-100 p-3 mr-4 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng kim cương</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'diamond').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">12% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Kim cương</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'diamond').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 2</p>
+                <p className="text-sm text-white/90 font-semibold">+12%</p>
               </div>
             </div>
           </div>
 
-          {/* Gold Customer */}
+          {/* Gold Customer - Vàng */}
           <div 
             onClick={() => handleCustomerTypeFilter('gold')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'gold' ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-yellow-500 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'gold' ? 'ring-4 ring-yellow-300' : ''
             }`}
           >
-            <div className="h-2 bg-yellow-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-yellow-100 p-3 mr-4 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Vàng</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'gold').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">5% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Vàng</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'gold').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 2</p>
+                <p className="text-sm text-white/90 font-semibold">+5%</p>
               </div>
             </div>
           </div>
 
-          {/* Silver Customer */}
+          {/* Silver Customer - Bạc */}
           <div 
             onClick={() => handleCustomerTypeFilter('silver')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'silver' ? 'border-gray-400 ring-2 ring-gray-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-gray-500 to-gray-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'silver' ? 'ring-4 ring-gray-300' : ''
             }`}
           >
-            <div className="h-2 bg-gray-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-gray-100 p-3 mr-4 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Bạc</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'silver').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">12% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Bạc</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'silver').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 3</p>
+                <p className="text-sm text-white/90 font-semibold">+12%</p>
               </div>
             </div>
           </div>
 
-          {/* Bronze Customer */}
+          {/* Bronze Customer - Đồng */}
           <div 
             onClick={() => handleCustomerTypeFilter('bronze')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'bronze' ? 'border-orange-400 ring-2 ring-orange-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'bronze' ? 'ring-4 ring-orange-300' : ''
             }`}
           >
-            <div className="h-2 bg-orange-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-orange-100 p-3 mr-4 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Đồng</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'bronze').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">3% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Đồng</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'bronze').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 3</p>
+                <p className="text-sm text-white/90 font-semibold">+3%</p>
               </div>
             </div>
           </div>
 
-          {/* New Customer */}
+          {/* New Customer - Mới */}
           <div 
             onClick={() => handleCustomerTypeFilter('new')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'new' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'new' ? 'ring-4 ring-blue-300' : ''
             }`}
           >
-            <div className="h-2 bg-blue-500 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-blue-100 p-3 mr-4 flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Mới</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'new').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">15% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Mới</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'new').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 1</p>
+                <p className="text-sm text-white/90 font-semibold">+15%</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filter Summary */}
-      {(searchTerm || filterStatus || filterIndustry || filterTag || filterCustomerType) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
-                Đang áp dụng bộ lọc - Hiển thị {filteredCustomers.length} trong tổng số {customers.filter(c => c.products && c.products.length > 0 && c.totalSpent > 0).length} khách hàng
-              </span>
-              {filterCustomerType && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                  Loại: {
-                    filterCustomerType === 'diamond' ? 'Kim cương' :
-                    filterCustomerType === 'gold' ? 'Vàng' :
-                    filterCustomerType === 'silver' ? 'Bạc' :
-                    filterCustomerType === 'bronze' ? 'Đồng' :
-                    filterCustomerType === 'new' ? 'Mới' :
-                    filterCustomerType === 'returning' ? 'Quay lại' : filterCustomerType
-                  }
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-blue-700">
-                {(searchTerm || filterStatus || filterIndustry || filterTag || filterCustomerType) && " Bộ lọc cơ bản ✓"}
-              </span>
-              <button
-                onClick={() => {
-                  setSearchTerm('')
-                  setFilterStatus('')
-                  setFilterIndustry('')
-                  setFilterTag('')
-                  setFilterCustomerType('')
-                }}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                Xóa tất cả bộ lọc
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Content based on selected view */}
       {selectedView === 'list' && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
+        <>
+          {/* Section 3: Thanh công cụ tìm kiếm và lọc */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Danh sách khách hàng</h3>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-wrap gap-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -5437,30 +5329,22 @@ export default function CustomersManagement() {
                   />
                 </div>
                 <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-                >
-                  <option value="name">Sắp xếp theo tên</option>
-                  <option value="lastInteraction">Tương tác gần nhất</option>
-                  <option value="totalValue">Giá trị</option>
-                </select>
-                <select 
                   value={filterStatus} 
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  <option value="active">Hoạt động</option>
-                  <option value="inactive">Không hoạt động</option>
-                  <option value="at-risk">Có nguy cơ</option>
-                  <option value="churned">Đã churn</option>
-                  <option value="dormant">Tạm ngưng</option>
+                  <option value="vip">💎 VIP</option>
+                  <option value="active">✅ Hoạt động</option>
+                  <option value="inactive">⏸️ Không hoạt động</option>
+                  <option value="at-risk">⚠️ Có nguy cơ</option>
+                  <option value="churned">❌ Đã churn</option>
+                  <option value="dormant">💤 Tạm ngưng</option>
                 </select>
                 <select 
                   value={filterCustomerType} 
                   onChange={(e) => setFilterCustomerType(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
                 >
                   <option value="">Tất cả hạng</option>
                   <option value="diamond">Kim cương</option>
@@ -5470,9 +5354,20 @@ export default function CustomersManagement() {
                   <option value="new">Mới</option>
                   <option value="returning">Quay lại</option>
                 </select>
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                >
+                  <option value="name">Sắp xếp theo tên</option>
+                  <option value="lastInteraction">Tương tác gần nhất</option>
+                  <option value="totalValue">Giá trị</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Lọc nâng cao</span>
@@ -5481,43 +5376,34 @@ export default function CustomersManagement() {
                 <div className="relative">
                   <button
                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                   >
                     <Columns className="w-4 h-4" />
-                    <span>Cột</span>
+                    <span>Hiển thị cột</span>
                   </button>
                   {showColumnSelector && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
                       <div className="p-4">
-                        <h4 className="font-medium text-gray-900 mb-3">Hiển thị cột</h4>
-                        <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900 mb-3">Tùy chỉnh cột hiển thị</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 max-h-72 overflow-y-auto">
                           {[
-                            { key: 'checkbox', label: 'Checkbox' },
-                            { key: 'no', label: 'STT' },
-                            { key: 'customerName', label: 'Tên khách hàng' },
-                            { key: 'phoneNumber', label: 'Số điện thoại' },
-                            { key: 'email', label: 'Email' },
+                            { key: 'email', label: 'Mail' },
                             { key: 'company', label: 'Công ty' },
                             { key: 'address', label: 'Địa chỉ' },
                             { key: 'region', label: 'Khu vực' },
                             { key: 'customerType', label: 'Loại khách hàng' },
                             { key: 'segment', label: 'Phân loại' },
                             { key: 'tags', label: 'Tags' },
-                            { key: 'source', label: 'Nguồn gốc' },
+                            { key: 'source', label: 'Nguồn' },
                             { key: 'accountManager', label: 'Sales phụ trách' },
                             { key: 'status', label: 'Trạng thái' },
-                            { key: 'lifecycleStage', label: 'Lifecycle Stage' },
                             { key: 'totalOrderValue', label: 'Tổng giá trị đơn' },
                             { key: 'orderCount', label: 'Số đơn hàng' },
                             { key: 'lastOrderDate', label: 'Đơn hàng gần nhất' },
                             { key: 'averageOrderValue', label: 'Giá trị đơn TB' },
-                            { key: 'lastContactDate', label: 'Lần liên hệ cuối' },
-                            { key: 'interactionCount', label: 'Số lần tương tác' },
-                            { key: 'createdDate', label: 'Ngày tạo' },
-                            { key: 'npsScore', label: 'NPS Score' },
-                            { key: 'actions', label: 'Hành động' }
+                            { key: 'actions', label: 'Thao tác' }
                           ].map(column => (
-                            <label key={column.key} className="flex items-center space-x-2">
+                            <label key={column.key} className="flex items-center space-x-2 py-1">
                               <input
                                 type="checkbox"
                                 checked={visibleColumns[column.key as keyof typeof visibleColumns]}
@@ -5525,13 +5411,13 @@ export default function CustomersManagement() {
                                   ...prev,
                                   [column.key]: e.target.checked
                                 }))}
-                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                className="w-4 h-4 text-blue-800 rounded focus:ring-blue-500 border-gray-300"
                               />
                               <span className="text-sm text-gray-700">{column.label}</span>
                             </label>
                           ))}
                         </div>
-                        <div className="flex justify-between mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex gap-3 mt-4 pt-3 border-t border-gray-200">
                           <button
                             onClick={() => setVisibleColumns({
                               checkbox: true,
@@ -5548,268 +5434,218 @@ export default function CustomersManagement() {
                               source: true,
                               accountManager: true,
                               status: true,
-                              lifecycleStage: true,
+                              lifecycleStage: false,
                               totalOrderValue: true,
                               orderCount: true,
                               lastOrderDate: true,
                               averageOrderValue: true,
-                              lastContactDate: true,
-                              interactionCount: true,
-                              createdDate: true,
-                              npsScore: true,
-                              customerScore: true,
+                              lastContactDate: false,
+                              interactionCount: false,
+                              createdDate: false,
+                              npsScore: false,
+                              customerScore: false,
                               actions: true
                             })}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-800 rounded-lg hover:bg-blue-900 transition-colors"
                           >
-                            Hiện tất cả
+                            Tất cả
                           </button>
                           <button
-                            onClick={() => setShowColumnSelector(false)}
-                            className="text-xs text-gray-600 hover:text-gray-800"
+                            onClick={() => {
+                              setVisibleColumns({
+                                checkbox: true,
+                                no: true,
+                                customerName: true,
+                                phoneNumber: true,
+                                email: true,
+                                company: true,
+                                address: false,
+                                region: true,
+                                customerType: true,
+                                segment: true,
+                                tags: true,
+                                source: true,
+                                accountManager: true,
+                                status: true,
+                                lifecycleStage: false,
+                                totalOrderValue: true,
+                                orderCount: true,
+                                lastOrderDate: true,
+                                averageOrderValue: true,
+                                lastContactDate: false,
+                                interactionCount: false,
+                                createdDate: false,
+                                npsScore: false,
+                                customerScore: false,
+                                actions: true
+                              })
+                              setShowColumnSelector(false)
+                            }}
+                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                           >
-                            Đóng
+                            Mặc định
                           </button>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
+
+                {/* Import Customer Button */}
+                <button 
+                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Nhập khách hàng</span>
+                </button>
+
+                {/* Add Customer Button */}
+                <button 
+                  onClick={() => setShowAddCustomerModal(true)}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Thêm khách hàng</span>
+                </button>
               </div>
             </div>
 
-            {/* Advanced Filters */}
+            {/* Advanced Filters - Inside toolbar container */}
             {showAdvancedFilters && (
-              <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <h3 className="text-sm font-medium mb-3">Bộ lọc nâng cao</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Department */}
+              <div className="mt-4 pt-4 border-t border-gray-200">
+                {/* Row 1: 3 columns - Người phụ trách, Khu vực, Sản phẩm đã mua */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                  {/* Người phụ trách */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Phòng ban</label>
-                    <select
-                      value={filterDepartment}
-                      onChange={(e) => setFilterDepartment(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả phòng ban</option>
-                      <option value="Sales">Phòng kinh doanh</option>
-                      <option value="Marketing">Phòng marketing</option>
-                      <option value="Customer Success">Phòng chăm sóc khách hàng</option>
-                      <option value="Business Development">Phòng phát triển kinh doanh</option>
-                      <option value="Support">Phòng hỗ trợ</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Người phụ trách</label>
+                    <div className="relative">
+                      <select
+                        value={filterAssignedPerson}
+                        onChange={(e) => setFilterAssignedPerson(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Chọn người phụ trách</option>
+                        <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                        <option value="Trần Thị B">Trần Thị B</option>
+                        <option value="Lê Văn C">Lê Văn C</option>
+                        <option value="Phạm Thị D">Phạm Thị D</option>
+                        <option value="Hoàng Văn E">Hoàng Văn E</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
 
-                  {/* Team */}
+                  {/* Khu vực */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Team</label>
-                    <select
-                      value={filterTeam}
-                      onChange={(e) => setFilterTeam(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả team</option>
-                      <option value="Team Alpha">Team Alpha</option>
-                      <option value="Team Beta">Team Beta</option>
-                      <option value="Team Gamma">Team Gamma</option>
-                      <option value="Team Delta">Team Delta</option>
-                      <option value="Team Enterprise">Team Enterprise</option>
-                      <option value="Team SMB">Team SMB</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
+                    <div className="relative">
+                      <select
+                        value={filterRegion}
+                        onChange={(e) => setFilterRegion(e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Chọn khu vực</option>
+                        <option value="Hà Nội">Hà Nội</option>
+                        <option value="TP.HCM">TP.HCM</option>
+                        <option value="Đà Nẵng">Đà Nẵng</option>
+                        <option value="Hải Phòng">Hải Phòng</option>
+                        <option value="Cần Thơ">Cần Thơ</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
 
-                  {/* Assigned Person */}
+                  {/* Sản phẩm đã mua */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Người phụ trách</label>
-                    <select
-                      value={filterAssignedPerson}
-                      onChange={(e) => setFilterAssignedPerson(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="Nguyễn Văn A">Nguyễn Văn A</option>
-                      <option value="Trần Thị B">Trần Thị B</option>
-                      <option value="Lê Văn C">Lê Văn C</option>
-                      <option value="Phạm Thị D">Phạm Thị D</option>
-                      <option value="Hoàng Văn E">Hoàng Văn E</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sản phẩm đã mua</label>
+                    <div className="relative">
+                      <select
+                        value={filterPurchasedProduct.length > 0 ? filterPurchasedProduct[0] : ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setFilterPurchasedProduct([e.target.value])
+                          } else {
+                            setFilterPurchasedProduct([])
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Chọn sản phẩm</option>
+                        {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || []))).map(productName => (
+                          <option key={productName} value={productName}>{productName}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
+                </div>
 
-                  {/* Region */}
+                {/* Row 2: Giá trị đơn hàng và Ngày mua */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Giá trị đơn hàng (VND) */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Khu vực</label>
-                    <select
-                      value={filterRegion}
-                      onChange={(e) => setFilterRegion(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="Hà Nội">Hà Nội</option>
-                      <option value="TP.HCM">TP.HCM</option>
-                      <option value="Đà Nẵng">Đà Nẵng</option>
-                      <option value="Hải Phòng">Hải Phòng</option>
-                      <option value="Cần Thơ">Cần Thơ</option>
-                    </select>
-                  </div>
-
-                  {/* Order Value Range */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Giá trị đơn hàng (VND)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Giá trị đơn hàng (VND)</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
                         placeholder="Từ"
                         value={filterOrderValue.min}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, min: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                       <input
                         type="number"
                         placeholder="Đến"
                         value={filterOrderValue.max}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, max: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       />
                     </div>
                   </div>
 
-                  {/* Last Interaction */}
+                  {/* Ngày mua */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Tương tác gần nhất</label>
-                    <select
-                      value={filterLastInteraction}
-                      onChange={(e) => setFilterLastInteraction(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="recent">7 ngày qua</option>
-                      <option value="week">30 ngày qua</option>
-                      <option value="month">90 ngày qua</option>
-                      <option value="old">Hơn 90 ngày</option>
-                    </select>
-                  </div>
-
-                  {/* Purchase Date Range */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Ngày mua</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày mua</label>
                     <div className="flex gap-2">
-                      <input
-                        type="date"
-                        value={filterPurchaseDate.start}
-                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
-                      />
-                      <input
-                        type="date"
-                        value={filterPurchaseDate.end}
-                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Purchased Product - improved UI */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Sản phẩm đã mua</label>
-                    <div className="relative">
-                      <div 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm cursor-pointer bg-white"
-                        onClick={() => setShowProductDropdown(!showProductDropdown)}
-                      >
-                        {filterPurchasedProduct.length === 0 ? (
-                          <span className="text-gray-500">Chọn sản phẩm...</span>
-                        ) : (
-                          <span className="text-blue-600">
-                            Đã chọn {filterPurchasedProduct.length} sản phẩm
-                          </span>
-                        )}
-                        <ChevronDown className={`w-4 h-4 float-right mt-0.5 transition-transform ${showProductDropdown ? 'rotate-180' : ''}`} />
+                      <div className="flex-1 relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Calendar className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="date"
+                          placeholder="Chọn ngày bắt đầu"
+                          value={filterPurchaseDate.start}
+                          onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
                       </div>
-                      
-                      {showProductDropdown && (
-                        <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-64 overflow-hidden">
-                          {/* Search input */}
-                          <div className="p-2 border-b border-gray-200">
-                            <input
-                              type="text"
-                              placeholder="Tìm kiếm sản phẩm..."
-                              value={productSearchTerm}
-                              onChange={(e) => setProductSearchTerm(e.target.value)}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                          </div>
-                          
-                          {/* Options list */}
-                          <div className="max-h-48 overflow-y-auto">
-                            {/* Clear all option */}
-                            <div 
-                              className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 border-b border-gray-100"
-                              onClick={() => setFilterPurchasedProduct([])}
-                            >
-                              <span className="text-red-600">✗ Bỏ chọn tất cả</span>
-                            </div>
-                            
-                            {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || [])))
-                              .filter(productName => 
-                                productName.toLowerCase().includes(productSearchTerm.toLowerCase())
-                              )
-                              .map(productName => (
-                                <div 
-                                  key={productName}
-                                  className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center"
-                                  onClick={() => {
-                                    if (filterPurchasedProduct.includes(productName)) {
-                                      setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== productName))
-                                    } else {
-                                      setFilterPurchasedProduct([...filterPurchasedProduct, productName])
-                                    }
-                                  }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={filterPurchasedProduct.includes(productName)}
-                                    onChange={() => {}} // Handled by parent div
-                                    className="mr-2 rounded"
-                                  />
-                                  <span className="flex-1">{productName}</span>
-                                </div>
-                              ))
-                            }
-                          </div>
+                      <div className="flex-1 relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Calendar className="w-4 h-4" />
                         </div>
-                      )}
-                      
-                      {/* Selected products tags */}
-                      {filterPurchasedProduct.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {filterPurchasedProduct.slice(0, 3).map(product => (
-                            <span 
-                              key={product}
-                              className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                            >
-                              {product.length > 15 ? product.substring(0, 15) + '...' : product}
-                              <button
-                                onClick={() => setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== product))}
-                                className="ml-1 text-blue-600 hover:text-blue-800"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                          {filterPurchasedProduct.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                              +{filterPurchasedProduct.length - 3} khác
-                            </span>
-                          )}
-                        </div>
-                      )}
+                        <input
+                          type="date"
+                          placeholder="Chọn ngày kết thúc"
+                          value={filterPurchaseDate.end}
+                          onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Clear Advanced Filters */}
-                <div className="mt-4 pt-3 border-t border-gray-200">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 mt-4">
+                  <button
+                    onClick={() => {
+                      // Apply filter logic
+                      setShowAdvancedFilters(false)
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                  >
+                    Áp dụng bộ lọc
+                  </button>
                   <button
                     onClick={() => {
                       setFilterDepartment('')
@@ -5823,7 +5659,7 @@ export default function CustomersManagement() {
                       setProductSearchTerm('')
                       setShowProductDropdown(false)
                     }}
-                    className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                     <span>Xóa bộ lọc nâng cao</span>
@@ -5831,7 +5667,11 @@ export default function CustomersManagement() {
                 </div>
               </div>
             )}
+          </div>
+          {/* End Section 3: Thanh công cụ tìm kiếm và lọc */}
 
+          {/* Section 4: Bảng danh sách khách hàng */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             {/* Bulk Actions Toolbar */}
             {selectedCustomerIds.length > 0 && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
@@ -5858,6 +5698,40 @@ export default function CustomersManagement() {
                       <Plus className="w-4 h-4" />
                       <span>Tạo task nhanh</span>
                     </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowExportDropdown(!showExportDropdown)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Xuất dữ liệu</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showExportDropdown && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                          <button
+                            onClick={() => {
+                              // Handle Excel export
+                              setShowExportDropdown(false)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Xuất Excel</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Handle CSV export
+                              setShowExportDropdown(false)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700 border-t border-gray-100"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Xuất CSV</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     {/* Ẩn chức năng gửi email hàng loạt theo yêu cầu */}
                     {/* <button
                       onClick={() => handleBulkEmail()}
@@ -5870,6 +5744,11 @@ export default function CustomersManagement() {
                 </div>
               </div>
             )}
+
+            {/* Thông tin hiển thị */}
+            <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+              <span>Hiển thị {filteredCustomers.length} trong tổng {customers.length} khách hàng</span>
+            </div>
 
             <div className="overflow-x-auto border border-gray-200 rounded-lg">
               <table className="w-full border-collapse">
@@ -5886,76 +5765,76 @@ export default function CustomersManagement() {
                       </th>
                     )}
                     {visibleColumns.no && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">STT</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">STT</th>
                     )}
                     {visibleColumns.customerName && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tên khách hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TÊN KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.phoneNumber && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số điện thoại</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ ĐIỆN THOẠI</th>
                     )}
                     {visibleColumns.email && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Email</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">EMAIL</th>
                     )}
                     {visibleColumns.company && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Công ty</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">CÔNG TY</th>
                     )}
                     {visibleColumns.address && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Địa chỉ</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">ĐỊA CHỈ</th>
                     )}
                     {visibleColumns.region && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Khu vực</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">KHU VỰC</th>
                     )}
                     {visibleColumns.customerType && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Loại khách hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LOẠI KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.segment && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Phân loại</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">PHÂN LOẠI</th>
                     )}
                     {visibleColumns.tags && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tags</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-[180px]">TAGS</th>
                     )}
                     {visibleColumns.source && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Nguồn gốc</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NGUỒN</th>
                     )}
                     {visibleColumns.accountManager && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Sales phụ trách</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SALES PHỤ TRÁCH</th>
                     )}
                     {visibleColumns.status && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Trạng thái</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TRẠNG THÁI</th>
                     )}
                     {visibleColumns.lifecycleStage && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Lifecycle Stage</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LIFECYCLE STAGE</th>
                     )}
                     {visibleColumns.totalOrderValue && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tổng giá trị đơn</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TỔNG GIÁ TRỊ ĐỠN</th>
                     )}
                     {visibleColumns.orderCount && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số đơn hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ ĐƠN HÀNG</th>
                     )}
                     {visibleColumns.lastOrderDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Đơn hàng gần nhất</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">ĐƠN HÀNG GẦN NHẤT</th>
                     )}
                     {visibleColumns.averageOrderValue && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Giá trị đơn TB</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">GIÁ TRỊ ĐƠN TB</th>
                     )}
                     {visibleColumns.lastContactDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Lần liên hệ cuối</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LẦN LIÊN HỆ CUỐI</th>
                     )}
                     {visibleColumns.interactionCount && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số lần tương tác</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ LẦN TƯƠNG TÁC</th>
                     )}
                     {visibleColumns.createdDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Ngày tạo</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NGÀY TẠO</th>
                     )}
                     {visibleColumns.customerScore && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Customer Score</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">CUSTOMER SCORE</th>
                     )}
                     {visibleColumns.npsScore && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NPS Score</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NPS SCORE</th>
                     )}
                     {visibleColumns.actions && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap min-w-fit">Hành động</th>
+                      <th className="text-center py-3 px-4 font-bold text-gray-700 whitespace-nowrap min-w-fit sticky right-0 bg-gray-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">THAO TÁC</th>
                     )}
                   </tr>
                 </thead>
@@ -5983,18 +5862,9 @@ export default function CustomersManagement() {
                         <td className="py-3 px-4 border-r border-gray-200">
                           <button 
                             onClick={() => handleCustomerSelect(customer)}
-                            className="flex items-center space-x-3 hover:text-blue-600 transition-colors"
+                            className="omi-link font-semibold text-left"
                           >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                              customer.status === 'vip' ? 'bg-purple-600' :
-                              customer.status === 'active' ? 'bg-green-600' :
-                              customer.status === 'at-risk' ? 'bg-red-600' : 'bg-gray-600'
-                            }`}>
-                              {customer.name.charAt(0)}
-                            </div>
-                            <div className="text-left">
-                              <div className="font-medium text-gray-900">{customer.name}</div>
-                            </div>
+                            {customer.name}
                           </button>
                         </td>
                       )}
@@ -6055,14 +5925,15 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.tags && (
-                        <td className="py-3 px-4 border-r border-gray-200">
-                          <div className="flex flex-wrap gap-1">
+                        <td className="py-3 px-4 border-r border-gray-200 min-w-[180px]">
+                          <div className="flex flex-nowrap gap-1 overflow-hidden">
                             {/* Tags đồng bộ từ sales management */}
                             {customer.tags && customer.tags.length > 0 ? (
                               customer.tags.slice(0, 2).map((tag, tagIndex) => (
                                 <span 
                                   key={tagIndex}
-                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${tag.color || 'bg-blue-100 text-blue-800'}`}
+                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap max-w-[80px] truncate ${tag.color || 'bg-blue-100 text-blue-800'}`}
+                                  title={tag.name}
                                 >
                                   {tag.name}
                                 </span>
@@ -6073,7 +5944,7 @@ export default function CustomersManagement() {
                             
                             {/* Hiển thị số tags còn lại */}
                             {customer.tags && customer.tags.length > 2 && (
-                              <span className="text-xs text-gray-500">+{customer.tags.length - 2}</span>
+                              <span className="text-xs text-gray-500 whitespace-nowrap">+{customer.tags.length - 2}</span>
                             )}
                           </div>
                         </td>
@@ -6190,29 +6061,87 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.actions && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1">
+                        <td className={`py-3 px-4 text-center sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] ${openActionMenu === customer.id ? 'z-[1000]' : 'z-10'}`}>
+                          <div className="relative inline-block">
                             <button 
-                              onClick={() => handleCustomerSelect(customer)}
-                              className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                              title="👁️ Chi tiết & Chỉnh sửa"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setOpenActionMenu(openActionMenu === customer.id ? null : customer.id)
+                              }}
+                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-lg transition-colors"
                             >
-                              <Eye className="w-3 h-3" />
+                              <Settings className="w-5 h-5" />
                             </button>
-                            <button 
-                              onClick={() => handleCreateOrder(customer)}
-                              className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                              title="� Tạo đơn hàng"
-                            >
-                              <ShoppingCart className="w-3 h-3" />
-                            </button>
-                            <button 
-                              onClick={() => handleQuickInteraction(customer)}
-                              className="p-1.5 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
-                              title="�️ Thêm tương tác nhanh"
-                            >
-                              <StickyNote className="w-3 h-3" />
-                            </button>
+                            {openActionMenu === customer.id && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-[998]" 
+                                  onClick={() => setOpenActionMenu(null)}
+                                />
+                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 z-[999] py-2">
+                                  {/* THÔNG TIN */}
+                                  <div className="px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleCustomerSelect(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <Eye className="w-4 h-4 text-gray-500" />
+                                    <span>Xem chi tiết</span>
+                                  </button>
+
+                                  {/* THAO TÁC NHANH */}
+                                  <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thao tác nhanh</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleCreateOrder(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <ShoppingCart className="w-4 h-4 text-gray-500" />
+                                    <span>Tạo đơn hàng</span>
+                                  </button>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleQuickInteraction(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <StickyNote className="w-4 h-4 text-gray-500" />
+                                    <span>Ghi chú</span>
+                                  </button>
+
+                                  {/* THAO TÁC NGUY HIỂM */}
+                                  <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Thao tác nguy hiểm</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
+                                        // Handle delete customer
+                                        setOpenActionMenu(null)
+                                      }
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3"
+                                  >
+                                    <XCircle className="w-4 h-4 text-red-500" />
+                                    <span>Xóa khách hàng</span>
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </td>
                       )}
@@ -6222,8 +6151,11 @@ export default function CustomersManagement() {
               </table>
             </div>
           </div>
-        </div>
-      )}      {selectedView === 'analytics' && (
+          {/* End Section 4: Bảng danh sách khách hàng */}
+        </>
+      )}
+
+      {selectedView === 'analytics' && (
         <div className="space-y-6">
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -7307,278 +7239,480 @@ export default function CustomersManagement() {
     {/* Create Order Modal */}
     {showCreateOrderModal && selectedCustomerForOrder && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng mới</h3>
-              <p className="text-sm text-gray-600">Khách hàng: {selectedCustomerForOrder.name}</p>
+              <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng</h3>
             </div>
             <button
-              onClick={() => setShowCreateOrderModal(false)}
+              onClick={() => {
+                setShowCreateOrderModal(false)
+                setSelectedProducts([])
+                setSelectedPackages({})
+                setProductQuantities({})
+                setOrderNotes('')
+                setSelectedCategory('Tất cả')
+                setPaymentDeadline('')
+                setDiscountPercent(0)
+                setDiscountType('%')
+                setPaymentMethod('cash')
+                setPaymentMode('full')
+                setPaymentInstallments(1)
+                setInstallmentData([{amount: 0, date: ''}])
+              }}
               className="text-gray-400 hover:text-gray-600"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="space-y-4">
-            {/* Product Selection */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm</h4>
-              <div className="max-h-80 overflow-y-auto space-y-3">
-                {availableProducts.map((product) => (
-                  <div key={product.id} className="border border-gray-200 rounded-lg p-4 bg-white">
-                    {/* Product Selection */}
-                    <label className="flex items-start space-x-3 cursor-pointer mb-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product.id])
-                            // Set default package to standard
-                            setSelectedPackages(prev => ({
-                              ...prev,
-                              [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
-                            }))
-                          } else {
-                            setSelectedProducts(prev => prev.filter(id => id !== product.id))
-                            // Remove package selection
-                            setSelectedPackages(prev => {
-                              const newPackages = { ...prev }
-                              delete newPackages[product.id]
-                              return newPackages
-                            })
-                          }
-                          // Recalculate totals after product change
-                          setTimeout(() => {
-                            handleOrderDiscountChange(newOrderData.discountPercent)
-                          }, 0)
-                        }}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h6 className="font-medium text-gray-900">{product.name}</h6>
-                            <p className="text-sm text-gray-600">{product.description}</p>
-                          </div>
-                          <span className="font-medium text-blue-600">
-                            {formatCurrency(product.price.toString())} VNĐ
-                          </span>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Package Selection Dropdown */}
-                    {selectedProducts.includes(product.id) && (
-                      <div className="ml-7 border-t border-gray-100 pt-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Chọn gói sản phẩm:
-                        </label>
-                        <select
-                          value={selectedPackages[product.id] || ''}
-                          onChange={(e) => {
-                            setSelectedPackages(prev => ({
-                              ...prev,
-                              [product.id]: e.target.value
-                            }))
-                            // Recalculate totals after package change
-                            setTimeout(() => {
-                              handleOrderDiscountChange(newOrderData.discountPercent)
-                            }, 0)
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                        >
-                          {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
-                            <option key={pkg.id} value={pkg.id}>
-                              {pkg.name} - {pkg.price > 0 ? `+${formatCurrency(pkg.price.toString())} VNĐ` : 'Miễn phí'} 
-                              {pkg.description && ` - ${pkg.description}`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {/* Customer Info */}
+          <div className="flex items-center gap-3 mb-4 p-3 rounded-lg">
+            <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                <User className="h-6 w-6" />
+              </span>
+            </span>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-slate-900">{selectedCustomerForOrder.name}</h3>
               </div>
+              <p className="text-sm text-slate-600">
+                {selectedCustomerForOrder.phone2 && <span className="mr-3">{selectedCustomerForOrder.phone2}</span>}
+                {selectedCustomerForOrder.email && <span>{selectedCustomerForOrder.email}</span>}
+              </p>
             </div>
+          </div>
 
+          <div className="space-y-4">
             {/* Order Notes */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Ghi chú đơn hàng</h4>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú đơn hàng</label>
               <textarea
-                value={newOrderData.notes}
-                onChange={(e) => setNewOrderData(prev => ({ ...prev, notes: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                rows={3}
-                placeholder="Ghi chú đặc biệt cho đơn hàng (không bắt buộc)..."
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                rows={2}
+                placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
               />
             </div>
 
-            {/* Order Summary */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Tóm tắt đơn hàng</h4>
-              {selectedProducts.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="text-sm font-medium text-gray-700 mb-2">
-                    Đã chọn {selectedProducts.length} sản phẩm:
-                  </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {selectedProducts.map(productId => {
-                      const product = availableProducts.find(p => p.id === productId)
-                      const selectedPackageId = selectedPackages[productId]
-                      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
-                      const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
-                      
-                      return product ? (
-                        <div key={productId} className="bg-white rounded p-3 shadow-sm">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <span className="font-medium text-gray-900">{product.name}</span>
-                              <div className="text-xs text-gray-500 mt-1">
-                                Sản phẩm: {formatCurrency(product.price.toString())} VNĐ
-                              </div>
-                            </div>
-                            <span className="font-medium text-blue-600">
-                              {formatCurrency(totalPrice.toString())} VNĐ
-                            </span>
+            {/* Category Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Chọn thể loại sản phẩm</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="Tất cả">Tất cả</option>
+                <option value="Sản phẩm">Sản phẩm</option>
+              </select>
+            </div>
+
+            {/* Product Selection - 2 Column Grid */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
+              <div className="max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
+                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                      {/* Product Selection */}
+                      <label className="flex items-start space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(prev => [...prev, product.id])
+                              setSelectedPackages(prev => ({
+                                ...prev,
+                                [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                              }))
+                              setProductQuantities(prev => ({
+                                ...prev,
+                                [product.id]: 1
+                              }))
+                            } else {
+                              setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                              setSelectedPackages(prev => {
+                                const newPackages = { ...prev }
+                                delete newPackages[product.id]
+                                return newPackages
+                              })
+                              setProductQuantities(prev => {
+                                const newQuantities = { ...prev }
+                                delete newQuantities[product.id]
+                                return newQuantities
+                              })
+                            }
+                          }}
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
+                            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{product.category}</span>
                           </div>
-                          {selectedPackage && (
-                            <div className="text-sm border-t border-gray-100 pt-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">
-                                  📦 {selectedPackage.name}
-                                </span>
-                                <span className="text-gray-600">
-                                  {selectedPackage.price > 0 ? `+${formatCurrency(selectedPackage.price.toString())} VNĐ` : 'Miễn phí'}
-                                </span>
-                              </div>
-                              {selectedPackage.description && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {selectedPackage.description}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                          <p className="text-sm font-semibold text-green-600 mt-1">{formatCurrency(product.price.toString())} VNĐ</p>
                         </div>
-                      ) : null
-                    })}
-                  </div>
-                  <div className="flex justify-between font-medium text-lg border-t border-blue-200 pt-3 mt-3">
-                    <span>Tổng cộng:</span>
-                    <span className="text-blue-600">
-                      {formatCurrency(
-                        selectedProducts.reduce((sum, productId) => {
+                      </label>
+
+                      {/* Package & Quantity Selection */}
+                      {selectedProducts.includes(product.id) && availablePackages[product.id as keyof typeof availablePackages] && (
+                        <div className="ml-7 mt-2 p-2 bg-gray-50 rounded">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Chọn gói:</label>
+                              <select
+                                value={selectedPackages[product.id] || ''}
+                                onChange={(e) => setSelectedPackages(prev => ({
+                                  ...prev,
+                                  [product.id]: e.target.value
+                                }))}
+                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                              >
+                                {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
+                                  <option key={pkg.id} value={pkg.id}>
+                                    {pkg.name} {pkg.price > 0 ? `(+${formatCurrency(pkg.price.toString())} VNĐ)` : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Số lượng:</label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={productQuantities[product.id] || 1}
+                                onChange={(e) => setProductQuantities(prev => ({
+                                  ...prev,
+                                  [product.id]: Math.max(1, parseInt(e.target.value) || 1)
+                                }))}
+                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">Không có sản phẩm nào trong thể loại này</p>
+                )}
+              </div>
+            </div>
+
+            {/* Payment & Discount Info */}
+            {selectedProducts.length > 0 && (
+              <div className="space-y-4">
+                {/* Selected Products Summary */}
+                {(() => {
+                  const subtotal = selectedProducts.reduce((sum, productId) => {
+                    const product = availableProducts.find(p => p.id === productId)
+                    const selectedPackageId = selectedPackages[productId]
+                    const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                    const quantity = productQuantities[productId] || 1
+                    return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                  }, 0)
+                  const totalBeforeDiscount = subtotal
+                  const discountAmount = discountType === '%' 
+                    ? totalBeforeDiscount * discountPercent / 100 
+                    : discountPercent
+                  const afterDiscount = totalBeforeDiscount - discountAmount
+                  const vatAmount = afterDiscount * 0.1
+                  const grandTotal = afterDiscount + vatAmount
+                  
+                  return (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <h5 className="text-sm font-medium text-green-800 mb-3">
+                        Đã chọn {selectedProducts.length} sản phẩm:
+                      </h5>
+                      <div className="space-y-2 text-sm">
+                        {selectedProducts.map(productId => {
                           const product = availableProducts.find(p => p.id === productId)
                           const selectedPackageId = selectedPackages[productId]
                           const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
-                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
-                        }, 0).toString()
-                      )} VNĐ
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 mb-2">
-                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Vui lòng chọn sản phẩm
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Payment Information */}
-            {selectedProducts.length > 0 && (
-              <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
-                
-                {/* Discount */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giảm giá (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={newOrderData.discountPercent}
-                    onChange={(e) => handleOrderDiscountChange(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0"
-                  />
-                </div>
-
-                {/* Payment Method */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hình thức thanh toán
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="orderPaymentMethod"
-                        value="cash"
-                        checked={newOrderData.paymentMethod === 'cash'}
-                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="orderPaymentMethod"
-                        value="transfer"
-                        checked={newOrderData.paymentMethod === 'transfer'}
-                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Final Amount */}
-                <div className="bg-white rounded-md p-3 border border-blue-200">
-                  <div className="flex justify-between text-sm">
-                    <span>Tổng tiền hàng:</span>
-                    <span>{newOrderData.totalAmount.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                  {newOrderData.discountPercent > 0 && (
-                    <div className="flex justify-between text-sm text-red-600">
-                      <span>Giảm giá ({newOrderData.discountPercent}%):</span>
-                      <span>-{(newOrderData.totalAmount * newOrderData.discountPercent / 100).toLocaleString('vi-VN')} VND</span>
+                          const quantity = productQuantities[productId] || 1
+                          const productTotal = ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                          
+                          return product ? (
+                            <div key={productId} className="flex justify-between text-gray-700">
+                              <span>{product.name} ({selectedPackage?.name || 'Standard'}) x{quantity}</span>
+                              <span className="font-medium text-green-600">
+                                {formatCurrency(productTotal.toString())} VNĐ
+                              </span>
+                            </div>
+                          ) : null
+                        })}
+                        {discountAmount > 0 && (
+                          <div className="flex justify-between text-gray-600 border-t border-green-200 pt-2 mt-2">
+                            <span>Giảm giá {discountType === '%' ? `(${discountPercent}%)` : ''}:</span>
+                            <span className="font-medium text-red-500">-{formatCurrency(discountAmount.toString())} VNĐ</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-gray-600 pt-1">
+                          <span>Phí VAT (10%):</span>
+                          <span className="font-medium text-gray-700">+{formatCurrency(vatAmount.toString())} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-green-700 border-t border-green-300 pt-2 mt-2">
+                          <span>Tổng cộng:</span>
+                          <span className="text-lg">{formatCurrency(grandTotal.toString())} VNĐ</span>
+                        </div>
+                      </div>
                     </div>
+                  )
+                })()}
+
+                {/* Payment Info Section */}
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  {/* Payment Deadline & Discount - Same Row */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    {/* Payment Deadline */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Thời hạn thanh toán <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={paymentDeadline}
+                        onChange={(e) => setPaymentDeadline(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                      {!paymentDeadline && (
+                        <p className="mt-1 text-xs text-red-500">Vui lòng chọn thời hạn thanh toán</p>
+                      )}
+                    </div>
+
+                    {/* Discount */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Giảm giá
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max={discountType === '%' ? 100 : undefined}
+                          value={discountPercent}
+                          onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
+                          placeholder="0"
+                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        />
+                        <select 
+                          value={discountType}
+                          onChange={(e) => {
+                            setDiscountType(e.target.value as '%' | 'VND')
+                            setDiscountPercent(0)
+                          }}
+                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          <option value="%">%</option>
+                          <option value="VND">VNĐ</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Hình thức thanh toán</label>
+                      <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="cash">Tiền mặt</option>
+                        <option value="bank_transfer">Chuyển khoản</option>
+                        <option value="installment">Trả góp</option>
+                        <option value="momo">Momo</option>
+                        <option value="card">Thẻ</option>
+                        <option value="custom">Tùy chỉnh</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Payment Mode */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
+                      <div className="flex gap-3">
+                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="customerOrderPaymentMode"
+                            value="full"
+                            checked={paymentMode === 'full'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
+                        </label>
+                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="customerOrderPaymentMode"
+                            value="installment"
+                            checked={paymentMode === 'installment'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Installments - Only show when installment mode selected */}
+                  {paymentMode === 'installment' && (
+                  <div className="border-t border-gray-200 pt-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số lần thanh toán
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={paymentInstallments}
+                        onChange={(e) => {
+                          const num = Math.max(1, Math.min(12, parseInt(e.target.value) || 1))
+                          setPaymentInstallments(num)
+                          const newInstallments = Array.from({length: num}, (_, i) => 
+                            installmentData[i] || {amount: 0, date: ''}
+                          )
+                          setInstallmentData(newInstallments)
+                        }}
+                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+
+                    {/* Installment Details */}
+                    {installmentData.map((installment, index) => {
+                      // Calculate grand total for validation (same as summary calculation)
+                      const subtotalCalc = selectedProducts.reduce((sum, productId) => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const quantity = productQuantities[productId] || 1
+                        return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                      }, 0)
+                      const totalBeforeDiscountCalc = subtotalCalc
+                      const discountAmountCalc = discountType === '%' 
+                        ? totalBeforeDiscountCalc * discountPercent / 100 
+                        : discountPercent
+                      const afterDiscountCalc = totalBeforeDiscountCalc - discountAmountCalc
+                      const grandTotalCalc = afterDiscountCalc + afterDiscountCalc * 0.1
+                      
+                      // Calculate max allowed for this installment
+                      const otherInstallmentsTotal = installmentData.reduce((sum, inst, i) => 
+                        i !== index ? sum + inst.amount : sum, 0
+                      )
+                      const maxAllowed = Math.max(0, grandTotalCalc - otherInstallmentsTotal)
+                      const isOverLimit = installment.amount > maxAllowed
+                      
+                      return (
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formatCurrency(installment.amount.toString())}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+                              const validatedValue = Math.min(value, maxAllowed)
+                              const newData = [...installmentData]
+                              newData[index] = {...newData[index], amount: validatedValue}
+                              setInstallmentData(newData)
+                            }}
+                            placeholder="0"
+                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                          />
+                          {isOverLimit && (
+                            <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
+                          )}
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Ngày thanh toán đợt {index + 1}
+                            </label>
+                            <input
+                              type="date"
+                              value={installment.date}
+                              onChange={(e) => {
+                                const newData = [...installmentData]
+                                newData[index] = {...newData[index], date: e.target.value}
+                                setInstallmentData(newData)
+                              }}
+                              min={new Date().toISOString().split('T')[0]}
+                              placeholder="Thời gian thanh toán ..."
+                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            />
+                          </div>
+                          {paymentInstallments > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (paymentInstallments > 1) {
+                                  const newData = installmentData.filter((_, i) => i !== index)
+                                  setInstallmentData(newData)
+                                  setPaymentInstallments(paymentInstallments - 1)
+                                }
+                              }}
+                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Xóa đợt thanh toán"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      )
+                    })}
+                  </div>
                   )}
-                  <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
-                    <span>Thành tiền:</span>
-                    <span className="text-green-600">{newOrderData.finalAmount.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                  <div className="text-xs text-gray-600 mt-1">
-                    Hình thức: {newOrderData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
-                  </div>
                 </div>
               </div>
             )}
+
+            <p className="text-sm text-gray-600 mt-4">
+              Khách hàng sẽ được tạo đơn hàng với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển sang "Hoàn thành".
+            </p>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
             <button
-              onClick={() => setShowCreateOrderModal(false)}
+              onClick={() => {
+                setShowCreateOrderModal(false)
+                setSelectedProducts([])
+                setSelectedPackages({})
+                setProductQuantities({})
+                setOrderNotes('')
+                setSelectedCategory('Tất cả')
+                setPaymentDeadline('')
+                setDiscountPercent(0)
+                setDiscountType('%')
+                setPaymentMethod('cash')
+                setPaymentMode('full')
+                setPaymentInstallments(1)
+                setInstallmentData([{amount: 0, date: ''}])
+              }}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleSubmitOrder}
-              disabled={selectedProducts.length === 0}
+              disabled={selectedProducts.length === 0 || !paymentDeadline}
               className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo đơn hàng
