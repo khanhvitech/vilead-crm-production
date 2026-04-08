@@ -3,15 +3,14 @@
 import React, { useEffect, useCallback, useMemo, useState } from 'react'
 import { AlertCircle, CheckCircle2, X } from 'lucide-react'
 import { FlowEditorProvider, useFlowEditor } from '../flowEditorStore'
-import { FlowDetail, FlowNode, NodeType } from '../types'
-import { MOCK_FOLDERS } from '../constants'
+import { FlowDetail, NodeType } from '../types'
 import Toolbar from './Toolbar'
 import NodePalette from './NodePalette'
 import FlowCanvas from './FlowCanvas'
 import ConfigPanel from './ConfigPanel'
 import PreviewPanel from './PreviewPanel'
 
-// ── Toast components ───────────────────────────────────────────────────────────
+// ─── Toast components ─────────────────────────────────────────────────────────
 function ValidationToast({ errors, onClose }: { errors: Array<{ message: string; nodeId?: string }>; onClose: () => void }) {
   return (
     <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
@@ -42,35 +41,54 @@ function SuccessToast({ message, onClose }: { message: string; onClose: () => vo
   )
 }
 
-// ── Inner editor ───────────────────────────────────────────────────────────────
+// ─── Inner editor ─────────────────────────────────────────────────────────────
 function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: () => void }) {
-  const {
-    state, setFlow, addNode, updateNode, moveNode, deleteNode,
-    addEdge, deleteEdge, selectNode, setPreviewOpen, setFlowName, markSaved, validate
-  } = useFlowEditor()
+  // Zustand selectors — granular to avoid unnecessary re-renders
+  const setFlow        = useFlowEditor(s => s.setFlow)
+  const addNodeFn      = useFlowEditor(s => s.addNode)
+  const updateNodeData = useFlowEditor(s => s.updateNodeData)
+  const deleteNodeFn   = useFlowEditor(s => s.deleteNode)
+  const selectNodeFn   = useFlowEditor(s => s.selectNode)
+  const setPreviewOpen = useFlowEditor(s => s.setPreviewOpen)
+  const setFlowName    = useFlowEditor(s => s.setFlowName)
+  const markSaved      = useFlowEditor(s => s.markSaved)
+  const validate       = useFlowEditor(s => s.validate)
+
+  const flowName          = useFlowEditor(s => s.flowName)
+  const status            = useFlowEditor(s => s.status)
+  const hasUnsavedChanges = useFlowEditor(s => s.hasUnsavedChanges)
+  const isPreviewOpen     = useFlowEditor(s => s.isPreviewOpen)
+  const selectedNodeId    = useFlowEditor(s => s.selectedNodeId)
+  const nodes             = useFlowEditor(s => s.nodes)
+  const validationErrors  = useFlowEditor(s => s.validationErrors)
+  const getFlowNodes      = useFlowEditor(s => s.getFlowNodes)
+  const getFlowEdges      = useFlowEditor(s => s.getFlowEdges)
 
   const [saving, setSaving] = useState(false)
-  const [toast, setToast] = useState<{ type: 'success' | 'error'; message?: string } | null>(null)
+  const [toast, setToast]   = useState<{ type: 'success' | 'error'; message?: string } | null>(null)
   const [showValidErrors, setShowValidErrors] = useState(false)
 
   // Initialize flow
   useEffect(() => { setFlow(flowData) }, [flowData, setFlow])
 
-  // Auto-place start node
+  // Auto-place start node for empty flows
   useEffect(() => {
-    if (state.nodes.length === 0 && state.flowId) {
-      addNode('start', { x: 300, y: 80 })
+    if (nodes.length === 0) {
+      addNodeFn('start', { x: 300, y: 80 })
     }
-  }, [state.flowId, state.nodes.length, addNode])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // run once on mount
 
-  // Drag from NodePalette
+  // Drag-start from NodePalette
   const handleDragStart = (e: React.DragEvent, nodeType: NodeType) => {
     e.dataTransfer.setData('nodeType', nodeType)
+    e.dataTransfer.effectAllowed = 'copy'
   }
 
+  // Drop on canvas
   const handleDropNode = useCallback((nodeType: NodeType, x: number, y: number) => {
-    addNode(nodeType, { x, y })
-  }, [addNode])
+    addNodeFn(nodeType, { x, y })
+  }, [addNodeFn])
 
   const handleSave = async () => {
     setSaving(true)
@@ -93,26 +111,30 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
     setToast({ type: 'success', message: 'Đã xuất bản luồng thành công! 🎉' })
   }
 
-  // Node index for ConfigPanel title
+  // Node display index — needed by ConfigPanel title
   const nodeDisplayIndex = useMemo(() => {
     const map = new Map<string, number>()
     let idx = 1
-    state.nodes.forEach(n => {
-      if (n.type !== 'start') map.set(n.id, idx++)
+    nodes.forEach(n => {
+      if (n.data.nodeType !== 'start') map.set(n.id, idx++)
     })
     return map
-  }, [state.nodes])
+  }, [nodes])
 
-  const selectedNode = state.nodes.find(n => n.id === state.selectedNodeId) || null
-  const selectedNodeIndex = selectedNode ? (nodeDisplayIndex.get(selectedNode.id) || 1) : 1
+  // Selected node — convert RF node → FlowNode for ConfigPanel
+  const selectedRFNode   = nodes.find(n => n.id === selectedNodeId) || null
+  const selectedFlowNode = selectedRFNode
+    ? { id: selectedRFNode.id, type: selectedRFNode.data.nodeType, position: selectedRFNode.position, data: selectedRFNode.data.nodeData }
+    : null
+  const selectedNodeIndex = selectedFlowNode ? (nodeDisplayIndex.get(selectedFlowNode.id) || 1) : 1
 
   return (
     <div className="h-full flex flex-col">
       <Toolbar
-        flowName={state.flowName}
+        flowName={flowName}
         flowGroupName={flowData.folder?.name || 'Tin nhắn Kịch bản'}
-        status={state.status}
-        hasChanges={state.hasUnsavedChanges}
+        status={status}
+        hasChanges={hasUnsavedChanges}
         saving={saving}
         onBack={onBack}
         onSave={handleSave}
@@ -121,47 +143,47 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
         onFlowNameChange={setFlowName}
       />
 
-      <div className="flex flex-1 min-h-0 overflow-hidden">
-        {/* Left: Config panel (slide-in when node selected) */}
-        {selectedNode && (
-          <ConfigPanel
-            selectedNode={selectedNode}
-            nodeIndex={selectedNodeIndex}
-            onUpdate={updateNode}
-            onDelete={deleteNode}
-            onClose={() => selectNode(null)}
-          />
-        )}
+      {/* Main area: palette | canvas | config panel */}
+      <div className="flex flex-1 min-h-0 overflow-hidden relative">
+        {/* Left: Node Palette — always visible */}
+        <NodePalette onDragStart={handleDragStart} />
 
-        {/* Left: Node palette (when nothing selected) */}
-        {!selectedNode && (
-          <NodePalette onDragStart={handleDragStart} />
-        )}
+        {/* Center: Canvas — fills remaining space */}
+        <FlowCanvas onDropNode={handleDropNode} />
 
-        {/* Center: Canvas */}
-        <FlowCanvas
-          nodes={state.nodes}
-          edges={state.edges}
-          selectedNodeId={state.selectedNodeId}
-          validationErrors={state.validationErrors}
-          onSelectNode={selectNode}
-          onMoveNode={(id, x, y) => moveNode(id, { x, y })}
-          onAddEdge={addEdge}
-          onDeleteEdge={deleteEdge}
-          onDropNode={handleDropNode}
-        />
+        {/* Right: Config Panel — floating overlay on canvas right side */}
+        {selectedFlowNode && (
+          <div
+            className="absolute right-0 top-0 h-full z-30 shadow-2xl"
+            style={{
+              width: 360,
+              background: 'white',
+              borderLeft: '1px solid #E5E7EB',
+              display: 'flex',
+              flexDirection: 'column',
+            }}
+          >
+            <ConfigPanel
+              selectedNode={selectedFlowNode}
+              nodeIndex={selectedNodeIndex}
+              onUpdate={(nodeId, data) => updateNodeData(nodeId, data)}
+              onDelete={(nodeId) => { deleteNodeFn(nodeId); selectNodeFn(null) }}
+              onClose={() => selectNodeFn(null)}
+            />
+          </div>
+        )}
       </div>
 
       <PreviewPanel
-        open={state.isPreviewOpen}
-        nodes={state.nodes}
-        edges={state.edges}
+        open={isPreviewOpen}
+        nodes={getFlowNodes()}
+        edges={getFlowEdges()}
         onClose={() => setPreviewOpen(false)}
       />
 
       {/* Toasts */}
-      {showValidErrors && state.validationErrors.length > 0 && (
-        <ValidationToast errors={state.validationErrors} onClose={() => setShowValidErrors(false)} />
+      {showValidErrors && validationErrors.length > 0 && (
+        <ValidationToast errors={validationErrors} onClose={() => setShowValidErrors(false)} />
       )}
       {toast?.type === 'success' && (
         <SuccessToast message={toast.message || 'Thành công'} onClose={() => setToast(null)} />
@@ -170,7 +192,7 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
   )
 }
 
-// ── Public component ───────────────────────────────────────────────────────────
+// ─── Public component ─────────────────────────────────────────────────────────
 interface FlowEditorPageProps {
   flowId: string
   onBack: () => void
@@ -197,7 +219,6 @@ function getMockFlowData(flowId: string): FlowDetail {
 
 export default function FlowEditorPage({ flowId, onBack }: FlowEditorPageProps) {
   const flowData = getMockFlowData(flowId)
-
   return (
     <FlowEditorProvider>
       <FlowEditorInner flowData={flowData} onBack={onBack} />

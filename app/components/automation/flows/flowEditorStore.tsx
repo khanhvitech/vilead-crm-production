@@ -1,31 +1,24 @@
 'use client'
 
-import React, {
-  createContext, useContext, useReducer, useCallback,
-  ReactNode,
-} from 'react'
+/**
+ * Flow Editor Store — Zustand
+ * Replaces the old Context + useReducer implementation.
+ * Uses subscribeWithSelector to prevent wasted re-renders.
+ */
+
+import { createContext, useContext, useRef, ReactNode } from 'react'
+import { createStore, useStore } from 'zustand'
+import { subscribeWithSelector } from 'zustand/middleware'
+import { type Node, type Edge, addEdge as rfAddEdge, applyNodeChanges, applyEdgeChanges } from '@xyflow/react'
 import {
   FlowEditorState, FlowNode, FlowEdge, NodeType, NodeData,
   FlowDetail, ValidationError, XY,
 } from './types'
 import { NODE_WIDTH, NODE_HEIGHT } from './constants'
 
-// ---- Action types ----
-type Action =
-  | { type: 'SET_FLOW'; payload: FlowDetail }
-  | { type: 'ADD_NODE'; payload: { nodeType: NodeType; position: XY } }
-  | { type: 'UPDATE_NODE'; payload: { nodeId: string; data: Partial<NodeData> } }
-  | { type: 'MOVE_NODE'; payload: { nodeId: string; position: XY } }
-  | { type: 'DELETE_NODE'; payload: { nodeId: string } }
-  | { type: 'ADD_EDGE'; payload: FlowEdge }
-  | { type: 'DELETE_EDGE'; payload: { edgeId: string } }
-  | { type: 'SELECT_NODE'; payload: { nodeId: string | null } }
-  | { type: 'SET_PREVIEW_OPEN'; payload: boolean }
-  | { type: 'SET_FLOW_NAME'; payload: string }
-  | { type: 'SET_VALIDATION_ERRORS'; payload: ValidationError[] }
-  | { type: 'MARK_SAVED' }
-
-// ---- Default node data per type ----
+// ─────────────────────────────────────────────────────────────────────────────
+// Default data per node type
+// ─────────────────────────────────────────────────────────────────────────────
 function defaultNodeData(nodeType: NodeType): NodeData {
   switch (nodeType) {
     case 'text':          return { content: '' }
@@ -47,255 +40,280 @@ function defaultNodeData(nodeType: NodeType): NodeData {
 
 let _nodeCounter = 100
 
-// ---- Reducer ----
-function reducer(state: FlowEditorState, action: Action): FlowEditorState {
-  switch (action.type) {
-    case 'SET_FLOW':
-      return {
-        ...state,
-        flowId: action.payload.id,
-        flowName: action.payload.name,
-        status: action.payload.status,
-        nodes: action.payload.nodes,
-        edges: action.payload.edges,
-        hasUnsavedChanges: false,
-        selectedNodeId: null,
-        validationErrors: [],
-      }
+// ─────────────────────────────────────────────────────────────────────────────
+// Store definition
+// ─────────────────────────────────────────────────────────────────────────────
+interface FlowStore {
+  // State
+  flowId: string | null
+  flowName: string
+  status: FlowEditorState['status']
+  nodes: Node<{ nodeType: NodeType; nodeData: NodeData }>[]
+  edges: Edge[]
+  selectedNodeId: string | null
+  hasUnsavedChanges: boolean
+  isPreviewOpen: boolean
+  validationErrors: ValidationError[]
 
-    case 'ADD_NODE': {
-      _nodeCounter++
-      const newNode: FlowNode = {
-        id: `node_${_nodeCounter}`,
-        type: action.payload.nodeType,
-        position: action.payload.position,
-        data: defaultNodeData(action.payload.nodeType),
-      }
-      return {
-        ...state,
-        nodes: [...state.nodes, newNode],
-        selectedNodeId: newNode.id,
-        hasUnsavedChanges: true,
-      }
-    }
-
-    case 'UPDATE_NODE':
-      return {
-        ...state,
-        nodes: state.nodes.map(n =>
-          n.id === action.payload.nodeId
-            ? { ...n, data: { ...n.data, ...action.payload.data } }
-            : n
-        ),
-        hasUnsavedChanges: true,
-      }
-
-    case 'MOVE_NODE':
-      return {
-        ...state,
-        nodes: state.nodes.map(n =>
-          n.id === action.payload.nodeId
-            ? { ...n, position: action.payload.position }
-            : n
-        ),
-        hasUnsavedChanges: true,
-      }
-
-    case 'DELETE_NODE': {
-      const targetId = action.payload.nodeId
-      return {
-        ...state,
-        nodes: state.nodes.filter(n => n.id !== targetId),
-        edges: state.edges.filter(e => e.source !== targetId && e.target !== targetId),
-        selectedNodeId: state.selectedNodeId === targetId ? null : state.selectedNodeId,
-        hasUnsavedChanges: true,
-      }
-    }
-
-    case 'ADD_EDGE': {
-      const edge = action.payload
-      // Prevent duplicate
-      const exists = state.edges.some(
-        e => e.source === edge.source && e.target === edge.target && e.sourceHandle === edge.sourceHandle
-      )
-      if (exists) return state
-      return { ...state, edges: [...state.edges, edge], hasUnsavedChanges: true }
-    }
-
-    case 'DELETE_EDGE':
-      return {
-        ...state,
-        edges: state.edges.filter(e => e.id !== action.payload.edgeId),
-        hasUnsavedChanges: true,
-      }
-
-    case 'SELECT_NODE':
-      return { ...state, selectedNodeId: action.payload.nodeId }
-
-    case 'SET_PREVIEW_OPEN':
-      return { ...state, isPreviewOpen: action.payload }
-
-    case 'SET_FLOW_NAME':
-      return { ...state, flowName: action.payload, hasUnsavedChanges: true }
-
-    case 'SET_VALIDATION_ERRORS':
-      return { ...state, validationErrors: action.payload }
-
-    case 'MARK_SAVED':
-      return { ...state, hasUnsavedChanges: false }
-
-    default:
-      return state
-  }
-}
-
-// ---- Initial state ----
-const INITIAL_STATE: FlowEditorState = {
-  flowId: null,
-  flowName: 'Luồng mới',
-  status: 'draft',
-  nodes: [],
-  edges: [],
-  selectedNodeId: null,
-  hasUnsavedChanges: false,
-  isPreviewOpen: false,
-  validationErrors: [],
-}
-
-// ---- Context ----
-interface FlowEditorContextValue {
-  state: FlowEditorState
+  // Actions
   setFlow: (flow: FlowDetail) => void
-  addNode: (nodeType: NodeType, position: XY) => void
-  updateNode: (nodeId: string, data: Partial<NodeData>) => void
-  moveNode: (nodeId: string, position: XY) => void
+  addNode: (nodeType: NodeType, position: XY) => string
+  updateNodeData: (nodeId: string, data: Partial<NodeData>) => void
+  onNodesChange: (changes: Parameters<typeof applyNodeChanges>[0]) => void
+  onEdgesChange: (changes: Parameters<typeof applyEdgeChanges>[0]) => void
+  onConnect: (connection: Parameters<typeof rfAddEdge>[0]) => void
   deleteNode: (nodeId: string) => void
-  addEdge: (edge: FlowEdge) => void
-  deleteEdge: (edgeId: string) => void
   selectNode: (nodeId: string | null) => void
   setPreviewOpen: (open: boolean) => void
   setFlowName: (name: string) => void
   markSaved: () => void
   validate: () => ValidationError[]
+
+  // Helpers to get app-level node/edge types
+  getFlowNodes: () => FlowNode[]
+  getFlowEdges: () => FlowEdge[]
 }
 
-const FlowEditorContext = createContext<FlowEditorContextValue | null>(null)
+function createFlowStore() {
+  return createStore<FlowStore>()(
+    subscribeWithSelector((set, get) => ({
+      flowId: null,
+      flowName: 'Luồng mới',
+      status: 'draft',
+      nodes: [],
+      edges: [],
+      selectedNodeId: null,
+      hasUnsavedChanges: false,
+      isPreviewOpen: false,
+      validationErrors: [],
 
-export function FlowEditorProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE)
+      setFlow: (flow) => {
+        // Convert FlowNode[] → RF Node[]
+        const rfNodes: Node<{ nodeType: NodeType; nodeData: NodeData }>[] =
+          flow.nodes.map(n => ({
+            id: n.id,
+            type: 'flowNode',
+            position: n.position,
+            data: { nodeType: n.type, nodeData: n.data },
+            selected: false,
+          }))
+        const rfEdges: Edge[] = flow.edges.map(e => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.sourceHandle ?? null,
+          targetHandle: null,
+          label: e.label,
+        }))
+        set({
+          flowId: flow.id,
+          flowName: flow.name,
+          status: flow.status,
+          nodes: rfNodes,
+          edges: rfEdges,
+          selectedNodeId: null,
+          hasUnsavedChanges: false,
+          validationErrors: [],
+        })
+      },
 
-  const setFlow = useCallback((flow: FlowDetail) =>
-    dispatch({ type: 'SET_FLOW', payload: flow }), [])
-
-  const addNode = useCallback((nodeType: NodeType, position: XY) =>
-    dispatch({ type: 'ADD_NODE', payload: { nodeType, position } }), [])
-
-  const updateNode = useCallback((nodeId: string, data: Partial<NodeData>) =>
-    dispatch({ type: 'UPDATE_NODE', payload: { nodeId, data } }), [])
-
-  const moveNode = useCallback((nodeId: string, position: XY) =>
-    dispatch({ type: 'MOVE_NODE', payload: { nodeId, position } }), [])
-
-  const deleteNode = useCallback((nodeId: string) =>
-    dispatch({ type: 'DELETE_NODE', payload: { nodeId } }), [])
-
-  const addEdge = useCallback((edge: FlowEdge) =>
-    dispatch({ type: 'ADD_EDGE', payload: edge }), [])
-
-  const deleteEdge = useCallback((edgeId: string) =>
-    dispatch({ type: 'DELETE_EDGE', payload: { edgeId } }), [])
-
-  const selectNode = useCallback((nodeId: string | null) =>
-    dispatch({ type: 'SELECT_NODE', payload: { nodeId } }), [])
-
-  const setPreviewOpen = useCallback((open: boolean) =>
-    dispatch({ type: 'SET_PREVIEW_OPEN', payload: open }), [])
-
-  const setFlowName = useCallback((name: string) =>
-    dispatch({ type: 'SET_FLOW_NAME', payload: name }), [])
-
-  const markSaved = useCallback(() =>
-    dispatch({ type: 'MARK_SAVED' }), [])
-
-  const validate = useCallback((): ValidationError[] => {
-    const { nodes, edges } = state
-    const errors: ValidationError[] = []
-
-    const startNode = nodes.find(n => n.type === 'start')
-    if (!startNode) {
-      errors.push({ code: 'NO_START_NODE', message: 'Flow cần có node Bắt đầu' })
-      dispatch({ type: 'SET_VALIDATION_ERRORS', payload: errors })
-      return errors
-    }
-
-    // Check start has child
-    const startEdges = edges.filter(e => e.source === startNode.id)
-    if (startEdges.length === 0) {
-      errors.push({ code: 'NO_CONTENT_NODE', message: 'Cần có ít nhất 1 node sau điểm Bắt đầu' })
-    }
-
-    // BFS reachable nodes
-    const reachable = new Set<string>([startNode.id])
-    const queue = [startNode.id]
-    while (queue.length) {
-      const curr = queue.shift()!
-      edges.filter(e => e.source === curr).forEach(e => {
-        if (!reachable.has(e.target)) {
-          reachable.add(e.target)
-          queue.push(e.target)
+      addNode: (nodeType, position) => {
+        _nodeCounter++
+        const id = `node_${_nodeCounter}`
+        const newNode: Node<{ nodeType: NodeType; nodeData: NodeData }> = {
+          id,
+          type: 'flowNode',
+          position,
+          data: { nodeType, nodeData: defaultNodeData(nodeType) },
+          selected: false,
         }
-      })
-    }
+        set(s => ({
+          nodes: [...s.nodes, newNode],
+          selectedNodeId: id,
+          hasUnsavedChanges: true,
+        }))
+        return id
+      },
 
-    nodes.forEach(n => {
-      if (n.type !== 'start' && !reachable.has(n.id)) {
-        errors.push({ nodeId: n.id, code: 'DISCONNECTED_NODE', message: `Node chưa được kết nối` })
-      }
-    })
+      updateNodeData: (nodeId, data) => {
+        set(s => ({
+          nodes: s.nodes.map(n =>
+            n.id === nodeId
+              ? { ...n, data: { ...n.data, nodeData: { ...n.data.nodeData, ...data } } }
+              : n
+          ),
+          hasUnsavedChanges: true,
+        }))
+      },
 
-    // Empty content
-    nodes.filter(n => ['text', 'image', 'video', 'audio', 'file'].includes(n.type)).forEach(n => {
-      const d = n.data as any
-      const isEmpty = n.type === 'text' ? !d.content : !d.url && !d.fileId
-      if (isEmpty) {
-        errors.push({ nodeId: n.id, code: 'EMPTY_CONTENT', message: 'Node chưa có nội dung' })
-      }
-    })
+      onNodesChange: (changes) => {
+        set(s => {
+          const updated = applyNodeChanges(changes, s.nodes) as Node<{ nodeType: NodeType; nodeData: NodeData }>[]
 
-    // Condition must have conditions
-    nodes.filter(n => n.type === 'condition').forEach(n => {
-      const d = n.data as any
-      if (!d.conditions || d.conditions.length === 0) {
-        errors.push({ nodeId: n.id, code: 'EMPTY_CONDITION', message: 'Node Điều kiện cần ít nhất 1 điều kiện' })
-      }
-    })
+          // Sync selectedNodeId when a node is selected via RF
+          let selectedNodeId = s.selectedNodeId
+          for (const c of changes) {
+            if (c.type === 'select') {
+              selectedNodeId = c.selected ? c.id : (selectedNodeId === c.id ? null : selectedNodeId)
+            }
+            if (c.type === 'remove') {
+              if (selectedNodeId === c.id) selectedNodeId = null
+            }
+          }
 
-    // Random must sum to 100
-    nodes.filter(n => n.type === 'random').forEach(n => {
-      const d = n.data as any
-      const total = (d.branches || []).reduce((s: number, b: any) => s + b.percentage, 0)
-      if (total !== 100) {
-        errors.push({ nodeId: n.id, code: 'INVALID_PERCENTAGE', message: `Tổng tỷ lệ = ${total}%, cần = 100%` })
-      }
-    })
+          return { nodes: updated, selectedNodeId, hasUnsavedChanges: true }
+        })
+      },
 
-    dispatch({ type: 'SET_VALIDATION_ERRORS', payload: errors })
-    return errors
-  }, [state])
+      onEdgesChange: (changes) => {
+        set(s => ({
+          edges: applyEdgeChanges(changes, s.edges),
+          hasUnsavedChanges: true,
+        }))
+      },
 
-  return (
-    <FlowEditorContext.Provider value={{
-      state, setFlow, addNode, updateNode, moveNode, deleteNode,
-      addEdge, deleteEdge, selectNode, setPreviewOpen, setFlowName,
-      markSaved, validate,
-    }}>
-      {children}
-    </FlowEditorContext.Provider>
+      onConnect: (connection) => {
+        set(s => {
+          // Prevent duplicate connections from the same source handle
+          const filtered = s.edges.filter(e => {
+            if (e.source === connection.source && e.sourceHandle === (connection.sourceHandle ?? null)) {
+              return false // remove old edge from same handle
+            }
+            return true
+          })
+          return {
+            edges: rfAddEdge(
+              {
+                ...connection,
+                id: `edge_${Date.now()}`,
+                animated: false,
+                style: { strokeWidth: 2 },
+              },
+              filtered
+            ),
+            hasUnsavedChanges: true,
+          }
+        })
+      },
+
+      deleteNode: (nodeId) => {
+        set(s => ({
+          nodes: s.nodes.filter(n => n.id !== nodeId),
+          edges: s.edges.filter(e => e.source !== nodeId && e.target !== nodeId),
+          selectedNodeId: s.selectedNodeId === nodeId ? null : s.selectedNodeId,
+          hasUnsavedChanges: true,
+        }))
+      },
+
+      selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
+
+      setPreviewOpen: (open) => set({ isPreviewOpen: open }),
+
+      setFlowName: (name) => set({ flowName: name, hasUnsavedChanges: true }),
+
+      markSaved: () => set({ hasUnsavedChanges: false }),
+
+      validate: () => {
+        const { nodes, edges } = get()
+        const errors: ValidationError[] = []
+
+        const startNode = nodes.find(n => n.data.nodeType === 'start')
+        if (!startNode) {
+          errors.push({ code: 'NO_START_NODE', message: 'Flow cần có node Bắt đầu' })
+          set({ validationErrors: errors })
+          return errors
+        }
+
+        const startEdges = edges.filter(e => e.source === startNode.id)
+        if (startEdges.length === 0) {
+          errors.push({ code: 'NO_CONTENT_NODE', message: 'Cần có ít nhất 1 node sau điểm Bắt đầu' })
+        }
+
+        // BFS reachability
+        const reachable = new Set<string>([startNode.id])
+        const queue = [startNode.id]
+        while (queue.length) {
+          const curr = queue.shift()!
+          edges.filter(e => e.source === curr).forEach(e => {
+            if (!reachable.has(e.target)) {
+              reachable.add(e.target)
+              queue.push(e.target)
+            }
+          })
+        }
+
+        nodes.forEach(n => {
+          if (n.data.nodeType !== 'start' && !reachable.has(n.id)) {
+            errors.push({ nodeId: n.id, code: 'DISCONNECTED_NODE', message: 'Node chưa được kết nối' })
+          }
+          if (['text', 'image', 'video', 'audio', 'file'].includes(n.data.nodeType)) {
+            const d = n.data.nodeData as any
+            const isEmpty = n.data.nodeType === 'text' ? !d.content : !d.url && !d.fileId
+            if (isEmpty) {
+              errors.push({ nodeId: n.id, code: 'EMPTY_CONTENT', message: 'Node chưa có nội dung' })
+            }
+          }
+          if (n.data.nodeType === 'condition') {
+            const d = n.data.nodeData as any
+            if (!d.conditions || d.conditions.length === 0) {
+              errors.push({ nodeId: n.id, code: 'EMPTY_CONDITION', message: 'Node Điều kiện cần ít nhất 1 điều kiện' })
+            }
+          }
+          if (n.data.nodeType === 'random') {
+            const d = n.data.nodeData as any
+            const total = (d.branches || []).reduce((s: number, b: any) => s + b.percentage, 0)
+            if (total !== 100) {
+              errors.push({ nodeId: n.id, code: 'INVALID_PERCENTAGE', message: `Tổng tỷ lệ = ${total}%, cần = 100%` })
+            }
+          }
+        })
+
+        set({ validationErrors: errors })
+        return errors
+      },
+
+      getFlowNodes: () => {
+        return get().nodes.map(n => ({
+          id: n.id,
+          type: n.data.nodeType,
+          position: n.position,
+          data: n.data.nodeData,
+        }))
+      },
+
+      getFlowEdges: () => {
+        return get().edges.map(e => ({
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.sourceHandle ?? undefined,
+          label: e.label as string | undefined,
+        }))
+      },
+    }))
   )
 }
 
-export function useFlowEditor() {
-  const ctx = useContext(FlowEditorContext)
-  if (!ctx) throw new Error('useFlowEditor must be used within FlowEditorProvider')
-  return ctx
+// ─────────────────────────────────────────────────────────────────────────────
+// Context
+// ─────────────────────────────────────────────────────────────────────────────
+type FlowStoreApi = ReturnType<typeof createFlowStore>
+const FlowStoreContext = createContext<FlowStoreApi | null>(null)
+
+export function FlowEditorProvider({ children }: { children: ReactNode }) {
+  const storeRef = useRef<FlowStoreApi | null>(null)
+  if (!storeRef.current) {
+    storeRef.current = createFlowStore()
+  }
+  return (
+    <FlowStoreContext.Provider value={storeRef.current}>
+      {children}
+    </FlowStoreContext.Provider>
+  )
+}
+
+export function useFlowEditor<T = FlowStore>(selector?: (s: FlowStore) => T): T {
+  const store = useContext(FlowStoreContext)
+  if (!store) throw new Error('useFlowEditor must be used within FlowEditorProvider')
+  return useStore(store, selector ?? ((s) => s as T))
 }
