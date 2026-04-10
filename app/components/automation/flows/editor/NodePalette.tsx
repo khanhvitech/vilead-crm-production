@@ -39,7 +39,7 @@ export default function NodePalette({ onDragStart }: NodePaletteProps) {
   return (
     <div
       className="flex flex-col overflow-hidden shrink-0"
-      style={{ width: 240, background: 'white', borderRight: '1px solid #E5E7EB' }}
+      style={{ width: 200, background: 'white', borderRight: '1px solid #E5E7EB' }}
     >
       {/* Header */}
       <div className="px-4 py-3 border-b border-gray-100">

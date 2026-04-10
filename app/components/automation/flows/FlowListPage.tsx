@@ -32,6 +32,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
   const [createModalOpen, setCreateModalOpen] = useState(false)
   const [folderModal, setFolderModal] = useState<FolderModal | null>(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [bulkDeleteIds, setBulkDeleteIds] = useState<string[] | null>(null)
 
   // ── Filtered & sorted flows ────────────────────────────────────────────
   const filteredFlows = useMemo(() => {
@@ -130,11 +131,66 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
   }
 
   const handleDelete = (id: string) => setDeleteConfirmId(id)
+
   const confirmDelete = () => {
     if (deleteConfirmId) {
       setFlows(prev => prev.filter(f => f.id !== deleteConfirmId))
       setDeleteConfirmId(null)
     }
+  }
+
+  // ── Rename ─────────────────────────────────────────────────────────────
+  const handleRename = (id: string, newName: string) => {
+    setFlows(prev => prev.map(f =>
+      f.id === id ? { ...f, name: newName, updatedAt: new Date().toISOString() } : f
+    ))
+  }
+
+  // ── Shortcut update ────────────────────────────────────────────────────
+  const handleUpdateShortcut = (id: string, shortcut: string | null) => {
+    setFlows(prev => prev.map(f =>
+      f.id === id ? { ...f, shortcut, updatedAt: new Date().toISOString() } : f
+    ))
+  }
+
+  // ── Bulk operations ────────────────────────────────────────────────────
+  const handleMoveToFolder = (ids: string[], folderId: string) => {
+    const folder = folders.find(f => f.id === folderId)
+    if (!folder) return
+    setFlows(prev => prev.map(f =>
+      ids.includes(f.id)
+        ? { ...f, folder: { id: folder.id, name: folder.name }, updatedAt: new Date().toISOString() }
+        : f
+    ))
+  }
+
+  const handleBulkDelete = (ids: string[]) => {
+    setBulkDeleteIds(ids)
+  }
+
+  const confirmBulkDelete = () => {
+    if (bulkDeleteIds) {
+      setFlows(prev => prev.filter(f => !bulkDeleteIds.includes(f.id)))
+      setBulkDeleteIds(null)
+    }
+  }
+
+  const handleBulkDuplicate = (ids: string[]) => {
+    const copies: Flow[] = []
+    ids.forEach(id => {
+      const flow = flows.find(f => f.id === id)
+      if (flow) {
+        copies.push({
+          ...flow,
+          id: `flow_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
+          name: `${flow.name} - Bản sao`,
+          shortcut: null,
+          status: 'draft',
+          updatedAt: new Date().toISOString(),
+        })
+      }
+    })
+    setFlows(prev => [...copies, ...prev])
   }
 
   // Folder flow counts
@@ -223,6 +279,12 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
           onEdit={onOpenEditor}
           onDuplicate={handleDuplicate}
           onDelete={handleDelete}
+          onRename={handleRename}
+          onUpdateShortcut={handleUpdateShortcut}
+          onMoveToFolder={handleMoveToFolder}
+          onBulkDelete={handleBulkDelete}
+          onBulkDuplicate={handleBulkDuplicate}
+          folders={foldersWithCount}
           sortField={sortField}
           sortOrder={sortOrder}
           onSort={handleSort}
@@ -274,7 +336,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
         </div>
       )}
 
-      {/* Delete confirm */}
+      {/* Single delete confirm */}
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirmId(null)} />
@@ -287,6 +349,26 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
             <div className="flex gap-3">
               <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
               <button onClick={confirmDelete} className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700">Xóa</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk delete confirm */}
+      {bulkDeleteIds && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setBulkDeleteIds(null)} />
+          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-80 text-center">
+            <div className="w-12 h-12 bg-red-50 rounded-xl mx-auto flex items-center justify-center mb-4">
+              <Trash2 className="w-6 h-6 text-red-500" />
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-1.5">
+              Xóa {bulkDeleteIds.length} luồng tin nhắn?
+            </h3>
+            <p className="text-sm text-gray-500 mb-5">Hành động này không thể hoàn tác.</p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkDeleteIds(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
+              <button onClick={confirmBulkDelete} className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700">Xóa tất cả</button>
             </div>
           </div>
         </div>

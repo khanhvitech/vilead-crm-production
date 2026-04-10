@@ -48,6 +48,7 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
   const addNodeFn      = useFlowEditor(s => s.addNode)
   const updateNodeData = useFlowEditor(s => s.updateNodeData)
   const deleteNodeFn   = useFlowEditor(s => s.deleteNode)
+  const duplicateNodeFn = useFlowEditor(s => s.duplicateNode)
   const selectNodeFn   = useFlowEditor(s => s.selectNode)
   const setPreviewOpen = useFlowEditor(s => s.setPreviewOpen)
   const setFlowName    = useFlowEditor(s => s.setFlowName)
@@ -144,30 +145,27 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
       />
 
       {/* Main area: palette | canvas | config panel */}
-      <div className="flex flex-1 min-h-0 overflow-hidden relative">
-        {/* Left: Node Palette — always visible */}
-        <NodePalette onDragStart={handleDragStart} />
+      <div className="flex flex-1 min-h-0 overflow-hidden">
+        {/* Left: Node Palette — hidden when config panel is open to save space */}
+        {!selectedFlowNode && (
+          <NodePalette onDragStart={handleDragStart} />
+        )}
 
         {/* Center: Canvas — fills remaining space */}
         <FlowCanvas onDropNode={handleDropNode} />
 
-        {/* Right: Config Panel — floating overlay on canvas right side */}
+        {/* Right: Config Panel — flex sibling, pushes canvas left */}
         {selectedFlowNode && (
           <div
-            className="absolute right-0 top-0 h-full z-30 shadow-2xl"
-            style={{
-              width: 360,
-              background: 'white',
-              borderLeft: '1px solid #E5E7EB',
-              display: 'flex',
-              flexDirection: 'column',
-            }}
+            className="h-full shrink-0 shadow-2xl border-l border-gray-200 flex flex-col bg-white overflow-hidden"
+            style={{ width: 340 }}
           >
             <ConfigPanel
               selectedNode={selectedFlowNode}
               nodeIndex={selectedNodeIndex}
               onUpdate={(nodeId, data) => updateNodeData(nodeId, data)}
               onDelete={(nodeId) => { deleteNodeFn(nodeId); selectNodeFn(null) }}
+              onDuplicate={(nodeId) => duplicateNodeFn(nodeId)}
               onClose={() => selectNodeFn(null)}
             />
           </div>

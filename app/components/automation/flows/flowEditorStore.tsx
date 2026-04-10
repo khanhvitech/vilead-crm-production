@@ -21,16 +21,16 @@ import { NODE_WIDTH, NODE_HEIGHT } from './constants'
 // ─────────────────────────────────────────────────────────────────────────────
 function defaultNodeData(nodeType: NodeType): NodeData {
   switch (nodeType) {
-    case 'text':          return { content: '' }
-    case 'image':         return { url: '', caption: '' }
-    case 'video':         return { url: '' }
-    case 'audio':         return { fileId: '' }
-    case 'file':          return { fileId: '', fileName: '', fileSize: 0 }
+    case 'text':          return { items: [{ id: `txt_${Date.now()}`, content: '' }] }
+    case 'image':         return { items: [{ id: `img_${Date.now()}`, url: '', caption: '' }] }
+    case 'video':         return { items: [{ id: `vid_${Date.now()}`, url: '' }] }
+    case 'audio':         return { items: [{ id: `aud_${Date.now()}`, fileId: '' }] }
+    case 'file':          return { items: [{ id: `file_${Date.now()}`, fileId: '', fileName: '', fileSize: 0 }] }
     case 'carousel':      return { cards: [{ id: `card_${Date.now()}`, imageUrl: '', title: '', description: '', buttons: [] }] }
     case 'buttons':       return { buttons: [{ id: `btn_${Date.now()}`, label: 'Nút 1', type: 'flow', value: '' }] }
     case 'quick_reply':   return { replies: [{ id: `qr_${Date.now()}`, label: 'Trả lời 1', type: 'flow' }] }
     case 'wait_response': return { timeoutValue: 24, timeoutUnit: 'hours' }
-    case 'condition':     return { logic: 'and', conditions: [] }
+    case 'condition':     return { branches: [{ id: `branch_${Date.now()}`, logic: 'and', conditions: [] }] }
     case 'random':        return { branches: [{ id: `b1_${Date.now()}`, name: 'Nhánh A', percentage: 50 }, { id: `b2_${Date.now()}`, name: 'Nhánh B', percentage: 50 }] }
     case 'delay':         return { value: 1, unit: 'hours' }
     case 'action':        return { actions: [] }
@@ -63,6 +63,7 @@ interface FlowStore {
   onEdgesChange: (changes: Parameters<typeof applyEdgeChanges>[0]) => void
   onConnect: (connection: Parameters<typeof rfAddEdge>[0]) => void
   deleteNode: (nodeId: string) => void
+  duplicateNode: (nodeId: string) => string | null
   selectNode: (nodeId: string | null) => void
   setPreviewOpen: (open: boolean) => void
   setFlowName: (name: string) => void
@@ -203,6 +204,27 @@ function createFlowStore() {
           selectedNodeId: s.selectedNodeId === nodeId ? null : s.selectedNodeId,
           hasUnsavedChanges: true,
         }))
+      },
+
+      duplicateNode: (nodeId) => {
+        const state = get()
+        const original = state.nodes.find(n => n.id === nodeId)
+        if (!original) return null
+        _nodeCounter++
+        const newId = `node_${_nodeCounter}`
+        const cloned = {
+          ...original,
+          id: newId,
+          position: { x: original.position.x + 60, y: original.position.y + 60 },
+          selected: false,
+          data: { ...original.data, nodeData: { ...original.data.nodeData } },
+        }
+        set(s => ({
+          nodes: [...s.nodes, cloned],
+          selectedNodeId: newId,
+          hasUnsavedChanges: true,
+        }))
+        return newId
       },
 
       selectNode: (nodeId) => set({ selectedNodeId: nodeId }),

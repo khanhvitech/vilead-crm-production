@@ -14,11 +14,20 @@ export type NodeType =
 
 // ---- Node Data Types ----
 
-export interface TextNodeData { content: string }
-export interface ImageNodeData { url?: string; fileId?: string; caption?: string }
-export interface VideoNodeData { url?: string; fileId?: string }
-export interface AudioNodeData { fileId?: string }
-export interface FileNodeData { fileId?: string; fileName?: string; fileSize?: number }
+export interface TextItem { id: string; content: string }
+export interface TextNodeData { items?: TextItem[]; content?: string }
+
+export interface ImageItem { id: string; url?: string; fileId?: string; caption?: string }
+export interface ImageNodeData { items?: ImageItem[]; url?: string; fileId?: string; caption?: string }
+
+export interface VideoItem { id: string; url?: string; fileId?: string }
+export interface VideoNodeData { items?: VideoItem[]; url?: string; fileId?: string }
+
+export interface AudioItem { id: string; fileId?: string }
+export interface AudioNodeData { items?: AudioItem[]; fileId?: string }
+
+export interface FileItem { id: string; fileId?: string; fileName?: string; fileSize?: number }
+export interface FileNodeData { items?: FileItem[]; fileId?: string; fileName?: string; fileSize?: number }
 export interface CarouselCard {
   id: string;
   imageUrl?: string;
@@ -66,9 +75,15 @@ export interface Condition {
   operator: ConditionOperator;
   value: string | string[];
 }
-export interface ConditionNodeData {
+
+export interface ConditionBranch {
+  id: string;
   logic: 'and' | 'or';
   conditions: Condition[];
+}
+
+export interface ConditionNodeData {
+  branches: ConditionBranch[];
 }
 
 export interface RandomBranch { id: string; name: string; percentage: number }
@@ -93,11 +108,25 @@ export type ActionItem =
 export interface ActionNodeData { actions: ActionItem[] }
 export interface StartNodeData { label?: string }
 
+export interface BaseNodeData {
+  customName?: string;
+}
+
 export type NodeData =
-  | StartNodeData | TextNodeData | ImageNodeData | VideoNodeData
-  | AudioNodeData | FileNodeData | CarouselNodeData | ButtonsNodeData
-  | QuickReplyNodeData | WaitResponseNodeData | ConditionNodeData
-  | RandomNodeData | DelayNodeData | ActionNodeData;
+  | (StartNodeData & BaseNodeData)
+  | (TextNodeData & BaseNodeData)
+  | (ImageNodeData & BaseNodeData)
+  | (VideoNodeData & BaseNodeData)
+  | (AudioNodeData & BaseNodeData)
+  | (FileNodeData & BaseNodeData)
+  | (CarouselNodeData & BaseNodeData)
+  | (ButtonsNodeData & BaseNodeData)
+  | (QuickReplyNodeData & BaseNodeData)
+  | (WaitResponseNodeData & BaseNodeData)
+  | (ConditionNodeData & BaseNodeData)
+  | (RandomNodeData & BaseNodeData)
+  | (DelayNodeData & BaseNodeData)
+  | (ActionNodeData & BaseNodeData);
 
 // ---- Flow Node & Edge ----
 

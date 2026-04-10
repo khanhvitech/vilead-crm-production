@@ -1,11 +1,11 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import {
   X, Plus, Trash2, Smile, Code2, Info, ChevronDown,
   MessageSquare, Image, Video, Mic, Paperclip, LayoutGrid,
   GitBranch, Shuffle, Timer, Zap, Clock, MousePointerClick, MessageCircle,
-  Play, Sliders
+  Play, Copy, ChevronUp, GripVertical, FileText
 } from 'lucide-react'
 import { FlowNode, NodeType, NodeData, TextNodeData, ConditionNodeData, RandomNodeData, DelayNodeData, ActionNodeData, ButtonsNodeData, QuickReplyNodeData, WaitResponseNodeData, ImageNodeData, CarouselNodeData } from '../types'
 import { NODE_COLOR, NODE_ICON_BG, NODE_LABEL, CONDITION_FIELDS, CONDITION_OPERATORS_BY_TYPE, ACTION_TYPES } from '../constants'
@@ -82,10 +82,63 @@ function Input({ value, onChange, placeholder, className = '' }: {
 // Upload zone
 function UploadZone({ label, icon, hint }: { label: string; icon: React.ReactNode; hint?: string }) {
   return (
-    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors">
-      <div className="text-gray-300">{icon}</div>
-      <p className="text-sm font-medium text-gray-500">{label}</p>
-      {hint && <p className="text-xs text-gray-300">{hint}</p>}
+    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+      <div className="text-gray-300 group-hover:scale-110 transition-transform duration-300 group-hover:text-blue-500">{icon}</div>
+      <p className="text-sm font-medium text-gray-500 group-hover:text-blue-600">{label}</p>
+      {hint && <p className="text-xs text-gray-300 group-hover:text-blue-400/70">{hint}</p>}
+    </div>
+  )
+}
+
+function NodeItemsContainer<T extends { id: string }>({
+  items, onChange, newItemFactory, addButtonText, renderItem
+}: {
+  items: T[],
+  onChange: (items: T[]) => void,
+  newItemFactory: () => T,
+  addButtonText: string,
+  renderItem: (item: T, update: (p: Partial<T>) => void) => React.ReactNode
+}) {
+  const count = items.length
+  return (
+    <div className="space-y-4 pr-7 relative">
+      {items.map((item, i) => (
+        <div key={item.id} className="relative group/item">
+          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden p-0" style={{ borderStyle: 'dotted', borderWidth: 1.5 }}>
+            {renderItem(item, (patch) => onChange(items.map(it => it.id === item.id ? { ...it, ...patch } : it)))}
+          </div>
+          <div className="absolute top-1 -right-7 flex flex-col items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-10 w-6">
+            <button onClick={() => onChange(items.filter(it => it.id !== item.id))} disabled={count <= 1} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-red-500 rounded disabled:opacity-30 p-1" title="Xóa">
+              <X size={15} />
+            </button>
+            <button onClick={() => {
+              const arr = [...items]
+              arr.splice(i + 1, 0, { ...item, id: `item_${Date.now()}` } as T)
+              onChange(arr)
+            }} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-blue-500 rounded p-1" title="Nhân bản">
+              <Copy size={13} />
+            </button>
+            <button onClick={() => {
+              const arr = [...items]
+              ;[arr[i], arr[i - 1]] = [arr[i - 1], arr[i]]
+              onChange(arr)
+            }} disabled={i === 0} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 p-1" title="Lên">
+              <ChevronUp size={15} />
+            </button>
+            <button onClick={() => {
+              const arr = [...items]
+              ;[arr[i], arr[i + 1]] = [arr[i + 1], arr[i]]
+              onChange(arr)
+            }} disabled={i === count - 1} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 p-1" title="Xuống">
+              <ChevronDown size={15} />
+            </button>
+          </div>
+        </div>
+      ))}
+      <button onClick={() => onChange([...items, newItemFactory()])} className="w-[calc(100%+36px)] flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
+        <Plus size={16} />
+        {addButtonText}
+      </button>
     </div>
   )
 }
@@ -119,73 +172,33 @@ function TextForm({ data, onChange, nodeIndex }: { data: TextNodeData; onChange:
 
       <Divider />
 
-      {/* Input area */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-2 text-gray-500">
-            <MessageSquare size={14} />
-            <span className="text-xs font-medium">Nhập liệu</span>
-          </div>
-          <button className="text-gray-400 hover:text-gray-600"><Sliders size={14} /></button>
-        </div>
-        <div className="border border-gray-200 rounded-xl overflow-hidden">
-          <textarea
-            value={data.content || ''}
-            onChange={e => onChange({ content: e.target.value })}
-            placeholder="Nhập nội dung tin nhắn..."
-            rows={4}
-            maxLength={1200}
-            className="w-full px-3.5 pt-3 pb-1 text-sm text-gray-700 placeholder-gray-300 focus:outline-none resize-none"
-          />
-          <div className="flex items-center justify-between px-3 pb-2">
-            <div className="flex items-center gap-2">
-              <button className="text-gray-400 hover:text-gray-600 transition-colors"><Smile size={15} /></button>
-              <button className="text-gray-400 hover:text-gray-600 transition-colors"><Code2 size={15} /></button>
+      <NodeItemsContainer 
+        items={data.items || []}
+        onChange={(items) => onChange({ items })}
+        newItemFactory={() => ({ id: `txt_${Date.now()}`, content: '' })}
+        addButtonText="Thêm nội dung văn bản"
+        renderItem={(item, update) => (
+          <div>
+            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50/50">
+              <textarea
+                value={item.content || ''}
+                onChange={e => update({ content: e.target.value })}
+                placeholder="Nhập nội dung tin nhắn..."
+                rows={4}
+                maxLength={1200}
+                className="w-full px-3.5 pt-3 pb-1 text-sm text-gray-700 placeholder-gray-300 bg-transparent focus:outline-none resize-none"
+              />
+              <div className="flex items-center justify-between px-3 pb-2">
+                <div className="flex items-center gap-2">
+                  <button className="text-gray-400 hover:text-gray-600 transition-colors"><Smile size={15} /></button>
+                  <button className="text-gray-400 hover:text-gray-600 transition-colors"><Code2 size={15} /></button>
+                </div>
+                <span className="text-xs text-gray-300">{(item.content || '').length}/1200</span>
+              </div>
             </div>
-            <span className="text-xs text-gray-300">{(data.content || '').length}/1200</span>
           </div>
-        </div>
-        <div className="flex items-center gap-1.5 mt-2">
-          <Info size={11} className="text-gray-300 shrink-0" />
-          <p className="text-xs text-gray-400">Bạn sẽ nhận được phản hồi từ khách hàng</p>
-        </div>
-      </div>
-
-      {/* Quick reply shortcuts */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {['Trả lời nhanh', 'Email', 'Số điện thoại'].map(t => (
-          <button key={t} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
-            {t}
-          </button>
-        ))}
-      </div>
-
-      <Divider />
-
-      {/* Add content buttons */}
-      <div>
-        <SectionLabel>Thêm một nội dung</SectionLabel>
-        <div className="grid grid-cols-4 gap-2">
-          {[
-            { icon: <MessageSquare size={18} />, label: 'Văn bản' },
-            { icon: <Image size={18} />, label: 'Hình ảnh' },
-            { icon: <LayoutGrid size={18} />, label: 'Nhóm ảnh' },
-            { icon: <LayoutGrid size={18} />, label: 'Bộ sưu tập' },
-            { icon: <MessageSquare size={18} />, label: 'Templates' },
-            { icon: <Video size={18} />, label: 'Video' },
-            { icon: <Mic size={18} />, label: 'Audio' },
-            { icon: <Plus size={18} />, label: 'Nhiều hơn' },
-          ].map(item => (
-            <button
-              key={item.label}
-              className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-gray-500 hover:text-blue-600"
-            >
-              {item.icon}
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+        )}
+      />
     </div>
   )
 }
@@ -193,74 +206,73 @@ function TextForm({ data, onChange, nodeIndex }: { data: TextNodeData; onChange:
 // ─── Image form ───────────────────────────────────────────────────────────────
 function ImageForm({ data, onChange }: { data: ImageNodeData; onChange: (d: Partial<ImageNodeData>) => void }) {
   return (
-    <div className="space-y-4">
-      <UploadZone
-        label="Tải lên ảnh"
-        icon={<Image size={32} />}
-        hint="Kích thước ảnh: Nhỏ (1.91:1) - Lớn (1:1) • Dung lượng ảnh: Tối đa 5MB"
-      />
-      <div className="space-y-2">
-        <div className="relative">
-          <textarea
-            value={data.caption || ''}
-            onChange={e => onChange({ caption: e.target.value })}
-            placeholder="Nhập tiêu đề..."
-            rows={2}
-            maxLength={45}
-            className="w-full border border-gray-200 rounded-xl px-3.5 pt-3 pb-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-          />
-          <span className="absolute bottom-2 right-3 text-xs text-gray-300">{(data.caption || '').length}/45</span>
+    <NodeItemsContainer 
+      items={data.items || []}
+      onChange={(items) => onChange({ items })}
+      newItemFactory={() => ({ id: `img_${Date.now()}`, url: '', caption: '' })}
+      addButtonText="Thêm hình ảnh"
+      renderItem={(item, update) => (
+        <div className="space-y-3 p-1">
+          <UploadZone label="Tải lên ảnh" icon={<Image size={32} />} hint="Kích thước ảnh: Nhỏ (1.91:1) - Lớn (1:1) • Tối đa 5MB" />
+          <div className="relative">
+            <textarea value={item.caption || ''} onChange={e => update({ caption: e.target.value })} placeholder="Nhập tiêu đề..." rows={2} maxLength={45} className="w-full border border-gray-200 rounded-xl px-3.5 pt-3 pb-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-50/50" />
+            <span className="absolute bottom-2 right-3 text-xs text-gray-300">{(item.caption || '').length}/45</span>
+          </div>
         </div>
-      </div>
-      <button className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
-        <Plus size={16} />
-        Thêm nút
-      </button>
-    </div>
+      )}
+    />
   )
 }
 
 // ─── Video form ───────────────────────────────────────────────────────────────
 function VideoForm({ data, onChange }: { data: any; onChange: (d: any) => void }) {
   return (
-    <div className="space-y-4">
-      <UploadZone
-        label="Tải lên video hoặc link URL"
-        icon={<Video size={32} />}
-        hint="Giới hạn Video: 15MB"
-      />
-      <Input value={data.url || ''} onChange={v => onChange({ url: v })} placeholder="Dán link video URL..." />
-      <button className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors">
-        <Plus size={16} />
-        Thêm nút
-      </button>
-    </div>
+    <NodeItemsContainer 
+      items={data.items || []}
+      onChange={(items) => onChange({ items })}
+      newItemFactory={() => ({ id: `vid_${Date.now()}`, url: '' })}
+      addButtonText="Thêm video"
+      renderItem={(item, update) => (
+        <div className="space-y-3 p-1">
+          <UploadZone label="Tải lên video hoặc link" icon={<Video size={32} />} hint="Giới hạn Video: 15MB" />
+          <Input value={item.url || ''} onChange={v => update({ url: v })} placeholder="Dán link video URL..." className="bg-gray-50/50" />
+        </div>
+      )}
+    />
   )
 }
 
 // ─── Audio form ───────────────────────────────────────────────────────────────
 function AudioForm({ data, onChange }: { data: any; onChange: (d: any) => void }) {
   return (
-    <div className="space-y-4">
-      <UploadZone
-        label="Thêm âm thanh"
-        icon={<Mic size={32} />}
-        hint="MP3, WAV, OGG tối đa 10MB"
-      />
-    </div>
+    <NodeItemsContainer 
+      items={data.items || []}
+      onChange={(items) => onChange({ items })}
+      newItemFactory={() => ({ id: `aud_${Date.now()}`, fileId: '' })}
+      addButtonText="Thêm âm thanh"
+      renderItem={(item, update) => (
+        <div className="p-1">
+          <UploadZone label="Thêm âm thanh" icon={<Mic size={32} />} hint="MP3, WAV, OGG tối đa 10MB" />
+        </div>
+      )}
+    />
   )
 }
 
 // ─── File form ────────────────────────────────────────────────────────────────
 function FileForm({ data, onChange }: { data: any; onChange: (d: any) => void }) {
   return (
-    <div className="space-y-4">
-      <UploadZone
-        label="File đính kèm"
-        icon={<Paperclip size={32} />}
-        hint="Tải tệp lên • Tối đa 10MB"
-      />
-    </div>
+    <NodeItemsContainer 
+      items={data.items || []}
+      onChange={(items) => onChange({ items })}
+      newItemFactory={() => ({ id: `file_${Date.now()}`, fileId: '' })}
+      addButtonText="Thêm file"
+      renderItem={(item, update) => (
+        <div className="p-1">
+          <UploadZone label="File đính kèm" icon={<Paperclip size={32} />} hint="Tải tệp lên • Tối đa 10MB" />
+        </div>
+      )}
+    />
   )
 }
 
@@ -277,14 +289,44 @@ function ButtonsForm({ data, onChange }: { data: ButtonsNodeData; onChange: (d: 
   const updateButton = (id: string, patch: any) => {
     onChange({ buttons: data.buttons.map(b => b.id === id ? { ...b, ...patch } : b) })
   }
+  const duplicateButton = (id: string) => {
+    const src = data.buttons.find(b => b.id === id)
+    if (!src) return
+    const copy = { ...src, id: `btn_${Date.now()}`, label: `${src.label} (bản sao)` }
+    const idx = data.buttons.findIndex(b => b.id === id)
+    const arr = [...data.buttons]; arr.splice(idx + 1, 0, copy)
+    onChange({ buttons: arr })
+  }
+  const moveButton = (id: string, dir: -1 | 1) => {
+    const arr = [...data.buttons]
+    const idx = arr.findIndex(b => b.id === id)
+    const to = idx + dir
+    if (to < 0 || to >= arr.length) return
+    ;[arr[idx], arr[to]] = [arr[to], arr[idx]]
+    onChange({ buttons: arr })
+  }
   return (
     <div className="space-y-4">
       <div className="space-y-2">
         {data.buttons.map((btn, i) => (
-          <div key={btn.id} className="border border-gray-200 rounded-xl p-3 space-y-2">
+          <div key={btn.id} className="border border-gray-200 rounded-xl p-3 space-y-2 group/btn">
             <div className="flex items-center gap-2">
+              <GripVertical size={12} className="text-gray-300 shrink-0" />
               <Input value={btn.label} onChange={v => updateButton(btn.id, { label: v })} placeholder={`Nút ${i + 1}`} className="flex-1" />
-              <button onClick={() => removeButton(btn.id)} className="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
+              {/* Move up */}
+              <button onClick={() => moveButton(btn.id, -1)} disabled={i === 0} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 rounded">
+                <ChevronUp size={12} />
+              </button>
+              {/* Move down */}
+              <button onClick={() => moveButton(btn.id, 1)} disabled={i === data.buttons.length - 1} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 rounded">
+                <ChevronDown size={12} />
+              </button>
+              {/* Duplicate */}
+              <button onClick={() => duplicateButton(btn.id)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-green-600 rounded">
+                <Copy size={12} />
+              </button>
+              {/* Delete */}
+              <button onClick={() => removeButton(btn.id)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
                 <Trash2 size={13} />
               </button>
             </div>
@@ -317,6 +359,22 @@ function QuickReplyForm({ data, onChange }: { data: QuickReplyNodeData; onChange
   const updateReply = (id: string, label: string) => {
     onChange({ replies: data.replies.map(r => r.id === id ? { ...r, label } : r) })
   }
+  const duplicateReply = (id: string) => {
+    const src = data.replies.find(r => r.id === id)
+    if (!src) return
+    const copy = { ...src, id: `qr_${Date.now()}`, label: `${src.label} (bản sao)` }
+    const idx = data.replies.findIndex(r => r.id === id)
+    const arr = [...data.replies]; arr.splice(idx + 1, 0, copy)
+    onChange({ replies: arr })
+  }
+  const moveReply = (id: string, dir: -1 | 1) => {
+    const arr = [...data.replies]
+    const idx = arr.findIndex(r => r.id === id)
+    const to = idx + dir
+    if (to < 0 || to >= arr.length) return
+    ;[arr[idx], arr[to]] = [arr[to], arr[idx]]
+    onChange({ replies: arr })
+  }
   return (
     <div className="space-y-4">
       <div className="border border-gray-200 rounded-xl overflow-hidden">
@@ -333,7 +391,17 @@ function QuickReplyForm({ data, onChange }: { data: QuickReplyNodeData; onChange
       <div className="space-y-2">
         {data.replies.map((reply, i) => (
           <div key={reply.id} className="flex items-center gap-2">
+            <GripVertical size={12} className="text-gray-300 shrink-0" />
             <Input value={reply.label} onChange={v => updateReply(reply.id, v)} placeholder={`Trả lời ${i + 1}`} className="flex-1" />
+            <button onClick={() => moveReply(reply.id, -1)} disabled={i === 0} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 rounded">
+              <ChevronUp size={12} />
+            </button>
+            <button onClick={() => moveReply(reply.id, 1)} disabled={i === data.replies.length - 1} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-gray-600 disabled:opacity-30 rounded">
+              <ChevronDown size={12} />
+            </button>
+            <button onClick={() => duplicateReply(reply.id)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-green-600 rounded">
+              <Copy size={12} />
+            </button>
             <button onClick={() => removeReply(reply.id)} className="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
               <Trash2 size={13} />
             </button>
@@ -378,105 +446,142 @@ function WaitResponseForm({ data, onChange }: { data: WaitResponseNodeData; onCh
 }
 
 // ─── Condition form ───────────────────────────────────────────────────────────
+// ─── Condition form ───────────────────────────────────────────────────────────
 function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: (d: Partial<ConditionNodeData>) => void }) {
-  const addCondition = () => {
+  // Legacy support: if branches is undefined, fallback to wrapping the legacy logic/conditions in a branch
+  const getBranches = () => {
+    if (data.branches) return data.branches
+    const legacy = { id: `branch_${Date.now()}`, logic: (data as any).logic || 'and', conditions: (data as any).conditions || [] }
+    return [legacy]
+  }
+  const branches = getBranches()
+
+  const addBranch = () => {
+    onChange({ branches: [...branches, { id: `branch_${Date.now()}`, logic: 'and', conditions: [] }] })
+  }
+  const removeBranch = (id: string) => {
+    onChange({ branches: branches.filter(b => b.id !== id) })
+  }
+  const updateBranchLogic = (branchId: string, logic: 'and' | 'or') => {
+    onChange({ branches: branches.map(b => b.id === branchId ? { ...b, logic } : b) })
+  }
+
+  const addCondition = (branchId: string) => {
     onChange({
-      conditions: [...data.conditions, { id: `cond_${Date.now()}`, field: 'customer_name' as any, operator: 'contains' as any, value: '' }]
+      branches: branches.map(b => b.id === branchId ? {
+        ...b, conditions: [...b.conditions, { id: `cond_${Date.now()}`, field: 'customer_name' as any, operator: 'contains' as any, value: '' }]
+      } : b)
     })
   }
-  const removeCondition = (id: string) => {
-    onChange({ conditions: data.conditions.filter(c => c.id !== id) })
+  const removeCondition = (branchId: string, condId: string) => {
+    onChange({
+      branches: branches.map(b => b.id === branchId ? {
+        ...b, conditions: b.conditions.filter((c: any) => c.id !== condId)
+      } : b)
+    })
   }
-  const updateCondition = (id: string, patch: any) => {
-    onChange({ conditions: data.conditions.map(c => c.id === id ? { ...c, ...patch } : c) })
+  const updateCondition = (branchId: string, condId: string, patch: any) => {
+    onChange({
+      branches: branches.map(b => b.id === branchId ? {
+        ...b, conditions: b.conditions.map((c: any) => c.id === condId ? { ...c, ...patch } : c)
+      } : b)
+    })
   }
+
   const fieldDef = (field: string) => CONDITION_FIELDS.find(f => f.value === field)
 
   return (
     <div className="space-y-4">
-      {/* Logic toggle */}
-      <div>
-        <SectionLabel>Điều kiện lọc</SectionLabel>
-        <div className="flex items-center gap-3">
-          {[
-            { v: 'and', label: 'Thỏa mãn tất cả các điều kiện' },
-            { v: 'or', label: 'Thỏa mãn một trong các điều kiện' },
-          ].map(opt => (
-            <label key={opt.v} className="flex items-center gap-2 cursor-pointer">
-              <div
-                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${data.logic === opt.v ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}
-                onClick={() => onChange({ logic: opt.v as 'and' | 'or' })}
-              >
-                {data.logic === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-              </div>
-              <span className="text-xs text-gray-600">{opt.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <Divider />
-
-      {/* Conditions list */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <SectionLabel>Điều kiện</SectionLabel>
-          <button onClick={addCondition} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-medium">
-            <Plus size={12} />
-            Thêm
-          </button>
-        </div>
-        {data.conditions.length === 0 ? (
-          <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 flex flex-col items-center gap-2">
-            <GitBranch size={24} className="text-gray-200" />
-            <p className="text-sm text-gray-400">Chưa có dữ liệu</p>
-            <button onClick={addCondition} className="text-xs text-blue-600 hover:underline font-medium flex items-center gap-1">
-              <Plus size={12} />
-              Thêm điều kiện
-            </button>
+      {branches.map((branch, branchIndex) => (
+        <div key={branch.id} className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
+          {/* Header */}
+          <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50">
+            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Nhóm điều kiện #{branchIndex + 1}</span>
+            <div className="flex items-center gap-1">
+              <button onClick={() => addCondition(branch.id)} className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+                <Plus size={11} /> Thêm
+              </button>
+              {branches.length > 1 && (
+                <button onClick={() => removeBranch(branch.id)} className="w-6 h-6 flex items-center justify-center text-red-300 hover:bg-red-50 hover:text-red-500 rounded transition-colors" title="Xóa nhóm điều kiện">
+                  <Trash2 size={12} />
+                </button>
+              )}
+            </div>
           </div>
-        ) : (
-          <div className="space-y-2">
-            {data.conditions.map(cond => {
-              const fDef = fieldDef(cond.field)
-              const operators = CONDITION_OPERATORS_BY_TYPE[fDef?.type || 'string'] || []
-              return (
-                <div key={cond.id} className="flex items-start gap-1.5">
-                  <div className="flex-1 space-y-1.5">
-                    <Select value={cond.field} onChange={v => updateCondition(cond.id, { field: v })}>
-                      {CONDITION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
-                    </Select>
-                    <div className="flex gap-1.5">
-                      <Select value={cond.operator} onChange={v => updateCondition(cond.id, { operator: v })} className="flex-1">
-                        {operators.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
-                      </Select>
-                      <Input value={String(cond.value)} onChange={v => updateCondition(cond.id, { value: v })} placeholder="Giá trị" className="flex-1" />
-                    </div>
+          
+          <div className="p-3 space-y-3">
+            {/* Logic toggle */}
+            <div className="flex items-center gap-3">
+              {[
+                { v: 'and', label: 'Thỏa mãn tất cả' },
+                { v: 'or', label: 'Thỏa mãn một trong' },
+              ].map(opt => (
+                <label key={opt.v} className="flex items-center gap-2 cursor-pointer group/logic">
+                  <div
+                    className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${branch.logic === opt.v ? 'border-blue-500 bg-blue-500' : 'border-gray-300 group-hover/logic:border-blue-300'}`}
+                    onClick={() => updateBranchLogic(branch.id, opt.v as 'and' | 'or')}
+                  >
+                    {branch.logic === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
                   </div>
-                  <button onClick={() => removeCondition(cond.id)} className="w-7 h-7 mt-1 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg shrink-0">
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              )
-            })}
+                  <span className="text-[11px] text-gray-600 font-medium select-none">{opt.label}</span>
+                </label>
+              ))}
+            </div>
+
+            {/* Conditions list */}
+            {branch.conditions.length === 0 ? (
+              <div className="border border-dashed border-gray-200 rounded-lg p-4 flex flex-col items-center gap-1">
+                <GitBranch size={14} className="text-gray-300" />
+                <p className="text-[11px] text-gray-400">Chưa có điều kiện</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {branch.conditions.map((cond: any) => {
+                  const fDef = fieldDef(cond.field)
+                  const operators = CONDITION_OPERATORS_BY_TYPE[fDef?.type || 'string'] || []
+                  return (
+                    <div key={cond.id} className="flex items-start gap-1.5 group/cond">
+                      <div className="flex-1 space-y-1.5 bg-gray-50/50 p-1.5 rounded-lg border border-transparent group-hover/cond:border-gray-100 group-hover/cond:bg-gray-50 transition-colors">
+                        <Select value={cond.field} onChange={v => updateCondition(branch.id, cond.id, { field: v })}>
+                          {CONDITION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                        </Select>
+                        <div className="flex gap-1.5">
+                          <Select className="flex-1" value={cond.operator} onChange={v => updateCondition(branch.id, cond.id, { operator: v })}>
+                            {operators.map(op => <option key={op.value} value={op.value}>{op.label}</option>)}
+                          </Select>
+                          <Input className="flex-1" value={String(cond.value)} onChange={v => updateCondition(branch.id, cond.id, { value: v })} placeholder="Giá trị" />
+                        </div>
+                      </div>
+                      <button onClick={() => removeCondition(branch.id, cond.id)} className="w-6 h-6 mt-1 flex items-center justify-center text-red-300 hover:bg-red-50 rounded-lg shrink-0 hover:text-red-500 opacity-0 group-hover/cond:opacity-100 transition-all">
+                        <Trash2 size={12} />
+                      </button>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+            
+            {/* Outcome hint for this branch */}
+            <div className="flex items-center gap-2 pt-2 border-t border-gray-50">
+              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+              <span className="text-[10px] text-green-600 font-semibold tracking-wide">NẾU THỎA MÃN ĐIỀU KIỆN NÀY</span>
+              <span className="text-[10px] text-green-400 ml-auto italic">→ Kéo handle xanh</span>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      ))}
+      
+      <button onClick={addBranch} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
+        <Plus size={16} />
+        Thêm nhóm điều kiện
+      </button>
 
       <Divider />
 
-      {/* Outcome branches info */}
-      <div className="space-y-2">
-        <div className="flex items-center gap-2 p-2.5 bg-green-50 rounded-xl">
-          <div className="w-2.5 h-2.5 rounded-full bg-green-500 shrink-0" />
-          <span className="text-xs text-green-700 font-medium">Nếu thỏa mãn điều kiện</span>
-          <span className="text-xs text-green-500 ml-auto">→ Kéo từ handle xanh</span>
-        </div>
-        <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-xl">
-          <div className="w-2.5 h-2.5 rounded-full bg-red-400 shrink-0" />
-          <span className="text-xs text-red-600 font-medium">Nếu không thỏa mãn</span>
-          <span className="text-xs text-red-400 ml-auto">→ Kéo từ handle đỏ</span>
-        </div>
+      <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-xl border border-red-100">
+        <div className="w-2.5 h-2.5 rounded-full bg-red-400 shrink-0" />
+        <span className="text-[11px] text-red-600 font-semibold">Nếu không thỏa mãn bất kỳ điều kiện nào</span>
+        <span className="text-[10px] text-red-500 ml-auto italic">→ Kéo handle đỏ</span>
       </div>
     </div>
   )
@@ -617,6 +722,18 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
   const removeAction = (idx: number) => {
     onChange({ actions: data.actions.filter((_, i) => i !== idx) })
   }
+  const duplicateAction = (idx: number) => {
+    const arr = [...data.actions]
+    arr.splice(idx + 1, 0, { ...arr[idx] })
+    onChange({ actions: arr })
+  }
+  const moveAction = (idx: number, dir: -1 | 1) => {
+    const arr = [...data.actions]
+    const to = idx + dir
+    if (to < 0 || to >= arr.length) return
+    ;[arr[idx], arr[to]] = [arr[to], arr[idx]]
+    onChange({ actions: arr })
+  }
 
   const addAction = (type: string) => {
     const newAction: any = { type }
@@ -645,6 +762,15 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
               <div key={i} className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
                 <Zap size={15} className="text-amber-500 shrink-0" />
                 <span className="text-sm text-amber-800 font-medium flex-1">{def?.label || action.type}</span>
+                <button onClick={() => moveAction(i, -1)} disabled={i === 0} className="w-5 h-5 flex items-center justify-center text-amber-400 hover:text-amber-700 disabled:opacity-30">
+                  <ChevronUp size={12} />
+                </button>
+                <button onClick={() => moveAction(i, 1)} disabled={i === data.actions.length - 1} className="w-5 h-5 flex items-center justify-center text-amber-400 hover:text-amber-700 disabled:opacity-30">
+                  <ChevronDown size={12} />
+                </button>
+                <button onClick={() => duplicateAction(i)} className="w-5 h-5 flex items-center justify-center text-amber-400 hover:text-green-600">
+                  <Copy size={12} />
+                </button>
                 <button onClick={() => removeAction(i)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
                   <Trash2 size={12} />
                 </button>
@@ -697,45 +823,20 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
 
 // ─── Carousel form ────────────────────────────────────────────────────────────
 function CarouselForm({ data, onChange }: { data: CarouselNodeData; onChange: (d: Partial<CarouselNodeData>) => void }) {
-  const [activeCard, setActiveCard] = useState(0)
-
-  const addCard = () => {
-    onChange({ cards: [...data.cards, { id: `card_${Date.now()}`, imageUrl: '', title: '', description: '', buttons: [] }] })
-    setActiveCard(data.cards.length)
-  }
-
-  const updateCard = (idx: number, patch: any) => {
-    onChange({ cards: data.cards.map((c, i) => i === idx ? { ...c, ...patch } : c) })
-  }
-
-  const card = data.cards[activeCard]
-
   return (
-    <div className="space-y-4">
-      {/* Card tabs */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1">
-        {data.cards.map((_, i) => (
-          <button
-            key={i}
-            onClick={() => setActiveCard(i)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium shrink-0 transition-colors ${activeCard === i ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-          >
-            Card {i + 1}
-          </button>
-        ))}
-        <button onClick={addCard} className="px-3 py-1.5 rounded-lg text-xs text-blue-600 bg-blue-50 hover:bg-blue-100 shrink-0">
-          <Plus size={12} />
-        </button>
-      </div>
-
-      {card && (
-        <div className="space-y-3">
-          <UploadZone label="Tải lên ảnh" icon={<Image size={24} />} hint="Tối đa 5MB" />
-          <Input value={card.title} onChange={v => updateCard(activeCard, { title: v })} placeholder="Nhập tiêu đề..." />
-          <Input value={card.description || ''} onChange={v => updateCard(activeCard, { description: v })} placeholder="Nhập mô tả..." />
+    <NodeItemsContainer 
+      items={data.cards || []}
+      onChange={(cards) => onChange({ cards })}
+      newItemFactory={() => ({ id: `card_${Date.now()}`, imageUrl: '', title: '', description: '', buttons: [] })}
+      addButtonText="Thêm nội dung"
+      renderItem={(card, update) => (
+        <div className="space-y-3 p-1">
+          <UploadZone label="Tải lên ảnh hoặc link URL" icon={<Image size={24} />} hint="Kích thước ảnh: 1.91:1 / Tối đa 5MB" />
+          <input value={card.title} onChange={e => update({ title: e.target.value })} placeholder="Nhập tiêu đề..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input value={card.description || ''} onChange={e => update({ description: e.target.value })} placeholder="Nhập mô tả..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
       )}
-    </div>
+    />
   )
 }
 
@@ -745,7 +846,7 @@ function PanelHeader({ node, nodeIndex, onClose }: { node: FlowNode; nodeIndex: 
   const bg = NODE_ICON_BG[node.type] || '#F3F4F6'
   const label = NODE_LABEL[node.type] || node.type
   const isStart = node.type === 'start'
-  const title = isStart ? 'Bắt đầu' : `${label} #${nodeIndex}`
+  const title = isStart ? 'Bắt đầu' : (node.data.customName || `${label} #${nodeIndex}`)
 
   return (
     <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
@@ -771,10 +872,14 @@ interface ConfigPanelProps {
   nodeIndex: number
   onUpdate: (nodeId: string, data: Partial<NodeData>) => void
   onDelete: (nodeId: string) => void
+  onDuplicate?: (nodeId: string) => void
   onClose: () => void
 }
 
-export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelete, onClose }: ConfigPanelProps) {
+export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelete, onDuplicate, onClose }: ConfigPanelProps) {
+  const [noteEnabled, setNoteEnabled] = useState(false)
+  const [noteText, setNoteText] = useState('')
+
   if (!selectedNode) return null
 
   const update = (data: Partial<NodeData>) => onUpdate(selectedNode.id, data)
@@ -823,29 +928,46 @@ export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelet
   }
 
   return (
-    <div
-      className="flex flex-col bg-white border-r border-gray-100 overflow-hidden"
-      style={{ width: 420, minWidth: 420, maxWidth: 420 }}
-    >
+    <div className="flex flex-col h-full overflow-hidden bg-white">
       <PanelHeader node={selectedNode} nodeIndex={nodeIndex} onClose={onClose} />
 
       <div className="flex-1 overflow-y-auto px-5 py-4">
         {renderForm()}
       </div>
 
-      {/* Footer */}
+      {/* Footer: Note */}
       {selectedNode.type !== 'start' && (
-        <div className="border-t border-gray-100 px-5 py-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={13} className="text-gray-400" />
-            <span className="text-xs text-gray-500">Thêm ghi chú</span>
+        <div className="border-t border-gray-100 shrink-0">
+          <div className="px-5 py-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <FileText size={13} className="text-gray-400" />
+              <span className="text-xs text-gray-500 font-medium">Thêm ghi chú</span>
+            </div>
+            <button
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
+                noteEnabled ? 'bg-blue-600' : 'bg-gray-200'
+              }`}
+              onClick={() => setNoteEnabled(v => !v)}
+            >
+              <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${
+                noteEnabled ? 'translate-x-4' : 'translate-x-0.5'
+              }`} />
+            </button>
           </div>
-          <button
-            className="relative inline-flex h-5 w-9 items-center rounded-full bg-gray-200"
-            onClick={() => {}}
-          >
-            <span className="inline-block h-3.5 w-3.5 transform translate-x-0.5 rounded-full bg-white shadow" />
-          </button>
+          {noteEnabled && (
+            <div className="px-5 pb-4">
+              <textarea
+                value={noteText}
+                onChange={e => setNoteText(e.target.value)}
+                placeholder="Nhập ghi chú cho node này..."
+                rows={3}
+                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none bg-amber-50 border-amber-200"
+              />
+              <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
+                <Info size={10} /> Ghi chú chỉ hiển thị trong chế độ chỉnh sửa
+              </p>
+            </div>
+          )}
         </div>
       )}
     </div>
