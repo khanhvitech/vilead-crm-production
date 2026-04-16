@@ -40,7 +40,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
         <div className="px-6 py-5 space-y-4">
           {/* Name */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Tên kịch bản *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Tên kịch bản <span className="text-red-500">*</span></label>
             <input
               type="text"
               value={name}
@@ -67,13 +67,13 @@ function CreateSequenceModal({ onClose, onCreate }: {
 
           {/* Trigger */}
           <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Trigger khởi chạy *</label>
+            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Điều kiện khởi chạy <span className="text-red-500">*</span></label>
             <select
               value={triggerType}
               onChange={e => setTrigger(e.target.value as TriggerType)}
               className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
-              <option value="">-- Chọn loại trigger --</option>
+              <option value="">Chọn loại điều kiện kích hoạt</option>
               {TRIGGER_GROUPS.map(group => (
                 <optgroup key={group.group} label={`── ${group.group} ──`}>
                   {group.triggers.map(t => (
@@ -98,20 +98,33 @@ function CreateSequenceModal({ onClose, onCreate }: {
 
             {/* Scheduled Selection */}
             {triggerType === 'scheduled' && (
-              <div className="animate-in fade-in slide-in-from-top-1 mt-4 grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Ngày chạy *</label>
-                  <input 
-                    type="date" 
-                    className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                  />
+              <div className="animate-in fade-in slide-in-from-top-1 mt-4 space-y-4">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Ngày chạy *</label>
+                    <input 
+                      type="date" 
+                      className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Giờ chạy *</label>
+                    <input 
+                      type="time" 
+                      className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
+                    />
+                  </div>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Giờ chạy *</label>
-                  <input 
-                    type="time" 
-                    className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                  />
+                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Chọn kiểu lặp lại (VD: Lặp lại hằng tuần)</label>
+                  <select
+                    className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
+                  >
+                    <option value="none">Không lặp lại</option>
+                    <option value="daily">Hằng ngày</option>
+                    <option value="weekly">Hằng tuần</option>
+                    <option value="monthly">Hằng tháng</option>
+                  </select>
                 </div>
               </div>
             )}
@@ -395,7 +408,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
             onChange={e => setTriggerFilter(e.target.value as TriggerType | 'all')}
             className="px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
           >
-            <option value="all">Tất cả trigger</option>
+            <option value="all">Tất cả điều kiện kích hoạt</option>
             {TRIGGER_GROUPS.map(group => (
               <optgroup key={group.group} label={group.group}>
                 {group.triggers.map(t => (

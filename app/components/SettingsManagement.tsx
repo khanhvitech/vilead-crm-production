@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import FormulaBuilder, { FormulaVariable } from './FormulaBuilder'
 import TaxManagement from './settings/TaxManagement'
+import BillingManagement from './settings/billing/BillingManagement'
 import {
   Settings,
   Users,
@@ -8294,6 +8295,20 @@ export default function SettingsManagement() {
             <Briefcase className="w-4 h-4" />
             Bán hàng
           </button>
+
+          {/* 5. Gói và thanh toán */}
+          <button
+            onClick={() => setActiveTab('payment')}
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+              activeTab === 'payment'
+                ? 'text-[#3e79f7] bg-[#f0f7ff]'
+                : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
+            }`}
+          >
+            <CreditCard className="w-4 h-4" />
+            Gói và thanh toán
+          </button>
+
           {/* 5. KPI */}
           {/* <button
             onClick={() => setActiveTab('kpi')}
@@ -8417,6 +8432,12 @@ export default function SettingsManagement() {
         )}
         
         {/* Bán hàng - 3 tabs: Quy trình, ds, Nhãn */}
+        {activeTab === 'payment' && (
+          <div className="h-full w-full overflow-hidden flex flex-col bg-white">
+            <BillingManagement />
+          </div>
+        )}
+
         {activeTab === 'workflow' && (
           <div>
             <Tabs defaultValue="process" className="space-y-6">

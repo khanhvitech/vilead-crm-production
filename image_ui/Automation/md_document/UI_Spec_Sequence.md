@@ -595,7 +595,7 @@ const SequenceListView: React.FC<SequenceListViewProps> = ({ onCreateNew }) => {
       
       <div className="filters">
         <select value={filterTrigger} onChange={e => setFilterTrigger(e.target.value)}>
-          <option value="all">Tất cả trigger</option>
+          <option value="all">Tất cả điều kiện kích hoạt</option>
           <option value="lead_created">Lead mới</option>
           <option value="email_opened">Mở email</option>
           <option value="link_clicked">Click link</option>

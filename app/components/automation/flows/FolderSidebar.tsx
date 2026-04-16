@@ -33,7 +33,7 @@ export default function FolderSidebar({
   }
 
   return (
-    <div className="w-52 shrink-0 flex flex-col border-r border-gray-200 bg-gray-50 h-full">
+    <div className="w-52 shrink-0 flex flex-col border-r border-gray-200 bg-white h-full">
       <div className="p-3 border-b border-gray-200">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-1">Thư mục</h3>
       </div>

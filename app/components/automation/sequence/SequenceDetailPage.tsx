@@ -48,8 +48,8 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
 
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'config',    label: 'Cấu hình' },
-    { id: 'customers', label: `Khách hàng (${sequence.stats.total_customers})` },
-    { id: 'report',    label: 'Báo cáo' },
+    { id: 'customers', label: `Khách hàng` },
+    // { id: 'report',    label: 'Báo cáo' },
   ]
 
   return (

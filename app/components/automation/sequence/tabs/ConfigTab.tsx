@@ -117,7 +117,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
             <Zap size={16} className="text-orange-500" />
           </div>
           <div>
-            <h3 className="text-sm font-bold text-gray-900">① Trigger khởi chạy</h3>
+            <h3 className="text-sm font-bold text-gray-900">① Điều kiện khởi chạy</h3>
             <p className="text-xs text-gray-500 mt-0.5">Sự kiện kích hoạt kịch bản tự động</p>
           </div>
           <div className="ml-auto">

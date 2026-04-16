@@ -100,7 +100,7 @@ export default function AutomationManagement() {
                   <Icon className="w-4 h-4" />
                   {channel.label}
                   {channel.id === 'sequence-list' && (
-                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 bg-green-100 text-green-700 rounded-full">
+                    <span className="ml-auto text-[10px] font-semibold px-1.5 py-0.5 bg-red-500 text-white rounded-full">
                       Mới
                     </span>
                   )}
