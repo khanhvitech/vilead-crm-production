@@ -155,6 +155,15 @@ export interface SequenceStep {
   };
 }
 
+// ─── Folder ───────────────────────────────────────────────────────────────────
+export interface Folder {
+  id: string;
+  name: string;
+  sequenceCount: number;
+  position: number;
+  isDefault?: boolean;
+}
+
 // ─── Sequence ─────────────────────────────────────────────────────────────────
 export interface SequenceStats {
   total_customers: number;
@@ -167,6 +176,7 @@ export interface Sequence {
   id: string;
   name: string;
   description?: string;
+  folder?: { id: string; name: string };
   status: SequenceStatus;
   current_version: number;
   trigger: {

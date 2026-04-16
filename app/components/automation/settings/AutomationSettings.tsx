@@ -1,16 +1,14 @@
 'use client'
 
 import React, { useState } from 'react'
-import { Tag, Zap, Bot } from 'lucide-react'
+import { Tag, Bot } from 'lucide-react'
 import TagsPage from './TagsPage'
-import AutoRulesPage from './AutoRulesPage'
 import BotSettingsPage from './BotSettingsPage'
 
-type TabId = 'tags' | 'auto-rules' | 'bot-settings'
+type TabId = 'tags' | 'bot-settings'
 
 const TABS: { id: TabId; label: string; icon: React.ComponentType<any>; iconColor: string; description: string }[] = [
   { id: 'tags',          label: 'Tags',              icon: Tag,  iconColor: '#3B82F6', description: 'Quản lý tags & liên kết kịch bản' },
-  { id: 'auto-rules',    label: 'Quy tắc tự động',   icon: Zap,  iconColor: '#F59E0B', description: '4 trigger tự động theo sự kiện' },
   { id: 'bot-settings',  label: 'Cài đặt Bot',       icon: Bot,  iconColor: '#8B5CF6', description: 'Hành vi bot khi NV can thiệp' },
 ]
 
@@ -68,7 +66,6 @@ export default function AutomationSettings({ onBack, defaultTab = 'tags' }: Auto
       <div className="flex-1 overflow-hidden">
         <div className="h-full bg-white">
           {activeTab === 'tags' && <TagsPage />}
-          {activeTab === 'auto-rules' && <AutoRulesPage />}
           {activeTab === 'bot-settings' && <BotSettingsPage />}
         </div>
       </div>

@@ -3,8 +3,16 @@
 // ======================================================
 
 import {
-  Sequence, CustomerJourney, SequenceReport, FlowOption, SequenceOption,
+  Sequence, CustomerJourney, SequenceReport, FlowOption, SequenceOption, Folder
 } from './types';
+
+// ─── Folders ──────────────────────────────────────────────────────────────────
+export const MOCK_FOLDERS: Folder[] = [
+  { id: 'f1', name: 'Chưa phân loại', sequenceCount: 1, position: 0, isDefault: true },
+  { id: 'f2', name: 'Marketing', sequenceCount: 2, position: 1 },
+  { id: 'f3', name: 'Sales', sequenceCount: 1, position: 2 },
+  { id: 'f4', name: 'Support', sequenceCount: 1, position: 3 }
+];
 
 // ─── Mock Flows (Published only) ──────────────────────────────────────────────
 export const MOCK_FLOWS: FlowOption[] = [
@@ -30,6 +38,7 @@ export const MOCK_SEQUENCES_FULL: Sequence[] = [
       type: 'first_message',
       config: { channels: ['zalo_oa', 'zalo_personal'] },
     },
+    folder: { id: 'f2', name: 'Marketing' },
     filter: {
       enabled: true,
       logic: 'all',
@@ -99,6 +108,7 @@ export const MOCK_SEQUENCES_FULL: Sequence[] = [
       type: 'customer_birthday',
       config: { mode: 'before_x_days', days_before: 1 },
     },
+    folder: { id: 'f3', name: 'Sales' },
     filter: { enabled: false, logic: 'all', rules: [] },
     steps: [
       {
