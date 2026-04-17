@@ -6,7 +6,6 @@ import { useSubscription, SubscriptionStatus } from '@/app/contexts/Subscription
 
 import { LocalSubscriptionAlert } from './Alerts/LocalSubscriptionAlert';
 import { RenewModal } from './Modals/RenewModal';
-import { PaymentOrderModal } from './Modals/PaymentOrderModal';
 
 const mockOrders = [
   {
@@ -30,13 +29,16 @@ const mockOrders = [
 export const BillingManagement: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'current_plan' | 'order_history'>('current_plan');
   
-  const { status, setStatus, usersCount, setUsersCount, maxUsers, setMaxUsers } = useSubscription();
+  const { 
+    status, setStatus, 
+    usersCount, setUsersCount, 
+    maxUsers, setMaxUsers,
+    isPaymentModalOpen, setPaymentModalOpen,
+    paymentActionType, setPaymentActionType 
+  } = useSubscription();
 
   // Modals state
   const [isRenewModalOpen, setRenewModalOpen] = useState(false);
-  const [isPaymentModalOpen, setPaymentModalOpen] = useState(false);
-
-  const [paymentActionType, setPaymentActionType] = useState<'upgrade' | 'downgrade' | 'renew' | null>(null);
 
   const getPricingBase = (plan: string) => {
     switch (plan) {
@@ -72,69 +74,69 @@ export const BillingManagement: React.FC = () => {
   }
 
   return (
-    <div className="flex-1 bg-white h-full flex flex-col p-6">
-
-      {/* Control Panel cho Dev (Prototype test) */}
-      <div className="bg-gray-800 text-white rounded-xl p-4 mb-6 shadow-md border border-gray-700 relative overflow-hidden">
-        <div className="flex items-center gap-2 mb-3 z-10 relative">
-          <Settings2 className="w-5 h-5 text-gray-400" />
-          <h4 className="font-extrabold text-sm tracking-wider text-gray-300 uppercase">Mock State Controller (Dev Only)</h4>
-        </div>
-        <div className="flex flex-wrap gap-2 relative z-10">
-          <button 
-            onClick={() => { setStatus('active'); setUsersCount(8); }}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'active' && usersCount === 8 ? 'bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-          >
-            Bình thường
-          </button>
-          <button 
-            onClick={() => { setStatus('expiring_7d'); setUsersCount(8); }}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'expiring_7d' ? 'bg-red-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-          >
-            Sắp hết hạn
-          </button>
-          <button 
-            onClick={() => setStatus('pending_downgrade')}
-            className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'pending_downgrade' ? 'bg-yellow-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
-          >
-            Đang chờ hạ cấp
-          </button>
-        </div>
-      </div>
-    
-    <div className="w-full h-full flex flex-col">
-        <div className="flex items-center border-b border-gray-200 mb-6">
+    <div className="flex-1 bg-gray-50 flex flex-col overflow-hidden h-full w-full">
+      <div className="w-full flex flex-col h-full">
+        {/* Header Tabs with White Background and left flush alignment */}
+        <div className="flex items-center bg-gray-50 border-b border-gray-200">
           <button
             onClick={() => setActiveTab('current_plan')}
-            className={`px-4 py-3 text-[14px] font-semibold border-b-[2px] transition-colors ${
+            className={`px-8 py-4 text-[14px] font-bold border-b-[2px] transition-colors ${
               activeTab === 'current_plan'
                 ? 'border-[#3e79f7] text-[#3e79f7]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Gói dịch vụ hiện tại
+            GÓI DỊCH VỤ HIỆN TẠI
           </button>
           <button
             onClick={() => setActiveTab('order_history')}
-            className={`px-4 py-3 text-[14px] font-semibold border-b-[2px] transition-colors ml-2 ${
+            className={`px-8 py-4 text-[14px] font-bold border-b-[2px] transition-colors ${
               activeTab === 'order_history'
                 ? 'border-[#3e79f7] text-[#3e79f7]'
                 : 'border-transparent text-gray-500 hover:text-gray-700'
             }`}
           >
-            Lịch sử giao dịch
+            LỊCH SỬ GIAO DỊCH
           </button>
         </div>
 
-        {/* Tab Content */}
-        <div className="w-full flex-1 overflow-auto pb-8">
+        {/* Tab Content Area (Gray Background) */}
+        <div className="w-full flex-1 overflow-auto flex flex-col">
           {activeTab === 'current_plan' && (
-            <div className="space-y-6">
+            <div className="flex flex-col p-6 space-y-6">
+
+              {/* Control Panel cho Dev (Prototype test) */}
+              <div className="bg-gray-800 text-white rounded-lg p-4 shadow-md border border-gray-700 relative overflow-hidden shrink-0">
+                <div className="flex items-center gap-2 mb-3 z-10 relative">
+                  <Settings2 className="w-5 h-5 text-gray-400" />
+                  <h4 className="font-extrabold text-sm tracking-wider text-gray-300 uppercase">Mock State Controller (Dev Only)</h4>
+                </div>
+                <div className="flex flex-wrap gap-2 relative z-10">
+                  <button 
+                    onClick={() => { setStatus('active'); setUsersCount(8); }}
+                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'active' && usersCount === 8 ? 'bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+                  >
+                    Bình thường
+                  </button>
+                  <button 
+                    onClick={() => { setStatus('expiring_7d'); setUsersCount(8); }}
+                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'expiring_7d' ? 'bg-red-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+                  >
+                    Sắp hết hạn
+                  </button>
+                  <button 
+                    onClick={() => setStatus('pending_downgrade')}
+                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'pending_downgrade' ? 'bg-yellow-500 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+                  >
+                    Đang chờ hạ cấp
+                  </button>
+                </div>
+              </div>
               
               <LocalSubscriptionAlert status={status} daysLeft={45} onRenew={handleOpenRenew} />
 
               {/* Current Plan Dashboard Card */}
-              <div className="bg-white rounded-2xl p-6 lg:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col lg:flex-row gap-8 items-start justify-between relative overflow-hidden">
+              <div className="bg-white rounded-lg p-6 lg:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col lg:flex-row gap-8 items-start justify-between relative overflow-hidden">
                 
                 {/* Left Info */}
                 <div className="flex flex-col w-full lg:w-[45%]">
@@ -217,7 +219,7 @@ export const BillingManagement: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4">
                   
                   {/* Starter */}
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
+                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
                     <div className="mb-5">
                       <h3 className="text-gray-400 font-bold text-xs tracking-wider uppercase mb-2">Starter</h3>
                       <div className="flex items-baseline">
@@ -242,7 +244,7 @@ export const BillingManagement: React.FC = () => {
                   </div>
 
                   {/* Professional */}
-                  <div className="bg-white rounded-2xl border-[3px] border-[#3e79f7] shadow-lg p-6 flex flex-col relative transform md:-translate-y-3">
+                  <div className="bg-white rounded-lg border-[3px] border-[#3e79f7] shadow-lg p-6 flex flex-col relative transform md:-translate-y-3">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3e79f7] text-white px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm whitespace-nowrap">
                       PHỔ BIẾN NHẤT
                     </div>
@@ -267,7 +269,7 @@ export const BillingManagement: React.FC = () => {
                   </div>
 
                   {/* Enterprise */}
-                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-6 flex flex-col">
+                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
                     <div className="mb-5">
                       <h3 className="text-gray-400 font-bold text-xs tracking-wider uppercase mb-2">Enterprise</h3>
                       <div className="flex items-baseline">
@@ -303,9 +305,10 @@ export const BillingManagement: React.FC = () => {
             </div>
           )}
           {activeTab === 'order_history' && (
-            <div className="bg-white rounded-2xl p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100">
-              <h3 className="text-lg font-bold text-[#111827] mb-6">Lịch sử giao dịch</h3>
-              <div className="overflow-x-auto">
+            <div className="p-6">
+              <div className="bg-white rounded-lg p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100">
+                <h3 className="text-lg font-bold text-[#111827] mb-6">Lịch sử giao dịch</h3>
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
                   <thead className="text-xs text-gray-500 border-b border-gray-200 uppercase tracking-wider">
                     <tr>
@@ -340,18 +343,10 @@ export const BillingManagement: React.FC = () => {
                 </table>
               </div>
             </div>
+            </div>
           )}
         </div>
       </div>
-
-      <PaymentOrderModal
-        isOpen={isPaymentModalOpen}
-        onClose={() => setPaymentModalOpen(false)}
-        actionType={paymentActionType}
-        currentPlan="Professional"
-        currentUsers={usersCount}
-        onSuccess={() => setStatus('pending_approval')}
-      />
 
       <RenewModal
         isOpen={isRenewModalOpen}

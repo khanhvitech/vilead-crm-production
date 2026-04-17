@@ -8433,7 +8433,7 @@ export default function SettingsManagement() {
         
         {/* Bán hàng - 3 tabs: Quy trình, ds, Nhãn */}
         {activeTab === 'payment' && (
-          <div className="h-full w-full overflow-hidden flex flex-col bg-white">
+          <div className="-mt-6 -ml-6 -mb-6 h-[calc(100%+3rem)] w-[calc(100%+1.5rem)] overflow-hidden flex flex-col bg-[#f3f4f6]">
             <BillingManagement />
           </div>
         )}
