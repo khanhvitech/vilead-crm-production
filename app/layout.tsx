@@ -8,6 +8,9 @@ export const metadata = {
   description: 'Hệ thống CRM ViLead giúp quản lý leads, khách hàng và doanh số hiệu quả',
 }
 
+import { SubscriptionProvider } from './contexts/SubscriptionContext'
+import { GlobalSubscriptionBanner } from './components/GlobalSubscriptionBanner'
+
 export default function RootLayout({
   children,
 }: {
@@ -19,7 +22,10 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
       </head>
       <body className={inter.className}>
-        {children}
+        <SubscriptionProvider>
+          <GlobalSubscriptionBanner />
+          {children}
+        </SubscriptionProvider>
       </body>
     </html>
   )
