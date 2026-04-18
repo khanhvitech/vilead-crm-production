@@ -274,6 +274,7 @@ export interface ActionOption {
   label: string;
   icon: string;
   description: string;
+  group?: string;
 }
 
 export interface FilterFieldOption {

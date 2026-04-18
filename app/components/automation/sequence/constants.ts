@@ -56,15 +56,15 @@ export const TRIGGER_MAP: Record<string, TriggerOption> = TRIGGER_GROUPS
 
 // ─── 9 Actions ────────────────────────────────────────────────────────────────
 export const ACTION_OPTIONS: ActionOption[] = [
-  { type: 'send_flow',        label: 'Gửi Luồng tin nhắn',   icon: '📨', description: 'Khởi chạy một luồng tin nhắn đã xuất bản' },
-  { type: 'assign_tags',      label: 'Gắn Tag',               icon: '🏷️', description: 'Gắn một hoặc nhiều tag cho khách hàng' },
-  { type: 'remove_tags',      label: 'Gỡ Tag',                icon: '🗑️', description: 'Gỡ tag khỏi khách hàng' },
-  { type: 'create_task',      label: 'Tạo Công việc',         icon: '✅', description: 'Tạo task và giao cho nhân viên' },
-  { type: 'create_reminder',  label: 'Tạo Nhắc nhở',          icon: '🔔', description: 'Tạo reminder cho nhân viên' },
-  { type: 'pause_bot',        label: 'Tạm dừng Bot',          icon: '⏸️', description: 'Tạm dừng bot trong khoảng thời gian' },
-  { type: 'resume_bot',       label: 'Kích hoạt Bot',         icon: '▶️', description: 'Bật lại bot cho khách hàng' },
-  { type: 'enroll_sequence',  label: 'Đăng ký Kịch bản khác', icon: '🔗', description: 'Thêm KH vào một kịch bản khác' },
-  { type: 'cancel_sequence',  label: 'Hủy Kịch bản',          icon: '🚫', description: 'Hủy kịch bản hiện tại hoặc kịch bản khác' },
+  { type: 'send_flow',        label: 'Gửi Luồng tin nhắn',   icon: '📨', group: 'Tin nhắn',  description: 'Khởi chạy một luồng tin nhắn đã xuất bản' },
+  { type: 'assign_tags',      label: 'Gắn Tag',               icon: '🏷️', group: 'Tag',       description: 'Gắn một hoặc nhiều tag cho khách hàng' },
+  { type: 'remove_tags',      label: 'Gỡ Tag',                icon: '🗑️', group: 'Tag',       description: 'Gỡ tag khỏi khách hàng' },
+  { type: 'create_task',      label: 'Tạo Công việc',         icon: '✅', group: 'Khác',      description: 'Tạo task và giao cho nhân viên' },
+  { type: 'create_reminder',  label: 'Tạo Nhắc nhở',          icon: '🔔', group: 'Khác',      description: 'Tạo reminder cho nhân viên' },
+  { type: 'pause_bot',        label: 'Tạm dừng Bot',          icon: '⏸️', group: 'Bot',       description: 'Tạm dừng bot trong khoảng thời gian' },
+  { type: 'resume_bot',       label: 'Kích hoạt Bot',         icon: '▶️', group: 'Bot',       description: 'Bật lại bot cho khách hàng' },
+  { type: 'enroll_sequence',  label: 'Đăng ký Kịch bản khác', icon: '🔗', group: 'Kịch bản', description: 'Thêm KH vào một kịch bản khác' },
+  { type: 'cancel_sequence',  label: 'Hủy Kịch bản',          icon: '🚫', group: 'Kịch bản', description: 'Hủy kịch bản hiện tại hoặc kịch bản khác' },
 ];
 
 export const ACTION_MAP: Record<string, ActionOption> = ACTION_OPTIONS

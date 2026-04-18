@@ -33,7 +33,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 border-b border-gray-200">
-          <h3 className="text-base font-bold text-gray-900">✨ Tạo Kịch bản mới</h3>
+          <h3 className="text-base font-bold text-gray-900">Tạo Kịch bản mới</h3>
           <p className="text-xs text-gray-500 mt-0.5">Thiết kế kịch bản chăm sóc tự động cho khách hàng</p>
         </div>
 
@@ -63,80 +63,6 @@ function CreateSequenceModal({ onClose, onCreate }: {
               placeholder="Mô tả mục đích kịch bản..."
               className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
-          </div>
-
-          {/* Trigger */}
-          <div>
-            <label className="block text-xs font-semibold text-gray-700 mb-1.5">Điều kiện khởi chạy <span className="text-red-500">*</span></label>
-            <select
-              value={triggerType}
-              onChange={e => setTrigger(e.target.value as TriggerType)}
-              className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-            >
-              <option value="">Chọn loại điều kiện kích hoạt</option>
-              {TRIGGER_GROUPS.map(group => (
-                <optgroup key={group.group} label={`── ${group.group} ──`}>
-                  {group.triggers.map(t => (
-                    <option key={t.type} value={t.type}>{t.label}</option>
-                  ))}
-                </optgroup>
-              ))}
-            </select>
-
-            {/* Tag Selection */}
-            {(triggerType === 'tag_added' || triggerType === 'tag_removed') && (
-              <div className="animate-in fade-in slide-in-from-top-1 mt-4">
-                <label className="block text-xs font-semibold text-gray-700 mb-1.5">Chọn thẻ (Tag) *</label>
-                <select className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
-                  <option value="">-- Chọn thẻ --</option>
-                  <option value="vip">Khách hàng VIP</option>
-                  <option value="new">Khách mới</option>
-                  <option value="buy">Đã mua hàng</option>
-                </select>
-              </div>
-            )}
-
-            {/* Scheduled Selection */}
-            {triggerType === 'scheduled' && (
-              <div className="animate-in fade-in slide-in-from-top-1 mt-4 space-y-4">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Ngày chạy *</label>
-                    <input 
-                      type="date" 
-                      className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-700 mb-1.5">Giờ chạy *</label>
-                    <input 
-                      type="time" 
-                      className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm" 
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-gray-700 mb-1.5">Chọn kiểu lặp lại (VD: Lặp lại hằng tuần)</label>
-                  <select
-                    className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white shadow-sm"
-                  >
-                    <option value="none">Không lặp lại</option>
-                    <option value="daily">Hằng ngày</option>
-                    <option value="weekly">Hằng tuần</option>
-                    <option value="monthly">Hằng tháng</option>
-                  </select>
-                </div>
-              </div>
-            )}
-
-            {triggerType && (
-              <div className="mt-4 flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg">
-                <Zap size={13} className="text-blue-500" />
-                <span className="text-xs text-blue-700 font-medium">
-                  Nhóm: <strong>{TRIGGER_MAP[triggerType]?.group}</strong>
-                </span>
-              </div>
-            )}
           </div>
         </div>
 

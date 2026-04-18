@@ -82,7 +82,8 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
       return (
         <div className="space-y-2">
           <label className="block text-xs font-semibold text-gray-600">
-            {actionType === 'assign_tags' ? 'Tags sẽ được gắn *' : 'Tags sẽ bị gỡ *'}
+            {actionType === 'assign_tags' ? 'Tags sẽ được gắn ' : 'Tags sẽ bị gỡ '}
+            <span className="text-red-500">*</span>
           </label>
           <TagMultiSelect
             selectedIds={tagIds}
@@ -197,7 +198,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
       const presets = [15, 30, 60, 120, 480, 1440]
       return (
         <div className="space-y-3">
-          <label className="block text-xs font-semibold text-gray-600">Thời gian tạm dừng *</label>
+          <label className="block text-xs font-semibold text-gray-600">Thời gian tạm dừng <span className='text-red-500'>*</span></label>
           <div className="flex items-center gap-3">
             <input
               type="number" min={1} max={1440}
@@ -205,7 +206,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
               onChange={e => onChange({ duration_minutes: Number(e.target.value) })}
               className="w-24 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
             />
-            <span className="text-sm text-gray-600">phút (1–1440)</span>
+            <span className="text-sm text-gray-600">phút</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {presets.map(v => (

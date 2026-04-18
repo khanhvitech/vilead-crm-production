@@ -1,14 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import { ChevronLeft, Play, Pause, FlaskConical, MoreHorizontal, Save, Check, Copy, Trash2 } from 'lucide-react'
+import { ChevronLeft, Play, Pause, Save, Check } from 'lucide-react'
 import { Sequence } from './types'
-import { SEQUENCE_STATUS_STYLES, TRIGGER_MAP } from './constants'
+import { SEQUENCE_STATUS_STYLES } from './constants'
 import { MOCK_SEQUENCES_FULL } from './mockData'
 import ConfigTab    from './tabs/ConfigTab'
 import CustomersTab from './tabs/CustomersTab'
 import ReportTab    from './tabs/ReportTab'
-import TestModeModal from './TestModeModal'
 
 type TabId = 'config' | 'customers' | 'report'
 
@@ -22,12 +21,9 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
 
   const [sequence, setSequence]     = useState<Sequence>(initial)
   const [activeTab, setActiveTab]   = useState<TabId>('config')
-  const [showTest, setShowTest]     = useState(false)
   const [saved, setSaved]           = useState(false)
-  const [menuOpen, setMenuOpen]     = useState(false)
 
   const statusStyle = SEQUENCE_STATUS_STYLES[sequence.status]
-  const triggerLabel = TRIGGER_MAP[sequence.trigger.type]?.label ?? sequence.trigger.type
 
   const handleSave = () => {
     // In production: API call to patch the sequence
@@ -40,10 +36,6 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
       ...s,
       status: s.status === 'active' ? 'paused' : 'active',
     }))
-  }
-
-  const handleTest = (customerId: string) => {
-    console.log('Test mode for customer:', customerId)
   }
 
   const tabs: Array<{ id: TabId; label: string }> = [
@@ -91,16 +83,6 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
 
           {/* Actions */}
           <div className="flex items-center gap-2 shrink-0">
-            {/* Test mode */}
-            <button
-              type="button"
-              onClick={() => setShowTest(true)}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-200 text-sm font-semibold text-gray-700 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-colors"
-            >
-              <FlaskConical size={14} />
-              Gửi thử
-            </button>
-
             {/* Toggle active/pause */}
             {sequence.status !== 'draft' && (
               <button
@@ -144,49 +126,6 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
             >
               {saved ? <><Check size={14} /> Đã lưu</> : <><Save size={14} /> Lưu</>}
             </button>
-
-            {/* More menu */}
-            <div className="relative">
-              <button
-                type="button"
-                onClick={() => setMenuOpen(o => !o)}
-                className="p-2 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors"
-              >
-                <MoreHorizontal size={16} />
-              </button>
-              {menuOpen && (
-                <div className="absolute right-0 top-10 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-44 overflow-hidden">
-                  <button
-                    onClick={() => setMenuOpen(false)}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50"
-                  >
-                    <Copy size={13} className="text-gray-400" /> Sao chép
-                  </button>
-                  <div className="border-t border-gray-100" />
-                  <button
-                    onClick={() => { setMenuOpen(false); onBack() }}
-                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50"
-                  >
-                    <Trash2 size={13} /> Xóa kịch bản
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Sequence meta */}
-        <div className="flex items-center gap-4 mt-3 pl-10">
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <span className="font-semibold text-gray-700">Trigger:</span>
-            <span className="px-2 py-0.5 bg-orange-50 border border-orange-100 text-orange-700 rounded-lg font-medium">{triggerLabel}</span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-gray-500">
-            <span>{sequence.steps.length} bước</span>
-            <span>·</span>
-            <span>v{sequence.current_version}</span>
-            <span>·</span>
-            <span>Cập nhật {new Date(sequence.updated_at).toLocaleDateString('vi-VN')}</span>
           </div>
         </div>
 
@@ -222,14 +161,6 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
         )}
       </div>
 
-      {/* Test Mode Modal */}
-      {showTest && (
-        <TestModeModal
-          sequenceName={sequence.name}
-          onClose={() => setShowTest(false)}
-          onTest={handleTest}
-        />
-      )}
     </div>
   )
 }
