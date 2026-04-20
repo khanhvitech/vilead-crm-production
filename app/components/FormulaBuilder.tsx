@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { Plus, Trash2, X } from 'lucide-react'
@@ -268,7 +268,7 @@ export default function FormulaBuilder({ formula, variables, onChange }: Formula
       {localFormula && localVariables.length > 0 && (
         <div className="pt-3 border-t border-[#e6ebf1]">
           <p className="text-xs text-[#72849a] mb-1">Xem trước công thức:</p>
-          <p className="text-sm text-[#455560] font-mono bg-[#f7f7f8] p-2 rounded-lg">
+          <p className="text-sm text-[#455560] font-mono bg-[#f7f7f8] p-2 rounded-[10px]">
             {localFormula}
             {localVariables.filter(v => v.tableName && v.columnName).length > 0 && (
               <span className="block mt-1 text-xs text-[#72849a]">

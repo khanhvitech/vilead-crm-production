@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
@@ -15,7 +15,7 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
       type="button"
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors focus:outline-none shrink-0 ${checked ? 'bg-blue-600' : 'bg-gray-200'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`relative inline-flex items-center h-6 w-11 rounded-full transition-colors focus:outline-none shrink-0 ${checked ? 'bg-[#3e79f7]' : 'bg-gray-200'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
     >
       <span
         className={`inline-block w-4.5 h-4.5 bg-white rounded-full shadow-sm transition-transform ${checked ? 'translate-x-5.5' : 'translate-x-0.5'}`}
@@ -48,7 +48,7 @@ function TagMultiSelect({ value, onChange, allTags }: {
     <div ref={ref} className="relative">
       <div
         onClick={() => setOpen(o => !o)}
-        className="min-h-[40px] w-full flex items-center flex-wrap gap-1.5 px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:border-blue-400 focus-within:ring-2 focus-within:ring-blue-500 transition-colors"
+        className="min-h-[40px] w-full flex items-center flex-wrap gap-1.5 px-3 py-2 bg-white border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-[#699dff] focus-within:ring-2 focus-within:ring-blue-500 transition-colors"
       >
         {selectedTags.length === 0 ? (
           <span className="text-sm text-gray-400">Chọn tags...</span>
@@ -75,7 +75,7 @@ function TagMultiSelect({ value, onChange, allTags }: {
       </div>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 max-h-48 overflow-y-auto">
           {allTags.map(tag => (
             <button
               key={tag.id}
@@ -83,7 +83,7 @@ function TagMultiSelect({ value, onChange, allTags }: {
               onClick={() => toggle(tag.id)}
               className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-left hover:bg-gray-50 transition-colors"
             >
-              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${value.includes(tag.id) ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}>
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 transition-colors ${value.includes(tag.id) ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1]'}`}>
                 {value.includes(tag.id) && <Check size={10} color="white" />}
               </div>
               <span className="inline-block w-2 h-2 rounded-full shrink-0" style={{ background: tag.color }} />
@@ -116,7 +116,7 @@ function FlowSelect({ value, onChange, flows }: {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+        className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-[#e6ebf1] rounded-[10px] text-sm hover:border-[#699dff] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors"
       >
         <span className={selected ? 'text-gray-800' : 'text-gray-400'}>
           {selected ? selected.name : 'Không gửi'}
@@ -125,7 +125,7 @@ function FlowSelect({ value, onChange, flows }: {
       </button>
 
       {open && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-48 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 max-h-48 overflow-y-auto">
           <button
             type="button"
             onClick={() => { onChange(null); setOpen(false) }}
@@ -184,10 +184,10 @@ function AutoRuleCard({ rule, allTags, flows, onToggle, onConfigChange }: {
   const isDirty = JSON.stringify(localConfig) !== JSON.stringify(rule.config)
 
   return (
-    <div className={`bg-white border rounded-2xl overflow-hidden transition-all ${rule.isEnabled ? 'border-blue-200 shadow-sm shadow-blue-50' : 'border-gray-200'}`}>
+    <div className={`bg-white border rounded-[10px] overflow-hidden transition-all ${rule.isEnabled ? 'border-[#c7d9fd] shadow-sm shadow-blue-50' : 'border-[#e6ebf1]'}`}>
       {/* Card header */}
       <div className="flex items-center gap-4 p-5">
-        <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style={{ background: meta.iconBg }}>
+        <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: meta.iconBg }}>
           <IconComp size={18} style={{ color: meta.iconColor }} />
         </div>
         <div className="flex-1 min-w-0">
@@ -214,7 +214,7 @@ function AutoRuleCard({ rule, allTags, flows, onToggle, onConfigChange }: {
                 min={1} max={365}
                 value={localConfig.days ?? 30}
                 onChange={e => setLocalConfig(c => ({ ...c, days: parseInt(e.target.value) || 1 }))}
-                className="w-24 px-3 py-2 text-sm font-semibold text-gray-800 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                className="w-24 px-3 py-2 text-sm font-semibold text-gray-800 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
               />
               <span className="text-sm text-gray-500">ngày</span>
               <span className="text-xs text-gray-400">(1 - 365)</span>
@@ -248,7 +248,7 @@ function AutoRuleCard({ rule, allTags, flows, onToggle, onConfigChange }: {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60"
+              className="flex items-center gap-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] text-xs font-semibold hover:bg-[#699dff] transition-colors disabled:opacity-60"
             >
               {saving ? <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
               {saving ? 'Đang lưu...' : 'Lưu cài đặt'}
@@ -284,7 +284,7 @@ export default function AutoRulesPage() {
       {/* Header */}
       <div className="px-6 py-5 border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[10px] bg-amber-50 flex items-center justify-center">
             <Zap size={20} className="text-amber-600" />
           </div>
           <div>
@@ -294,7 +294,7 @@ export default function AutoRulesPage() {
         </div>
 
         {/* Info banner */}
-        <div className="mt-4 flex items-start gap-2.5 p-3.5 bg-amber-50 rounded-xl">
+        <div className="mt-4 flex items-start gap-2.5 p-3.5 bg-amber-50 rounded-[10px]">
           <Info size={15} className="text-amber-500 mt-0.5 shrink-0" />
           <p className="text-xs text-amber-700 leading-relaxed">
             Khi một rule được bật, hệ thống sẽ tự động thực thi cấu hình khi điều kiện trigger xảy ra. 

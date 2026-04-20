@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { Download, BarChart3 } from 'lucide-react';
@@ -105,7 +105,7 @@ export function ZbsReportsDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-blue-100 rounded-lg">
+          <div className="p-2 bg-blue-100 rounded-[10px]">
             <BarChart3 className="h-6 w-6 text-blue-600" />
           </div>
           <div>
@@ -118,7 +118,7 @@ export function ZbsReportsDashboard() {
         
         <button
           onClick={() => setExportModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#2dc56a] transition-colors shadow-sm"
         >
           <Download className="h-4 w-4" />
           <span>Xuất báo cáo</span>

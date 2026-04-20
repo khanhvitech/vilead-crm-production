@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { 
@@ -57,9 +57,9 @@ function StatCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border p-5 flex-1">
+    <div className="bg-white rounded-[10px] border p-5 flex-1">
       <div className="flex items-center gap-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${colorClasses[color]}`}>
+        <div className={`w-12 h-12 rounded-[10px] flex items-center justify-center ${colorClasses[color]}`}>
           <Icon className="w-6 h-6" />
         </div>
         <div>
@@ -79,7 +79,7 @@ const getStatusBadgeConfig = (status: string) => {
     case 'running': return 'bg-green-100 text-green-700';
     case 'paused': return 'bg-orange-100 text-orange-700';
     case 'sent': return 'bg-gray-100 text-gray-700';
-    case 'draft': return 'bg-blue-100 text-blue-700';
+    case 'draft': return 'bg-blue-100 text-[#3e79f7]';
     case 'scheduled': return 'bg-purple-100 text-purple-700';
     case 'cancelled': return 'bg-red-100 text-red-700';
     default: return 'bg-gray-100 text-gray-600';
@@ -190,7 +190,7 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -213,7 +213,7 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
             {campaign.status === 'running' && onPause && (
               <button 
                 onClick={() => onPause(campaign)}
-                className="flex items-center gap-2 px-4 py-2 border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-50"
+                className="flex items-center gap-2 px-4 py-2 border border-yellow-300 text-yellow-700 rounded-[10px] hover:bg-yellow-50"
               >
                 <Pause className="w-4 h-4" />
                 Tạm dừng
@@ -222,7 +222,7 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
             {campaign.status === 'paused' && onResume && (
               <button 
                 onClick={() => onResume(campaign)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                className="flex items-center gap-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182]"
               >
                 <Play className="w-4 h-4" />
                 Tiếp tục
@@ -231,21 +231,21 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
             {(campaign.status === 'sent' || campaign.status === 'paused') && onClone && (
               <button 
                 onClick={() => onClone(campaign)}
-                className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50"
               >
                 <Copy className="w-4 h-4" />
                 Tạo bản sao
               </button>
             )}
             {campaign.status === 'sent' && (
-              <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+              <button className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50">
                 <Download className="w-4 h-4" />
                 Export
               </button>
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100"
+              className="p-2 rounded-[10px] hover:bg-gray-100"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -280,11 +280,11 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
             />
           </div>
 
-          <div className="bg-white rounded-xl border">
+          <div className="bg-white rounded-[10px] border">
             {/* Header */}
             <div className="p-4 border-b flex items-center justify-between">
               <h3 className="font-semibold text-gray-900">Chi tiết người nhận</h3>
-              <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg">
+              <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-[10px]">
                 <Download className="w-4 h-4" />
                 Export Excel
               </button>
@@ -360,7 +360,7 @@ export function ZbsCampaignDetailModal({ campaign, onClose, onPause, onResume, o
                             {recipient.status === 'success' ? 'Thành công' : 'Thất bại'}
                           </span>
                           <span className={`w-2 h-2 rounded-full ${
-                            recipient.status === 'success' ? 'bg-green-500' : 'bg-red-500'
+                            recipient.status === 'success' ? 'bg-[#2dc56a]' : 'bg-red-500'
                           }`} />
                         </div>
                       </td>

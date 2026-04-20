@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { X, Search, Check, FileText, Eye, Layers, Clock } from 'lucide-react';
@@ -38,11 +38,11 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex-shrink-0 border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Chọn mẫu email</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -56,7 +56,7 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm mẫu email..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
             />
           </div>
         </div>
@@ -74,10 +74,10 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
                 <div
                   key={template.id}
                   className={`
-                    relative rounded-lg border-2 overflow-hidden transition-all cursor-pointer group
+                    relative rounded-[10px] border-2 overflow-hidden transition-all cursor-pointer group
                     ${currentSelected === template.id
                       ? 'border-blue-500 ring-2 ring-blue-200'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                     }
                   `}
                   onClick={() => setCurrentSelected(template.id)}
@@ -103,7 +103,7 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
                           e.stopPropagation();
                           onPreview(template);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100"
+                        className="flex items-center gap-2 px-3 py-2 bg-white rounded-[10px] text-sm font-medium text-gray-700 hover:bg-gray-100"
                       >
                         <Eye className="w-4 h-4" />
                         Xem trước
@@ -112,7 +112,7 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
 
                     {/* Selected check */}
                     {currentSelected === template.id && (
-                      <div className="absolute top-2 right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-[#3e79f7] rounded-full flex items-center justify-center">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -140,15 +140,15 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
 
         {/* Selected preview */}
         {selectedTemplate && (
-          <div className="flex-shrink-0 px-6 py-3 bg-blue-50 border-t border-blue-200">
+          <div className="flex-shrink-0 px-6 py-3 bg-blue-50 border-t border-[#c7d9fd]">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm text-blue-700">Mẫu được chọn:</p>
+                <p className="text-sm text-[#3e79f7]">Mẫu được chọn:</p>
                 <p className="font-medium text-blue-900">{selectedTemplate.name}</p>
               </div>
               <button
                 onClick={() => onPreview(selectedTemplate)}
-                className="flex items-center gap-1 text-sm text-blue-600 hover:text-blue-700"
+                className="flex items-center gap-1 text-sm text-blue-600 hover:text-[#3e79f7]"
               >
                 <Eye className="w-4 h-4" />
                 Xem trước
@@ -158,17 +158,17 @@ export function ContentModal({ selectedId, onSelect, onPreview, onClose }: Conte
         )}
 
         {/* Footer */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3">
+        <div className="flex-shrink-0 bg-white border-t border-[#e6ebf1] px-6 py-4 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
             disabled={!currentSelected}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Chọn mẫu này
           </button>

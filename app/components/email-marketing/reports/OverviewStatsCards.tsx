@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { 
@@ -122,9 +122,9 @@ export function OverviewStatsCards({ overview, loading = false }: OverviewStatsC
     return (
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {Array.from({ length: 6 }).map((_, i) => (
-          <div key={i} className="bg-white rounded-lg border p-4 animate-pulse">
+          <div key={i} className="bg-white rounded-[10px] border p-4 animate-pulse">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-gray-200 rounded-lg" />
+              <div className="w-8 h-8 bg-gray-200 rounded-[10px]" />
               <div className="h-4 bg-gray-200 rounded w-20" />
             </div>
             <div className="h-8 bg-gray-200 rounded w-16 mb-2" />
@@ -137,7 +137,7 @@ export function OverviewStatsCards({ overview, loading = false }: OverviewStatsC
 
   if (!overview) {
     return (
-      <div className="bg-white rounded-lg border p-8 text-center text-gray-500">
+      <div className="bg-white rounded-[10px] border p-8 text-center text-gray-500">
         Không có dữ liệu tổng quan
       </div>
     );
@@ -153,10 +153,10 @@ export function OverviewStatsCards({ overview, loading = false }: OverviewStatsC
         return (
           <div 
             key={config.key} 
-            className="bg-white rounded-lg border p-4 hover:shadow-md transition-shadow"
+            className="bg-white rounded-[10px] border p-4 hover:shadow-md transition-shadow"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className={`p-2 rounded-lg ${config.colorClass}`}>
+              <div className={`p-2 rounded-[10px] ${config.colorClass}`}>
                 <Icon className="h-4 w-4" />
               </div>
               <span className="text-xs text-gray-500 truncate">{config.label}</span>

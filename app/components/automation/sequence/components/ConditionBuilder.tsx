@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Plus, X, ChevronDown, Check } from 'lucide-react'
@@ -21,7 +21,7 @@ function Dropdown({ trigger, children }: { trigger: React.ReactNode; children: R
     <div ref={ref} className="relative">
       <div onClick={() => setOpen(o => !o)}>{trigger}</div>
       {open && (
-        <div className="absolute top-full left-0 mt-1 min-w-[160px] bg-white border border-gray-200 rounded-xl shadow-xl z-50">
+        <div className="absolute top-full left-0 mt-1 min-w-[160px] bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50">
           <div onClick={() => setOpen(false)}>{children}</div>
         </div>
       )}
@@ -34,7 +34,7 @@ function SelectBtn({ label, className = '' }: { label: string; className?: strin
   return (
     <button
       type="button"
-      className={`flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 rounded-xl bg-white hover:border-blue-400 focus:outline-none transition-colors whitespace-nowrap ${className}`}
+      className={`flex items-center gap-1.5 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] bg-white hover:border-[#699dff] focus:outline-none transition-colors whitespace-nowrap ${className}`}
     >
       <span className="truncate max-w-[120px]">{label}</span>
       <ChevronDown size={12} className="text-gray-400 shrink-0" />
@@ -76,7 +76,7 @@ function ValueInput({ field, operator, value, onChange, tags }: ValueInputProps)
               onClick={() => toggle(tag.id)}
               className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-left hover:bg-gray-50"
             >
-              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${selectedIds.includes(tag.id) ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}>
+              <div className={`w-4 h-4 rounded border-2 flex items-center justify-center shrink-0 ${selectedIds.includes(tag.id) ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1]'}`}>
                 {selectedIds.includes(tag.id) && <Check size={10} color="white" />}
               </div>
               <span className="w-2 h-2 rounded-full shrink-0" style={{ background: tag.color }} />
@@ -123,7 +123,7 @@ function ValueInput({ field, operator, value, onChange, tags }: ValueInputProps)
           value={v?.from ?? ''}
           onChange={e => onChange({ from: Number(e.target.value), to: v?.to ?? 0 })}
           placeholder="Từ"
-          className="w-20 px-2 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-20 px-2 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
         />
         <span className="text-xs text-gray-400">đến</span>
         <input
@@ -131,7 +131,7 @@ function ValueInput({ field, operator, value, onChange, tags }: ValueInputProps)
           value={v?.to ?? ''}
           onChange={e => onChange({ from: v?.from ?? 0, to: Number(e.target.value) })}
           placeholder="Đến"
-          className="w-20 px-2 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-20 px-2 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
         />
       </div>
     )
@@ -143,7 +143,7 @@ function ValueInput({ field, operator, value, onChange, tags }: ValueInputProps)
       value={value as string | number}
       onChange={e => onChange(field.type === 'number' ? Number(e.target.value) : e.target.value)}
       placeholder="Giá trị..."
-      className="w-32 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+      className="w-32 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
     />
   )
 }
@@ -221,7 +221,7 @@ function RuleRow({ rule, fields, tags, onChange, onDelete }: RuleRowProps) {
       <button
         type="button"
         onClick={onDelete}
-        className="ml-auto p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+        className="ml-auto p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-[10px] transition-colors"
       >
         <X size={14} />
       </button>
@@ -284,7 +284,7 @@ export default function ConditionBuilder({
           <button
             type="button"
             onClick={() => onToggle(!enabled)}
-            className={`relative h-6 rounded-full transition-colors focus:outline-none shrink-0 ${enabled ? 'bg-blue-600' : 'bg-gray-200'}`}
+            className={`relative h-6 rounded-full transition-colors focus:outline-none shrink-0 ${enabled ? 'bg-[#3e79f7]' : 'bg-gray-200'}`}
             style={{ width: 44 }}
           >
             <span
@@ -302,13 +302,13 @@ export default function ConditionBuilder({
           {/* Logic toggle */}
           <div className="flex items-center gap-2 text-sm">
             <span className="text-gray-500">Logic:</span>
-            <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+            <div className="flex rounded-[10px] border border-[#e6ebf1] overflow-hidden">
               {(['all', 'any'] as const).map(l => (
                 <button
                   key={l}
                   type="button"
                   onClick={() => onLogicChange(l)}
-                  className={`px-3.5 py-1.5 text-xs font-semibold transition-colors ${logic === l ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                  className={`px-3.5 py-1.5 text-xs font-semibold transition-colors ${logic === l ? 'bg-[#3e79f7] text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                 >
                   {l === 'all' ? 'TẤT CẢ (AND)' : 'BẤT KỲ (OR)'}
                 </button>
@@ -325,7 +325,7 @@ export default function ConditionBuilder({
                     {logic === 'all' ? 'VÀ' : 'HOẶC'}
                   </span>
                 )}
-                <div className={`flex-1 p-3 bg-gray-50 rounded-xl border border-gray-100 ${idx === 0 ? '' : ''}`}>
+                <div className={`flex-1 p-3 bg-gray-50 rounded-[10px] border border-gray-100 ${idx === 0 ? '' : ''}`}>
                   <RuleRow
                     rule={rule}
                     fields={fields}
@@ -342,7 +342,7 @@ export default function ConditionBuilder({
           <button
             type="button"
             onClick={addRule}
-            className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-[#3e79f7] font-medium"
           >
             <Plus size={14} />
             Thêm điều kiện
@@ -350,8 +350,8 @@ export default function ConditionBuilder({
 
           {/* Preview */}
           {previewText && rules.length > 0 && (
-            <div className="p-3 bg-blue-50 rounded-xl">
-              <p className="text-xs text-blue-700">
+            <div className="p-3 bg-blue-50 rounded-[10px]">
+              <p className="text-xs text-[#3e79f7]">
                 <span className="font-semibold">Điều kiện: </span>
                 {previewText}
               </p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
@@ -78,7 +78,7 @@ export default function Toolbar({
             onChange={e => setTempName(e.target.value)}
             onBlur={commitEdit}
             onKeyDown={handleKeyDown}
-            className="text-sm font-semibold text-gray-900 px-2 py-0.5 border border-blue-400 rounded-lg outline-none ring-2 ring-blue-100 max-w-[200px]"
+            className="text-sm font-semibold text-gray-900 px-2 py-0.5 border border-[#699dff] rounded-[10px] outline-none ring-2 ring-blue-100 max-w-[200px]"
             maxLength={100}
           />
         ) : (
@@ -96,7 +96,7 @@ export default function Toolbar({
       <div className="flex items-center gap-2 shrink-0">
         {/* Undo-like (history) */}
         <button
-          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors"
+          className="w-8 h-8 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-500 transition-colors"
           title="Hoàn tác"
         >
           <RotateCcw size={15} />
@@ -105,7 +105,7 @@ export default function Toolbar({
         {/* Preview */}
         <button
           onClick={onPreview}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm text-gray-600 border border-gray-200 hover:bg-gray-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-sm text-gray-600 border border-[#e6ebf1] hover:bg-gray-50 transition-colors"
         >
           <Eye size={15} />
           <span>Xem thử</span>
@@ -115,13 +115,13 @@ export default function Toolbar({
         <button
           onClick={onSave}
           disabled={!hasChanges || saving}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm transition-colors font-medium
+          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[10px] text-sm transition-colors font-medium
             ${hasChanges && !saving
-              ? 'bg-white border border-gray-200 text-gray-700 hover:bg-gray-50'
+              ? 'bg-white border border-[#e6ebf1] text-gray-700 hover:bg-gray-50'
               : 'bg-white border border-gray-100 text-gray-300 cursor-not-allowed'}`}
         >
           {saving ? (
-            <span className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
+            <span className="w-4 h-4 border-2 border-[#699dff] border-t-transparent rounded-full animate-spin" />
           ) : (
             <Save size={15} />
           )}
@@ -131,14 +131,14 @@ export default function Toolbar({
         {/* Publish */}
         <button
           onClick={onPublish}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-xl text-sm text-white font-semibold transition-all"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-[10px] text-sm text-white font-semibold transition-all"
           style={{ background: 'linear-gradient(135deg, #4F46E5, #3B82F6)' }}
         >
           {status === 'published' ? 'Cập nhật' : 'Lưu'}
         </button>
 
         {/* More */}
-        <button className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-500 transition-colors">
+        <button className="w-8 h-8 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-500 transition-colors">
           <MoreHorizontal size={16} />
         </button>
       </div>

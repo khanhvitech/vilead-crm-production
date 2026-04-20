@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
@@ -22,7 +22,7 @@ function RadioDot({ checked, onClick }: { checked: boolean; onClick: () => void 
     <div
       onClick={onClick}
       className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 cursor-pointer transition-colors ${
-        checked ? 'border-blue-600 bg-blue-600' : 'border-gray-300 hover:border-gray-400'
+        checked ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1] hover:border-gray-400'
       }`}
     >
       {checked && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -112,7 +112,7 @@ function PopupContent({
     <div
       ref={popupRef}
       style={{ position: 'fixed', ...pos, width: 440, zIndex: 9999 }}
-      className="bg-white border border-gray-200 rounded-lg shadow-2xl overflow-hidden"
+      className="bg-white border border-[#e6ebf1] rounded-[10px] shadow-2xl overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-start justify-between px-5 py-4 border-b border-gray-100">
@@ -122,7 +122,7 @@ function PopupContent({
         </div>
         <button
           onClick={onClose}
-          className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-400 transition-colors shrink-0"
+          className="p-1.5 rounded-[10px] hover:bg-gray-100 text-gray-400 transition-colors shrink-0"
         >
           <X size={15} />
         </button>
@@ -152,11 +152,11 @@ function PopupContent({
                   <input
                     type="number" min={1} max={365} value={value}
                     onChange={e => setValue(Math.max(1, Number(e.target.value)))}
-                    className="w-20 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                    className="w-20 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
                   />
                   <select
                     value={unit} onChange={e => setUnit(e.target.value as 'minutes' | 'hours' | 'days')}
-                    className="flex-1 min-w-[80px] px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="flex-1 min-w-[80px] px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                   >
                     {DELAY_UNIT_OPTIONS.map(u => (
                       <option key={u.value} value={u.value}>{u.label}</option>
@@ -186,14 +186,14 @@ function PopupContent({
                 <div className="flex items-center gap-2">
                   <select
                     value={windowFrom} onChange={e => setWindowFrom(e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="px-2 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                   >
                     {hourOptions.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
                   <span className="text-xs text-gray-500">đến</span>
                   <select
                     value={windowTo} onChange={e => setWindowTo(e.target.value)}
-                    className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    className="px-2 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                   >
                     {hourOptions.map(t => <option key={t} value={t}>{t}</option>)}
                   </select>
@@ -226,13 +226,13 @@ function PopupContent({
       <div className="flex items-center justify-end gap-3 px-5 py-3.5 border-t border-gray-100 bg-gray-50/60">
         <button
           onClick={onClose}
-          className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors"
+          className="px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-[10px] transition-colors"
         >
           Hủy
         </button>
         <button
           onClick={handleSave}
-          className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm"
+          className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] transition-colors shadow-sm"
         >
           <Check size={14} />
           Lưu và cập nhật

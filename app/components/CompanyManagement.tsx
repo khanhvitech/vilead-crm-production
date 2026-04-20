@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -1105,8 +1105,8 @@ export default function CompanyManagement() {
           </div>
         </div>
         
-        <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-700">
+        <div className="bg-blue-50 p-3 rounded-[10px] border border-[#c7d9fd]">
+          <p className="text-sm text-[#3e79f7]">
             <strong>Lưu ý:</strong> Hiệu xuất công việc sẽ được tính toán tự động từ hệ thống sau khi nhân viên bắt đầu làm việc.
           </p>
         </div>
@@ -1298,7 +1298,7 @@ export default function CompanyManagement() {
                 <p className="text-sm text-[#72849a] text-center py-8">Không tìm thấy nhân viên phù hợp</p>
               ) : (
                 filteredEmployees.filter(emp => emp.id !== parseInt(formData.managerId)).map(emp => (
-                  <div key={emp.id} className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' : 'hover:bg-[#f7f7f8] border border-transparent'}`} onClick={() => toggleMember(emp.id)}>
+                  <div key={emp.id} className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' : 'hover:bg-[#f7f7f8] border border-transparent'}`} onClick={() => toggleMember(emp.id)}>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#3e79f7] border-[#3e79f7]' : 'border-[#d9d9d9] bg-white'}`}>
                       {selectedMembers.includes(emp.id) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
@@ -1339,7 +1339,7 @@ export default function CompanyManagement() {
               {conflictMembers.map(conflict => {
                 const isSelected = confirmedConflictIds.includes(conflict.employeeId)
                 return (
-                  <div key={conflict.employeeId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border ${isSelected ? 'bg-[#f0f7ff] border-[#3e79f7]/20' : 'bg-white border-gray-200 hover:bg-gray-50'}`} onClick={() => toggleConflictMember(conflict.employeeId)}>
+                  <div key={conflict.employeeId} className={`flex items-center gap-3 p-3 rounded-[10px] cursor-pointer transition-colors border ${isSelected ? 'bg-[#f0f7ff] border-[#3e79f7]/20' : 'bg-white border-[#e6ebf1] hover:bg-gray-50'}`} onClick={() => toggleConflictMember(conflict.employeeId)}>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-[#3e79f7] border-[#3e79f7]' : 'border-[#d9d9d9]'}`}>
                       {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
@@ -1664,7 +1664,7 @@ export default function CompanyManagement() {
                 availableEmployees.map(emp => (
                   <div 
                     key={emp.id}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${
                       selectedMembers.includes(emp.id) 
                         ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' 
                         : 'hover:bg-[#f7f7f8] border border-transparent'
@@ -1754,7 +1754,7 @@ export default function CompanyManagement() {
                 {conflictMembers.map(conflict => (
                   <div 
                     key={conflict.employeeId}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${
                       confirmedConflictIds.includes(conflict.employeeId) 
                         ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' 
                         : 'hover:bg-[#f7f7f8] border border-transparent'
@@ -2441,7 +2441,7 @@ export default function CompanyManagement() {
                 <p className="text-sm text-[#72849a] text-center py-8">Không tìm thấy nhân viên phù hợp</p>
               ) : (
                 filteredEmployees.filter(emp => emp.id !== parseInt(formData.managerId)).map(emp => (
-                  <div key={emp.id} className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' : 'hover:bg-[#f7f7f8] border border-transparent'}`} onClick={() => toggleMember(emp.id)}>
+                  <div key={emp.id} className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' : 'hover:bg-[#f7f7f8] border border-transparent'}`} onClick={() => toggleMember(emp.id)}>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-colors ${selectedMembers.includes(emp.id) ? 'bg-[#3e79f7] border-[#3e79f7]' : 'border-[#d9d9d9] bg-white'}`}>
                       {selectedMembers.includes(emp.id) && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
@@ -2482,7 +2482,7 @@ export default function CompanyManagement() {
               {conflictMembers.map(conflict => {
                 const isSelected = confirmedConflictIds.includes(conflict.employeeId)
                 return (
-                  <div key={conflict.employeeId} className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors border ${isSelected ? 'bg-[#f0f7ff] border-[#3e79f7]/20' : 'bg-white border-gray-200 hover:bg-gray-50'}`} onClick={() => toggleConflictMember(conflict.employeeId)}>
+                  <div key={conflict.employeeId} className={`flex items-center gap-3 p-3 rounded-[10px] cursor-pointer transition-colors border ${isSelected ? 'bg-[#f0f7ff] border-[#3e79f7]/20' : 'bg-white border-[#e6ebf1] hover:bg-gray-50'}`} onClick={() => toggleConflictMember(conflict.employeeId)}>
                     <div className={`w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 ${isSelected ? 'bg-[#3e79f7] border-[#3e79f7]' : 'border-[#d9d9d9]'}`}>
                       {isSelected && <CheckCircle className="w-3 h-3 text-white" />}
                     </div>
@@ -2808,7 +2808,7 @@ export default function CompanyManagement() {
                 availableEmployees.map(emp => (
                   <div 
                     key={emp.id}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${
                       selectedMembers.includes(emp.id) 
                         ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' 
                         : 'hover:bg-[#f7f7f8] border border-transparent'
@@ -2898,7 +2898,7 @@ export default function CompanyManagement() {
                 {conflictMembers.map(conflict => (
                   <div 
                     key={conflict.employeeId}
-                    className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                    className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${
                       confirmedConflictIds.includes(conflict.employeeId) 
                         ? 'bg-[#f0f7ff] border border-[#3e79f7]/20' 
                         : 'hover:bg-[#f7f7f8] border border-transparent'
@@ -3036,7 +3036,7 @@ export default function CompanyManagement() {
                   <span className="font-medium">{employee.position}</span>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                  <Badge variant="outline" className="bg-blue-50 text-[#3e79f7] border-[#c7d9fd]">
                     {employee.roleName}
                   </Badge>
                 </TableCell>
@@ -3237,7 +3237,7 @@ export default function CompanyManagement() {
                       </button>
                     </div>
                     {deptActionMenuOpen === dept.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-2 z-50">
                         <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Thao tác nhanh</div>
                         <button
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -3341,7 +3341,7 @@ export default function CompanyManagement() {
                     <span className="text-sm text-gray-600">{team.description}</span>
                   </TableCell>
                   <TableCell>
-                    <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200">
+                    <Badge variant="outline" className="bg-blue-50 text-[#3e79f7] border-[#c7d9fd]">
                       {team.departmentName}
                     </Badge>
                   </TableCell>
@@ -3365,7 +3365,7 @@ export default function CompanyManagement() {
                       </button>
                     </div>
                     {teamActionMenuOpen === team.id && (
-                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                      <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-2 z-50">
                         <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Thao tác nhanh</div>
                         <button
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
@@ -3500,7 +3500,7 @@ export default function CompanyManagement() {
     return (
       <div className="flex gap-6 h-[calc(100vh-200px)]">
         {/* Left Sidebar - Role List */}
-        <div className="w-64 flex-shrink-0 bg-[#1a1f2e] rounded-lg overflow-hidden">
+        <div className="w-64 flex-shrink-0 bg-[#1a1f2e] rounded-[10px] overflow-hidden">
           <div className="p-3">
             {roles.map((role) => (
               <div
@@ -3763,7 +3763,7 @@ export default function CompanyManagement() {
                 <Card key={module.id} className="overflow-hidden">
                   <div className="flex items-center justify-between p-3 border-b bg-gray-50">
                     <div className="flex items-center gap-2">
-                      <div className="p-1.5 bg-blue-100 text-blue-600 rounded-lg text-sm">
+                      <div className="p-1.5 bg-blue-100 text-blue-600 rounded-[10px] text-sm">
                         {module.icon}
                       </div>
                       <span className="font-medium text-sm text-gray-700">{module.name}</span>
@@ -4044,10 +4044,10 @@ export default function CompanyManagement() {
                 ].map(dataType => (
                   <div
                     key={dataType.value}
-                    className={`p-3 border rounded-lg cursor-pointer transition-colors ${
+                    className={`p-3 border rounded-[10px] cursor-pointer transition-colors ${
                       selectedDataTypes.includes(dataType.value)
-                        ? 'border-blue-500 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:border-gray-300'
+                        ? 'border-blue-500 bg-blue-50 text-[#3e79f7]'
+                        : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                     }`}
                     onClick={() => {
                       if (selectedDataTypes.includes(dataType.value)) {
@@ -4067,7 +4067,7 @@ export default function CompanyManagement() {
             </div>
 
             {/* Warning message */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4">
               <div className="flex items-start space-x-2">
                 <div className="text-yellow-600">⚠️</div>
                 <div className="text-sm text-yellow-800">
@@ -4095,7 +4095,7 @@ export default function CompanyManagement() {
             <Button 
               onClick={handleDataTransfer}
               disabled={!transferToEmployeeId || selectedDataTypes.length === 0}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-[#ff6b72] hover:bg-[#d9505c] text-white"
             >
               Xác nhận chuyển dữ liệu và ngừng hoạt động
             </Button>
@@ -4183,7 +4183,7 @@ export default function CompanyManagement() {
                         <div className="flex items-center space-x-2">
                           <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div 
-                              className="bg-blue-600 h-2 rounded-full"
+                              className="bg-[#3e79f7] h-2 rounded-full"
                               style={{ width: `${selectedEmployee.performance}%` }}
                             />
                           </div>
@@ -4534,7 +4534,7 @@ export default function CompanyManagement() {
                 <h4 className="font-medium mb-3">Chi tiết phân quyền</h4>
                 <div className="space-y-4">
                   {/* Leads Permissions */}
-                  <div className="border rounded-lg p-4">
+                  <div className="border rounded-[10px] p-4">
                     <h5 className="font-medium mb-2">Leads</h5>
                     <div className="grid grid-cols-5 gap-4 text-sm">
                       <div>
@@ -4569,7 +4569,7 @@ export default function CompanyManagement() {
                   </div>
 
                   {/* Deals Permissions */}
-                  <div className="border rounded-lg p-4">
+                  <div className="border rounded-[10px] p-4">
                     <h5 className="font-medium mb-2">Deals</h5>
                     <div className="grid grid-cols-5 gap-4 text-sm">
                       <div>

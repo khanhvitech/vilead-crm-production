@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from 'react';
 import { CreditCard, CheckCircle2, AlertTriangle, Download, Receipt, Settings2 } from 'lucide-react';
@@ -77,7 +77,7 @@ export const BillingManagement: React.FC = () => {
     <div className="flex-1 bg-gray-50 flex flex-col overflow-hidden h-full w-full">
       <div className="w-full flex flex-col h-full">
         {/* Header Tabs with White Background and left flush alignment */}
-        <div className="flex items-center bg-gray-50 border-b border-gray-200">
+        <div className="flex items-center bg-gray-50 border-b border-[#e6ebf1]">
           <button
             onClick={() => setActiveTab('current_plan')}
             className={`px-8 py-4 text-[14px] font-bold border-b-[2px] transition-colors ${
@@ -106,7 +106,7 @@ export const BillingManagement: React.FC = () => {
             <div className="flex flex-col p-6 space-y-6">
 
               {/* Control Panel cho Dev (Prototype test) */}
-              <div className="bg-gray-800 text-white rounded-lg p-4 shadow-md border border-gray-700 relative overflow-hidden shrink-0">
+              <div className="bg-gray-800 text-white rounded-[10px] p-4 shadow-md border border-gray-700 relative overflow-hidden shrink-0">
                 <div className="flex items-center gap-2 mb-3 z-10 relative">
                   <Settings2 className="w-5 h-5 text-gray-400" />
                   <h4 className="font-extrabold text-sm tracking-wider text-gray-300 uppercase">Mock State Controller (Dev Only)</h4>
@@ -114,7 +114,7 @@ export const BillingManagement: React.FC = () => {
                 <div className="flex flex-wrap gap-2 relative z-10">
                   <button 
                     onClick={() => { setStatus('active'); setUsersCount(8); }}
-                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'active' && usersCount === 8 ? 'bg-green-500 text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
+                    className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${status === 'active' && usersCount === 8 ? 'bg-[#2dc56a] text-white shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'bg-gray-700 hover:bg-gray-600 text-gray-300'}`}
                   >
                     Bình thường
                   </button>
@@ -136,7 +136,7 @@ export const BillingManagement: React.FC = () => {
               <LocalSubscriptionAlert status={status} daysLeft={45} onRenew={handleOpenRenew} />
 
               {/* Current Plan Dashboard Card */}
-              <div className="bg-white rounded-lg p-6 lg:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col lg:flex-row gap-8 items-start justify-between relative overflow-hidden">
+              <div className="bg-white rounded-[10px] p-6 lg:p-8 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col lg:flex-row gap-8 items-start justify-between relative overflow-hidden">
                 
                 {/* Left Info */}
                 <div className="flex flex-col w-full lg:w-[45%]">
@@ -219,7 +219,7 @@ export const BillingManagement: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-5 pt-4">
                   
                   {/* Starter */}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
+                  <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm p-6 flex flex-col">
                     <div className="mb-5">
                       <h3 className="text-gray-400 font-bold text-xs tracking-wider uppercase mb-2">Starter</h3>
                       <div className="flex items-baseline">
@@ -237,14 +237,14 @@ export const BillingManagement: React.FC = () => {
                     </ul>
                     <button 
                       onClick={() => handleOpenDowngrade()}
-                      className="w-full py-2.5 rounded-xl border-2 border-gray-200 text-gray-900 font-bold text-[13px] hover:bg-gray-50 transition-colors mt-auto"
+                      className="w-full py-2.5 rounded-[10px] border-2 border-[#e6ebf1] text-gray-900 font-bold text-[13px] hover:bg-gray-50 transition-colors mt-auto"
                     >
                       Hạ cấp
                     </button>
                   </div>
 
                   {/* Professional */}
-                  <div className="bg-white rounded-lg border-[3px] border-[#3e79f7] shadow-lg p-6 flex flex-col relative transform md:-translate-y-3">
+                  <div className="bg-white rounded-[10px] border-[3px] border-[#3e79f7] shadow-lg p-6 flex flex-col relative transform md:-translate-y-3">
                     <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-[#3e79f7] text-white px-3 py-1 rounded-full text-[10px] font-extrabold shadow-sm whitespace-nowrap">
                       PHỔ BIẾN NHẤT
                     </div>
@@ -263,13 +263,13 @@ export const BillingManagement: React.FC = () => {
                         </li>
                       ))}
                     </ul>
-                    <button disabled className="w-full py-2.5 rounded-xl bg-gray-100 text-gray-400 font-bold text-[13px] cursor-not-allowed mt-auto">
+                    <button disabled className="w-full py-2.5 rounded-[10px] bg-gray-100 text-gray-400 font-bold text-[13px] cursor-not-allowed mt-auto">
                       Đang dùng
                     </button>
                   </div>
 
                   {/* Enterprise */}
-                  <div className="bg-white rounded-lg border border-gray-200 shadow-sm p-6 flex flex-col">
+                  <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm p-6 flex flex-col">
                     <div className="mb-5">
                       <h3 className="text-gray-400 font-bold text-xs tracking-wider uppercase mb-2">Enterprise</h3>
                       <div className="flex items-baseline">
@@ -294,7 +294,7 @@ export const BillingManagement: React.FC = () => {
                     </ul>
                     <button 
                       onClick={() => handleOpenUpgrade()}
-                      className="w-full py-2.5 rounded-xl bg-[#3e79f7] hover:bg-[#3264d0] text-white font-bold text-[13px] transition-colors shadow-md mt-auto"
+                      className="w-full py-2.5 rounded-[10px] bg-[#3e79f7] hover:bg-[#3264d0] text-white font-bold text-[13px] transition-colors shadow-md mt-auto"
                     >
                       Nâng cấp
                     </button>
@@ -306,11 +306,11 @@ export const BillingManagement: React.FC = () => {
           )}
           {activeTab === 'order_history' && (
             <div className="p-6">
-              <div className="bg-white rounded-lg p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100">
+              <div className="bg-white rounded-[10px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100">
                 <h3 className="text-lg font-bold text-[#111827] mb-6">Lịch sử giao dịch</h3>
                 <div className="overflow-x-auto">
                 <table className="w-full text-sm text-left">
-                  <thead className="text-xs text-gray-500 border-b border-gray-200 uppercase tracking-wider">
+                  <thead className="text-xs text-gray-500 border-b border-[#e6ebf1] uppercase tracking-wider">
                     <tr>
                       <th className="px-6 py-4 font-bold">Mã đơn hàng</th>
                       <th className="px-6 py-4 font-bold">Ngày thanh toán</th>
@@ -333,7 +333,7 @@ export const BillingManagement: React.FC = () => {
                           </span>
                         </td>
                         <td className="px-6 py-4 text-right whitespace-nowrap">
-                          <button className="text-[#3e79f7] hover:text-blue-700 inline-flex items-center justify-end gap-2 font-bold">
+                          <button className="text-[#3e79f7] hover:text-[#3e79f7] inline-flex items-center justify-end gap-2 font-bold">
                             <Receipt className="w-4 h-4" /> HD
                           </button>
                         </td>

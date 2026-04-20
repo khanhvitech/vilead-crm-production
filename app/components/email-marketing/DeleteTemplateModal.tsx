@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 // ==================== DELETE TEMPLATE CONFIRM MODAL ====================
 // Modal xác nhận xóa template
@@ -48,12 +48,12 @@ export function DeleteTemplateModal({
 
       {/* Modal */}
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-xl max-w-md w-full overflow-hidden">
+        <div className="relative bg-white rounded-[10px] shadow-xl max-w-md w-full overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6ebf1]">
             <h2 className="text-lg font-semibold text-gray-900">Xác nhận xóa</h2>
             <button
-              className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-500 hover:bg-gray-100 rounded-[10px] transition-colors"
               onClick={onClose}
             >
               <X className="w-5 h-5" />
@@ -74,7 +74,7 @@ export function DeleteTemplateModal({
                   Mẫu &quot;<span className="font-medium">{template.name}</span>&quot; sẽ bị xóa vĩnh viễn và không thể khôi phục.
                 </p>
                 {template.usage_count > 0 && (
-                  <p className="mt-2 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-lg">
+                  <p className="mt-2 text-sm text-amber-600 bg-amber-50 px-3 py-2 rounded-[10px]">
                     ⚠️ Mẫu này đã được sử dụng trong {template.usage_count} chiến dịch. 
                     Các chiến dịch cũ sẽ không bị ảnh hưởng.
                   </p>
@@ -84,16 +84,16 @@ export function DeleteTemplateModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e6ebf1] bg-gray-50">
             <button
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] font-medium transition-colors"
               onClick={onClose}
               disabled={loading}
             >
               Hủy
             </button>
             <button
-              className="px-4 py-2 bg-red-600 text-white hover:bg-red-700 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-[#ff6b72] text-white hover:bg-[#d9505c] rounded-[10px] font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleConfirm}
               disabled={loading}
             >

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { FolderOpen, Folder, Plus, MoreHorizontal, Pencil, Trash2, ChevronRight } from 'lucide-react'
@@ -33,8 +33,8 @@ export default function FolderSidebar({
   }
 
   return (
-    <div className="w-52 shrink-0 flex flex-col border-r border-gray-200 bg-white h-full">
-      <div className="p-3 border-b border-gray-200">
+    <div className="w-52 shrink-0 flex flex-col border-r border-[#e6ebf1] bg-white h-full">
+      <div className="p-3 border-b border-[#e6ebf1]">
         <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider px-1">Thư mục</h3>
       </div>
 
@@ -43,9 +43,9 @@ export default function FolderSidebar({
         <button
           onClick={() => onSelect(null)}
           className={cn(
-            'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+            'w-full flex items-center gap-2 px-3 py-2 rounded-[10px] text-sm transition-colors',
             selectedFolderId === null
-              ? 'bg-blue-50 text-blue-700 font-medium'
+              ? 'bg-blue-50 text-[#3e79f7] font-medium'
               : 'text-gray-700 hover:bg-white hover:shadow-sm'
           )}
         >
@@ -53,7 +53,7 @@ export default function FolderSidebar({
           <span className="flex-1 text-left truncate">Tất cả</span>
           <span className={cn(
             'text-xs font-medium px-1.5 py-0.5 rounded-full',
-            selectedFolderId === null ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
+            selectedFolderId === null ? 'bg-blue-100 text-[#3e79f7]' : 'bg-gray-200 text-gray-600'
           )}>
             {totalCount}
           </span>
@@ -75,9 +75,9 @@ export default function FolderSidebar({
               <button
                 onClick={() => onSelect(folder.id)}
                 className={cn(
-                  'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+                  'w-full flex items-center gap-2 px-3 py-2 rounded-[10px] text-sm transition-colors',
                   isSelected
-                    ? 'bg-blue-50 text-blue-700 font-medium'
+                    ? 'bg-blue-50 text-[#3e79f7] font-medium'
                     : 'text-gray-700 hover:bg-white hover:shadow-sm'
                 )}
               >
@@ -95,7 +95,7 @@ export default function FolderSidebar({
                 ) : (
                   <span className={cn(
                     'text-xs font-medium px-1.5 py-0.5 rounded-full',
-                    isSelected ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-600'
+                    isSelected ? 'bg-blue-100 text-[#3e79f7]' : 'bg-gray-200 text-gray-600'
                   )}>
                     {folder.flowCount}
                   </span>
@@ -104,7 +104,7 @@ export default function FolderSidebar({
 
               {/* Context menu */}
               {isMenuOpen && (
-                <div className="absolute right-0 top-8 z-30 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-32">
+                <div className="absolute right-0 top-8 z-30 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 min-w-32">
                   <button
                     onClick={() => { onEditFolder(folder); setMenuOpenId(null) }}
                     className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
@@ -127,10 +127,10 @@ export default function FolderSidebar({
       </nav>
 
       {/* Add folder button */}
-      <div className="p-3 border-t border-gray-200">
+      <div className="p-3 border-t border-[#e6ebf1]">
         <button
           onClick={onCreateFolder}
-          className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-blue-600 hover:bg-blue-50 transition-colors font-medium"
+          className="w-full flex items-center gap-2 px-3 py-2 rounded-[10px] text-sm text-blue-600 hover:bg-blue-50 transition-colors font-medium"
         >
           <Plus className="w-4 h-4" />
           Thêm thư mục

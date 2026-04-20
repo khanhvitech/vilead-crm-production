@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -172,15 +172,15 @@ export default function CreateTaskModalSimple({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200 flex-shrink-0">
+        <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1] flex-shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">
             {isEditMode ? 'Chỉnh sửa Công việc' : 'Tạo Công việc mới'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
@@ -198,7 +198,7 @@ export default function CreateTaskModalSimple({
               onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
               placeholder="Nhập tiêu đề công việc (tối đa 100 ký tự)"
               maxLength={100}
-              className={`w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+              className={`w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
                 errors.title ? 'border-red-300' : ''
               }`}
             />
@@ -218,7 +218,7 @@ export default function CreateTaskModalSimple({
               placeholder="Nhập mô tả chi tiết công việc (tối đa 1000 ký tự)"
               maxLength={1000}
               rows={3}
-              className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
             />
           </div>
 
@@ -234,7 +234,7 @@ export default function CreateTaskModalSimple({
                 value={formData.dueDate}
                 onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                 placeholder="Chọn ngày đến hạn"
-                className={`w-full pl-10 pr-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                className={`w-full pl-10 pr-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
                   errors.dueDate ? 'border-red-300' : ''
                 }`}
               />
@@ -253,7 +253,7 @@ export default function CreateTaskModalSimple({
               <select
                 value={formData.priority}
                 onChange={(e) => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-                className="w-full px-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                className="w-full px-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent appearance-none bg-white"
               >
                 <option value="">Chọn ưu tiên</option>
                 <option value="low">Thấp</option>
@@ -281,7 +281,7 @@ export default function CreateTaskModalSimple({
                       setTodos(newTodos)
                     }}
                     placeholder="Nhập việc cần làm"
-                    className="flex-1 px-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="flex-1 px-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   />
                   <button
                     type="button"
@@ -295,7 +295,7 @@ export default function CreateTaskModalSimple({
               <button
                 type="button"
                 onClick={() => setTodos([...todos, ''])}
-                className="w-full px-3 py-2.5 text-sm text-gray-500 border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2"
+                className="w-full px-3 py-2.5 text-sm text-gray-500 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] flex items-center justify-center gap-2"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -312,7 +312,7 @@ export default function CreateTaskModalSimple({
                 <select
                   value={formData.assignedTo}
                   onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: e.target.value }))}
-                  className={`w-full px-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white ${
+                  className={`w-full px-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent appearance-none bg-white ${
                     errors.assignedTo ? 'border-red-300' : ''
                   }`}
                 >
@@ -338,7 +338,7 @@ export default function CreateTaskModalSimple({
                 <select
                   value={formData.relatedType}
                   onChange={(e) => setFormData(prev => ({ ...prev, relatedType: e.target.value }))}
-                  className="w-full px-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none bg-white"
+                  className="w-full px-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent appearance-none bg-white"
                 >
                   <option value="leads">Leads</option>
                   <option value="customer">Khách hàng</option>
@@ -366,7 +366,7 @@ export default function CreateTaskModalSimple({
                 }}
                 onFocus={() => setShowLeadSearch(true)}
                 placeholder="Chọn người liên quan"
-                className="w-full pl-10 pr-3 py-2.5 text-sm text-gray-700 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-3 py-2.5 text-sm text-gray-700 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
               />
               
               {/* Dropdown with search results */}
@@ -376,9 +376,9 @@ export default function CreateTaskModalSimple({
                     className="fixed inset-0 z-20" 
                     onClick={() => setShowLeadSearch(false)}
                   />
-                  <div className="absolute z-30 mt-1 w-full bg-white rounded-lg shadow-xl border border-gray-200 max-h-64 overflow-hidden">
+                  <div className="absolute z-30 mt-1 w-full bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] max-h-64 overflow-hidden">
                     {/* Search box */}
-                    <div className="p-3 border-b border-gray-200">
+                    <div className="p-3 border-b border-[#e6ebf1]">
                       <div className="relative">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                         <input
@@ -386,7 +386,7 @@ export default function CreateTaskModalSimple({
                           value={leadSearchTerm}
                           onChange={(e) => setLeadSearchTerm(e.target.value)}
                           placeholder="Tìm kiếm leads..."
-                          className="w-full pl-10 pr-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full pl-10 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                           onClick={(e) => e.stopPropagation()}
                         />
                       </div>
@@ -434,13 +434,13 @@ export default function CreateTaskModalSimple({
               onChange={(e) => setFormData(prev => ({ ...prev, internalNotes: e.target.value }))}
               placeholder="Nhập ghi chú nội bộ"
               rows={4}
-              className="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
             />
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+        <div className="flex items-center justify-end space-x-3 px-6 py-4 border-t border-[#e6ebf1] bg-gray-50 flex-shrink-0">
           <button
             onClick={onClose}
             type="button"
@@ -452,7 +452,7 @@ export default function CreateTaskModalSimple({
           <button
             onClick={handleSave}
             type="button"
-            className="bg-blue-600 text-white px-6 py-2.5 rounded-lg hover:bg-blue-700 transition-colors font-medium text-sm"
+            className="bg-[#3e79f7] text-white px-6 py-2.5 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium text-sm"
           >
             {isEditMode ? 'Cập nhật công việc' : 'Tạo công việc'}
           </button>

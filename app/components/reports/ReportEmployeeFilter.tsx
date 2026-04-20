@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import { Search, ChevronDown, X } from 'lucide-react'
@@ -62,12 +62,12 @@ export function getFilterMultiplier(dept: string, team: string, employee: string
 const colorMap: Record<string, string> = {
   red: 'bg-red-100 text-red-700',
   green: 'bg-green-100 text-green-700',
-  blue: 'bg-blue-100 text-blue-700',
+  blue: 'bg-blue-100 text-[#3e79f7]',
   orange: 'bg-orange-100 text-orange-700',
   purple: 'bg-purple-100 text-purple-700',
   teal: 'bg-teal-100 text-teal-700',
   pink: 'bg-pink-100 text-pink-700',
-  indigo: 'bg-indigo-100 text-indigo-700',
+  indigo: 'bg-[#f0f7ff] text-[#3e79f7]',
 }
 
 interface ReportEmployeeFilterProps {
@@ -136,7 +136,7 @@ export default function ReportEmployeeFilter({
             onTeamChange('')
             onEmployeeChange('')
           }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8 appearance-none min-w-[180px]"
+          className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] pr-8 appearance-none min-w-[180px]"
         >
           <option value="">Tất cả Phòng</option>
           {reportOrgData.departments.map(d => (
@@ -155,7 +155,7 @@ export default function ReportEmployeeFilter({
             onTeamChange(e.target.value)
             onEmployeeChange('')
           }}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8 appearance-none min-w-[160px]"
+          className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] pr-8 appearance-none min-w-[160px]"
         >
           <option value="">Tất cả Team</option>
           {filteredTeams.map(t => (
@@ -171,7 +171,7 @@ export default function ReportEmployeeFilter({
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setShowEmployeeDropdown(!showEmployeeDropdown)}
-          className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center space-x-2 min-w-[170px] hover:border-blue-400 transition-colors"
+          className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] flex items-center space-x-2 min-w-[170px] hover:border-[#699dff] transition-colors"
         >
           {selectedEmpObj ? (
             <>
@@ -195,7 +195,7 @@ export default function ReportEmployeeFilter({
         </button>
 
         {showEmployeeDropdown && (
-          <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+          <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-50 overflow-hidden">
             {/* Search */}
             <div className="p-2 border-b border-gray-100">
               <div className="relative">
@@ -205,7 +205,7 @@ export default function ReportEmployeeFilter({
                   placeholder="Tìm kiếm"
                   value={employeeSearch}
                   onChange={(e) => setEmployeeSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   autoFocus
                 />
               </div>

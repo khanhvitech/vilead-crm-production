@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { X, Mail, User, AlertTriangle, ExternalLink, Info, CheckCircle } from 'lucide-react'
@@ -108,15 +108,15 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl transform transition-all">
+        <div className="relative w-full max-w-lg bg-white rounded-[10px] shadow-xl transform transition-all">
           {/* Header */}
-          <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6ebf1]">
             <h3 className="text-lg font-semibold text-gray-900">
               Thêm Sender mới
             </h3>
             <button
               onClick={onClose}
-              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
             >
               <X className="w-5 h-5" />
             </button>
@@ -136,12 +136,12 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                 Brevo đã gửi email xác thực đến <span className="font-medium">{formData.email}</span>. 
                 Vui lòng kiểm tra hộp thư (hoặc spam) và nhấn link xác thực.
               </p>
-              <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-left">
+              <div className="bg-blue-50 border border-blue-100 rounded-[10px] p-4 text-left">
                 <div className="flex items-start gap-3">
                   <Info className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-blue-800">
                     <p className="font-medium mb-1">Lưu ý:</p>
-                    <ul className="list-disc list-inside space-y-1 text-blue-700">
+                    <ul className="list-disc list-inside space-y-1 text-[#3e79f7]">
                       <li>Kiểm tra cả thư mục Spam/Junk</li>
                       <li>Link xác thực có hiệu lực 24 giờ</li>
                       <li>Sau khi xác thực, nhấn nút &quot;Cập nhật từ Brevo&quot; để đồng bộ</li>
@@ -151,7 +151,7 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
               </div>
               <button
                 onClick={onClose}
-                className="mt-6 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="mt-6 px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
               >
                 Đóng
               </button>
@@ -161,7 +161,7 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
             <form onSubmit={handleSubmit}>
               <div className="px-6 py-4 space-y-5 max-h-[60vh] overflow-y-auto">
                 {/* Info Alert */}
-                <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-100 rounded-lg">
+                <div className="flex items-start gap-3 p-3 bg-yellow-50 border border-yellow-100 rounded-[10px]">
                   <AlertTriangle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                   <div className="text-sm text-yellow-800">
                     <p>
@@ -191,8 +191,8 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                       value={formData.email}
                       onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="sender@company.com"
-                      className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                      className={`w-full pl-10 pr-4 py-2.5 border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
+                        errors.email ? 'border-red-300 bg-red-50' : 'border-[#e6ebf1]'
                       }`}
                     />
                   </div>
@@ -219,8 +219,8 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                       value={formData.sender_name}
                       onChange={(e) => setFormData(prev => ({ ...prev, sender_name: e.target.value }))}
                       placeholder="VD: Phòng Kinh Doanh"
-                      className={`w-full pl-10 pr-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors.sender_name ? 'border-red-300 bg-red-50' : 'border-gray-200'
+                      className={`w-full pl-10 pr-4 py-2.5 border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
+                        errors.sender_name ? 'border-red-300 bg-red-50' : 'border-[#e6ebf1]'
                       }`}
                     />
                   </div>
@@ -235,14 +235,14 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                     Quyền sử dụng sender
                   </label>
                   <div className="space-y-2">
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label className="flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-gray-50 transition-colors">
                       <input
                         type="radio"
                         name="permission_type"
                         value="me"
                         checked={formData.permission_type === 'me'}
                         onChange={() => setFormData(prev => ({ ...prev, permission_type: 'me', permitted_user_ids: [] }))}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7]"
                       />
                       <div className="ml-3">
                         <span className="text-sm font-medium text-gray-900">Chỉ mình tôi</span>
@@ -250,14 +250,14 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                       </div>
                     </label>
                     
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label className="flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-gray-50 transition-colors">
                       <input
                         type="radio"
                         name="permission_type"
                         value="all"
                         checked={formData.permission_type === 'all'}
                         onChange={() => setFormData(prev => ({ ...prev, permission_type: 'all', permitted_user_ids: [] }))}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7]"
                       />
                       <div className="ml-3">
                         <span className="text-sm font-medium text-gray-900">Toàn bộ tổ chức</span>
@@ -265,14 +265,14 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                       </div>
                     </label>
                     
-                    <label className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <label className="flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-gray-50 transition-colors">
                       <input
                         type="radio"
                         name="permission_type"
                         value="specific"
                         checked={formData.permission_type === 'specific'}
                         onChange={() => setFormData(prev => ({ ...prev, permission_type: 'specific' }))}
-                        className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+                        className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7]"
                       />
                       <div className="ml-3">
                         <span className="text-sm font-medium text-gray-900">Chỉ định cụ thể</span>
@@ -288,8 +288,8 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Chọn nhân viên <span className="text-red-500">*</span>
                     </label>
-                    <div className={`border rounded-lg divide-y ${
-                      errors.permitted_user_ids ? 'border-red-300' : 'border-gray-200'
+                    <div className={`border rounded-[10px] divide-y ${
+                      errors.permitted_user_ids ? 'border-red-300' : 'border-[#e6ebf1]'
                     }`}>
                       {MOCK_USERS.map(user => (
                         <label
@@ -300,7 +300,7 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
                             type="checkbox"
                             checked={formData.permitted_user_ids.includes(user.id)}
                             onChange={() => toggleUserSelection(user.id)}
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                           />
                           <div className="ml-3">
                             <span className="text-sm font-medium text-gray-900">{user.name}</span>
@@ -317,18 +317,18 @@ export default function AddSenderModal({ open, onClose, onSubmit, loading }: Add
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+              <div className="px-6 py-4 border-t border-[#e6ebf1] flex items-center justify-end gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                  className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+                  className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 flex items-center"
                 >
                   {loading && (
                     <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

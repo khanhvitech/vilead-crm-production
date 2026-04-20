@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import { Search, Plus, MoreHorizontal, Play, Pause, Copy, Trash2, ChevronRight, Zap, Users, Check, FolderInput, Pencil, ChevronLeft } from 'lucide-react'
@@ -30,9 +30,9 @@ function CreateSequenceModal({ onClose, onCreate }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
-        <div className="px-6 py-5 border-b border-gray-200">
+        <div className="px-6 py-5 border-b border-[#e6ebf1]">
           <h3 className="text-base font-bold text-gray-900">Tạo Kịch bản mới</h3>
           <p className="text-xs text-gray-500 mt-0.5">Thiết kế kịch bản chăm sóc tự động cho khách hàng</p>
         </div>
@@ -47,7 +47,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
               onChange={e => { setName(e.target.value); setNameError('') }}
               placeholder="VD: Chăm sóc KH mới, Chúc mừng sinh nhật..."
               maxLength={100}
-              className={`w-full px-3.5 py-2.5 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${nameError ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+              className={`w-full px-3.5 py-2.5 text-sm border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors ${nameError ? 'border-red-400 bg-red-50' : 'border-[#e6ebf1]'}`}
               autoFocus
             />
             {nameError && <p className="text-xs text-red-500 mt-1">{nameError}</p>}
@@ -61,7 +61,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
               value={description}
               onChange={e => setDesc(e.target.value)}
               placeholder="Mô tả mục đích kịch bản..."
-              className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] resize-none"
             />
           </div>
         </div>
@@ -71,7 +71,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
@@ -79,7 +79,7 @@ function CreateSequenceModal({ onClose, onCreate }: {
             type="button"
             onClick={handleCreate}
             disabled={!name.trim() || !triggerType}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             Tạo kịch bản
           </button>
@@ -294,7 +294,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
       {/* Main content */}
       <div className="flex-1 h-full flex flex-col bg-white overflow-hidden">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-200 bg-white shrink-0">
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[#e6ebf1] bg-white shrink-0">
           {/* Search */}
           <div className="flex-1 relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -303,12 +303,12 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               value={query}
               onChange={e => setQuery(e.target.value)}
               placeholder="Tìm kiếm kịch bản..."
-              className="w-full pl-9 pr-4 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+              className="w-full pl-9 pr-4 py-1.5 text-sm border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-1 focus:ring-[#3e79f7] bg-white"
             />
           </div>
 
           {/* Status filter */}
-          <div className="flex gap-1 p-0.5 bg-gray-100 border border-gray-200 rounded-md">
+          <div className="flex gap-1 p-0.5 bg-gray-100 border border-[#e6ebf1] rounded-md">
             {([
               { v: 'all',    l: 'Tất cả' },
               { v: 'active', l: '🟢 Đang chạy' },
@@ -332,7 +332,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
           <select
             value={triggerFilter}
             onChange={e => setTriggerFilter(e.target.value as TriggerType | 'all')}
-            className="px-3 py-1.5 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+            className="px-3 py-1.5 text-sm border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-1 focus:ring-[#3e79f7] bg-white"
           >
             <option value="all">Tất cả điều kiện kích hoạt</option>
             {TRIGGER_GROUPS.map(group => (
@@ -347,7 +347,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
           <button
             type="button"
             onClick={() => setShowCreate(true)}
-            className="ml-auto flex items-center gap-2 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-full transition-colors shadow-sm"
+            className="ml-auto flex items-center gap-2 px-4 py-1.5 bg-[#3e79f7] hover:bg-[#699dff] text-white text-sm font-semibold rounded-full transition-colors shadow-sm"
           >
             <Plus size={15} />
             Tạo kịch bản mới
@@ -372,7 +372,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               {selectedCount < filtered.length && (
                 <button
                   onClick={selectAllVisible}
-                  className="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 text-sm rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-white border border-blue-300 text-[#3e79f7] text-sm rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
                 >
                   <Check className="w-3.5 h-3.5" />
                   Chọn tất cả ({filtered.length})
@@ -381,13 +381,13 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               <div className="relative" ref={moveFolderRef}>
                 <button
                   onClick={() => setMoveFolderOpen(v => !v)}
-                  className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+                  className="px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-1.5"
                 >
                   <FolderInput className="w-3.5 h-3.5" />
                   Chuyển thư mục
                 </button>
                 {moveFolderOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5 z-50 max-h-60 overflow-auto">
+                  <div className="absolute right-0 top-full mt-1.5 w-56 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] py-1.5 z-50 max-h-60 overflow-auto">
                     <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                       Chọn thư mục
                     </div>
@@ -422,7 +422,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                   handleBulkDelete(Array.from(selectedIds))
                   clearSelection()
                 }}
-                className="px-3 py-1.5 bg-red-600 border border-transparent text-white text-sm rounded-md hover:bg-red-700 transition-colors flex items-center gap-1.5 shadow-sm"
+                className="px-3 py-1.5 bg-[#ff6b72] border border-transparent text-white text-sm rounded-md hover:bg-[#d9505c] transition-colors flex items-center gap-1.5 shadow-sm"
               >
                 <Trash2 className="w-3.5 h-3.5" />
                 Xóa
@@ -435,13 +435,13 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
         <div className="flex-1 overflow-auto">
           <div className="bg-white min-w-[900px]">
             {/* Table head */}
-            <div className="grid grid-cols-12 gap-0 px-5 py-2.5 bg-gray-50 border-b border-gray-200 sticky top-0 z-10 items-center">
+            <div className="grid grid-cols-12 gap-0 px-5 py-2.5 bg-gray-50 border-b border-[#e6ebf1] sticky top-0 z-10 items-center">
             <div className="col-span-1 flex items-center">
               <input
                 type="checkbox"
                 checked={filtered.length > 0 && selectedIds.size === filtered.length}
                 onChange={toggleSelectAll}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7] w-4 h-4 cursor-pointer"
               />
             </div>
             <div className="col-span-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tên Kịch bản</div>
@@ -463,7 +463,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               <button
                 type="button"
                 onClick={() => setShowCreate(true)}
-                className="mt-4 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-full hover:bg-blue-700 transition-colors"
+                className="mt-4 px-5 py-2.5 bg-[#3e79f7] text-white text-sm font-semibold rounded-full hover:bg-[#699dff] transition-colors"
               >
                 Tạo kịch bản mới
               </button>
@@ -483,14 +483,14 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                       type="checkbox"
                       checked={selectedIds.has(seq.id)}
                       onChange={(e) => { e.stopPropagation(); toggleSelect(seq.id) }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 cursor-pointer"
+                      className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7] w-4 h-4 cursor-pointer"
                       onClick={e => e.stopPropagation()}
                     />
                   </div>
 
                   {/* Name + description */}
                   <div className="col-span-3 flex items-center gap-3 min-w-0 pr-4">
-                    <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                    <div className="w-9 h-9 bg-blue-100 rounded-[10px] flex items-center justify-center shrink-0">
                       <Zap size={15} className="text-blue-600" />
                     </div>
                     <div className="min-w-0">
@@ -510,7 +510,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                   {/* Folder */}
                   <div className="col-span-2 flex items-center pr-2">
                     {seq.folder ? (
-                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md border border-gray-200/60 truncate max-w-[140px]">
+                      <span className="flex items-center gap-1.5 px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-md border border-[#e6ebf1]/60 truncate max-w-[140px]">
                         <FolderInput className="w-3 h-3 text-gray-400 shrink-0" />
                         <span className="truncate">{seq.folder.name}</span>
                       </span>
@@ -522,7 +522,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                   {/* Trigger */}
                   <div className="col-span-2 flex items-center">
                     <div>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-lg border border-orange-100 truncate max-w-[120px]">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-orange-50 text-orange-700 text-xs font-semibold rounded-[10px] border border-orange-100 truncate max-w-[120px]">
                         {triggerLabel}
                       </span>
                     </div>
@@ -560,14 +560,14 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); setMenuOpenId(isMenuOpen ? null : seq.id) }}
-                        className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                        className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
                       >
                         <MoreHorizontal size={15} />
                       </button>
 
                       {isMenuOpen && (
                         <div
-                          className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-48 overflow-hidden"
+                          className="absolute right-0 top-8 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 w-48 overflow-hidden"
                           onMouseLeave={() => setMenuOpenId(null)}
                         >
                           <button
@@ -617,7 +617,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
 
       {/* Pagination Footer */}
       {filtered.length > 0 && (
-        <div className="flex items-center justify-between px-5 py-3 border-t border-gray-200 bg-white shrink-0">
+        <div className="flex items-center justify-between px-5 py-3 border-t border-[#e6ebf1] bg-white shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600">Hiển thị</span>
             <select
@@ -626,7 +626,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                 setPageSize(Number(e.target.value))
                 setCurrentPage(1)
               }}
-              className="text-sm border border-gray-200 rounded-lg px-2 py-1 outline-none focus:border-blue-500"
+              className="text-sm border border-[#e6ebf1] rounded-[10px] px-2 py-1 outline-none focus:border-[#3e79f7]"
             >
               {[10, 20, 50].map(v => (
                 <option key={v} value={v}>{v}</option>
@@ -641,17 +641,17 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               &larr; Trước
             </button>
-            <span className="px-3 py-1 text-sm font-semibold bg-blue-600 text-white rounded-md">
+            <span className="px-3 py-1 text-sm font-semibold bg-[#3e79f7] text-white rounded-md">
               {currentPage}
             </span>
             <button
               disabled={currentPage === totalPages || totalPages === 0}
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               Sau &rarr;
             </button>
@@ -671,7 +671,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
       {/* Folder Create/Edit Modal */}
       {folderModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl w-full max-w-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 text-base">
                 {folderModal.mode === 'create' ? 'Tạo thư mục mới' : 'Đổi tên thư mục'}
@@ -686,8 +686,8 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                 value={folderModal.name}
                 onChange={e => setFolderModal({ ...folderModal, name: e.target.value, error: undefined })}
                 onKeyDown={e => e.key === 'Enter' && submitFolder()}
-                className={`w-full px-3.5 py-2 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow ${
-                  folderModal.error ? 'border-red-300 ring-4 ring-red-500/10' : 'border-gray-200'
+                className={`w-full px-3.5 py-2 text-sm border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-shadow ${
+                  folderModal.error ? 'border-red-300 ring-4 ring-red-500/10' : 'border-[#e6ebf1]'
                 }`}
               />
               {folderModal.error && (
@@ -701,14 +701,14 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               <button
                 type="button"
                 onClick={() => setFolderModal(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200/50 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 type="button"
                 onClick={submitFolder}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] shadow-sm transition-colors"
               >
                 {folderModal.mode === 'create' ? 'Tạo mới' : 'Lưu thay đổi'}
               </button>
@@ -720,7 +720,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
       {/* Rename Modal */}
       {renameModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl w-full max-w-sm overflow-hidden">
             <div className="px-5 py-4 border-b border-gray-100">
               <h3 className="font-semibold text-gray-900 text-base">Đổi tên kịch bản</h3>
             </div>
@@ -741,8 +741,8 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                     setRenameModal(null)
                   }
                 }}
-                className={`w-full px-3.5 py-2 text-sm border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow ${
-                  renameModal.error ? 'border-red-300 ring-4 ring-red-500/10' : 'border-gray-200'
+                className={`w-full px-3.5 py-2 text-sm border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-shadow ${
+                  renameModal.error ? 'border-red-300 ring-4 ring-red-500/10' : 'border-[#e6ebf1]'
                 }`}
               />
               {renameModal.error && (
@@ -755,7 +755,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
               <button
                 type="button"
                 onClick={() => setRenameModal(null)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200/50 rounded-lg transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200/50 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
@@ -769,7 +769,7 @@ export default function SequenceListPage({ onSelectSequence }: Props) {
                   setSequences(prev => prev.map(s => s.id === renameModal.id ? { ...s, name: renameModal.name.trim() } : s))
                   setRenameModal(null)
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] shadow-sm transition-colors"
               >
                 Lưu thay đổi
               </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -326,7 +326,7 @@ export function DepartmentModal({ isOpen, onClose, onSave, employees, department
                       <div
                         key={employee.id}
                         onClick={() => handleMemberToggle(employee)}
-                        className={`flex items-center gap-3 p-2.5 rounded-lg cursor-pointer transition-colors ${
+                        className={`flex items-center gap-3 p-2.5 rounded-[10px] cursor-pointer transition-colors ${
                           isSelected
                             ? 'bg-[#f0f7ff] border border-[#3e79f7]/20'
                             : 'hover:bg-[#f7f7f8] border border-transparent'
@@ -566,7 +566,7 @@ export function TeamModal({ isOpen, onClose, onSave, departments, employees, tea
           {formData.departmentId > 0 && (
             <div className="space-y-2">
               <Label>Thành viên team</Label>
-              <div className="border rounded-lg p-4 max-h-48 overflow-y-auto">
+              <div className="border rounded-[10px] p-4 max-h-48 overflow-y-auto">
                 {departmentEmployees.length > 0 ? (
                   <div className="space-y-2">
                     {departmentEmployees
@@ -578,7 +578,7 @@ export function TeamModal({ isOpen, onClose, onSave, departments, employees, tea
                           id={`member-${employee.id}`}
                           checked={formData.members.includes(employee.id)}
                           onChange={() => handleMemberToggle(employee.id)}
-                          className="rounded border-gray-300"
+                          className="rounded border-[#e6ebf1]"
                         />
                         <Label htmlFor={`member-${employee.id}`} className="flex-1 cursor-pointer">
                           {employee.name} - {employee.position}

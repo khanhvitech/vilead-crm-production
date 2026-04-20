@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -121,7 +121,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
         </div>
         <button
           onClick={openCreateModal}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
         >
           <Plus className="w-4 h-4" />
           Tạo chiến dịch
@@ -138,7 +138,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             onChange={(e) => setSearchInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
             placeholder="Tìm kiếm theo tên hoặc tiêu đề..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
           />
         </div>
         <div className="flex gap-2">
@@ -146,7 +146,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
           <select
             value={filters.status}
             onChange={(e) => handleTabChange(e.target.value as CampaignStatus | 'all')}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[140px]"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm min-w-[140px]"
           >
             {STATUS_TABS.map(tab => (
               <option key={tab.key} value={tab.key}>
@@ -158,7 +158,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
           <select
             value={filters.type}
             onChange={(e) => updateFilters({ type: e.target.value as CampaignType | 'all' })}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
           >
             <option value="all">Tất cả loại</option>
             <option value="normal">Chiến dịch thường</option>
@@ -166,7 +166,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
           </select>
           <button
             onClick={handleSearch}
-            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+            className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200 transition-colors"
           >
             <Filter className="w-4 h-4" />
           </button>
@@ -194,10 +194,10 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('createType', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <button
               onClick={() => toggleModal('createType', false)}
-              className="absolute right-4 top-4 p-1 rounded-lg hover:bg-gray-100"
+              className="absolute right-4 top-4 p-1 rounded-[10px] hover:bg-gray-100"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -216,7 +216,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
                   value={newCampaignName}
                   onChange={(e) => setNewCampaignName(e.target.value)}
                   placeholder="VD: Khuyến mãi tháng 1/2025"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 />
               </div>
               
@@ -228,15 +228,15 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
                   <button
                     onClick={() => setNewCampaignType('normal')}
                     className={`
-                      flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors
+                      flex flex-col items-center gap-2 p-4 rounded-[10px] border-2 transition-colors
                       ${newCampaignType === 'normal' 
                         ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                       }
                     `}
                   >
                     <Mail className={`w-8 h-8 ${newCampaignType === 'normal' ? 'text-blue-600' : 'text-gray-400'}`} />
-                    <span className={`text-sm font-medium ${newCampaignType === 'normal' ? 'text-blue-700' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium ${newCampaignType === 'normal' ? 'text-[#3e79f7]' : 'text-gray-600'}`}>
                       Chiến dịch thường
                     </span>
                     <span className="text-xs text-gray-500 text-center">
@@ -247,15 +247,15 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
                   <button
                     onClick={() => setNewCampaignType('ab')}
                     className={`
-                      flex flex-col items-center gap-2 p-4 rounded-lg border-2 transition-colors
+                      flex flex-col items-center gap-2 p-4 rounded-[10px] border-2 transition-colors
                       ${newCampaignType === 'ab' 
                         ? 'border-blue-500 bg-blue-50' 
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                       }
                     `}
                   >
                     <FlaskConical className={`w-8 h-8 ${newCampaignType === 'ab' ? 'text-blue-600' : 'text-gray-400'}`} />
-                    <span className={`text-sm font-medium ${newCampaignType === 'ab' ? 'text-blue-700' : 'text-gray-600'}`}>
+                    <span className={`text-sm font-medium ${newCampaignType === 'ab' ? 'text-[#3e79f7]' : 'text-gray-600'}`}>
                       A/B Testing
                     </span>
                     <span className="text-xs text-gray-500 text-center">
@@ -269,14 +269,14 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             <div className="mt-6 flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('createType', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={handleCreateConfirm}
                 disabled={!newCampaignName.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Tiếp tục
               </button>
@@ -292,7 +292,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('delete', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-red-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -310,13 +310,13 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('delete', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={() => deleteCampaign(selectedCampaign.id)}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
               >
                 Xóa chiến dịch
               </button>
@@ -332,7 +332,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('cancel', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-yellow-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-yellow-600" />
@@ -350,13 +350,13 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('cancel', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Quay lại
               </button>
               <button
                 onClick={() => cancelCampaign(selectedCampaign.id)}
-                className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+                className="px-4 py-2 bg-yellow-600 text-white rounded-[10px] hover:bg-yellow-700 transition-colors"
               >
                 Hủy chiến dịch
               </button>
@@ -372,7 +372,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('pause', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-orange-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-orange-600" />
@@ -387,7 +387,7 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
               Chiến dịch sẽ dừng gửi email. Bạn có thể tiếp tục gửi sau.
             </p>
             
-            <div className="bg-gray-50 rounded-lg p-3 mb-6">
+            <div className="bg-gray-50 rounded-[10px] p-3 mb-6">
               <div className="flex justify-between text-sm">
                 <span className="text-gray-500">Đã gửi:</span>
                 <span className="font-medium">{selectedCampaign.stats.total_sent}/{selectedCampaign.valid_email_count}</span>
@@ -401,13 +401,13 @@ export function CampaignList({ onOpenEditor, onOpenABEditor, onViewStats }: Camp
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('pause', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={() => pauseCampaign(selectedCampaign.id)}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 transition-colors"
               >
                 Tạm dừng
               </button>
@@ -454,10 +454,10 @@ function ResumeModal({ campaign, onClose, onResume }: ResumeModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 p-1 rounded-lg hover:bg-gray-100"
+          className="absolute right-4 top-4 p-1 rounded-[10px] hover:bg-gray-100"
         >
           <X className="w-5 h-5 text-gray-500" />
         </button>
@@ -466,8 +466,8 @@ function ResumeModal({ campaign, onClose, onResume }: ResumeModalProps) {
           Tiếp tục gửi chiến dịch
         </h3>
         
-        <div className="bg-blue-50 rounded-lg p-3 mb-4">
-          <p className="text-sm text-blue-700">
+        <div className="bg-blue-50 rounded-[10px] p-3 mb-4">
+          <p className="text-sm text-[#3e79f7]">
             Còn <strong>{remaining.toLocaleString()}</strong> email chưa gửi
           </p>
         </div>
@@ -512,7 +512,7 @@ function ResumeModal({ campaign, onClose, onResume }: ResumeModalProps) {
                   value={scheduledDate}
                   onChange={(e) => setScheduledDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm"
                 />
               </div>
               <div>
@@ -521,7 +521,7 @@ function ResumeModal({ campaign, onClose, onResume }: ResumeModalProps) {
                   type="time"
                   value={scheduledTime}
                   onChange={(e) => setScheduledTime(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm"
                 />
               </div>
             </div>
@@ -531,14 +531,14 @@ function ResumeModal({ campaign, onClose, onResume }: ResumeModalProps) {
         <div className="mt-6 flex gap-3 justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
             disabled={sendType === 'scheduled' && (!scheduledDate || !scheduledTime)}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50"
           >
             Tiếp tục gửi
           </button>

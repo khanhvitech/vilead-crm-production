@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo } from 'react'
 import { Plus, Search, SlidersHorizontal, X, Pencil, Trash2, AlertTriangle } from 'lucide-react'
@@ -214,7 +214,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
       {/* Main content */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top bar */}
-        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-gray-200 bg-white shrink-0">
+        <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[#e6ebf1] bg-white shrink-0">
           {/* Search */}
           <div className="flex-1 relative max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -223,7 +223,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
               value={searchQuery}
               onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1) }}
               placeholder="Tìm tên hoặc shortcut..."
-              className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all"
+              className="w-full pl-9 pr-8 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:border-[#699dff] focus:ring-2 focus:ring-blue-100 transition-all"
             />
             {searchQuery && (
               <button
@@ -244,7 +244,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
                 const [f, o] = e.target.value.split('-')
                 setSortField(f); setSortOrder(o as 'asc' | 'desc')
               }}
-              className="text-sm border border-gray-200 rounded-xl px-3 py-2 bg-white focus:outline-none focus:border-blue-400"
+              className="text-sm border border-[#e6ebf1] rounded-[10px] px-3 py-2 bg-white focus:outline-none focus:border-[#699dff]"
             >
               <option value="updatedAt-desc">Mới nhất</option>
               <option value="updatedAt-asc">Cũ nhất</option>
@@ -256,7 +256,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
           {/* Create */}
           <button
             onClick={() => setCreateModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm shrink-0"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium rounded-[10px] hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm shrink-0"
           >
             <Plus className="w-4 h-4" />
             Tạo luồng mới
@@ -310,7 +310,7 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
       {folderModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setFolderModal(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-80">
+          <div className="relative bg-white rounded-[10px] shadow-2xl p-6 w-80">
             <h3 className="text-base font-semibold text-gray-900 mb-4">
               {folderModal.mode === 'create' ? 'Tạo thư mục mới' : 'Đổi tên thư mục'}
             </h3>
@@ -323,14 +323,14 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
               autoFocus
               onKeyDown={e => e.key === 'Enter' && handleSaveFolder()}
               className={cn(
-                'w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none',
-                folderModal.error ? 'border-red-300 ring-2 ring-red-100' : 'border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100'
+                'w-full px-3.5 py-2.5 rounded-[10px] border text-sm outline-none',
+                folderModal.error ? 'border-red-300 ring-2 ring-red-100' : 'border-[#e6ebf1] focus:border-[#699dff] focus:ring-2 focus:ring-blue-100'
               )}
             />
             {folderModal.error && <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1"><AlertTriangle className="w-3.5 h-3.5" />{folderModal.error}</p>}
             <div className="flex gap-3 mt-5">
-              <button onClick={() => setFolderModal(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
-              <button onClick={handleSaveFolder} className="flex-1 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-700">Lưu</button>
+              <button onClick={() => setFolderModal(null)} className="flex-1 py-2.5 rounded-[10px] border border-[#e6ebf1] text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
+              <button onClick={handleSaveFolder} className="flex-1 py-2.5 rounded-[10px] bg-[#3e79f7] text-white text-sm font-medium hover:bg-[#699dff]">Lưu</button>
             </div>
           </div>
         </div>
@@ -340,15 +340,15 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
       {deleteConfirmId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setDeleteConfirmId(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-80 text-center">
-            <div className="w-12 h-12 bg-red-50 rounded-xl mx-auto flex items-center justify-center mb-4">
+          <div className="relative bg-white rounded-[10px] shadow-2xl p-6 w-80 text-center">
+            <div className="w-12 h-12 bg-red-50 rounded-[10px] mx-auto flex items-center justify-center mb-4">
               <Trash2 className="w-6 h-6 text-red-500" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1.5">Xóa luồng tin nhắn?</h3>
             <p className="text-sm text-gray-500 mb-5">Hành động này không thể hoàn tác.</p>
             <div className="flex gap-3">
-              <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
-              <button onClick={confirmDelete} className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700">Xóa</button>
+              <button onClick={() => setDeleteConfirmId(null)} className="flex-1 py-2.5 rounded-[10px] border border-[#e6ebf1] text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
+              <button onClick={confirmDelete} className="flex-1 py-2.5 rounded-[10px] bg-[#ff6b72] text-white text-sm font-medium hover:bg-[#d9505c]">Xóa</button>
             </div>
           </div>
         </div>
@@ -358,8 +358,8 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
       {bulkDeleteIds && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setBulkDeleteIds(null)} />
-          <div className="relative bg-white rounded-2xl shadow-2xl p-6 w-80 text-center">
-            <div className="w-12 h-12 bg-red-50 rounded-xl mx-auto flex items-center justify-center mb-4">
+          <div className="relative bg-white rounded-[10px] shadow-2xl p-6 w-80 text-center">
+            <div className="w-12 h-12 bg-red-50 rounded-[10px] mx-auto flex items-center justify-center mb-4">
               <Trash2 className="w-6 h-6 text-red-500" />
             </div>
             <h3 className="font-semibold text-gray-900 mb-1.5">
@@ -367,8 +367,8 @@ export default function FlowListPage({ onOpenEditor }: FlowListPageProps) {
             </h3>
             <p className="text-sm text-gray-500 mb-5">Hành động này không thể hoàn tác.</p>
             <div className="flex gap-3">
-              <button onClick={() => setBulkDeleteIds(null)} className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
-              <button onClick={confirmBulkDelete} className="flex-1 py-2.5 rounded-xl bg-red-600 text-white text-sm font-medium hover:bg-red-700">Xóa tất cả</button>
+              <button onClick={() => setBulkDeleteIds(null)} className="flex-1 py-2.5 rounded-[10px] border border-[#e6ebf1] text-sm text-gray-700 hover:bg-gray-50">Hủy</button>
+              <button onClick={confirmBulkDelete} className="flex-1 py-2.5 rounded-[10px] bg-[#ff6b72] text-white text-sm font-medium hover:bg-[#d9505c]">Xóa tất cả</button>
             </div>
           </div>
         </div>

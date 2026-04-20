@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { X, AlertCircle, Users, Lock } from 'lucide-react'
@@ -83,9 +83,9 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
           <h3 className="text-lg font-semibold text-gray-900">Thêm email người gửi mới</h3>
           <button 
             onClick={onClose} 
@@ -111,8 +111,8 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
                 setFormData({ ...formData, email: e.target.value })
                 if (errors.email) setErrors({ ...errors, email: undefined })
               }}
-              className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.email ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              className={`w-full px-3 py-2.5 border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent transition-colors ${
+                errors.email ? 'border-red-300 bg-red-50' : 'border-[#e6ebf1]'
               }`}
               disabled={isSubmitting}
             />
@@ -144,8 +144,8 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
                 if (errors.sender_name) setErrors({ ...errors, sender_name: undefined })
               }}
               maxLength={100}
-              className={`w-full px-3 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors ${
-                errors.sender_name ? 'border-red-300 bg-red-50' : 'border-gray-200'
+              className={`w-full px-3 py-2.5 border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent transition-colors ${
+                errors.sender_name ? 'border-red-300 bg-red-50' : 'border-[#e6ebf1]'
               }`}
               disabled={isSubmitting}
             />
@@ -177,7 +177,7 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
                 })
                 if (errors.permitted_user_ids) setErrors({ ...errors, permitted_user_ids: undefined })
               }}
-              className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              className="w-full px-3 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent bg-white"
               disabled={isSubmitting}
             >
               <option value="all">{PERMISSION_LABELS.all}</option>
@@ -186,7 +186,7 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
             </select>
             
             {/* Permission description */}
-            <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+            <div className="mt-2 p-3 bg-gray-50 rounded-[10px]">
               {formData.permission_type === 'all' && (
                 <div className="flex items-start text-sm text-gray-600">
                   <Users className="w-4 h-4 mr-2 mt-0.5 text-gray-400" />
@@ -210,8 +210,8 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
             {/* Member Picker */}
             {formData.permission_type === 'specific' && (
               <div className="mt-3">
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
-                  <div className="p-3 bg-gray-50 border-b border-gray-200">
+                <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+                  <div className="p-3 bg-gray-50 border-b border-[#e6ebf1]">
                     <span className="text-sm font-medium text-gray-700">
                       Chọn thành viên ({formData.permitted_user_ids.length} đã chọn)
                     </span>
@@ -220,13 +220,13 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
                     {MOCK_USERS.map(user => (
                       <label
                         key={user.id}
-                        className="flex items-center p-2 hover:bg-gray-50 rounded-lg cursor-pointer transition-colors"
+                        className="flex items-center p-2 hover:bg-gray-50 rounded-[10px] cursor-pointer transition-colors"
                       >
                         <input
                           type="checkbox"
                           checked={formData.permitted_user_ids.includes(user.id)}
                           onChange={() => handleMemberToggle(user.id)}
-                          className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+                          className="w-4 h-4 text-blue-600 rounded border-[#e6ebf1] focus:ring-[#3e79f7]"
                           disabled={isSubmitting}
                         />
                         <div className="ml-3">
@@ -249,10 +249,10 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end space-x-3 p-4 border-t border-[#e6ebf1] bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-[10px] transition-colors"
             disabled={isSubmitting}
           >
             Hủy bỏ
@@ -260,7 +260,7 @@ export default function AddEmailModal({ open, onClose, onSubmit, loading = false
           <button
             onClick={handleSubmit}
             disabled={isSubmitting || loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             {isSubmitting ? (
               <>

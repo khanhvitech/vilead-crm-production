@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { memo, useState } from 'react'
 import { Handle, Position, NodeProps } from '@xyflow/react'
@@ -99,7 +99,7 @@ function NodeBodyPreview({ type, data }: { type: NodeType; data: NodeData }) {
       return (
         <div className="space-y-1">
           {d.branches.slice(0, 3).map((b, i) => (
-             <div key={b.id} className="text-[10px] text-gray-600 truncate border-l-2 border-blue-200 pl-1.5 flex justify-between pr-2">
+             <div key={b.id} className="text-[10px] text-gray-600 truncate border-l-2 border-[#c7d9fd] pl-1.5 flex justify-between pr-2">
                 <span>Nhánh #{i+1}</span>
                 <span className="text-gray-400 font-medium">
                   {b.conditions.length === 0 ? 'Trống' : `${b.conditions.length} đ.kiện`}
@@ -173,20 +173,20 @@ function outputHandleStyle(color: string): React.CSSProperties {
 function DeleteConfirm({ onConfirm, onCancel }: { onConfirm: () => void; onCancel: () => void }) {
   return (
     <div
-      className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 bg-white border border-red-200 rounded-xl shadow-xl px-3 py-2.5 flex items-center gap-3 whitespace-nowrap"
+      className="absolute -top-16 left-1/2 -translate-x-1/2 z-50 bg-white border border-red-200 rounded-[10px] shadow-xl px-3 py-2.5 flex items-center gap-3 whitespace-nowrap"
       onClick={e => e.stopPropagation()}
     >
       <AlertTriangle size={14} className="text-red-500 shrink-0" />
       <span className="text-xs font-medium text-gray-700">Xóa node này?</span>
       <button
         onClick={onConfirm}
-        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500 text-white text-xs hover:bg-red-600 transition-colors"
+        className="flex items-center gap-1 px-2 py-1 rounded-[10px] bg-red-500 text-white text-xs hover:bg-[#ff6b72] transition-colors"
       >
         <Check size={11} /> Xóa
       </button>
       <button
         onClick={onCancel}
-        className="flex items-center gap-1 px-2 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 transition-colors"
+        className="flex items-center gap-1 px-2 py-1 rounded-[10px] bg-gray-100 text-gray-600 text-xs hover:bg-gray-200 transition-colors"
       >
         <X size={11} /> Hủy
       </button>
@@ -301,12 +301,12 @@ const FlowNodeCard = memo(function FlowNodeCard({ id, data, selected }: NodeProp
 
       {/* Card */}
       <div
-        className="bg-white rounded-xl overflow-hidden transition-all duration-150"
+        className="bg-white rounded-[10px] overflow-hidden transition-all duration-150"
         style={{ border: `${borderWidth}px solid ${borderColor}`, boxShadow }}
       >
         {/* Header */}
         <div className="flex items-center gap-2 px-3 py-2.5 border-b border-gray-100">
-          <div className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: iconBg }}>
+          <div className="w-7 h-7 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: iconBg }}>
             <NodeIcon type={nodeType} size={14} />
           </div>
           {isEditingTitle ? (
@@ -316,7 +316,7 @@ const FlowNodeCard = memo(function FlowNodeCard({ id, data, selected }: NodeProp
               onChange={e => setEditTitle(e.target.value)}
               onKeyDown={handleTitleKeyDown}
               onBlur={toggleEditTitle}
-              className="flex-1 min-w-0 text-sm font-semibold text-gray-800 bg-white border border-blue-300 rounded px-1 outline-none focus:ring-1 focus:ring-blue-500"
+              className="flex-1 min-w-0 text-sm font-semibold text-gray-800 bg-white border border-blue-300 rounded px-1 outline-none focus:ring-1 focus:ring-[#3e79f7]"
               onClick={e => e.stopPropagation()}
             />
           ) : (
@@ -378,7 +378,7 @@ const FlowNodeCard = memo(function FlowNodeCard({ id, data, selected }: NodeProp
           return (
             <div className="px-3 pb-2.5 flex justify-between text-[10px]">
               <span className="text-green-600 font-semibold flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"/>
+                <span className="w-1.5 h-1.5 rounded-full bg-[#2dc56a] inline-block"/>
                 {branches.length > 1 ? `${branches.length} Nhóm TM` : 'Thỏa mãn'}
               </span>
               <span className="text-red-500 font-semibold flex items-center gap-1">

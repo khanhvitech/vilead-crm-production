@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 // ==================== TEMPLATE LIBRARY COMPONENT ====================
 // Thư viện mẫu email - Tab Thư viện mẫu trong Email Marketing
@@ -73,12 +73,12 @@ export function TemplateLibrary() {
   return (
     <div className="space-y-6">
       {/* Tabs */}
-      <div className="flex items-center gap-4 border-b border-gray-200">
+      <div className="flex items-center gap-4 border-b border-[#e6ebf1]">
         <button
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'system'
-              ? 'text-indigo-600 border-indigo-600'
-              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              ? 'text-[#3e79f7] border-indigo-600'
+              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-[#e6ebf1]'
           }`}
           onClick={() => setActiveTab('system')}
         >
@@ -88,8 +88,8 @@ export function TemplateLibrary() {
         <button
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'notification'
-              ? 'text-indigo-600 border-indigo-600'
-              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              ? 'text-[#3e79f7] border-indigo-600'
+              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-[#e6ebf1]'
           }`}
           onClick={() => setActiveTab('notification')}
         >
@@ -99,8 +99,8 @@ export function TemplateLibrary() {
         <button
           className={`flex items-center gap-2 px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
             activeTab === 'user'
-              ? 'text-indigo-600 border-indigo-600'
-              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-gray-300'
+              ? 'text-[#3e79f7] border-indigo-600'
+              : 'text-gray-500 border-transparent hover:text-gray-700 hover:border-[#e6ebf1]'
           }`}
           onClick={() => setActiveTab('user')}
         >
@@ -119,7 +119,7 @@ export function TemplateLibrary() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm theo tên mẫu..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
           />
         </div>
 
@@ -127,7 +127,7 @@ export function TemplateLibrary() {
         {/* {activeTab === 'user' && (
           <div className="flex items-center gap-2">
             <button
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
               onClick={() => toggleModal('importHtml', true)}
             >
               <FileCode className="w-4 h-4" />
@@ -140,7 +140,7 @@ export function TemplateLibrary() {
       {/* Loading State */}
       {loading && (
         <div className="flex items-center justify-center py-20">
-          <RefreshCw className="w-8 h-8 text-indigo-600 animate-spin" />
+          <RefreshCw className="w-8 h-8 text-[#3e79f7] animate-spin" />
         </div>
       )}
 
@@ -197,7 +197,7 @@ export function TemplateLibrary() {
           </p>
           {activeTab === 'user' && (
             <button
-              className="flex items-center gap-2 px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-2 px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] font-medium hover:bg-[#699dff] transition-colors"
               onClick={openCreateEditor}
             >
               + Tạo mẫu mới
@@ -215,7 +215,7 @@ export function TemplateLibrary() {
               <button
                 onClick={() => setPage(pagination.page - 1)}
                 disabled={pagination.page === 1}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Trước
               </button>
@@ -225,7 +225,7 @@ export function TemplateLibrary() {
               <button
                 onClick={() => setPage(pagination.page + 1)}
                 disabled={pagination.page === pagination.total_pages}
-                className="px-3 py-1.5 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-3 py-1.5 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 Sau
               </button>
@@ -356,11 +356,11 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
       <div className="relative min-h-screen flex items-center justify-center p-4">
-        <div className="relative bg-white rounded-xl shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="relative bg-white rounded-[10px] shadow-xl max-w-3xl w-full max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between px-6 py-4 border-b">
             <h2 className="text-lg font-semibold">Import HTML</h2>
-            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg">
+            <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-[10px]">
               <span className="text-xl">&times;</span>
             </button>
           </div>
@@ -377,23 +377,23 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Nhập tên mẫu (tùy chọn)"
-                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500"
+                className="w-full px-3 py-2 border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
               />
             </div>
 
             {/* Mode tabs */}
             <div className="flex gap-2">
               <button
-                className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                  mode === 'paste' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'
+                className={`px-4 py-2 text-sm font-medium rounded-[10px] ${
+                  mode === 'paste' ? 'bg-[#f0f7ff] text-[#3e79f7]' : 'text-gray-600 hover:bg-gray-100'
                 }`}
                 onClick={() => setMode('paste')}
               >
                 Dán code
               </button>
               <button
-                className={`px-4 py-2 text-sm font-medium rounded-lg ${
-                  mode === 'upload' ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'
+                className={`px-4 py-2 text-sm font-medium rounded-[10px] ${
+                  mode === 'upload' ? 'bg-[#f0f7ff] text-[#3e79f7]' : 'text-gray-600 hover:bg-gray-100'
                 }`}
                 onClick={() => setMode('upload')}
               >
@@ -410,10 +410,10 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
                   setPreview(null);
                 }}
                 placeholder="Dán nội dung HTML vào đây..."
-                className="w-full h-48 p-3 font-mono text-sm border rounded-lg focus:ring-2 focus:ring-indigo-500 resize-none"
+                className="w-full h-48 p-3 font-mono text-sm border rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] resize-none"
               />
             ) : (
-              <div className="border-2 border-dashed rounded-lg p-8 text-center">
+              <div className="border-2 border-dashed rounded-[10px] p-8 text-center">
                 <input
                   type="file"
                   accept=".html,.htm"
@@ -423,7 +423,7 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
                 />
                 <label
                   htmlFor="html-file-upload"
-                  className="cursor-pointer text-indigo-600 hover:text-indigo-700"
+                  className="cursor-pointer text-[#3e79f7] hover:text-[#3e79f7]"
                 >
                   Chọn file HTML (tối đa 500KB)
                 </label>
@@ -435,7 +435,7 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
 
             {/* Warnings */}
             {warnings.length > 0 && (
-              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3">
+              <div className="bg-amber-50 border border-amber-200 rounded-[10px] p-3">
                 <p className="text-sm font-medium text-amber-800 mb-1">⚠️ Cảnh báo:</p>
                 <ul className="text-sm text-amber-700 list-disc list-inside">
                   {warnings.map((w, i) => (
@@ -447,7 +447,7 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
 
             {/* Preview */}
             {preview && (
-              <div className="border rounded-lg overflow-hidden">
+              <div className="border rounded-[10px] overflow-hidden">
                 <div className="bg-gray-50 px-3 py-2 border-b text-sm text-gray-600">
                   Xem trước
                 </div>
@@ -462,20 +462,20 @@ function ImportHtmlModal({ open, onClose, onImport }: ImportHtmlModalProps) {
           {/* Footer */}
           <div className="flex items-center justify-end gap-3 px-6 py-4 border-t bg-gray-50">
             <button
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg font-medium"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] font-medium"
               onClick={onClose}
             >
               Hủy
             </button>
             <button
-              className="px-4 py-2 border border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg font-medium"
+              className="px-4 py-2 border border-[#e6ebf1] text-gray-700 hover:bg-gray-50 rounded-[10px] font-medium"
               onClick={handlePreview}
               disabled={!html.trim()}
             >
               Xem trước
             </button>
             <button
-              className="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 rounded-lg font-medium disabled:opacity-50"
+              className="px-4 py-2 bg-[#3e79f7] text-white hover:bg-[#699dff] rounded-[10px] font-medium disabled:opacity-50"
               onClick={handleImport}
               disabled={loading || !html.trim()}
             >

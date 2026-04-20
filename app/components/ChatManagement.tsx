@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect, useMemo } from 'react'
 import { Card, CardContent } from '@/components/ui/card'
@@ -407,7 +407,7 @@ const demoCRMCustomers: CRMCustomer[] = [
 // Sales Pipeline Stages
 const salesStages = [
   { id: 'new-lead', name: 'Lead mới', color: 'bg-gray-100 text-gray-700', icon: UserPlus },
-  { id: 'consulting', name: 'Đang tư vấn', color: 'bg-blue-100 text-blue-700', icon: MessageSquare },
+  { id: 'consulting', name: 'Đang tư vấn', color: 'bg-blue-100 text-[#3e79f7]', icon: MessageSquare },
   { id: 'quote-sent', name: 'Đã gửi đề xuất', color: 'bg-green-100 text-green-700', icon: Mail },
   { id: 'negotiation', name: 'Đàm phán', color: 'bg-yellow-100 text-yellow-700', icon: Briefcase },
   { id: 'payment-pending', name: 'Chuyển đổi - chờ thanh toán', color: 'bg-purple-100 text-purple-700', icon: Clock },
@@ -1535,14 +1535,14 @@ export default function ChatManagement() {
       <div className="grid grid-cols-12 gap-0 h-full overflow-hidden">
 
         {/* LEFT PANEL - Conversation List */}
-        <div className="col-span-3 border-r border-gray-200 h-full flex flex-col bg-white overflow-hidden">
+        <div className="col-span-3 border-r border-[#e6ebf1] h-full flex flex-col bg-white overflow-hidden">
           {/* Header */}
-          <div className="p-4 border-b border-gray-200 bg-white">
+          <div className="p-4 border-b border-[#e6ebf1] bg-white">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-base font-semibold text-gray-900">Tin nhắn</h2>
               <button 
                 onClick={() => setShowConnectionModal(true)}
-                className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+                className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Kết nối</span>
@@ -1559,7 +1559,7 @@ export default function ChatManagement() {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsSearchMode(true)}
-                    className="pl-10 bg-white border-gray-300 text-sm h-9"
+                    className="pl-10 bg-white border-[#e6ebf1] text-sm h-9"
                   />
                 </div>
                 {isSearchMode && (
@@ -1593,7 +1593,7 @@ export default function ChatManagement() {
                       className={cn(
                         "text-xs h-8",
                         searchTab === 'all'
-                          ? "bg-blue-500 hover:bg-blue-600 text-white"
+                          ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                           : "hover:bg-gray-100 text-gray-700"
                       )}
                     >
@@ -1606,7 +1606,7 @@ export default function ChatManagement() {
                       className={cn(
                         "text-xs h-8",
                         searchTab === 'users'
-                          ? "bg-blue-500 hover:bg-blue-600 text-white"
+                          ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                           : "hover:bg-gray-100 text-gray-700"
                       )}
                     >
@@ -1619,7 +1619,7 @@ export default function ChatManagement() {
                       className={cn(
                         "text-xs h-8",
                         searchTab === 'messages'
-                          ? "bg-blue-500 hover:bg-blue-600 text-white"
+                          ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                           : "hover:bg-gray-100 text-gray-700"
                       )}
                     >
@@ -1641,8 +1641,8 @@ export default function ChatManagement() {
                 className={cn(
                   "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
                   selectedChannel === 'zalo-personal' 
-                    ? "bg-blue-600 ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-blue-500 hover:bg-blue-600"
+                    ? "bg-[#3e79f7] ring-2 ring-blue-300 ring-offset-1" 
+                    : "bg-blue-500 hover:bg-[#3e79f7]"
                 )}
               >
                 <span className="text-white font-semibold text-xs">ZL</span>
@@ -1664,8 +1664,8 @@ export default function ChatManagement() {
                 className={cn(
                   "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
                   selectedChannel === 'zalo-oa' 
-                    ? "bg-blue-600 ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-blue-500 hover:bg-blue-600"
+                    ? "bg-[#3e79f7] ring-2 ring-blue-300 ring-offset-1" 
+                    : "bg-blue-500 hover:bg-[#3e79f7]"
                 )}
               >
                 <span className="text-white font-semibold text-xs">OA</span>
@@ -1687,8 +1687,8 @@ export default function ChatManagement() {
                 className={cn(
                   "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
                   selectedChannel === 'facebook' 
-                    ? "bg-blue-700 ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-blue-600 hover:bg-blue-700"
+                    ? "bg-[#699dff] ring-2 ring-blue-300 ring-offset-1" 
+                    : "bg-[#3e79f7] hover:bg-[#699dff]"
                 )}
               >
                 <span className="text-white font-semibold text-xs">FB</span>
@@ -1707,7 +1707,7 @@ export default function ChatManagement() {
             <div className="relative mb-3" ref={accountDropdownRef}>
               <button
                 onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 transition-colors h-9"
+                className="w-full flex items-center justify-between px-3 py-2 border border-[#e6ebf1] rounded-md bg-white hover:bg-gray-50 transition-colors h-9"
               >
                 <div className="flex items-center gap-2">
                   <Avatar className="w-6 h-6">
@@ -1738,7 +1738,7 @@ export default function ChatManagement() {
 
               {/* Dropdown Menu */}
               {showAccountDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-50 py-1">
+                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e6ebf1] rounded-md shadow-lg z-50 py-1">
                   {connectedAccounts.filter(account => account.platform === selectedChannel).map((account) => (
                     <button
                       key={account.id}
@@ -1764,7 +1764,7 @@ export default function ChatManagement() {
                       </div>
                       <div className="flex items-center gap-2">
                         {account.unreadCount > 0 && (
-                          <span className="bg-green-500 text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
+                          <span className="bg-[#2dc56a] text-white text-xs px-1.5 py-0.5 rounded-full min-w-[18px] text-center">
                             {account.unreadCount > 9 ? '9+' : account.unreadCount}
                           </span>
                         )}
@@ -1791,7 +1791,7 @@ export default function ChatManagement() {
                   className={cn(
                     "text-xs h-8",
                     activeTab === 'all'
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
+                      ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                       : "hover:bg-gray-100 text-gray-700"
                   )}
                 >
@@ -1807,7 +1807,7 @@ export default function ChatManagement() {
                   className={cn(
                     "text-xs h-8",
                     activeTab === 'unread'
-                      ? "bg-blue-500 hover:bg-blue-600 text-white"
+                      ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                       : "hover:bg-gray-100 text-gray-700"
                   )}
                 >
@@ -1824,7 +1824,7 @@ export default function ChatManagement() {
                     className={cn(
                       "text-xs h-8",
                       activeTab === 'contacts'
-                        ? "bg-blue-500 hover:bg-blue-600 text-white"
+                        ? "bg-blue-500 hover:bg-[#3e79f7] text-white"
                         : "hover:bg-gray-100 text-gray-700"
                     )}
                   >
@@ -1834,7 +1834,7 @@ export default function ChatManagement() {
               </div>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="text-xs h-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-2 flex items-center gap-1">
+                  <Button variant="ghost" size="sm" className="text-xs h-8 text-blue-600 hover:text-[#3e79f7] hover:bg-blue-50 px-2 flex items-center gap-1">
                     Phân loại <ChevronDown className="w-3 h-3" />
                   </Button>
                 </DropdownMenuTrigger>
@@ -1860,7 +1860,7 @@ export default function ChatManagement() {
                           type="checkbox" 
                           checked={selectedTagFilters.includes(tag.id)} 
                           readOnly 
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-3.5 h-3.5 mr-1"
+                          className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7] w-3.5 h-3.5 mr-1"
                         />
                         <SolidTagIcon color={tag.color} className="w-3.5 h-3.5" />
                         <span className="text-sm text-gray-700 font-medium truncate">{tag.name}</span>
@@ -1989,7 +1989,7 @@ export default function ChatManagement() {
             // Contacts View
             <div className="flex-1 flex flex-col bg-white overflow-hidden">
               {/* Contact Tabs */}
-              <div className="flex items-center border-b border-gray-200">
+              <div className="flex items-center border-b border-[#e6ebf1]">
                 <button
                   onClick={() => setContactTab('friends')}
                   className={cn(
@@ -2169,7 +2169,7 @@ export default function ChatManagement() {
                         </AvatarFallback>
                       </Avatar>
                       {conversation.contact.isActive && (
-                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2dc56a] border-2 border-white rounded-full"></div>
                       )}
                       {isSyncedWithCRM && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
@@ -2220,13 +2220,13 @@ export default function ChatManagement() {
 
         {/* MIDDLE PANEL - Chat Messages */}
         <div className={cn(
-          "border-r border-gray-200 h-full flex flex-col bg-white overflow-hidden",
+          "border-r border-[#e6ebf1] h-full flex flex-col bg-white overflow-hidden",
           showContactDetail ? "col-span-6" : "col-span-9"
         )}>
           {selectedConversation ? (
             <>
               {/* Chat Header */}
-              <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white">
+              <div className="px-4 py-3 border-b border-[#e6ebf1] flex items-center justify-between bg-white">
                 <div className="flex items-center gap-3 flex-1">
                   <Avatar className="w-11 h-11">
                     <AvatarImage src={selectedConversation.contact.avatar} />
@@ -2289,7 +2289,7 @@ export default function ChatManagement() {
                                     }}
                                   >
                                     <SolidTagIcon color={tag.color} className="w-3.5 h-3.5 flex-shrink-0" />
-                                    <span className={cn("text-sm font-medium truncate", isAssigned ? "text-blue-700" : "text-gray-700")}>{tag.name}</span>
+                                    <span className={cn("text-sm font-medium truncate", isAssigned ? "text-[#3e79f7]" : "text-gray-700")}>{tag.name}</span>
                                   </div>
                                 )})}
                               </ScrollArea>
@@ -2389,7 +2389,7 @@ export default function ChatManagement() {
                             // Show assigned employee avatar
                             <button
                               onClick={() => setShowAssignEmployeeDropdown(!showAssignEmployeeDropdown)}
-                              className="flex items-center gap-2 px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
+                              className="flex items-center gap-2 px-2 py-1 rounded-[10px] hover:bg-gray-100 transition-colors"
                               title={`Phân công: ${assignedEmp.name}`}
                             >
                               <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-medium">
@@ -2416,7 +2416,7 @@ export default function ChatManagement() {
                       )
                     })()}
                     {showAssignEmployeeDropdown && (
-                      <div className="absolute right-0 top-full mt-1 w-72 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                      <div className="absolute right-0 top-full mt-1 w-72 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-50">
                         <div className="p-3 border-b border-gray-100">
                           <div className="relative">
                             <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -2425,7 +2425,7 @@ export default function ChatManagement() {
                               value={assignEmployeeSearch}
                               onChange={(e) => setAssignEmployeeSearch(e.target.value)}
                               placeholder="Phân công nhân viên"
-                              className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
+                              className="w-full pl-9 pr-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                               autoFocus
                             />
                           </div>
@@ -2436,7 +2436,7 @@ export default function ChatManagement() {
                               <div
                                 key={emp.id}
                                 onClick={() => handleAssignConversation(emp.id)}
-                                className="flex items-center gap-3 p-2 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors"
+                                className="flex items-center gap-3 p-2 rounded-[10px] cursor-pointer hover:bg-gray-50 transition-colors"
                               >
                                 <div className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
                                   {emp.name.split(' ').map(n => n[0]).slice(-2).join('').toUpperCase()}
@@ -2563,7 +2563,7 @@ export default function ChatManagement() {
                       Bạn tạo nhắc hẹn mới <span className="font-medium">{reminderNotification.title}</span> - {getDayOfWeek(reminderNotification.date)}, {new Date(reminderNotification.date).getDate()} tháng {new Date(reminderNotification.date).getMonth() + 1} lúc {reminderNotification.time} .{' '}
                       <button 
                         onClick={() => setRightPanelTab('reminders')}
-                        className="text-blue-600 hover:text-blue-700 font-medium"
+                        className="text-blue-600 hover:text-[#3e79f7] font-medium"
                       >
                         Xem
                       </button>
@@ -2634,7 +2634,7 @@ export default function ChatManagement() {
                                       "w-5 h-5 rounded border-2 flex items-center justify-center transition-colors",
                                       selectedMessageIds.includes(message.id)
                                         ? "bg-blue-500 border-blue-500"
-                                        : "border-gray-300 hover:border-blue-400"
+                                        : "border-[#e6ebf1] hover:border-[#699dff]"
                                     )}>
                                       {selectedMessageIds.includes(message.id) && (
                                         <Check className="w-3 h-3 text-white" />
@@ -2716,14 +2716,14 @@ export default function ChatManagement() {
                                 <div className="flex flex-col">
                                   {/* Reply reference */}
                                   {message.replyTo && (
-                                    <div className="text-xs text-gray-500 mb-1 px-2 py-1 bg-gray-50 rounded border-l-2 border-blue-400">
+                                    <div className="text-xs text-gray-500 mb-1 px-2 py-1 bg-gray-50 rounded border-l-2 border-[#699dff]">
                                       <span className="font-medium">{message.replyTo.senderName}</span>
                                       <p className="truncate max-w-[200px]">{message.replyTo.content}</p>
                                     </div>
                                   )}
                                   <div
                                     className={cn(
-                                      "rounded-2xl px-4 py-2 relative",
+                                      "rounded-[10px] px-4 py-2 relative",
                                       msgGroup.direction === 'outgoing'
                                         ? 'bg-blue-50 text-gray-900'
                                         : 'bg-gray-100 text-gray-900',
@@ -2822,7 +2822,7 @@ export default function ChatManagement() {
 
               {/* Message Input - Fixed at bottom */}
               <div className={cn(
-                "border-t border-gray-200 bg-white transition-all duration-300",
+                "border-t border-[#e6ebf1] bg-white transition-all duration-300",
                 isInputExpanded ? "flex-1 flex flex-col min-h-0" : "flex-shrink-0"
               )}>
                 {/* Hidden file inputs */}
@@ -2844,7 +2844,7 @@ export default function ChatManagement() {
 
                 {/* Selection Mode Actions */}
                 {isSelectMode && (
-                  <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+                  <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-[#e6ebf1]">
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-gray-600">
                         Đã chọn {selectedMessageIds.length} tin nhắn
@@ -2907,7 +2907,7 @@ export default function ChatManagement() {
                 <div className={cn("p-3", isInputExpanded && "flex-1 flex flex-col min-h-0", isSelectMode && "hidden")}>
                   {/* Expanded Header */}
                   {isInputExpanded && (
-                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-200">
+                    <div className="flex items-center justify-between mb-2 pb-2 border-b border-[#e6ebf1]">
                       <span className="text-sm font-medium text-gray-700">Soạn tin nhắn</span>
                       <Button
                         variant="ghost"
@@ -2923,12 +2923,12 @@ export default function ChatManagement() {
 
                   {/* Input Chat Box Container */}
                   <div className={cn(
-                    "border border-gray-200 rounded-lg bg-white",
+                    "border border-[#e6ebf1] rounded-[10px] bg-white",
                     isInputExpanded && "flex-1 flex flex-col min-h-0"
                   )}>
                     {/* Reply/Forward Preview */}
                     {(replyingToMessage || forwardingMessage) && (
-                      <div className="flex items-start gap-2 p-3 bg-gray-50 border-b border-gray-200 rounded-t-lg">
+                      <div className="flex items-start gap-2 p-3 bg-gray-50 border-b border-[#e6ebf1] rounded-t-lg">
                         <div className="flex-shrink-0 mt-0.5">
                           {replyingToMessage ? (
                             <Reply className="w-4 h-4 text-blue-500" />
@@ -2936,7 +2936,7 @@ export default function ChatManagement() {
                             <Forward className="w-4 h-4 text-blue-500" />
                           )}
                         </div>
-                        <div className="flex-1 min-w-0 border-l-2 border-blue-400 pl-2">
+                        <div className="flex-1 min-w-0 border-l-2 border-[#699dff] pl-2">
                           <div className="flex items-center gap-1 text-xs font-medium text-blue-600">
                             {replyingToMessage ? (
                               <>Trả lời {replyingToMessage.sender.name}</>
@@ -2969,7 +2969,7 @@ export default function ChatManagement() {
                                 <img
                                   src={url}
                                   alt={`Preview ${index + 1}`}
-                                  className="w-16 h-16 object-cover rounded-lg border border-gray-200"
+                                  className="w-16 h-16 object-cover rounded-[10px] border border-[#e6ebf1]"
                                 />
                                 <button
                                   onClick={() => removeSelectedImage(index)}
@@ -2985,7 +2985,7 @@ export default function ChatManagement() {
                         {selectedFiles.length > 0 && (
                           <div className="flex flex-wrap gap-2">
                             {selectedFiles.map((file, index) => (
-                              <div key={index} className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-lg group">
+                              <div key={index} className="flex items-center gap-2 px-2 py-1 bg-gray-100 rounded-[10px] group">
                                 <Paperclip className="w-3 h-3 text-gray-500" />
                                 <span className="text-xs text-gray-700 max-w-[100px] truncate">{file.name}</span>
                                 <button
@@ -3020,7 +3020,7 @@ export default function ChatManagement() {
                     </div>
 
                     {/* Action Buttons Row */}
-                    <div className="flex items-center justify-between border-t border-gray-200 px-2 py-2">
+                    <div className="flex items-center justify-between border-t border-[#e6ebf1] px-2 py-2">
                       {/* Left Actions */}
                       <div className="flex items-center gap-1">
                         <Button
@@ -3108,7 +3108,7 @@ export default function ChatManagement() {
                         <Button
                           onClick={handleSendMessage}
                           disabled={!messageInput.trim() && selectedImages.length === 0 && selectedFiles.length === 0}
-                          className="h-8 px-3 bg-blue-500 hover:bg-blue-600 text-white text-xs rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          className="h-8 px-3 bg-blue-500 hover:bg-[#3e79f7] text-white text-xs rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           title="Gửi tin nhắn"
                         >
                           <Send className="w-4 h-4 mr-1" />
@@ -3136,14 +3136,14 @@ export default function ChatManagement() {
         {showContactDetail && selectedConversation && (
           <div className="col-span-3 h-full flex flex-col bg-white overflow-hidden">
             {/* Main Tab Menu */}
-            <div className="flex items-center border-b border-gray-200 bg-white flex-shrink-0">
+            <div className="flex items-center border-b border-[#e6ebf1] bg-white flex-shrink-0">
               <button
                 onClick={() => setRightPanelTab('zalo')}
                 className={cn(
                   "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
                   rightPanelTab === 'zalo'
                     ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]"
                 )}
               >
                 {selectedChannel === 'facebook' ? 'Facebook' : 'Zalo'}
@@ -3156,7 +3156,7 @@ export default function ChatManagement() {
                     "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
                     rightPanelTab === 'community'
                       ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]"
                   )}
                 >
                   Thông tin cộng đồng
@@ -3168,7 +3168,7 @@ export default function ChatManagement() {
                     "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
                     rightPanelTab === 'sync'
                       ? "border-blue-500 text-blue-600"
-                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                      : "border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]"
                   )}
                 >
                   Đồng bộ
@@ -3180,7 +3180,7 @@ export default function ChatManagement() {
                   "px-4 py-2 text-sm font-medium border-b-2 transition-colors",
                   rightPanelTab === 'files'
                     ? "border-blue-500 text-blue-600"
-                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]"
                 )}
               >
                 File chia sẻ
@@ -3209,7 +3209,7 @@ export default function ChatManagement() {
                       </div>
 
                       {/* Info section */}
-                      <div className="pt-12 px-4 pb-4 border-b border-gray-200">
+                      <div className="pt-12 px-4 pb-4 border-b border-[#e6ebf1]">
                         <h3 className="font-semibold text-base text-gray-900">{selectedConversation.contact.name}</h3>
                         <p className="text-sm text-gray-500">{demoGroupMembers.length} thành viên</p>
                       </div>
@@ -3269,7 +3269,7 @@ export default function ChatManagement() {
                       </div>
 
                       {/* Info section */}
-                      <div className="pt-12 px-4 pb-4 border-b border-gray-200">
+                      <div className="pt-12 px-4 pb-4 border-b border-[#e6ebf1]">
                         <h3 className="font-semibold text-base text-gray-900">{selectedConversation.contact.name}</h3>
                         <p className="text-sm text-gray-500">{selectedConversation.contact.company}</p>
                       </div>
@@ -3346,9 +3346,9 @@ export default function ChatManagement() {
 
               <TabsContent value="history" className="flex-1 overflow-y-auto p-4 mt-0">
                 <div className="space-y-3">
-                  <div className="border-l-2 border-blue-200 pl-3 pb-3">
+                  <div className="border-l-2 border-[#c7d9fd] pl-3 pb-3">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <div className="w-2 h-2 bg-[#3e79f7] rounded-full"></div>
                       <span className="font-medium text-sm">Bắt đầu cuộc hội thoại</span>
                     </div>
                     <p className="text-sm text-gray-600">Khách hàng bắt đầu chat qua Zalo</p>
@@ -3360,7 +3360,7 @@ export default function ChatManagement() {
                   {selectedConversation.contact.purchaseHistory.map((purchase) => (
                     <div key={purchase.orderId} className="border-l-2 border-green-200 pl-3 pb-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <div className="w-2 h-2 bg-green-600 rounded-full"></div>
+                        <div className="w-2 h-2 bg-[#2dc56a] rounded-full"></div>
                         <span className="font-medium text-sm">Mua hàng</span>
                       </div>
                       <p className="text-sm text-gray-600">{purchase.productName}</p>
@@ -3370,7 +3370,7 @@ export default function ChatManagement() {
                     </div>
                   ))}
 
-                  <div className="border-l-2 border-gray-200 pl-3 pb-3">
+                  <div className="border-l-2 border-[#e6ebf1] pl-3 pb-3">
                     <div className="flex items-center gap-2 mb-1">
                       <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
                       <span className="font-medium text-sm">Tin nhắn gần nhất</span>
@@ -3400,9 +3400,9 @@ export default function ChatManagement() {
                   </div>
 
                   {/* Notes list */}
-                  <div className="space-y-2 pt-3 border-t border-gray-200">
+                  <div className="space-y-2 pt-3 border-t border-[#e6ebf1]">
                     {selectedConversation.contact.notes.map((note) => (
-                      <div key={note.id} className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                      <div key={note.id} className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-3">
                         <p className="text-sm text-gray-900">{note.content}</p>
                         <div className="flex justify-between items-center mt-2">
                           <span className="text-xs text-gray-500">
@@ -3447,8 +3447,8 @@ export default function ChatManagement() {
                         <ScrollArea className="flex-1">
                           <div className="p-6">
                             {/* Connected Status Banner */}
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6 flex items-center gap-3">
-                              <div className="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center flex-shrink-0">
+                            <div className="bg-green-50 border border-green-200 rounded-[10px] p-4 mb-6 flex items-center gap-3">
+                              <div className="w-10 h-10 bg-[#2dc56a] rounded-full flex items-center justify-center flex-shrink-0">
                                 <Check className="w-6 h-6 text-white" />
                               </div>
                               <div className="flex-1">
@@ -3459,20 +3459,20 @@ export default function ChatManagement() {
                                 {connectionCount && connectionCount.total > 0 && (
                                   <div className="flex gap-2 mt-2 flex-wrap">
                                     {connectionCount['zalo-personal'] > 0 && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
-                                        <span className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">ZL</span>
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-[#3e79f7] text-xs font-medium">
+                                        <span className="w-5 h-5 bg-[#3e79f7] rounded-full flex items-center justify-center text-white text-[10px] font-bold">ZL</span>
                                         {connectionCount['zalo-personal']} Zalo
                                       </span>
                                     )}
                                     {connectionCount['zalo-oa'] > 0 && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-[#3e79f7] text-xs font-medium">
                                         <span className="w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white text-[10px] font-bold">OA</span>
                                         {connectionCount['zalo-oa']} Zalo OA
                                       </span>
                                     )}
                                     {connectionCount['facebook'] > 0 && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-blue-700 text-xs font-medium">
-                                        <span className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center text-white text-[10px] font-bold">FB</span>
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-blue-100 text-[#3e79f7] text-xs font-medium">
+                                        <span className="w-5 h-5 bg-[#3e79f7] rounded-full flex items-center justify-center text-white text-[10px] font-bold">FB</span>
                                         {connectionCount['facebook']} Facebook
                                       </span>
                                     )}
@@ -3482,9 +3482,9 @@ export default function ChatManagement() {
                             </div>
 
                             {/* Customer Info Card */}
-                            <div className="border border-gray-200 rounded-lg overflow-hidden">
+                            <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
                               {/* Header */}
-                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-gray-200">
+                              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 px-4 py-3 border-b border-[#e6ebf1]">
                                 <h4 className="font-semibold text-sm text-gray-900 flex items-center gap-2">
                                   <User className="w-4 h-4 text-blue-600" />
                                   Thông tin khách hàng
@@ -3506,7 +3506,7 @@ export default function ChatManagement() {
                                       {customerToShow.name}
                                     </h3>
                                     <div className="flex items-center gap-2 flex-wrap">
-                                      <Badge className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 border-blue-300">
+                                      <Badge className="text-xs px-2 py-0.5 bg-blue-100 text-[#3e79f7] border-blue-300">
                                         Lead
                                       </Badge>
                                       <Badge className="text-xs py-0 h-5 cursor-pointer hover:opacity-80 transition-opacity whitespace-nowrap bg-gray-100 text-gray-700">
@@ -3557,7 +3557,7 @@ export default function ChatManagement() {
                                 )}
 
                                 {/* Source & Dates */}
-                                <div className="bg-gray-50 rounded-lg p-3 space-y-2 text-xs">
+                                <div className="bg-gray-50 rounded-[10px] p-3 space-y-2 text-xs">
                                   <div className="flex justify-between">
                                     <span className="text-gray-600">Nguồn:</span>
                                     <span className="font-medium text-gray-900">{customerToShow.source}</span>
@@ -3685,8 +3685,8 @@ export default function ChatManagement() {
                                                 <div className="flex items-center gap-2 w-full">
                                                   <span className={cn(
                                                     "w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0",
-                                                    conn.platform === 'zalo-personal' ? "bg-blue-600" :
-                                                    conn.platform === 'zalo-oa' ? "bg-blue-500" : "bg-blue-600"
+                                                    conn.platform === 'zalo-personal' ? "bg-[#3e79f7]" :
+                                                    conn.platform === 'zalo-oa' ? "bg-blue-500" : "bg-[#3e79f7]"
                                                   )}>
                                                     {conn.platform === 'zalo-personal' ? 'ZL' : 
                                                      conn.platform === 'zalo-oa' ? 'OA' : 'FB'}
@@ -3793,7 +3793,7 @@ export default function ChatManagement() {
                           if (syncSearchTerm && filteredCustomers.length === 0) {
                             return (
                               <div className="flex-1 flex items-center justify-center py-12">
-                                <div className="bg-red-50 text-red-500 px-6 py-3 rounded-lg text-sm font-medium">
+                                <div className="bg-red-50 text-red-500 px-6 py-3 rounded-[10px] text-sm font-medium">
                                   Không tìm thấy khách hàng nào !
                                 </div>
                               </div>
@@ -3813,7 +3813,7 @@ export default function ChatManagement() {
                               {filteredCustomers.map((customer) => (
                                 <div
                                   key={customer.id}
-                                  className="border border-gray-200 rounded-lg p-3 hover:bg-gray-50 transition-colors cursor-pointer"
+                                  className="border border-[#e6ebf1] rounded-[10px] p-3 hover:bg-gray-50 transition-colors cursor-pointer"
                                 >
                                   <div className="flex items-start gap-3">
                                     <Avatar className="w-12 h-12 flex-shrink-0">
@@ -3831,7 +3831,7 @@ export default function ChatManagement() {
                                           className={cn(
                                             "text-xs px-2 py-0 h-5",
                                             customer.status === 'customer' ? "bg-green-100 text-green-700 border-green-300" :
-                                            customer.status === 'lead' ? "bg-blue-100 text-blue-700 border-blue-300" :
+                                            customer.status === 'lead' ? "bg-blue-100 text-[#3e79f7] border-blue-300" :
                                             "bg-yellow-100 text-yellow-700 border-yellow-300"
                                           )}
                                         >
@@ -3883,24 +3883,24 @@ export default function ChatManagement() {
                                         // This specific conversation is connected to this customer
                                         return (
                                           <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                                            <div className="flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-lg">
+                                            <div className="flex items-center gap-1 bg-green-50 px-3 py-1.5 rounded-[10px]">
                                               <Check className="w-4 h-4 text-green-600" />
                                               <span className="text-xs font-medium text-green-700">Đã kết nối</span>
                                             </div>
                                             {customerConnCount && customerConnCount.total > 1 && (
                                               <div className="flex gap-1">
                                                 {customerConnCount['zalo-personal'] > 0 && (
-                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-[#3e79f7] font-medium">
                                                     {customerConnCount['zalo-personal']}ZL
                                                   </span>
                                                 )}
                                                 {customerConnCount['zalo-oa'] > 0 && (
-                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-[#3e79f7] font-medium">
                                                     {customerConnCount['zalo-oa']}OA
                                                   </span>
                                                 )}
                                                 {customerConnCount['facebook'] > 0 && (
-                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-700 font-medium">
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-[#3e79f7] font-medium">
                                                     {customerConnCount['facebook']}FB
                                                   </span>
                                                 )}
@@ -4015,7 +4015,7 @@ export default function ChatManagement() {
                                                 )}
                                               </div>
                                             )}
-                                            <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-lg">
+                                            <div className="flex items-center gap-1 bg-yellow-50 px-3 py-1.5 rounded-[10px]">
                                               <AlertTriangle className="w-4 h-4 text-yellow-600" />
                                               <span className="text-xs font-medium text-yellow-700">Đã kết nối</span>
                                             </div>
@@ -4088,7 +4088,7 @@ export default function ChatManagement() {
                                             )}
                                             <Button 
                                               size="sm" 
-                                              className="h-8 text-xs px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors"
+                                              className="h-8 text-xs px-3 bg-blue-500 hover:bg-[#3e79f7] text-white rounded-md transition-colors"
                                               onClick={() => {
                                                 const newConnected = new Set(connectedCustomers)
                                                 newConnected.add(customer.id)
@@ -4134,7 +4134,7 @@ export default function ChatManagement() {
                                         return (
                                           <Button 
                                             size="sm" 
-                                            className="h-8 text-xs px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors flex-shrink-0"
+                                            className="h-8 text-xs px-3 bg-blue-500 hover:bg-[#3e79f7] text-white rounded-md transition-colors flex-shrink-0"
                                             onClick={() => {
                                               const newConnected = new Set(connectedCustomers)
                                               newConnected.add(customer.id)
@@ -4188,7 +4188,7 @@ export default function ChatManagement() {
             {rightPanelTab === 'community' && selectedConversation.conversationType === 'group' && selectedChannel === 'zalo-personal' && (
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search Members */}
-                <div className="p-4 border-b border-gray-200 flex-shrink-0">
+                <div className="p-4 border-b border-[#e6ebf1] flex-shrink-0">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
@@ -4240,7 +4240,7 @@ export default function ChatManagement() {
                                 {filteredAdmins.map((member) => (
                                   <div
                                     key={member.id}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-3 p-2 rounded-[10px] hover:bg-gray-50 transition-colors"
                                   >
                                     <div className="relative flex-shrink-0">
                                       <Avatar className="w-11 h-11 border-2 border-orange-200">
@@ -4250,7 +4250,7 @@ export default function ChatManagement() {
                                         </AvatarFallback>
                                       </Avatar>
                                       {member.isActive && (
-                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2dc56a] border-2 border-white rounded-full"></div>
                                       )}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -4308,7 +4308,7 @@ export default function ChatManagement() {
                                 {filteredMembers.map((member) => (
                                   <div
                                     key={member.id}
-                                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors"
+                                    className="flex items-center gap-3 p-2 rounded-[10px] hover:bg-gray-50 transition-colors"
                                   >
                                     <div className="relative flex-shrink-0">
                                       <Avatar className="w-11 h-11">
@@ -4318,7 +4318,7 @@ export default function ChatManagement() {
                                         </AvatarFallback>
                                       </Avatar>
                                       {member.isActive && (
-                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2dc56a] border-2 border-white rounded-full"></div>
                                       )}
                                     </div>
                                     <div className="flex-1 min-w-0">
@@ -4368,7 +4368,7 @@ export default function ChatManagement() {
                 </ScrollArea>
 
                 {/* Bottom Actions */}
-                <div className="p-4 border-t border-gray-200 flex-shrink-0">
+                <div className="p-4 border-t border-[#e6ebf1] flex-shrink-0">
                   <Button variant="outline" className="w-full text-sm text-red-600 hover:bg-red-50 hover:text-red-700 border-red-300">
                     <X className="w-4 h-4 mr-2" />
                     Rời khỏi nhóm
@@ -4381,7 +4381,7 @@ export default function ChatManagement() {
             {rightPanelTab === 'files' && (
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Search */}
-                <div className="p-4 border-b border-gray-200">
+                <div className="p-4 border-b border-[#e6ebf1]">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                     <Input
@@ -4394,7 +4394,7 @@ export default function ChatManagement() {
                 </div>
 
                 {/* Filters */}
-                <div className="p-4 space-y-3 border-b border-gray-200 flex-shrink-0">
+                <div className="p-4 space-y-3 border-b border-[#e6ebf1] flex-shrink-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600 w-20 flex-shrink-0">Loại file:</span>
                     <div className="flex gap-2 flex-wrap">
@@ -4406,7 +4406,7 @@ export default function ChatManagement() {
                             "px-3 py-1 text-xs rounded-md border transition-colors",
                             fileTypeFilter === type
                               ? "bg-blue-50 border-blue-500 text-blue-600"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                              : "border-[#e6ebf1] text-gray-600 hover:bg-gray-50"
                           )}
                         >
                           {type === 'all' ? 'Tất cả' : type}
@@ -4425,7 +4425,7 @@ export default function ChatManagement() {
                             "px-3 py-1 text-xs rounded-md border transition-colors",
                             fileSenderFilter === sender
                               ? "bg-blue-50 border-blue-500 text-blue-600"
-                              : "border-gray-300 text-gray-600 hover:bg-gray-50"
+                              : "border-[#e6ebf1] text-gray-600 hover:bg-gray-50"
                           )}
                         >
                           {sender === 'all' ? 'Tất cả' : sender === 'staff' ? 'Nhân viên' : 'Khách hàng'}
@@ -4478,7 +4478,7 @@ export default function ChatManagement() {
                                 </svg>
                                 Tải xuống
                               </Button>
-                              <Button size="sm" className="h-8 text-xs px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-md">
+                              <Button size="sm" className="h-8 text-xs px-3 bg-blue-500 hover:bg-[#3e79f7] text-white rounded-md">
                                 <svg className="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                 </svg>
@@ -4497,7 +4497,7 @@ export default function ChatManagement() {
             {rightPanelTab === 'reminders' && (
               <div className="flex-1 flex flex-col overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white">
+                <div className="flex items-center justify-between px-4 py-3 border-b border-[#e6ebf1] bg-white">
                   <div className="flex items-center gap-2">
                     <button 
                       onClick={() => setRightPanelTab('zalo')}
@@ -4543,10 +4543,10 @@ export default function ChatManagement() {
                         return (
                           <div 
                             key={reminder.id}
-                            className="flex gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:shadow-sm transition-shadow"
+                            className="flex gap-3 p-3 bg-white border border-[#e6ebf1] rounded-[10px] hover:shadow-sm transition-shadow"
                           >
                             {/* Date Badge */}
-                            <div className="flex-shrink-0 w-14 h-14 bg-blue-50 rounded-lg flex flex-col items-center justify-center border border-blue-100">
+                            <div className="flex-shrink-0 w-14 h-14 bg-blue-50 rounded-[10px] flex flex-col items-center justify-center border border-blue-100">
                               <span className="text-[10px] text-blue-600 font-medium">{dayOfWeek}</span>
                               <span className="text-lg font-bold text-blue-600">{day}</span>
                               <span className="text-[10px] text-blue-500">Tháng {month}</span>
@@ -4621,19 +4621,19 @@ export default function ChatManagement() {
         <DialogContent className="max-w-4xl max-h-[90vh] p-0">
           <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
               <h2 className="text-xl font-semibold text-gray-900">Quản lý kết nối</h2>
             </div>
 
             {/* Controls */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <label className="text-sm text-gray-600">Chọn nền tảng:</label>
                   <select
                     value={connectionPlatformFilter}
                     onChange={(e) => setConnectionPlatformFilter(e.target.value as any)}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                   >
                     <option value="all">Tất cả nền tảng</option>
                     <option value="zalo-personal">Zalo cá nhân</option>
@@ -4642,7 +4642,7 @@ export default function ChatManagement() {
                   </select>
                 </div>
                 <Button 
-                  className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                  className="flex items-center gap-2 bg-blue-500 hover:bg-[#3e79f7] text-white"
                   onClick={() => setShowIntegrationModal(true)}
                 >
                   <Plus className="w-4 h-4" />
@@ -4657,7 +4657,7 @@ export default function ChatManagement() {
                 {connectedZaloAccounts
                   .filter(account => connectionPlatformFilter === 'all' || account.platform === connectionPlatformFilter)
                   .map((account) => (
-                    <div key={account.id} className="border border-gray-200 rounded-lg p-4">
+                    <div key={account.id} className="border border-[#e6ebf1] rounded-[10px] p-4">
                       <div className="flex items-start justify-between">
                         <div className="flex items-start gap-3 flex-1">
                           <Avatar className="w-12 h-12">
@@ -4673,7 +4673,7 @@ export default function ChatManagement() {
                                 "text-xs",
                                 account.platform === 'zalo-personal' ? "bg-blue-100 text-blue-800" :
                                 account.platform === 'zalo-oa' ? "bg-purple-100 text-purple-800" :
-                                "bg-blue-600 text-white"
+                                "bg-[#3e79f7] text-white"
                               )}>
                                 {account.platform === 'zalo-personal' ? 'Zalo cá nhân' :
                                  account.platform === 'zalo-oa' ? 'Zalo OA' :
@@ -4690,7 +4690,7 @@ export default function ChatManagement() {
                           <div className="flex items-center gap-2">
                             {accountConnectionStatus.get(account.id) ? (
                               <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                                <div className="w-2 h-2 rounded-full bg-[#2dc56a]"></div>
                                 Đã kết nối
                               </Badge>
                             ) : (
@@ -4714,14 +4714,14 @@ export default function ChatManagement() {
                               <Button
                                 size="sm"
                                 onClick={() => toggleAccountConnection(account.id)}
-                                className="bg-green-500 hover:bg-green-600 text-white text-xs h-8 px-3 border-0 rounded-md"
+                                className="bg-[#2dc56a] hover:bg-[#2dc56a] text-white text-xs h-8 px-3 border-0 rounded-md"
                               >
                                 Kết nối
                               </Button>
                             )}
                             <Button
                               size="sm"
-                              className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 border-0 rounded-md"
+                              className="bg-red-500 hover:bg-[#ff6b72] text-white h-8 w-8 p-0 border-0 rounded-md"
                               onClick={() => {
                                 setAccountToDelete(account)
                                 setShowDeleteAccountModal(true)
@@ -4740,7 +4740,7 @@ export default function ChatManagement() {
                                 setDefaultShiftTab('permission')
                                 setShowShiftPermissionModal(true)
                               }}
-                              className="text-xs h-8 px-3 border-gray-300 hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
+                              className="text-xs h-8 px-3 border-[#e6ebf1] hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
                             >
                               <User className="w-3.5 h-3.5 mr-1.5" />
                               Thiết lập nhân viên
@@ -4753,7 +4753,7 @@ export default function ChatManagement() {
                                 setDefaultShiftTab('shift')
                                 setShowShiftPermissionModal(true)
                               }}
-                              className="text-xs h-8 px-3 border-gray-300 hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
+                              className="text-xs h-8 px-3 border-[#e6ebf1] hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
                             >
                               <Calendar className="w-3.5 h-3.5 mr-1.5" />
                               Phân ca trực
@@ -4766,7 +4766,7 @@ export default function ChatManagement() {
                                 setDefaultShiftTab('history')
                                 setShowShiftPermissionModal(true)
                               }}
-                              className="text-xs h-8 px-3 border-gray-300 hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
+                              className="text-xs h-8 px-3 border-[#e6ebf1] hover:bg-gray-50 hover:border-[#3e79f7] hover:text-[#3e79f7] rounded-md"
                             >
                               <ClockIcon className="w-3.5 h-3.5 mr-1.5" />
                               Lịch sử
@@ -4826,7 +4826,7 @@ export default function ChatManagement() {
             </div>
 
             {selectedIntegrationType === 'zalo-personal' && (
-              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded p-3">
                 <p className="text-sm text-blue-800">
                   Quét mã QR bằng ứng dụng Zalo để kết nối tài khoản cá nhân
                 </p>
@@ -4895,10 +4895,10 @@ export default function ChatManagement() {
           <div className="flex gap-8 px-6 py-4">
             {/* Left: QR Code */}
             <div className="flex-shrink-0">
-              <div className="w-64 h-64 bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center relative">
+              <div className="w-64 h-64 bg-gray-100 border-2 border-[#e6ebf1] rounded-[10px] flex items-center justify-center relative">
                 {qrCheckStatus === 'pending' || qrCheckStatus === 'checking' ? (
                   <>
-                    <div className="w-56 h-56 bg-white border border-gray-200 rounded flex items-center justify-center">
+                    <div className="w-56 h-56 bg-white border border-[#e6ebf1] rounded flex items-center justify-center">
                       <QrCode className="w-32 h-32 text-gray-400" />
                     </div>
                     {qrCheckStatus === 'checking' && (
@@ -5003,7 +5003,7 @@ export default function ChatManagement() {
           <div className="space-y-6 px-6 py-4">
             {/* Logo Section */}
             <div className="flex items-center justify-center gap-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-600">V</span>
               </div>
 
@@ -5015,7 +5015,7 @@ export default function ChatManagement() {
             </div>
 
             {/* Warning Message */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4 text-center">
               <p className="text-sm text-gray-700">
                 Zalo OA yêu cầu bạn phải mua gói{' '}
                 <strong className="text-yellow-800">OA Nâng cao</strong> hoặc{' '}
@@ -5054,19 +5054,19 @@ export default function ChatManagement() {
           <div className="space-y-6 px-6 py-4">
             {/* Logo Section */}
             <div className="flex items-center justify-center gap-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-600">V</span>
               </div>
 
               <RefreshCw className="w-6 h-6 text-gray-400" />
 
-              <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+              <div className="w-16 h-16 bg-[#3e79f7] rounded-full flex items-center justify-center">
                 <Facebook className="w-8 h-8 text-white" />
               </div>
             </div>
 
             {/* Info Message */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+            <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 text-center">
               <p className="text-sm text-gray-700">
                 Đăng nhập Facebook để kết nối các{' '}
                 <strong className="text-blue-600">Fanpage</strong> bạn quản lý
@@ -5075,7 +5075,7 @@ export default function ChatManagement() {
 
             {/* Connect Button */}
             <Button
-              className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700"
+              className="w-full h-12 text-base bg-[#3e79f7] hover:bg-[#699dff]"
               onClick={() => {
                 alert('Đang kết nối với Facebook...')
                 setShowFacebookModal(false)
@@ -5115,7 +5115,7 @@ export default function ChatManagement() {
               Hủy
             </Button>
             <Button
-              className="bg-red-600 hover:bg-red-700 text-white border-0"
+              className="bg-[#ff6b72] hover:bg-[#d9505c] text-white border-0"
               onClick={() => {
                 if (accountToDelete) {
                   const deletedAccountPlatform = accountToDelete.platform
@@ -5226,7 +5226,7 @@ export default function ChatManagement() {
                   setFriendRequestMessage(e.target.value)
                 }
               }}
-              className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full min-h-[120px] px-3 py-2 border border-[#e6ebf1] rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
               placeholder="Xin chào bạn. Tôi muốn kết bạn với bạn trên Zalo"
             />
             <div className="mt-2 text-sm text-gray-500">
@@ -5263,9 +5263,9 @@ export default function ChatManagement() {
       {/* Create Lead Modal */}
       <Dialog open={showCreateLeadModal} onOpenChange={setShowCreateLeadModal}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-0 [&>button]:hidden">
-          <div className="bg-white rounded-lg">
+          <div className="bg-white rounded-[10px]">
             {/* Header */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">Thêm Lead mới</h3>
@@ -5294,9 +5294,9 @@ export default function ChatManagement() {
                   <span className="text-red-500">*</span>Loại khách hàng
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className={`relative flex items-center p-3 border rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${leadFormData.customerType === 'individual' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
+                  <label className={`relative flex items-center p-3 border rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors ${leadFormData.customerType === 'individual' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1]'}`}>
                     <input 
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" 
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2" 
                       type="radio" 
                       value="individual" 
                       checked={leadFormData.customerType === 'individual'}
@@ -5308,9 +5308,9 @@ export default function ChatManagement() {
                       <div className="text-xs text-gray-500">Khách hàng cá nhân</div>
                     </div>
                   </label>
-                  <label className={`relative flex items-center p-3 border rounded-lg cursor-pointer hover:border-blue-500 transition-colors ${leadFormData.customerType === 'business' ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}`}>
+                  <label className={`relative flex items-center p-3 border rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors ${leadFormData.customerType === 'business' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1]'}`}>
                     <input 
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2" 
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2" 
                       type="radio" 
                       value="business" 
                       checked={leadFormData.customerType === 'business'}
@@ -5337,7 +5337,7 @@ export default function ChatManagement() {
                     </label>
                     <input 
                       placeholder="Nhập tên khách hàng..." 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" 
                       type="text" 
                       value={leadFormData.name}
                       onChange={(e) => setLeadFormData({...leadFormData, name: e.target.value})}
@@ -5349,7 +5349,7 @@ export default function ChatManagement() {
                     </label>
                     <input 
                       placeholder="0901234567" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" 
                       type="tel" 
                       value={leadFormData.phone}
                       onChange={(e) => setLeadFormData({...leadFormData, phone: e.target.value})}
@@ -5361,7 +5361,7 @@ export default function ChatManagement() {
                     </label>
                     <input 
                       placeholder="email@domain.com" 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" 
                       type="email" 
                       value={leadFormData.email}
                       onChange={(e) => setLeadFormData({...leadFormData, email: e.target.value})}
@@ -5380,7 +5380,7 @@ export default function ChatManagement() {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn</label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.source}
                       onChange={(e) => setLeadFormData({...leadFormData, source: e.target.value})}
                     >
@@ -5400,7 +5400,7 @@ export default function ChatManagement() {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.province}
                       onChange={(e) => setLeadFormData({...leadFormData, province: e.target.value})}
                     >
@@ -5424,7 +5424,7 @@ export default function ChatManagement() {
                       </div>
                     </label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.assignTo}
                       onChange={(e) => setLeadFormData({...leadFormData, assignTo: e.target.value})}
                     >
@@ -5453,7 +5453,7 @@ export default function ChatManagement() {
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Sản phẩm quan tâm</label>
                     <select 
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.product}
                       onChange={(e) => setLeadFormData({...leadFormData, product: e.target.value})}
                     >
@@ -5495,7 +5495,7 @@ export default function ChatManagement() {
                     <textarea 
                       placeholder="Mô tả nhu cầu, yêu cầu của khách hàng..." 
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.content}
                       onChange={(e) => setLeadFormData({...leadFormData, content: e.target.value})}
                     />
@@ -5505,7 +5505,7 @@ export default function ChatManagement() {
                     <textarea 
                       placeholder="Ghi chú thêm về lead này..." 
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.notes}
                       onChange={(e) => setLeadFormData({...leadFormData, notes: e.target.value})}
                     />
@@ -5514,7 +5514,7 @@ export default function ChatManagement() {
               </div>
 
               {/* Preview */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[10px] p-4 border border-[#c7d9fd]">
                 <h4 className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
                   <Eye className="w-4 h-4" />
                   Xem trước Lead
@@ -5530,9 +5530,9 @@ export default function ChatManagement() {
             </div>
 
             {/* Footer */}
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button 
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
                 onClick={() => {
                   setShowCreateLeadModal(false)
                   setLeadFormData({
@@ -5552,7 +5552,7 @@ export default function ChatManagement() {
                 Hủy
               </button>
               <button 
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
                 onClick={() => {
                   // Create new lead customer
                   const newCustomer = {
@@ -5642,8 +5642,8 @@ export default function ChatManagement() {
       {/* Quick Status Change Modal */}
       {showQuickStatusModal && selectedLeadForQuickAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col mx-4">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col mx-4">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] flex-shrink-0">
               <div className="flex justify-between items-center">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">Chuyển trạng thái - {selectedLeadForQuickAction.name}</h3>
                 <button 
@@ -5661,7 +5661,7 @@ export default function ChatManagement() {
             <div className="px-4 sm:px-6 py-4 flex-1 overflow-y-auto">
               <div className="space-y-3">
                 {[
-                  { value: 'new', emoji: '🆕', label: 'Lead mới', desc: 'Lead mới vừa được tạo, chưa được xử lý', bg: 'bg-gray-100', border: 'border-gray-300' },
+                  { value: 'new', emoji: '🆕', label: 'Lead mới', desc: 'Lead mới vừa được tạo, chưa được xử lý', bg: 'bg-gray-100', border: 'border-[#e6ebf1]' },
                   { value: 'consulting', emoji: '📞', label: 'Đang tư vấn', desc: 'Đã liên hệ và đang tư vấn khách hàng', bg: 'bg-blue-100', border: 'border-blue-300' },
                   { value: 'proposal', emoji: '📋', label: 'Đã gửi đề xuất', desc: 'Đã gửi đề xuất/báo giá cho khách hàng', bg: 'bg-yellow-100', border: 'border-yellow-300' },
                   { value: 'negotiation', emoji: '🤝', label: 'Đàm phán', desc: 'Đang trong quá trình thương lượng và đàm phán', bg: 'bg-orange-100', border: 'border-orange-300' },
@@ -5673,10 +5673,10 @@ export default function ChatManagement() {
                     key={status.value}
                     onClick={() => setQuickStatusValue(status.value)}
                     className={cn(
-                      "p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md",
+                      "p-4 border-2 rounded-[10px] cursor-pointer transition-all duration-200 hover:shadow-md",
                       quickStatusValue === status.value 
                         ? `${status.bg} ${status.border}` 
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-[#e6ebf1] hover:border-[#e6ebf1]"
                     )}
                   >
                     <div className="flex items-center space-x-3">
@@ -5690,7 +5690,7 @@ export default function ChatManagement() {
                 ))}
               </div>
             </div>
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] bg-gray-50 flex-shrink-0">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div className="text-sm text-gray-600 text-center sm:text-left">
                   💡 Mẹo: Việc chuyển trạng thái sẽ được ghi lại trong lịch sử tương tác
@@ -5701,7 +5701,7 @@ export default function ChatManagement() {
                       setShowQuickStatusModal(false)
                       setQuickStatusValue('')
                     }}
-                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
                   >
                     Hủy
                   </button>
@@ -5713,9 +5713,9 @@ export default function ChatManagement() {
                       setQuickStatusValue('')
                     }}
                     className={cn(
-                      "w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 flex items-center justify-center gap-2",
+                      "w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 flex items-center justify-center gap-2",
                       quickStatusValue 
-                        ? "text-white bg-blue-600 hover:bg-blue-700" 
+                        ? "text-white bg-[#3e79f7] hover:bg-[#699dff]" 
                         : "text-gray-400 bg-gray-300 cursor-not-allowed"
                     )}
                   >
@@ -5732,7 +5732,7 @@ export default function ChatManagement() {
       {/* Quick Task Modal */}
       {showQuickTaskModal && selectedLeadForQuickAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col mx-4">
             <div className="flex items-center justify-between px-6 py-4 border-b">
               <h3 className="text-lg font-semibold text-gray-900">Tạo công việc</h3>
               <button 
@@ -5811,7 +5811,7 @@ export default function ChatManagement() {
               {/* Danh sách việc cần làm */}
               <div>
                 <Label className="text-sm font-medium text-gray-700">Danh sách việc cần làm</Label>
-                <div className="mt-1.5 border border-gray-200 rounded-lg p-3 flex items-center justify-center">
+                <div className="mt-1.5 border border-[#e6ebf1] rounded-[10px] p-3 flex items-center justify-center">
                   <button className="text-gray-400 hover:text-gray-600">
                     <Plus className="w-5 h-5" />
                   </button>
@@ -5856,7 +5856,7 @@ export default function ChatManagement() {
                 <Label className="text-sm font-medium text-gray-700">Nhãn</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
                   {[
-                    { value: 'later', label: 'Khách hẹn mua sau', color: 'bg-gray-100 text-gray-700 border-gray-300' },
+                    { value: 'later', label: 'Khách hẹn mua sau', color: 'bg-gray-100 text-gray-700 border-[#e6ebf1]' },
                     { value: 'potential', label: 'Khách tiềm năng', color: 'bg-green-100 text-green-700 border-green-300' },
                     { value: 'not_interested', label: 'Khách không quan tâm', color: 'bg-red-100 text-red-700 border-red-300' },
                   ].map((tag) => (
@@ -5873,7 +5873,7 @@ export default function ChatManagement() {
                         "px-3 py-1 text-xs rounded-full border transition-all",
                         quickTaskTags.includes(tag.value) 
                           ? tag.color + ' border-2'
-                          : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+                          : 'bg-white text-gray-500 border-[#e6ebf1] hover:border-gray-400'
                       )}
                     >
                       {tag.label}
@@ -5934,7 +5934,7 @@ export default function ChatManagement() {
                   setQuickTaskInternalNote('')
                 }}
                 disabled={!quickTaskTitle.trim() || !quickTaskAssignee}
-                className="bg-blue-600 hover:bg-blue-700"
+                className="bg-[#3e79f7] hover:bg-[#699dff]"
               >
                 Tạo công việc
               </Button>
@@ -5946,7 +5946,7 @@ export default function ChatManagement() {
       {/* Quick Note Modal */}
       {showQuickNoteModal && selectedLeadForQuickAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Thêm ghi chú</h3>
@@ -5994,7 +5994,7 @@ export default function ChatManagement() {
                   />
                   <label 
                     htmlFor="quick-note-file-input" 
-                    className="flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <Paperclip className="w-4 h-4 mr-2 text-gray-600" />
                     <span className="text-sm text-gray-700">Chọn file</span>
@@ -6071,7 +6071,7 @@ export default function ChatManagement() {
       {/* Quick Order Modal */}
       {showQuickOrderModal && selectedLeadForQuickAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng</h3>
@@ -6099,9 +6099,9 @@ export default function ChatManagement() {
             </div>
 
             {/* Customer Info */}
-            <div className="flex items-center gap-3 mb-4 p-3 rounded-lg">
+            <div className="flex items-center gap-3 mb-4 p-3 rounded-[10px]">
               <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                   <User className="h-6 w-6" />
                 </span>
               </span>
@@ -6123,7 +6123,7 @@ export default function ChatManagement() {
                 <textarea
                   value={quickOrderNotes}
                   onChange={(e) => setQuickOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -6135,7 +6135,7 @@ export default function ChatManagement() {
                 <select
                   value={quickOrderSelectedCategory}
                   onChange={(e) => setQuickOrderSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="Tất cả">Tất cả</option>
                   <option value="Sản phẩm">Sản phẩm</option>
@@ -6143,12 +6143,12 @@ export default function ChatManagement() {
               </div>
 
               {/* Product Selection - 2 Column Grid */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-[10px] p-4">
                 <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
                 <div className="max-h-80 overflow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {quickOrderAvailableProducts.filter(product => quickOrderSelectedCategory === 'Tất cả' || product.category === quickOrderSelectedCategory).map((product) => (
-                      <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                      <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                         {/* Product Selection */}
                         <label className="flex items-start space-x-3 cursor-pointer">
                           <input
@@ -6179,7 +6179,7 @@ export default function ChatManagement() {
                                 })
                               }
                             }}
-                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -6203,7 +6203,7 @@ export default function ChatManagement() {
                                     ...prev,
                                     [product.id]: e.target.value
                                   }))}
-                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                 >
                                   {quickOrderAvailablePackages[product.id]?.map((pkg) => (
                                     <option key={pkg.id} value={pkg.id}>
@@ -6222,7 +6222,7 @@ export default function ChatManagement() {
                                     ...prev,
                                     [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                   }))}
-                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                 />
                               </div>
                             </div>
@@ -6258,7 +6258,7 @@ export default function ChatManagement() {
                     const grandTotal = afterDiscount + vatAmount
                     
                     return (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
                         <h5 className="text-sm font-medium text-green-800 mb-3">
                           Đã chọn {quickOrderSelectedProducts.length} sản phẩm:
                         </h5>
@@ -6299,7 +6299,7 @@ export default function ChatManagement() {
                   })()}
 
                   {/* Payment Info Section */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                     {/* Payment Deadline & Discount - Same Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       {/* Payment Deadline */}
@@ -6312,7 +6312,7 @@ export default function ChatManagement() {
                           value={quickOrderPaymentDeadline}
                           onChange={(e) => setQuickOrderPaymentDeadline(e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                         {!quickOrderPaymentDeadline && (
                           <p className="mt-1 text-xs text-red-500">Vui lòng chọn thời hạn thanh toán</p>
@@ -6332,7 +6332,7 @@ export default function ChatManagement() {
                             value={quickOrderDiscountPercent}
                             onChange={(e) => setQuickOrderDiscountPercent(Math.max(0, quickOrderDiscountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
                             placeholder="0"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           />
                           <select 
                             value={quickOrderDiscountType}
@@ -6340,7 +6340,7 @@ export default function ChatManagement() {
                               setQuickOrderDiscountType(e.target.value as '%' | 'VND')
                               setQuickOrderDiscountPercent(0)
                             }}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                           >
                             <option value="%">%</option>
                             <option value="VND">VNĐ</option>
@@ -6356,7 +6356,7 @@ export default function ChatManagement() {
                         <select
                           value={quickOrderPaymentMethod}
                           onChange={(e) => setQuickOrderPaymentMethod(e.target.value)}
-                          className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="cash">Tiền mặt</option>
                           <option value="bank_transfer">Chuyển khoản</option>
@@ -6373,25 +6373,25 @@ export default function ChatManagement() {
                       <div className="flex flex-wrap items-center gap-4">
                         <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
                         <div className="flex gap-3">
-                          <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                             <input
                               type="radio"
                               name="quickOrderPaymentMode"
                               value="full"
                               checked={quickOrderPaymentMode === 'full'}
                               onChange={(e) => setQuickOrderPaymentMode(e.target.value as 'full' | 'installment')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
                           </label>
-                          <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                             <input
                               type="radio"
                               name="quickOrderPaymentMode"
                               value="installment"
                               checked={quickOrderPaymentMode === 'installment'}
                               onChange={(e) => setQuickOrderPaymentMode(e.target.value as 'full' | 'installment')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
                           </label>
@@ -6401,7 +6401,7 @@ export default function ChatManagement() {
 
                     {/* Payment Installments - Only show when installment mode selected */}
                     {quickOrderPaymentMode === 'installment' && (
-                    <div className="border-t border-gray-200 pt-4">
+                    <div className="border-t border-[#e6ebf1] pt-4">
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-gray-700 mb-2">
                           Số lần thanh toán
@@ -6419,7 +6419,7 @@ export default function ChatManagement() {
                             )
                             setQuickOrderInstallmentData(newInstallments)
                           }}
-                          className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
 
@@ -6445,7 +6445,7 @@ export default function ChatManagement() {
                         const isOverLimit = installment.amount > maxAllowed
                         
                         return (
-                        <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                        <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                               Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {maxAllowed.toLocaleString('vi-VN')} VNĐ)</span>
@@ -6461,7 +6461,7 @@ export default function ChatManagement() {
                                 setQuickOrderInstallmentData(newData)
                               }}
                               placeholder="0"
-                              className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                              className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
                             />
                             {isOverLimit && (
                               <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
@@ -6481,7 +6481,7 @@ export default function ChatManagement() {
                                   setQuickOrderInstallmentData(newData)
                                 }}
                                 min={new Date().toISOString().split('T')[0]}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                               />
                             </div>
                             {quickOrderPaymentInstallments > 1 && (
@@ -6494,7 +6494,7 @@ export default function ChatManagement() {
                                     setQuickOrderPaymentInstallments(quickOrderPaymentInstallments - 1)
                                   }
                                 }}
-                                className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                                className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
                                 title="Xóa đợt thanh toán"
                               >
                                 <Trash2 className="h-5 w-5" />
@@ -6532,7 +6532,7 @@ export default function ChatManagement() {
                   setQuickOrderPaymentInstallments(1)
                   setQuickOrderInstallmentData([{amount: 0, date: ''}])
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+                className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] text-gray-700 hover:bg-gray-50"
               >
                 Hủy
               </button>
@@ -6567,9 +6567,9 @@ export default function ChatManagement() {
                   setQuickOrderInstallmentData([{amount: 0, date: ''}])
                 }}
                 className={cn(
-                  "px-6 py-2 rounded-lg font-medium",
+                  "px-6 py-2 rounded-[10px] font-medium",
                   quickOrderSelectedProducts.length > 0 && quickOrderPaymentDeadline
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    ? "bg-[#3e79f7] text-white hover:bg-[#699dff]"
                     : "bg-gray-300 text-gray-500 cursor-not-allowed"
                 )}
               >
@@ -6601,7 +6601,7 @@ export default function ChatManagement() {
             </Button>
             <Button
               onClick={executeUnpin}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-[#ff6b72] text-white"
             >
               Bỏ ghim
             </Button>
@@ -6628,7 +6628,7 @@ export default function ChatManagement() {
           <div className="space-y-4 py-4 px-6">
             {/* Related message preview */}
             {reminderMessage && (
-              <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
+              <div className="p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1]">
                 <p className="text-xs text-gray-500 mb-1">Tin nhắn liên quan:</p>
                 <p className="text-sm text-gray-700 line-clamp-2">{reminderMessage.content}</p>
               </div>
@@ -6723,7 +6723,7 @@ export default function ChatManagement() {
             </Button>
             <Button
               onClick={saveReminder}
-              className="bg-blue-500 hover:bg-blue-600"
+              className="bg-blue-500 hover:bg-[#3e79f7]"
               disabled={!reminderTitle.trim()}
             >
               <Bell className="w-4 h-4 mr-1" />
@@ -6753,7 +6753,7 @@ export default function ChatManagement() {
             </Button>
             <Button
               onClick={executeDeleteReminder}
-              className="bg-red-500 hover:bg-red-600 text-white"
+              className="bg-red-500 hover:bg-[#ff6b72] text-white"
             >
               Có
             </Button>

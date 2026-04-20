@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { 
@@ -17,8 +17,8 @@ import { useBrevoConnection } from './hooks'
 // Plan badge component
 function PlanBadge({ plan }: { plan: string }) {
   const planConfig: Record<string, { label: string; className: string; icon: any }> = {
-    free: { label: 'Free', className: 'bg-gray-100 text-gray-700 border-gray-200', icon: null },
-    starter: { label: 'Starter', className: 'bg-blue-100 text-blue-700 border-blue-200', icon: Zap },
+    free: { label: 'Free', className: 'bg-gray-100 text-gray-700 border-[#e6ebf1]', icon: null },
+    starter: { label: 'Starter', className: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]', icon: Zap },
     business: { label: 'Business', className: 'bg-purple-100 text-purple-700 border-purple-200', icon: Zap },
     enterprise: { label: 'Enterprise', className: 'bg-amber-100 text-amber-700 border-amber-200', icon: Crown }
   }
@@ -100,7 +100,7 @@ export default function EmailLimitsConfig() {
           Xem thông tin giới hạn gửi email từ tài khoản Brevo
         </p>
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-8">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm p-8">
           <div className="text-center py-8">
             <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Mail className="w-8 h-8 text-gray-400" />
@@ -122,7 +122,7 @@ export default function EmailLimitsConfig() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toast.show && (
-        <div className="fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg bg-green-500 text-white flex items-center space-x-2 animate-slide-in">
+        <div className="fixed top-4 right-4 z-50 px-4 py-3 rounded-[10px] shadow-lg bg-[#2dc56a] text-white flex items-center space-x-2 animate-slide-in">
           <CheckCircle className="w-5 h-5" />
           <span>{toast.message}</span>
         </div>
@@ -136,7 +136,7 @@ export default function EmailLimitsConfig() {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+          className="flex items-center space-x-2 px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
         >
           <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin' : ''}`} />
           <span>Cập nhật</span>
@@ -144,7 +144,7 @@ export default function EmailLimitsConfig() {
       </div>
 
       {/* Plan Info Card */}
-      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100 p-6">
+      <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[10px] border border-blue-100 p-6">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center gap-3 mb-2">
@@ -163,7 +163,7 @@ export default function EmailLimitsConfig() {
             href="https://app.brevo.com/billing/subscription"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="flex items-center text-sm text-blue-600 hover:text-[#3e79f7] font-medium"
           >
             Nâng cấp gói
             <ExternalLink className="w-3.5 h-3.5 ml-1" />
@@ -172,7 +172,7 @@ export default function EmailLimitsConfig() {
 
         {/* Warning for Free plan */}
         {connection?.brevo_plan === 'free' && (
-          <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-lg mt-2">
+          <div className="flex items-start gap-3 p-3 bg-amber-50 border border-amber-100 rounded-[10px] mt-2">
             <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800">
               <p className="font-medium">Gói Free có giới hạn 300 email/ngày</p>
@@ -187,9 +187,9 @@ export default function EmailLimitsConfig() {
       {/* Quota Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Daily Quota */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-blue-100 rounded-[10px] flex items-center justify-center">
               <Calendar className="w-5 h-5 text-blue-600" />
             </div>
             <div>
@@ -204,7 +204,7 @@ export default function EmailLimitsConfig() {
             label="Email đã gửi hôm nay"
           />
 
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between text-sm">
+          <div className="mt-4 p-3 bg-gray-50 rounded-[10px] flex items-center justify-between text-sm">
             <span className="text-gray-600">Giới hạn gói {connection?.brevo_plan || 'Free'}:</span>
             <span className="font-semibold text-gray-900">
               {(quota?.daily?.limit || 300).toLocaleString()} email/ngày
@@ -213,9 +213,9 @@ export default function EmailLimitsConfig() {
         </div>
 
         {/* Monthly Quota */}
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+        <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+            <div className="w-10 h-10 bg-purple-100 rounded-[10px] flex items-center justify-center">
               <Clock className="w-5 h-5 text-purple-600" />
             </div>
             <div>
@@ -230,7 +230,7 @@ export default function EmailLimitsConfig() {
             label="Email đã gửi tháng này"
           />
 
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg flex items-center justify-between text-sm">
+          <div className="mt-4 p-3 bg-gray-50 rounded-[10px] flex items-center justify-between text-sm">
             <span className="text-gray-600">Giới hạn gói {connection?.brevo_plan || 'Free'}:</span>
             <span className="font-semibold text-gray-900">
               {(quota?.monthly?.limit || 9000).toLocaleString()} email/tháng
@@ -240,8 +240,8 @@ export default function EmailLimitsConfig() {
       </div>
 
       {/* Plan Comparison */}
-      {/* <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
+      {/* <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-[#e6ebf1]">
           <h3 className="font-semibold text-gray-900">So sánh các gói Brevo</h3>
         </div>
         <div className="overflow-x-auto">
@@ -310,12 +310,12 @@ export default function EmailLimitsConfig() {
             </tbody>
           </table>
         </div>
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="px-6 py-3 bg-gray-50 border-t border-[#e6ebf1]">
           <a
             href="https://www.brevo.com/pricing/"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 font-medium"
+            className="inline-flex items-center text-sm text-blue-600 hover:text-[#3e79f7] font-medium"
           >
             Xem chi tiết bảng giá Brevo
             <ExternalLink className="w-3.5 h-3.5 ml-1" />
@@ -324,7 +324,7 @@ export default function EmailLimitsConfig() {
       </div> */}
 
       {/* Info Card */}
-      <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+      <div className="bg-gray-50 p-4 rounded-[10px] border border-[#e6ebf1]">
         <h4 className="font-medium text-gray-900 mb-2">📌 Lưu ý quan trọng</h4>
         <ul className="text-sm text-gray-600 space-y-1.5">
           <li>• Giới hạn gửi email được quản lý bởi Brevo theo gói dịch vụ của bạn</li>

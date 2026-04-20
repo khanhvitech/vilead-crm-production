@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
@@ -109,7 +109,7 @@ function ToggleSwitch({ checked, onChange }: { checked: boolean; onChange: () =>
       type="button"
       onClick={onChange}
       className={`relative inline-flex h-5 w-9 shrink-0 items-center rounded-full transition-colors focus:outline-none ${
-        checked ? 'bg-blue-600' : 'bg-gray-200'
+        checked ? 'bg-[#3e79f7]' : 'bg-gray-200'
       }`}
     >
       <span
@@ -185,7 +185,7 @@ export default function TimelineStepRow({
               style={{ transform: 'translateY(-50%)' }}
             />
           )}
-          <div className="absolute right-[7px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-gray-300 z-10" />
+          <div className="absolute right-[7px] top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-white border-2 border-[#e6ebf1] z-10" />
 
           {/* Timing button */}
           <button
@@ -193,7 +193,7 @@ export default function TimelineStepRow({
             type="button"
             onClick={() => setShowTimingPopup(p => !p)}
             className={`text-right leading-snug transition-colors group pr-5 ${
-              showTimingPopup ? 'text-blue-700' : 'text-blue-500 hover:text-blue-700'
+              showTimingPopup ? 'text-[#3e79f7]' : 'text-blue-500 hover:text-[#3e79f7]'
             }`}
           >
             <div className="flex items-center gap-1 justify-end">
@@ -210,11 +210,11 @@ export default function TimelineStepRow({
 
         {/* ── RIGHT: Content row ────────────────────────────────────────── */}
         <div
-          className={`flex-1 flex items-center gap-4 px-4 py-3 border rounded-lg mb-3 bg-white transition-all duration-150 ${
+          className={`flex-1 flex items-center gap-4 px-4 py-3 border rounded-[10px] mb-3 bg-white transition-all duration-150 ${
             isSelected
               ? 'border-blue-300 bg-blue-50/50 shadow-sm'
               : dragging
-                ? 'border-blue-400 shadow-lg shadow-blue-50 scale-[1.005]'
+                ? 'border-[#699dff] shadow-lg shadow-blue-50 scale-[1.005]'
                 : 'border-gray-100 hover:border-blue-100 hover:shadow-sm'
           }`}
         >
@@ -232,7 +232,7 @@ export default function TimelineStepRow({
             type="checkbox"
             checked={isSelected}
             onChange={e => onCheckChange(step.id, e.target.checked)}
-            className="w-4 h-4 rounded border-gray-300 text-blue-600 cursor-pointer shrink-0"
+            className="w-4 h-4 rounded border-[#e6ebf1] text-blue-600 cursor-pointer shrink-0"
           />
 
           {/* Toggle kích hoạt */}
@@ -264,13 +264,13 @@ export default function TimelineStepRow({
             <button
               type="button"
               onClick={() => setMenuOpen(o => !o)}
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+              className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
             >
               <MoreHorizontal size={15} />
             </button>
 
             {menuOpen && (
-              <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-48 overflow-hidden py-1">
+              <div className="absolute right-0 top-8 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 w-48 overflow-hidden py-1">
                 <button onClick={() => setMenuOpen(false)}
                   className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors">
                   <Pencil size={13} className="text-gray-400" />Sửa tên

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import {
@@ -57,7 +57,7 @@ const STAT_CONFIGS = [
     key: 'processing',
     label: 'Đang xử lý',
     icon: Loader,
-    colorClass: 'bg-indigo-50 text-indigo-600',
+    colorClass: 'bg-[#f0f7ff] text-[#3e79f7]',
     valueKey: 'processing_campaigns' as const
   },
   {
@@ -71,9 +71,9 @@ const STAT_CONFIGS = [
 
 function StatCardSkeleton() {
   return (
-    <div className="bg-white rounded-xl border p-4 animate-pulse">
+    <div className="bg-white rounded-[10px] border p-4 animate-pulse">
       <div className="flex items-center gap-2 mb-3">
-        <div className="w-7 h-7 rounded-lg bg-gray-200" />
+        <div className="w-7 h-7 rounded-[10px] bg-gray-200" />
         <div className="h-4 w-24 bg-gray-200 rounded" />
       </div>
       <div className="h-8 w-12 bg-gray-100 rounded" />
@@ -110,10 +110,10 @@ export function ZbsCampaignStatsCards({ stats, loading = false }: ZbsCampaignSta
           const Icon = config.icon;
 
           return (
-            <div key={config.key} className="bg-white rounded-xl border p-4 hover:shadow-md transition-shadow">
+            <div key={config.key} className="bg-white rounded-[10px] border p-4 hover:shadow-md transition-shadow">
               {/* Header: Icon + Label centered */}
               <div className="flex items-center gap-2 mb-3">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${config.colorClass}`}>
+                <div className={`w-7 h-7 rounded-[10px] flex items-center justify-center flex-shrink-0 ${config.colorClass}`}>
                   <Icon className="w-4 h-4" />
                 </div>
                 <p className="text-sm text-gray-500 truncate">{config.label}</p>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+﻿import React, { useState } from 'react'
 import { Plus, Edit2, Trash2 } from 'lucide-react'
 import { Card, CardContent } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -82,7 +82,7 @@ export default function TaxManagement() {
         <CardContent className="pt-4">
           <div className="space-y-2">
             {taxes.map((tax) => (
-              <div key={tax.id} className="flex items-center justify-between px-3 py-2.5 border rounded-lg hover:bg-gray-50 transition-colors">
+              <div key={tax.id} className="flex items-center justify-between px-3 py-2.5 border rounded-[10px] hover:bg-gray-50 transition-colors">
                 <div className="flex items-center space-x-3">
                   <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-xs font-semibold text-blue-600">
                     {tax.rate}%

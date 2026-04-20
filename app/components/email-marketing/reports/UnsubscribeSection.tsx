@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { 
@@ -56,7 +56,7 @@ export function UnsubscribeSection({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border p-6 animate-pulse">
+      <div className="bg-white rounded-[10px] border p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-5 h-5 bg-gray-200 rounded" />
           <div className="h-6 bg-gray-200 rounded w-48" />
@@ -74,7 +74,7 @@ export function UnsubscribeSection({
   }
 
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <div className="bg-white rounded-[10px] border overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex items-center justify-between">
@@ -104,7 +104,7 @@ export function UnsubscribeSection({
             </h4>
             
             {trend.length === 0 ? (
-              <div className="h-[200px] flex items-center justify-center bg-gray-50 rounded-lg text-gray-500">
+              <div className="h-[200px] flex items-center justify-center bg-gray-50 rounded-[10px] text-gray-500">
                 Không có dữ liệu
               </div>
             ) : (
@@ -145,7 +145,7 @@ export function UnsubscribeSection({
                   value={search}
                   onChange={(e) => onSearchChange(e.target.value)}
                   placeholder="Tìm email..."
-                  className="pl-9 pr-4 py-1.5 text-sm border rounded-lg w-48 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="pl-9 pr-4 py-1.5 text-sm border rounded-[10px] w-48 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 />
               </div>
             </div>
@@ -153,14 +153,14 @@ export function UnsubscribeSection({
             {/* List */}
             <div className="space-y-2 max-h-[250px] overflow-y-auto">
               {unsubscribes.length === 0 ? (
-                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg">
+                <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-[10px]">
                   {search ? 'Không tìm thấy kết quả' : 'Không có lượt hủy đăng ký'}
                 </div>
               ) : (
                 unsubscribes.map((entry) => (
                   <div 
                     key={entry.id} 
-                    className="p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="p-3 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors"
                   >
                     <div className="flex items-start justify-between">
                       <div className="min-w-0 flex-1">

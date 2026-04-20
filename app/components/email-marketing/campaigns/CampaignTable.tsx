@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import {
@@ -164,7 +164,7 @@ export function CampaignTable({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
         <div className="animate-pulse p-8">
           <div className="space-y-4">
             {[1, 2, 3, 4, 5].map(i => (
@@ -183,7 +183,7 @@ export function CampaignTable({
 
   if (campaigns.length === 0) {
     return (
-      <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-12 text-center">
         <Mail className="w-12 h-12 text-gray-300 mx-auto mb-4" />
         <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có chiến dịch nào</h3>
         <p className="text-gray-500">Bắt đầu bằng cách tạo chiến dịch email mới</p>
@@ -192,10 +192,10 @@ export function CampaignTable({
   }
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+    <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
       <div className="overflow-x-auto">
         <table className="w-full">
-          <thead className="bg-gray-50 border-b border-gray-200">
+          <thead className="bg-gray-50 border-b border-[#e6ebf1]">
             <tr>
               <th className="text-left px-4 py-3 text-sm font-medium text-gray-600">
                 <button
@@ -293,7 +293,7 @@ export function CampaignTable({
                           className="fixed inset-0 z-10"
                           onClick={() => setOpenDropdown(null)}
                         />
-                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                        <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-20">
                           {actions.map((action, index) => (
                             <button
                               key={index}

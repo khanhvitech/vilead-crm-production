@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import {
@@ -93,25 +93,25 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
         <DialogContent className="max-w-4xl max-h-[90vh] p-0">
           <div className="flex flex-col h-full">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
               <h2 className="text-xl font-semibold text-gray-900">Quản lý kết nối Zalo OA</h2>
             </div>
 
             {/* Controls */}
-            <div className="px-6 py-4 border-b border-gray-200">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <label className="text-sm text-gray-600">Chọn nền tảng:</label>
                   <select
                     value={platform}
                     onChange={(e) => setPlatform(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                   >
                     <option value="zalo-oa">Zalo OA</option>
                   </select>
                 </div>
                 <Button 
-                  className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white"
+                  className="flex items-center gap-2 bg-blue-500 hover:bg-[#3e79f7] text-white"
                   onClick={() => setShowIntegrationModal(true)}
                 >
                   <Plus className="w-4 h-4" />
@@ -129,7 +129,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
                   </div>
                 )}
                 {accounts.map((account) => (
-                  <div key={account.id} className="border border-gray-200 rounded-lg p-4">
+                  <div key={account.id} className="border border-[#e6ebf1] rounded-[10px] p-4">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start gap-3 flex-1">
                         <Avatar className="w-12 h-12">
@@ -155,7 +155,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
                         <div className="flex items-center gap-2">
                           {account.status === 'connected' ? (
                             <Badge className="bg-green-100 text-green-800 flex items-center gap-1 hover:bg-green-100">
-                              <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                              <div className="w-2 h-2 rounded-full bg-[#2dc56a]"></div>
                               Đã kết nối
                             </Badge>
                           ) : (
@@ -179,14 +179,14 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
                             <Button
                               size="sm"
                               onClick={() => toggleAccountConnection(account.id)}
-                              className="bg-green-500 hover:bg-green-600 text-white text-xs h-8 px-3 border-0 rounded-md"
+                              className="bg-[#2dc56a] hover:bg-[#2dc56a] text-white text-xs h-8 px-3 border-0 rounded-md"
                             >
                               Kết nối
                             </Button>
                           )}
                           <Button
                             size="sm"
-                            className="bg-red-500 hover:bg-red-600 text-white h-8 w-8 p-0 border-0 rounded-md"
+                            className="bg-red-500 hover:bg-[#ff6b72] text-white h-8 w-8 p-0 border-0 rounded-md"
                             onClick={() => handleRemove(account.id)}
                           >
                             <X className="w-4 h-4" />
@@ -216,7 +216,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
             <div>
               <Label>Loại kết nối</Label>
               <Select value="zalo-oa">
-                <SelectTrigger className="mt-2 text-gray-700 bg-gray-50 border-gray-200">
+                <SelectTrigger className="mt-2 text-gray-700 bg-gray-50 border-[#e6ebf1]">
                   <SelectValue placeholder="Chọn loại kết nối" />
                 </SelectTrigger>
                 <SelectContent>
@@ -272,7 +272,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
           <div className="space-y-6 px-6 py-4">
             {/* Logo Section */}
             <div className="flex items-center justify-center gap-6">
-              <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
                 <span className="text-2xl font-bold text-blue-600">V</span>
               </div>
 
@@ -284,7 +284,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
             </div>
 
             {/* Warning Message */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+            <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4 text-center">
               <p className="text-sm text-gray-700">
                 Zalo OA yêu cầu bạn phải mua gói{' '}
                 <strong className="text-yellow-800">OA Nâng cao</strong> hoặc{' '}
@@ -300,7 +300,7 @@ export default function ZbsConnectionModal({ open, onClose }: ZbsConnectionModal
 
           <DialogFooter className="flex-col sm:flex-col gap-2">
             <Button
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white"
+              className="w-full bg-blue-500 hover:bg-[#3e79f7] text-white"
               onClick={() => {
                 setShowOALinkModal(false)
                 alert('Tích hợp API kết nối Zalo OA chưa được thiết lập!')

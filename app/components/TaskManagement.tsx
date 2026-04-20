@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import CreateTaskModalSimple from './CreateTaskModalSimple'
@@ -781,7 +781,7 @@ export default function TaskManagement() {
       case 'low':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -803,11 +803,11 @@ export default function TaskManagement() {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -827,13 +827,13 @@ export default function TaskManagement() {
   const getCategoryColor = (category?: string) => {
     switch (category) {
       case 'lead':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'customer':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'general':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -1168,16 +1168,16 @@ export default function TaskManagement() {
           <div className="flex flex-wrap gap-2">
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
+            className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo công việc</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors text-sm">
             <Download className="w-4 h-4" />
             <span>Xuất Excel</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <button className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm">
             <FileText className="w-4 h-4" />
             <span>Xuất PDF</span>
           </button>
@@ -1187,9 +1187,9 @@ export default function TaskManagement() {
       {/* Detailed Priority Insights */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Priority Tasks Analysis */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border border-red-200 p-6">
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-[10px] border border-red-200 p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-lg">
+            <div className="p-2 bg-red-100 rounded-[10px]">
               <Target className="w-5 h-5 text-red-600" />
             </div>
             <div>
@@ -1199,7 +1199,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-red-100">
+            <div className="bg-white rounded-[10px] p-4 border border-red-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Quá hạn</span>
                 <span className="text-lg font-bold text-red-600">
@@ -1212,7 +1212,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
+            <div className="bg-white rounded-[10px] p-4 border border-orange-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Hết hạn hôm nay</span>
                 <span className="text-lg font-bold text-orange-600">
@@ -1228,7 +1228,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-yellow-100">
+            <div className="bg-white rounded-[10px] p-4 border border-yellow-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Hết hạn ngày mai</span>
                 <span className="text-lg font-bold text-yellow-600">
@@ -1247,9 +1247,9 @@ export default function TaskManagement() {
         </div>
 
         {/* Customer Related Tasks */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[10px] border border-[#c7d9fd] p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-[10px]">
               <User className="w-5 h-5 text-blue-600" />
             </div>
             <div>
@@ -1259,7 +1259,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
+            <div className="bg-white rounded-[10px] p-4 border border-blue-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tổng CV khách hàng</span>
                 <span className="text-lg font-bold text-blue-600">
@@ -1272,7 +1272,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <div className="bg-white rounded-[10px] p-4 border border-purple-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">KH ưu tiên cao</span>
                 <span className="text-lg font-bold text-purple-600">
@@ -1284,7 +1284,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-green-100">
+            <div className="bg-white rounded-[10px] p-4 border border-green-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Follow-up cần làm</span>
                 <span className="text-lg font-bold text-green-600">
@@ -1303,9 +1303,9 @@ export default function TaskManagement() {
         </div>
 
         {/* Lead Related Tasks */}
-        <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border border-teal-200 p-6">
+        <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-[10px] border border-teal-200 p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-teal-100 rounded-lg">
+            <div className="p-2 bg-teal-100 rounded-[10px]">
               <Users className="w-5 h-5 text-teal-600" />
             </div>
             <div>
@@ -1315,7 +1315,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-teal-100">
+            <div className="bg-white rounded-[10px] p-4 border border-teal-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tổng CV leads</span>
                 <span className="text-lg font-bold text-teal-600">
@@ -1328,7 +1328,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
+            <div className="bg-white rounded-[10px] p-4 border border-orange-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Leads nóng</span>
                 <span className="text-lg font-bold text-orange-600">
@@ -1343,7 +1343,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
+            <div className="bg-white rounded-[10px] p-4 border border-blue-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tư vấn & Demo</span>
                 <span className="text-lg font-bold text-blue-600">
@@ -1368,10 +1368,10 @@ export default function TaskManagement() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Type Distribution Chart - Split into 2 horizontal tables */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-[10px]">
                 <PieChart className="w-5 h-5 text-blue-600" />
               </div>
               <div>
@@ -1388,7 +1388,7 @@ export default function TaskManagement() {
               <h4 className="text-sm font-medium text-gray-700 mb-3">Theo loại công việc</h4>
               <div className="space-y-3">
                 {/* Lead & Customer Tasks */}
-                <div className="bg-blue-50 rounded-lg p-3">
+                <div className="bg-blue-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
@@ -1401,10 +1401,10 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Order Tasks */}
-                <div className="bg-green-50 rounded-lg p-3">
+                <div className="bg-green-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <div className="w-4 h-4 bg-[#2dc56a] rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Công việc chung</span>
                     </div>
                     <span className="text-lg font-bold text-green-600 min-w-[2rem]">
@@ -1414,7 +1414,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* General Tasks */}
-                <div className="bg-purple-50 rounded-lg p-3">
+                <div className="bg-purple-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
@@ -1433,7 +1433,7 @@ export default function TaskManagement() {
               <h4 className="text-sm font-medium text-gray-700 mb-3">Theo mức độ ưu tiên</h4>
               <div className="space-y-3">
                 {/* High Priority */}
-                <div className="bg-red-50 rounded-lg p-3">
+                <div className="bg-red-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-red-500 rounded-full"></div>
@@ -1446,7 +1446,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Medium Priority */}
-                <div className="bg-yellow-50 rounded-lg p-3">
+                <div className="bg-yellow-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
@@ -1459,7 +1459,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Low Priority */}
-                <div className="bg-gray-50 rounded-lg p-3">
+                <div className="bg-gray-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
@@ -1476,10 +1476,10 @@ export default function TaskManagement() {
         </div>
 
         {/* Recent Tasks */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-green-100 rounded-lg">
+              <div className="p-2 bg-green-100 rounded-[10px]">
                 <Clock className="w-5 h-5 text-green-600" />
               </div>
               <div>
@@ -1713,7 +1713,7 @@ export default function TaskManagement() {
     return (
       <div className="h-full">
         {/* Lark-style Header */}
-        <div className="rounded-lg border border-gray-200 mb-6">
+        <div className="rounded-[10px] border border-[#e6ebf1] mb-6">
         <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
@@ -1732,7 +1732,7 @@ export default function TaskManagement() {
                     : currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
                   }
                 </h1>
-                <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+                <div className="flex items-center space-x-1 bg-gray-50 rounded-[10px] p-1">
                   <button
                     onClick={() => navigateMonth('prev')}
                     className="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200"
@@ -1761,7 +1761,7 @@ export default function TaskManagement() {
               {/* Right section - Actions */}
               <div className="flex items-center space-x-3">
                 {/* View toggle */}
-                <div className="flex items-center bg-gray-50 rounded-lg p-1">
+                <div className="flex items-center bg-gray-50 rounded-[10px] p-1">
                   <button
                     onClick={() => setCalendarView('day')}
                     className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
@@ -1800,7 +1800,7 @@ export default function TaskManagement() {
                     setSelectedEventDate(new Date())
                     setShowCreateEventModal(true)
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-all duration-200 font-medium shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tạo sự kiện</span>
@@ -1859,7 +1859,7 @@ export default function TaskManagement() {
                               setSelectedTask(task)
                               setShowDetailModal(true)
                             }}
-                            className={`p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm ${
+                            className={`p-3 rounded-[10px] border-l-4 cursor-pointer transition-all hover:shadow-sm ${
                               task.priority === 'high' 
                                 ? 'bg-red-50 border-red-400 text-red-700 hover:bg-red-100' 
                                 : task.priority === 'medium'
@@ -1895,7 +1895,7 @@ export default function TaskManagement() {
                         {hourEvents.map(event => (
                           <div
                             key={`event-${event.id}`}
-                            className="p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm"
+                            className="p-3 rounded-[10px] border-l-4 cursor-pointer transition-all hover:shadow-sm"
                             style={{ 
                               backgroundColor: event.color + '15', 
                               borderLeftColor: event.color,
@@ -2042,7 +2042,7 @@ export default function TaskManagement() {
         ) : calendarView === 'month' ? (
           <div className="flex-1">
             {/* Calendar Grid */}
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
             <div>
               {/* Weekday headers - Lark style */}
               <div className="grid grid-cols-7 border-b border-gray-100">
@@ -2081,7 +2081,7 @@ export default function TaskManagement() {
                         <div className="flex items-center space-x-2">
                           <div className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-medium transition-colors ${
                             dayIsToday
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-[#3e79f7] text-white'
                               : !dayIsCurrentMonth
                               ? 'text-gray-400'
                               : holiday
@@ -2217,7 +2217,7 @@ export default function TaskManagement() {
                 <button
                   key={template.id}
                   onClick={() => handleQuickEvent(template, new Date())}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                   style={{ borderLeftColor: template.color, borderLeftWidth: '3px' }}
                 >
                   {template.type === 'meeting' && <Users className="w-4 h-4" />}
@@ -2235,7 +2235,7 @@ export default function TaskManagement() {
                   type="checkbox"
                   checked={showLunar}
                   onChange={(e) => setShowLunar(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <Moon className="w-4 h-4" />
                 <span>Âm lịch</span>
@@ -2245,7 +2245,7 @@ export default function TaskManagement() {
                   type="checkbox"
                   checked={showHolidays}
                   onChange={(e) => setShowHolidays(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <TreePine className="w-4 h-4" />
                 <span>Lễ tết</span>
@@ -2260,10 +2260,10 @@ export default function TaskManagement() {
   const renderTasks = () => (
     <div className="space-y-4">
       {/* Statistics Cards */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'total' 
               ? 'bg-gradient-to-br from-blue-700 to-blue-500 transform scale-105 ring-4 ring-blue-300' 
               : 'bg-gradient-to-br from-blue-600 to-blue-400'
@@ -2283,7 +2283,7 @@ export default function TaskManagement() {
         </div>
 
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'pending' 
               ? 'bg-gradient-to-br from-gray-700 to-gray-500 transform scale-105 ring-4 ring-gray-300' 
               : 'bg-gradient-to-br from-gray-600 to-gray-400'
@@ -2303,7 +2303,7 @@ export default function TaskManagement() {
         </div>
 
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'in_progress' 
               ? 'bg-gradient-to-br from-yellow-700 to-yellow-500 transform scale-105 ring-4 ring-yellow-300' 
               : 'bg-gradient-to-br from-yellow-600 to-yellow-400'
@@ -2323,7 +2323,7 @@ export default function TaskManagement() {
         </div>
 
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'completed' 
               ? 'bg-gradient-to-br from-green-700 to-green-500 transform scale-105 ring-4 ring-green-300' 
               : 'bg-gradient-to-br from-green-600 to-green-400'
@@ -2343,7 +2343,7 @@ export default function TaskManagement() {
         </div>
 
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'overdue' 
               ? 'bg-gradient-to-br from-red-700 to-red-500 transform scale-105 ring-4 ring-red-300' 
               : 'bg-gradient-to-br from-red-600 to-red-400'
@@ -2363,7 +2363,7 @@ export default function TaskManagement() {
         </div>
 
         <div 
-          className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'urgent_priority' 
               ? 'bg-gradient-to-br from-orange-700 to-orange-500 transform scale-105 ring-4 ring-orange-300' 
               : 'bg-gradient-to-br from-orange-600 to-orange-400'
@@ -2390,11 +2390,11 @@ export default function TaskManagement() {
       </div>
 
       {/* Header and filters */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           <div className="flex items-center gap-4">
             {/* View Toggle */}
-            <div className="flex items-center bg-gray-100 rounded-lg p-1">
+            <div className="flex items-center bg-gray-100 rounded-[10px] p-1">
               <button
                 onClick={() => setTaskView('table')}
                 className={`flex items-center space-x-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
@@ -2429,7 +2429,7 @@ export default function TaskManagement() {
                 placeholder="Tìm kiếm công việc..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
               />
             </div>
             
@@ -2438,7 +2438,7 @@ export default function TaskManagement() {
               <select 
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
               >
                 <option value="">Tất cả trạng thái</option>
                 <option value="pending">Chưa làm</option>
@@ -2449,7 +2449,7 @@ export default function TaskManagement() {
               <select 
                 value={priorityFilter}
                 onChange={(e) => setPriorityFilter(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
               >
                 <option value="">Tất cả ưu tiên</option>
                 <option value="high">Cao</option>
@@ -2460,7 +2460,7 @@ export default function TaskManagement() {
               <select 
                 value={relatedTypeFilter}
                 onChange={(e) => setRelatedTypeFilter(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
               >
                 <option value="">Tất cả phân loại</option>
                 <option value="lead">Leads</option>
@@ -2471,7 +2471,7 @@ export default function TaskManagement() {
               <select 
                 value={assigneeFilter}
                 onChange={(e) => setAssigneeFilter(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
               >
                 <option value="">Tất cả nhân viên</option>
                 {employees.map(emp => (
@@ -2480,7 +2480,7 @@ export default function TaskManagement() {
               </select>
               
               {/* Date Range Filter */}
-              <div className="flex items-center gap-2 border border-gray-300 rounded px-3 py-2 bg-white">
+              <div className="flex items-center gap-2 border border-[#e6ebf1] rounded px-3 py-2 bg-white">
                 <Calendar className="w-4 h-4 text-gray-400" />
                 <select 
                   value={dateRangeFilter.preset}
@@ -2512,7 +2512,7 @@ export default function TaskManagement() {
                       ...prev,
                       startDate: e.target.value
                     }))}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
                     placeholder="Từ ngày"
                   />
                   <input
@@ -2522,7 +2522,7 @@ export default function TaskManagement() {
                       ...prev,
                       endDate: e.target.value
                     }))}
-                    className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
                     placeholder="Đến ngày"
                   />
                 </>
@@ -2530,7 +2530,7 @@ export default function TaskManagement() {
               
               <button 
                 onClick={() => setShowCreateModal(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
+                className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Tạo công việc mới</span>
@@ -2542,10 +2542,10 @@ export default function TaskManagement() {
 
       {/* Tasks Content - Table or Kanban */}
       {taskView === 'table' ? (
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
           {/* Selection Bar */}
           {selectedTasks.length > 0 && (
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <span className="text-sm font-medium text-blue-900">
@@ -2568,7 +2568,7 @@ export default function TaskManagement() {
                       ))
                       setSelectedTasks([])
                     }}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                   >
                     <CheckCircle className="w-4 h-4" />
                     <span>Đánh dấu đã làm</span>
@@ -2580,7 +2580,7 @@ export default function TaskManagement() {
                         setSelectedTasks([])
                       }
                     }}
-                    className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                     <span>Xóa công việc</span>
@@ -2595,14 +2595,14 @@ export default function TaskManagement() {
             <span>Hiển thị {displayTasks.length} trong tổng {tasks.length} công việc</span>
           </div>
 
-          <div className="overflow-x-auto rounded-lg border border-gray-200">
+          <div className="overflow-x-auto rounded-[10px] border border-[#e6ebf1]">
             <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
                 <th className="px-4 py-3 text-left">
                   <input
                     type="checkbox"
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] focus:ring-2"
                     checked={selectedTasks.length === displayTasks.length && displayTasks.length > 0}
                     onChange={(e) => {
                       if (e.target.checked) {
@@ -2675,7 +2675,7 @@ export default function TaskManagement() {
                     <td className="px-4 py-4">
                       <input
                         type="checkbox"
-                        className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 focus:ring-2"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] focus:ring-2"
                         checked={selectedTasks.includes(task.id)}
                         onChange={(e) => {
                           if (e.target.checked) {
@@ -2765,7 +2765,7 @@ export default function TaskManagement() {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-1">
                           {task.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                            <span key={tag} className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 border border-[#c7d9fd]">
                               {tag}
                             </span>
                           ))}
@@ -2801,7 +2801,7 @@ export default function TaskManagement() {
                                 className="fixed inset-0 z-[999]" 
                                 onClick={() => setOpenDropdownTaskId(null)}
                               />
-                              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-[1000] py-2 text-left">
+                              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] z-[1000] py-2 text-left">
                                 {/* Thông tin Section */}
                                 <div className="px-3 py-1.5">
                                   <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
@@ -2864,11 +2864,11 @@ export default function TaskManagement() {
         </div>
       ) : (
         /* Kanban Board */
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Chưa làm Column */}
             <div 
-              className={`bg-slate-50 rounded-lg p-4 transition-colors ${
+              className={`bg-slate-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'pending' ? 'bg-slate-100 ring-2 ring-gray-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'pending')}
@@ -2894,7 +2894,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-gray-300'
                       } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
@@ -2959,7 +2959,7 @@ export default function TaskManagement() {
 
             {/* Đang làm Column */}
             <div 
-              className={`bg-blue-50 rounded-lg p-4 transition-colors ${
+              className={`bg-blue-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'in_progress' ? 'bg-blue-100 ring-2 ring-blue-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'in_progress')}
@@ -2971,7 +2971,7 @@ export default function TaskManagement() {
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
                   Đang làm
                 </h3>
-                <span className="bg-blue-200 text-blue-700 text-xs px-2 py-1 rounded-full">
+                <span className="bg-blue-200 text-[#3e79f7] text-xs px-2 py-1 rounded-full">
                   {displayTasks.filter(task => task.status === 'in_progress').length}
                 </span>
               </div>
@@ -2985,7 +2985,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-blue-300'
                       } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
@@ -3016,7 +3016,7 @@ export default function TaskManagement() {
                         {assignee && (
                           <div className="flex items-center space-x-2">
                             <div className="w-6 h-6 bg-blue-300 rounded-full flex items-center justify-center">
-                              <span className="text-xs text-blue-700">{assignee.name.charAt(0)}</span>
+                              <span className="text-xs text-[#3e79f7]">{assignee.name.charAt(0)}</span>
                             </div>
                             <span className="text-xs text-gray-600">{assignee.name}</span>
                           </div>
@@ -3050,7 +3050,7 @@ export default function TaskManagement() {
 
             {/* Hoàn tất Column */}
             <div 
-              className={`bg-green-50 rounded-lg p-4 transition-colors ${
+              className={`bg-green-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'completed' ? 'bg-green-100 ring-2 ring-green-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'completed')}
@@ -3059,7 +3059,7 @@ export default function TaskManagement() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <div className="w-3 h-3 bg-[#2dc56a] rounded-full mr-2"></div>
                   Hoàn tất
                 </h3>
                 <span className="bg-green-200 text-green-700 text-xs px-2 py-1 rounded-full">
@@ -3075,7 +3075,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-all cursor-move opacity-90 ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-all cursor-move opacity-90 ${
                         draggedTask?.id === task.id ? 'opacity-30 transform scale-95' : ''
                       }`}
                       onClick={() => {
@@ -3152,14 +3152,14 @@ export default function TaskManagement() {
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[#e6ebf1]">
         <nav className="flex space-x-8 px-6">
           <button
             onClick={() => setActiveTab('tasks')}
             className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'tasks'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
             }`}
           >
             <span className={activeTab === 'tasks' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
@@ -3172,7 +3172,7 @@ export default function TaskManagement() {
             className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'calendar'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
             }`}
           >
             <span className={activeTab === 'calendar' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
@@ -3191,8 +3191,8 @@ export default function TaskManagement() {
       {/* Create View Modal */}
       {showCreateViewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Tạo chế độ xem mới</h3>
               <button
                 onClick={() => setShowCreateViewModal(false)}
@@ -3212,7 +3212,7 @@ export default function TaskManagement() {
                   value={newViewForm.name}
                   onChange={(e) => setNewViewForm(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ví dụ: Công việc urgent của tôi"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
 
@@ -3225,7 +3225,7 @@ export default function TaskManagement() {
                   value={newViewForm.description}
                   onChange={(e) => setNewViewForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Mô tả ngắn gọn về chế độ xem này"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
 
@@ -3242,7 +3242,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, status: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="pending">Chờ xử lý</option>
@@ -3259,7 +3259,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, priority: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="high">Cao</option>
@@ -3276,7 +3276,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, relatedType: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="leads">Leads</option>
@@ -3306,7 +3306,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-4 border-t border-[#e6ebf1]">
               <button
                 onClick={() => {
                   setShowCreateViewModal(false)
@@ -3368,7 +3368,7 @@ export default function TaskManagement() {
                   }
                 }}
                 disabled={!newViewForm.name.trim()}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Tạo chế độ xem
               </button>

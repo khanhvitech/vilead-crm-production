@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import { Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Edit, Trash2, X, Download, CheckSquare, Square, Users, Tag, Send, UserPlus } from 'lucide-react'
@@ -218,9 +218,9 @@ export default function LeadsManagement() {
       case 'Google':
         return 'bg-red-500'
       case 'Zalo':
-        return 'bg-blue-600'
+        return 'bg-[#3e79f7]'
       case 'Website':
-        return 'bg-green-500'
+        return 'bg-[#2dc56a]'
       case 'Referral':
         return 'bg-purple-500'
       default:
@@ -546,14 +546,14 @@ export default function LeadsManagement() {
             <div className="flex items-center space-x-2">
               <button 
                 onClick={() => handleExportLeads('csv')}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-200 rounded-lg hover:bg-green-200 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-200 rounded-[10px] hover:bg-green-200 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>CSV</span>
               </button>
               <button 
                 onClick={() => handleExportLeads('excel')}
-                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-200 rounded-lg hover:bg-blue-200 transition-colors"
+                className="flex items-center space-x-2 px-3 py-2 text-sm font-medium text-[#3e79f7] bg-blue-100 border border-[#c7d9fd] rounded-[10px] hover:bg-blue-200 transition-colors"
               >
                 <Download className="w-4 h-4" />
                 <span>Excel</span>
@@ -570,10 +570,10 @@ export default function LeadsManagement() {
         </div>
       </div>      {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <div className="w-6 h-6 bg-blue-600 rounded"></div>
+            <div className="p-2 bg-blue-100 rounded-[10px]">
+              <div className="w-6 h-6 bg-[#3e79f7] rounded"></div>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Tổng Leads</p>
@@ -582,10 +582,10 @@ export default function LeadsManagement() {
           </div>
         </div>
         
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <div className="w-6 h-6 bg-green-600 rounded"></div>
+            <div className="p-2 bg-green-100 rounded-[10px]">
+              <div className="w-6 h-6 bg-[#2dc56a] rounded"></div>
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Leads mới</p>
@@ -594,9 +594,9 @@ export default function LeadsManagement() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+            <div className="p-2 bg-yellow-100 rounded-[10px]">
               <div className="w-6 h-6 bg-yellow-600 rounded"></div>
             </div>
             <div className="ml-4">
@@ -606,9 +606,9 @@ export default function LeadsManagement() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center">
-            <div className="p-2 bg-purple-100 rounded-lg">
+            <div className="p-2 bg-purple-100 rounded-[10px]">
               <div className="w-6 h-6 bg-purple-600 rounded"></div>
             </div>
             <div className="ml-4">
@@ -627,14 +627,14 @@ export default function LeadsManagement() {
               placeholder="Tìm kiếm leads..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 w-80 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              className="pl-10 pr-4 py-2 w-80 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
             />
           </div>
           
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
           >
             <option value="all">Tất cả trạng thái</option>
             {uniqueStatuses.map(status => (
@@ -645,7 +645,7 @@ export default function LeadsManagement() {
           <select
             value={stageFilter}
             onChange={(e) => setStageFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
           >
             <option value="all">Tất cả giai đoạn</option>
             {uniqueStages.map(stage => (
@@ -656,7 +656,7 @@ export default function LeadsManagement() {
           <select
             value={regionFilter}
             onChange={(e) => setRegionFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
           >
             <option value="all">Tất cả khu vực</option>
             {uniqueRegions.map(region => (
@@ -672,7 +672,7 @@ export default function LeadsManagement() {
                 e.target.value = '' // Reset dropdown
               }
             }}
-            className="px-3 py-2 border border-orange-300 bg-orange-50 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-orange-700"
+            className="px-3 py-2 border border-orange-300 bg-orange-50 rounded-[10px] focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none text-orange-700"
             defaultValue=""
           >
             <option value="">🎯 Chọn nhanh...</option>
@@ -709,7 +709,7 @@ export default function LeadsManagement() {
 
       {/* Bulk Actions Toolbar */}
       {selectedLeadIds.length > 0 && (
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-lg p-4 shadow-sm mb-4">
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-[#c7d9fd] rounded-[10px] p-4 shadow-sm mb-4">
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center space-x-4">
               <div className="text-sm font-bold text-blue-900 bg-blue-100 px-3 py-1 rounded-full">
@@ -720,42 +720,42 @@ export default function LeadsManagement() {
               <div className="flex items-center space-x-2 flex-wrap">
                 <button
                   onClick={() => handleBulkOperation('change-status')}
-                  className="px-4 py-2 text-sm font-medium text-blue-700 bg-blue-100 border border-blue-300 rounded-lg hover:bg-blue-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[#3e79f7] bg-blue-100 border border-blue-300 rounded-[10px] hover:bg-blue-200 transition-colors"
                 >
                   📊 Đổi trạng thái
                 </button>
                 
                 <button
                   onClick={() => handleBulkOperation('assign')}
-                  className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-lg hover:bg-green-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-green-700 bg-green-100 border border-green-300 rounded-[10px] hover:bg-green-200 transition-colors"
                 >
                   👤 Phân công
                 </button>
                 
                 <button
                   onClick={() => handleBulkOperation('add-tag')}
-                  className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 border border-purple-300 rounded-lg hover:bg-purple-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-purple-700 bg-purple-100 border border-purple-300 rounded-[10px] hover:bg-purple-200 transition-colors"
                 >
                   🏷️ Thêm tag
                 </button>
                 
                 <button
                   onClick={() => handleBulkOperation('mark-contacted')}
-                  className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 border border-yellow-300 rounded-lg hover:bg-yellow-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-yellow-700 bg-yellow-100 border border-yellow-300 rounded-[10px] hover:bg-yellow-200 transition-colors"
                 >
                   ✅ Đã liên hệ
                 </button>
                 
                 <button
                   onClick={() => handleBulkOperation('send-email')}
-                  className="px-4 py-2 text-sm font-medium text-indigo-700 bg-indigo-100 border border-indigo-300 rounded-lg hover:bg-indigo-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-[#3e79f7] bg-[#f0f7ff] border border-indigo-300 rounded-[10px] hover:bg-indigo-200 transition-colors"
                 >
                   📧 Gửi email
                 </button>
                 
                 <button
                   onClick={() => handleBulkOperation('create-tasks')}
-                  className="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-100 border border-teal-300 rounded-lg hover:bg-teal-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-teal-700 bg-teal-100 border border-teal-300 rounded-[10px] hover:bg-teal-200 transition-colors"
                 >
                   📋 Tạo task
                 </button>
@@ -765,14 +765,14 @@ export default function LeadsManagement() {
               <div className="relative">
                 <button
                   onClick={() => setShowQuickActionsDropdown(!showQuickActionsDropdown)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-1"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors flex items-center space-x-1"
                 >
                   <MoreVertical className="w-4 h-4" />
                   <span>Thêm...</span>
                 </button>
                 
                 {showQuickActionsDropdown && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10">
+                  <div className="absolute top-full left-0 mt-1 w-48 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-10">
                     <div className="py-1">
                       <button
                         onClick={() => {
@@ -811,7 +811,7 @@ export default function LeadsManagement() {
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => setSelectedLeadIds([])}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
               >
                 ❌ Bỏ chọn tất cả
               </button>
@@ -821,7 +821,7 @@ export default function LeadsManagement() {
       )}
 
       {/* Leads Table */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1]">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -959,7 +959,7 @@ export default function LeadsManagement() {
       {/* Bulk Action Modal */}
       {showBulkActionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-md w-full mx-4">
+          <div className="bg-white rounded-[10px] max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-lg font-bold text-gray-900">
                 {bulkActionType === 'change-status' && '📊 Thay đổi trạng thái'}
@@ -988,7 +988,7 @@ export default function LeadsManagement() {
                   <select
                     value={bulkActionData}
                     onChange={(e) => setBulkActionData(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="">-- Chọn trạng thái --</option>
                     <option value="new">🆕 Mới</option>
@@ -1012,7 +1012,7 @@ export default function LeadsManagement() {
                     value={bulkActionData}
                     onChange={(e) => setBulkActionData(e.target.value)}
                     placeholder="Nhập tên người phụ trách..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   />
                 </div>
               )}
@@ -1027,7 +1027,7 @@ export default function LeadsManagement() {
                     value={bulkActionData}
                     onChange={(e) => setBulkActionData(e.target.value)}
                     placeholder="Nhập tag mới..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   />
                 </div>
               )}
@@ -1042,7 +1042,7 @@ export default function LeadsManagement() {
                     value={bulkActionData}
                     onChange={(e) => setBulkActionData(e.target.value)}
                     placeholder="Nhập tiêu đề công việc..."
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   />
                 </div>
               )}
@@ -1050,14 +1050,14 @@ export default function LeadsManagement() {
               <div className="flex justify-end space-x-3 pt-4">
                 <button
                   onClick={() => setShowBulkActionModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={() => executeBulkAction(bulkActionType, bulkActionData)}
                   disabled={!bulkActionData.trim()}
-                  className="px-4 py-2 text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   Xác nhận
                 </button>
@@ -1070,7 +1070,7 @@ export default function LeadsManagement() {
       {/* Lead Detail Modal */}
       {isDetailModalOpen && selectedLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
+          <div className="bg-white rounded-[10px] max-w-4xl w-full max-h-[90vh] overflow-y-auto m-4">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold text-gray-900">Chi tiết Lead</h2>
               <button
@@ -1151,13 +1151,13 @@ export default function LeadsManagement() {
               {/* Nội dung yêu cầu */}
               <div>
                 <label className="text-sm font-medium text-gray-600">Nội dung yêu cầu</label>
-                <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">{selectedLead.content}</p>
+                <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-[10px]">{selectedLead.content}</p>
               </div>
 
               {/* Ghi chú */}
               <div>
                 <label className="text-sm font-medium text-gray-600">Ghi chú</label>
-                <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-lg">{selectedLead.notes}</p>
+                <p className="text-gray-900 mt-1 p-3 bg-gray-50 rounded-[10px]">{selectedLead.notes}</p>
               </div>
 
               {/* Tags */}
@@ -1192,11 +1192,11 @@ export default function LeadsManagement() {
             <div className="flex justify-end gap-3 p-6 border-t bg-gray-50">
               <button
                 onClick={() => setIsDetailModalOpen(false)}
-                className="px-4 py-2 text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-gray-600 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Đóng
               </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              <button className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors">
                 Chỉnh sửa
               </button>
             </div>

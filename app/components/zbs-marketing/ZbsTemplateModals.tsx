@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, MessageSquare, Phone, Link as LinkIcon, AlertTriangle, AlertCircle, Plus } from 'lucide-react';
@@ -37,7 +37,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col max-h-[90vh] overflow-hidden z-10">
+      <div className="relative w-full max-w-4xl bg-white rounded-[10px] shadow-2xl flex flex-col max-h-[90vh] overflow-hidden z-10">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">Chi tiết mẫu ZNS</h2>
@@ -119,7 +119,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
 
           {/* Right: Preview */}
           <div className="w-2/5 p-6 bg-gray-50/50 border-l border-gray-100 flex items-start justify-center overflow-y-auto">
-            <div className="w-full max-w-[320px] bg-white rounded-xl shadow-sm border border-gray-200 p-5 mt-4">
+            <div className="w-full max-w-[320px] bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-5 mt-4">
               <div className="flex items-center gap-2 mb-4">
                 <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center overflow-hidden border border-gray-100">
                    <div className="text-blue-600 font-bold text-[10px]">OA</div>
@@ -137,7 +137,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
               {template.buttons && template.buttons.length > 0 && (
                 <div className="mt-5 space-y-2">
                   {template.buttons.map((btn, idx) => (
-                    <button key={idx} className="w-full py-2.5 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                    <button key={idx} className="w-full py-2.5 px-4 bg-[#3e79f7] text-white font-medium text-sm rounded-[10px] hover:bg-[#699dff] transition-colors">
                       {btn.label}
                     </button>
                   ))}
@@ -145,7 +145,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
               )}
               {(!template.buttons || template.buttons.length === 0) && (
                 <div className="mt-5">
-                   <button className="w-full py-2.5 px-4 bg-blue-600 text-white font-medium text-sm rounded-lg hover:bg-blue-700 transition-colors">
+                   <button className="w-full py-2.5 px-4 bg-[#3e79f7] text-white font-medium text-sm rounded-[10px] hover:bg-[#699dff] transition-colors">
                       TRA CỨU
                     </button>
                 </div>
@@ -158,7 +158,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
         <div className="flex items-center justify-end px-6 py-4 border-t border-gray-100 gap-3 shrink-0 bg-white">
           <button
             onClick={onClose}
-            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
           >
             Đóng
           </button>
@@ -170,7 +170,7 @@ export function ZbsPreviewModal({ open, onClose, template, onCreateCampaign, sho
                   onCreateCampaign(template);
                 }
               }}
-              className="px-6 py-2.5 text-sm font-medium text-white bg-green-500 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2 shadow-sm"
+              className="px-6 py-2.5 text-sm font-medium text-white bg-[#2dc56a] rounded-[10px] hover:bg-[#2dc56a] transition-colors flex items-center gap-2 shadow-sm"
             >
               Tạo chiến dịch <Plus className="w-4 h-4" />
             </button>
@@ -218,7 +218,7 @@ export function ZbsDeleteTemplateModal({ open, onClose, template, onConfirm }: Z
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center gap-4 mb-4">
           <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
             <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -229,7 +229,7 @@ export function ZbsDeleteTemplateModal({ open, onClose, template, onConfirm }: Z
           </div>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-6 flex flex-col gap-1">
+        <div className="bg-gray-50 p-4 rounded-[10px] border border-[#e6ebf1] mb-6 flex flex-col gap-1">
           <div className="flex justify-between items-center">
             <span className="text-sm font-medium text-gray-700 truncate pr-4">{template.name}</span>
             <span className="text-xs px-2 py-0.5 bg-gray-200 text-gray-600 rounded">
@@ -246,13 +246,13 @@ export function ZbsDeleteTemplateModal({ open, onClose, template, onConfirm }: Z
 
         <div className="flex items-center justify-end gap-3">
           <button
-            className="px-4 py-2 font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+            className="px-4 py-2 font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
             onClick={onClose}
           >
             Hủy bỏ
           </button>
           <button
-            className="px-4 py-2 font-medium text-white bg-red-600 border border-transparent rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 font-medium text-white bg-[#ff6b72] border border-transparent rounded-[10px] hover:bg-[#d9505c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             onClick={handleDelete}
             disabled={loading}
           >

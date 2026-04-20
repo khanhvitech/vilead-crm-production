@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { 
@@ -113,17 +113,17 @@ export function ZbsTemplateEditorModal({
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-gray-50 flex flex-col">
       {/* Header */}
-      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-white shadow-sm">
+      <div className="flex-shrink-0 flex items-center justify-between px-6 py-4 border-b border-[#e6ebf1] bg-white shadow-sm">
         <div className="flex items-center gap-4">
           <button
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
             onClick={onClose}
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
           <span className="font-medium text-lg text-gray-900">{getTitle()}</span>
           {(mode === 'edit' || mode === 'clone') && template?.status === 'approved' && (
-            <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-700">
+            <span className="ml-2 px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-[#3e79f7]">
               Approved
             </span>
           )}
@@ -131,7 +131,7 @@ export function ZbsTemplateEditorModal({
 
         <div className="flex items-center gap-3">
           <button
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-medium hover:bg-[#699dff] transition-colors disabled:opacity-50"
             onClick={handleSave}
             disabled={saving}
           >
@@ -139,7 +139,7 @@ export function ZbsTemplateEditorModal({
             {saving ? 'Đang lưu...' : 'Lưu và Gửi duyệt'}
           </button>
           <button
-            className="p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
             onClick={onClose}
           >
             <X className="w-5 h-5" />
@@ -153,7 +153,7 @@ export function ZbsTemplateEditorModal({
           
           {/* Left: Input Config */}
           <div className="space-y-6">
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+            <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm space-y-4">
               <h3 className="font-semibold text-gray-900 mb-2">Thông tin cơ bản</h3>
               
               <div>
@@ -163,7 +163,7 @@ export function ZbsTemplateEditorModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Nhập tên mẫu..."
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
 
@@ -172,7 +172,7 @@ export function ZbsTemplateEditorModal({
                 <select
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="Chăm sóc">Chăm sóc khách hàng</option>
                   <option value="Giao dịch">Giao dịch</option>
@@ -183,7 +183,7 @@ export function ZbsTemplateEditorModal({
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+            <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm space-y-4">
               <div className="flex justify-between items-end mb-2">
                 <h3 className="font-semibold text-gray-900">Nội dung tin nhắn</h3>
               </div>
@@ -205,20 +205,20 @@ export function ZbsTemplateEditorModal({
                 onChange={(e) => setContent(e.target.value)}
                 rows={8}
                 placeholder="Nhập nội dung tin nhắn. Sử dụng {{ten_bien}} để cá nhân hóa..."
-                className="w-full p-4 font-mono text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none shadow-inner bg-gray-50 text-gray-800"
+                className="w-full p-4 font-mono text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none shadow-inner bg-gray-50 text-gray-800"
               />
               <p className="text-xs text-gray-500 text-right">
                 {content.length} ký tự
               </p>
             </div>
 
-            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-4">
+            <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm space-y-4">
               <div className="flex justify-between items-center mb-2">
                 <h3 className="font-semibold text-gray-900">Nút Bấm CTA (Tối đa 2)</h3>
                 {buttons.length < 2 && (
                   <button 
                     onClick={() => setButtons([...buttons, { type: 'web', label: 'Xem chi tiết', value: 'https://' }])}
-                    className="text-sm font-medium text-blue-600 hover:text-blue-700 flex items-center gap-1"
+                    className="text-sm font-medium text-blue-600 hover:text-[#3e79f7] flex items-center gap-1"
                   >
                     <Plus className="w-4 h-4" /> Thêm nút
                   </button>
@@ -226,7 +226,7 @@ export function ZbsTemplateEditorModal({
               </div>
 
               {buttons.map((btn, index) => (
-                <div key={index} className="flex flex-col gap-3 p-4 border border-gray-200 rounded-lg bg-gray-50 relative group">
+                <div key={index} className="flex flex-col gap-3 p-4 border border-[#e6ebf1] rounded-[10px] bg-gray-50 relative group">
                   <button 
                     onClick={() => setButtons(buttons.filter((_, i) => i !== index))}
                     className="absolute top-2 right-2 p-1 text-gray-400 hover:text-red-500 rounded"
@@ -243,7 +243,7 @@ export function ZbsTemplateEditorModal({
                           newBtns[index].type = e.target.value as any;
                           setButtons(newBtns);
                         }}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                        className="w-full px-3 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px]"
                       >
                         <option value="web">Mở Website</option>
                         <option value="phone">Gọi điện thoại</option>
@@ -259,7 +259,7 @@ export function ZbsTemplateEditorModal({
                           newBtns[index].label = e.target.value;
                           setButtons(newBtns);
                         }}
-                        className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                        className="w-full px-3 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px]"
                       />
                     </div>
                   </div>
@@ -275,7 +275,7 @@ export function ZbsTemplateEditorModal({
                         newBtns[index].value = e.target.value;
                         setButtons(newBtns);
                       }}
-                      className="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg"
+                      className="w-full px-3 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px]"
                       placeholder={btn.type === 'web' ? 'https://example.com' : '09xxxx'}
                     />
                   </div>
@@ -298,7 +298,7 @@ export function ZbsTemplateEditorModal({
                 <div className="w-16 h-4 bg-black rounded-full" />
               </div>
               <div className="w-full h-full bg-gray-100 flex flex-col relative pt-8">
-                <div className="px-4 py-3 bg-white border-b border-gray-200 flex items-center gap-3">
+                <div className="px-4 py-3 bg-white border-b border-[#e6ebf1] flex items-center gap-3">
                   <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-cyan-500 flex items-center justify-center shadow-sm">
                     <MessageSquare className="w-5 h-5 text-white" />
                   </div>
@@ -309,12 +309,12 @@ export function ZbsTemplateEditorModal({
                 </div>
 
                 <div className="p-4 flex-1 overflow-auto">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                  <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] overflow-hidden">
                     <div className="p-4 whitespace-pre-wrap text-sm text-gray-800 break-words leading-relaxed">
                       {content || 'Chưa có nội dung...'}
                     </div>
                     {buttons.length > 0 && (
-                      <div className="border-t border-gray-200 divide-y divide-gray-200">
+                      <div className="border-t border-[#e6ebf1] divide-y divide-gray-200">
                         {buttons.map((btn, idx) => (
                           <div key={idx} className="p-3 text-center text-blue-600 font-medium text-sm flex items-center justify-center gap-2">
                             {btn.type === 'web' ? <LinkIcon className="w-4 h-4" /> : <Phone className="w-4 h-4" />}

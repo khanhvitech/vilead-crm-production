@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect } from 'react';
 import { 
@@ -39,8 +39,8 @@ function StepIndicator({
             <div className="flex items-center gap-2">
               <div className={`
                 w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors
-                ${isActive ? 'bg-blue-600 text-white' : ''}
-                ${isPast || step.completed ? 'bg-green-500 text-white' : ''}
+                ${isActive ? 'bg-[#3e79f7] text-white' : ''}
+                ${isPast || step.completed ? 'bg-[#2dc56a] text-white' : ''}
                 ${!isActive && !isPast && !step.completed ? 'bg-gray-200 text-gray-600' : ''}
               `}>
                 {isPast || step.completed ? <Check className="w-4 h-4" /> : index + 1}
@@ -75,10 +75,10 @@ function ABTestTypeCard({
     <button
       onClick={onSelect}
       className={`
-        flex-1 p-4 rounded-xl border-2 transition-all text-left
+        flex-1 p-4 rounded-[10px] border-2 transition-all text-left
         ${selected 
           ? 'border-blue-500 bg-blue-50 ring-2 ring-blue-200' 
-          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+          : 'border-[#e6ebf1] hover:border-[#e6ebf1] hover:bg-gray-50'
         }
       `}
     >
@@ -112,16 +112,16 @@ function ChecklistItem({
     <button
       onClick={onClick}
       className={`
-        w-full flex items-center gap-3 p-4 rounded-lg border transition-colors text-left
+        w-full flex items-center gap-3 p-4 rounded-[10px] border transition-colors text-left
         ${completed 
           ? 'border-green-200 bg-green-50 hover:bg-green-100' 
-          : 'border-gray-200 hover:bg-gray-50'
+          : 'border-[#e6ebf1] hover:bg-gray-50'
         }
       `}
     >
       <div className={`
         w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0
-        ${completed ? 'bg-green-500' : 'bg-gray-200'}
+        ${completed ? 'bg-[#2dc56a]' : 'bg-gray-200'}
       `}>
         {completed ? (
           <Check className="w-4 h-4 text-white" />
@@ -160,7 +160,7 @@ function ABRatioVisualization({
   
   return (
     <div className="space-y-2">
-      <div className="flex h-8 rounded-lg overflow-hidden">
+      <div className="flex h-8 rounded-[10px] overflow-hidden">
         <div 
           className="bg-red-500 flex items-center justify-center text-white text-xs font-medium"
           style={{ width: `${ratioA}%` }}
@@ -174,7 +174,7 @@ function ABRatioVisualization({
           B {ratioB}%
         </div>
         <div 
-          className="bg-green-500 flex items-center justify-center text-white text-xs font-medium"
+          className="bg-[#2dc56a] flex items-center justify-center text-white text-xs font-medium"
           style={{ width: `${winnerRatio}%` }}
         >
           Winner {winnerRatio}%
@@ -250,7 +250,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
           type="text"
           value={formData.name}
           onChange={(e) => updateField('name', e.target.value)}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
           placeholder="VD: [A/B] Test tiêu đề - Sale cuối năm"
         />
       </div>
@@ -323,7 +323,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
 
       {/* Warning if not enough recipients */}
       {recipientsPreview && recipientsPreview.valid_emails < 100 && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-[10px]">
           <p className="text-sm text-yellow-800">
             ⚠️ Cần tối thiểu 100 người nhận cho A/B testing. Hiện tại chỉ có {recipientsPreview.valid_emails} email hợp lệ.
           </p>
@@ -341,7 +341,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
         </label>
         <div className="grid grid-cols-2 gap-4">
           {/* Version A */}
-          <div className="p-4 rounded-lg border-2 border-red-200 bg-red-50">
+          <div className="p-4 rounded-[10px] border-2 border-red-200 bg-red-50">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-1 bg-red-500 text-white text-xs font-bold rounded">A</span>
               <span className="font-medium text-gray-900">Phiên bản A</span>
@@ -351,14 +351,14 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
                 type="text"
                 value={formData.subject}
                 onChange={(e) => updateField('subject', e.target.value)}
-                className="w-full px-3 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 border border-red-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-red-500"
                 placeholder="VD: Sale cuối năm - Giảm giá sốc!"
               />
             )}
             {formData.ab_test_type === 'content' && (
               <button
                 onClick={() => openModal('content')}
-                className="w-full px-3 py-2 border border-red-300 rounded-lg text-left hover:bg-red-100"
+                className="w-full px-3 py-2 border border-red-300 rounded-[10px] text-left hover:bg-red-100"
               >
                 {selectedTemplate?.name || 'Chọn mẫu nội dung A...'}
               </button>
@@ -368,13 +368,13 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
                 type="datetime-local"
                 value={formData.ab_send_time_a ? new Date(formData.ab_send_time_a).toISOString().slice(0, 16) : ''}
                 onChange={(e) => updateField('ab_send_time_a', e.target.value ? new Date(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-red-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500"
+                className="w-full px-3 py-2 border border-red-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-red-500"
               />
             )}
           </div>
 
           {/* Version B */}
-          <div className="p-4 rounded-lg border-2 border-blue-200 bg-blue-50">
+          <div className="p-4 rounded-[10px] border-2 border-[#c7d9fd] bg-blue-50">
             <div className="flex items-center gap-2 mb-3">
               <span className="px-2 py-1 bg-blue-500 text-white text-xs font-bold rounded">B</span>
               <span className="font-medium text-gray-900">Phiên bản B</span>
@@ -384,14 +384,14 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
                 type="text"
                 value={formData.subject_b || ''}
                 onChange={(e) => updateField('subject_b', e.target.value)}
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-blue-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 placeholder="VD: {ten_khach} ơi, đừng bỏ lỡ Sale!"
               />
             )}
             {formData.ab_test_type === 'content' && (
               <button
                 onClick={() => openModal('content_b')}
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg text-left hover:bg-blue-100"
+                className="w-full px-3 py-2 border border-blue-300 rounded-[10px] text-left hover:bg-blue-100"
               >
                 {selectedTemplateB?.name || 'Chọn mẫu nội dung B...'}
               </button>
@@ -401,7 +401,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
                 type="datetime-local"
                 value={formData.ab_send_time_b ? new Date(formData.ab_send_time_b).toISOString().slice(0, 16) : ''}
                 onChange={(e) => updateField('ab_send_time_b', e.target.value ? new Date(e.target.value) : null)}
-                className="w-full px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-blue-300 rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               />
             )}
           </div>
@@ -422,7 +422,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
               max={45}
               value={formData.ab_ratio_a}
               onChange={(e) => updateField('ab_ratio_a', Math.min(45, Math.max(5, parseInt(e.target.value) || 5)))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
           <div>
@@ -433,7 +433,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
               max={45}
               value={formData.ab_ratio_b}
               onChange={(e) => updateField('ab_ratio_b', Math.min(45, Math.max(5, parseInt(e.target.value) || 5)))}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
         </div>
@@ -467,7 +467,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
             max={168}
             value={formData.ab_evaluation_hours}
             onChange={(e) => updateField('ab_evaluation_hours', Math.min(168, Math.max(1, parseInt(e.target.value) || 24)))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
           />
           <p className="mt-1 text-xs text-gray-500">
             💡 Nên chờ ít nhất 24 giờ để có đủ dữ liệu
@@ -532,7 +532,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
   const renderStep3 = () => (
     <div className="p-6 space-y-6 max-w-3xl mx-auto">
       {/* Summary */}
-      <div className="p-6 bg-gray-50 rounded-xl border">
+      <div className="p-6 bg-gray-50 rounded-[10px] border">
         <h3 className="font-semibold text-gray-900 mb-4">Tóm tắt chiến dịch</h3>
         
         <div className="space-y-3 text-sm">
@@ -595,7 +595,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
       </div>
 
       {/* Notice */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <div className="p-4 bg-blue-50 border border-[#c7d9fd] rounded-[10px]">
         <p className="text-sm text-blue-800">
           ℹ️ Sau khi bắt đầu, phiên bản A và B sẽ được gửi đồng thời.
           Sau <strong>{formData.ab_evaluation_hours} giờ</strong>, hệ thống sẽ xác định phiên bản thắng
@@ -612,7 +612,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
           type="checkbox"
           checked={confirmChecked}
           onChange={(e) => setConfirmChecked(e.target.checked)}
-          className="w-5 h-5 mt-0.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+          className="w-5 h-5 mt-0.5 text-blue-600 rounded border-[#e6ebf1] focus:ring-[#3e79f7]"
         />
         <span className="text-gray-700">
           Tôi đã kiểm tra và xác nhận thông tin chính xác
@@ -628,7 +628,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
         <div className="flex items-center gap-4">
           <button 
             onClick={onClose}
-            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors"
           >
             <ArrowLeft className="w-5 h-5 text-gray-600" />
           </button>
@@ -643,7 +643,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
         </div>
         <button
           onClick={() => {/* Save draft */}}
-          className="flex items-center gap-2 px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="flex items-center gap-2 px-4 py-2 text-gray-700 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
         >
           <Save className="w-4 h-4" />
           Lưu nháp
@@ -664,7 +664,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
       <div className="flex-shrink-0 border-t bg-white px-6 py-4 flex justify-between">
         <button
           onClick={currentStep === 'basic' ? onClose : prevStep}
-          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg"
+          className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px]"
         >
           <ChevronLeft className="w-4 h-4" />
           {currentStep === 'basic' ? 'Hủy' : 'Quay lại'}
@@ -674,7 +674,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
           <button
             onClick={nextStep}
             disabled={currentStep === 'basic' ? !isStep1Complete : !isStep2Complete}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Tiếp tục
             <ChevronRight className="w-4 h-4" />
@@ -748,7 +748,7 @@ export function ABCampaignEditor({ campaign, onClose, onSave, onStart }: ABCampa
               onStart(newCampaign);
             }}
             disabled={!canStart}
-            className="flex items-center gap-2 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Play className="w-4 h-4" />
             Bắt đầu chiến dịch

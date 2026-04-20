@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { ActionType, ActionConfig } from '../types'
@@ -19,7 +19,7 @@ function TagMultiSelect({ selectedIds, onChange }: {
     onChange(selectedIds.includes(id) ? selectedIds.filter(i => i !== id) : [...selectedIds, id])
 
   return (
-    <div className="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-xl min-h-[42px] bg-white">
+    <div className="flex flex-wrap gap-2 p-3 border border-[#e6ebf1] rounded-[10px] min-h-[42px] bg-white">
       {MOCK_TAGS_REF.map(tag => (
         <button
           key={tag.id}
@@ -28,7 +28,7 @@ function TagMultiSelect({ selectedIds, onChange }: {
           className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
             selectedIds.includes(tag.id)
               ? 'border-transparent text-white shadow-sm'
-              : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+              : 'border-[#e6ebf1] text-gray-700 bg-white hover:border-[#e6ebf1]'
           }`}
           style={selectedIds.includes(tag.id) ? { background: tag.color } : {}}
         >
@@ -57,7 +57,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
           <select
             value={(cfg.flow_id as string) ?? ''}
             onChange={e => onChange({ flow_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
           >
             <option value="">-- Chọn luồng --</option>
             {publishedFlows.map(f => (
@@ -65,9 +65,9 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
             ))}
           </select>
           {selected && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-[10px]">
               <span className="text-blue-500">📨</span>
-              <span className="text-xs text-blue-700 font-medium">{selected.message_count} tin nhắn</span>
+              <span className="text-xs text-[#3e79f7] font-medium">{selected.message_count} tin nhắn</span>
               <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Đã xuất bản</span>
             </div>
           )}
@@ -107,7 +107,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
               value={(cfg.title as string) ?? ''}
               onChange={e => onChange({ ...cfg, title: e.target.value })}
               placeholder="VD: Gọi điện tư vấn KH"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
           <div>
@@ -137,12 +137,12 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
                 type="number" min={1}
                 value={(cfg.deadline_value as number) ?? 24}
                 onChange={e => onChange({ ...cfg, deadline_value: Number(e.target.value) })}
-                className="w-20 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                className="w-20 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
               />
               <select
                 value={(cfg.deadline_unit as string) ?? 'hours'}
                 onChange={e => onChange({ ...cfg, deadline_unit: e.target.value })}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                className="px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
               >
                 <option value="hours">giờ</option>
                 <option value="days">ngày</option>
@@ -165,7 +165,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
               value={(cfg.content as string) ?? ''}
               onChange={e => onChange({ ...cfg, content: e.target.value })}
               placeholder="VD: Gọi điện hỏi thăm KH sau đơn hàng"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] resize-none"
             />
           </div>
           <div>
@@ -204,7 +204,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
               type="number" min={1} max={1440}
               value={dur}
               onChange={e => onChange({ duration_minutes: Number(e.target.value) })}
-              className="w-24 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+              className="w-24 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
             />
             <span className="text-sm text-gray-600">phút</span>
           </div>
@@ -214,7 +214,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
                 key={v}
                 type="button"
                 onClick={() => onChange({ duration_minutes: v })}
-                className={`px-3 py-1 text-xs rounded-lg border transition-colors ${dur === v ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:border-blue-400'}`}
+                className={`px-3 py-1 text-xs rounded-[10px] border transition-colors ${dur === v ? 'bg-[#3e79f7] text-white border-[#3e79f7]' : 'border-[#e6ebf1] text-gray-600 hover:border-[#699dff]'}`}
               >
                 {v >= 60 ? `${v / 60}h` : `${v}p`}
               </button>
@@ -227,7 +227,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
     // ── resume_bot ─────────────────────────────────────────────────────────────
     case 'resume_bot':
       return (
-        <div className="p-3.5 bg-green-50 rounded-xl">
+        <div className="p-3.5 bg-green-50 rounded-[10px]">
           <p className="text-sm text-green-700">Bot sẽ được bật lại ngay lập tức cho khách hàng này.</p>
         </div>
       )
@@ -240,7 +240,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
           <select
             value={(cfg.sequence_id as string) ?? ''}
             onChange={e => onChange({ sequence_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
           >
             <option value="">-- Chọn kịch bản --</option>
             {MOCK_SEQUENCE_OPTIONS.map(s => (
@@ -277,7 +277,7 @@ export default function ActionConfigForm({ actionType, config, onChange }: Props
             <select
               value={(cfg.sequence_id as string) ?? ''}
               onChange={e => onChange({ ...cfg, sequence_id: e.target.value })}
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
             >
               <option value="">-- Chọn kịch bản cần hủy --</option>
               {MOCK_SEQUENCE_OPTIONS.map(s => (

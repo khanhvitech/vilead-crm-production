@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState } from 'react'
 import {
@@ -39,14 +39,14 @@ export const RenewModal: React.FC<RenewModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px] p-0 border-0 rounded-xl overflow-hidden bg-white shadow-xl">
+      <DialogContent className="sm:max-w-[425px] p-0 border-0 rounded-[10px] overflow-hidden bg-white shadow-xl">
         <DialogHeader className="bg-[#1a56db] text-white p-6">
           <DialogTitle className="text-xl font-bold">Gia hạn license</DialogTitle>
           <p className="text-sm font-medium mt-1.5 opacity-90">Gia hạn được mở khi đơn hàng liên kết đã thanh toán.</p>
         </DialogHeader>
         
         <div className="p-6 pb-2">
-          <div className="bg-[#f8fafc] border border-gray-100 rounded-xl p-4 text-[13px] leading-relaxed text-gray-700 space-y-2 mb-6">
+          <div className="bg-[#f8fafc] border border-gray-100 rounded-[10px] p-4 text-[13px] leading-relaxed text-gray-700 space-y-2 mb-6">
             <div className="flex"><span className="font-bold w-28 text-gray-500">Khách hàng:</span> <span className="font-bold">CÔNG TY TNHH VILEAD</span></div>
             <div className="flex"><span className="font-bold w-28 text-gray-500">Đơn liên kết:</span> <span className="font-bold text-[#1a56db]">{orderId}</span></div>
             <div className="flex"><span className="font-bold w-28 text-gray-500">Gói hiện tại:</span> <span className="font-bold">{currentPlan}</span></div>
@@ -62,7 +62,7 @@ export const RenewModal: React.FC<RenewModalProps> = ({
                 min={1}
                 max={36}
                 onChange={(e) => setMonths(Number(e.target.value))}
-                className="h-11 border-gray-300 font-semibold focus-visible:ring-[#1a56db]"
+                className="h-11 border-[#e6ebf1] font-semibold focus-visible:ring-[#1a56db]"
               />
             </div>
             
@@ -72,7 +72,7 @@ export const RenewModal: React.FC<RenewModalProps> = ({
                 value={note} 
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Nhập ghi chú gia hạn..."
-                className="min-h-[100px] border-gray-300 resize-none focus-visible:ring-[#1a56db]"
+                className="min-h-[100px] border-[#e6ebf1] resize-none focus-visible:ring-[#1a56db]"
               />
             </div>
           </div>

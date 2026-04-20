@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { 
@@ -122,7 +122,7 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'upcoming':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'due':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'overdue':
@@ -130,7 +130,7 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -310,7 +310,7 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
           </select>
 
           <div className="flex space-x-2">
-            <button className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff]">
               <Send className="w-4 h-4" />
               <span>Gửi nhắc nhở hàng loạt</span>
             </button>
@@ -444,7 +444,7 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
       <div className="card p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Tự động hóa sự kiện</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-[#e6ebf1] rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Gift className="w-5 h-5 text-purple-600" />
               <span className="font-medium text-gray-900">Sinh nhật tự động</span>
@@ -452,12 +452,12 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
             <p className="text-sm text-gray-600 mb-3">
               Tự động tạo sự kiện sinh nhật cho khách hàng mới và gửi lời chúc
             </p>
-            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700">
+            <button className="w-full px-4 py-2 bg-purple-600 text-white rounded-[10px] hover:bg-purple-700">
               Kích hoạt
             </button>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-[#e6ebf1] rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Heart className="w-5 h-5 text-red-600" />
               <span className="font-medium text-gray-900">Kỷ niệm hợp tác</span>
@@ -465,12 +465,12 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
             <p className="text-sm text-gray-600 mb-3">
               Tự động tạo sự kiện kỷ niệm và gửi lời cảm ơn khách hàng
             </p>
-            <button className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+            <button className="w-full px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c]">
               Kích hoạt
             </button>
           </div>
 
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-[#e6ebf1] rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <RefreshCw className="w-5 h-5 text-blue-600" />
               <span className="font-medium text-gray-900">Theo dõi tự động</span>
@@ -478,7 +478,7 @@ export default function CustomerEventsManager({ customers }: CustomerEventsManag
             <p className="text-sm text-gray-600 mb-3">
               Tự động tạo task theo dõi sau các tương tác quan trọng
             </p>
-            <button className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            <button className="w-full px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff]">
               Kích hoạt
             </button>
           </div>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
@@ -44,7 +44,7 @@ function StatusBadge({ status }: { status: FlowStatus }) {
     </span>
   )
   if (status === 'draft') return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-gray-200">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-[#e6ebf1]">
       <Clock className="w-3 h-3" />
       Bản nháp
     </span>
@@ -203,7 +203,7 @@ export default function FlowTable({
 
   if (flows.length === 0) return (
     <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
-      <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center mb-4">
+      <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center mb-4">
         <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
         </svg>
@@ -219,7 +219,7 @@ export default function FlowTable({
     <div className="flex flex-col flex-1 min-h-0">
       {/* ── Bulk Action Bar ─────────────────────────────────── */}
       {selectedCount > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg mx-4 mt-3 px-4 py-2.5 flex items-center justify-between shrink-0">
+        <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] mx-4 mt-3 px-4 py-2.5 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-blue-900">
               Đã chọn <strong>{selectedCount}</strong> luồng
@@ -237,7 +237,7 @@ export default function FlowTable({
             {selectedCount < flows.length && (
               <button
                 onClick={selectAllVisible}
-                className="px-3 py-1.5 bg-white border border-blue-300 text-blue-700 text-sm rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-white border border-blue-300 text-[#3e79f7] text-sm rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
               >
                 <Check className="w-3.5 h-3.5" />
                 Chọn tất cả ({flows.length})
@@ -248,7 +248,7 @@ export default function FlowTable({
             <div className="relative" ref={moveFolderRef}>
               <button
                 onClick={() => setMoveFolderOpen(v => !v)}
-                className="px-3 py-1.5 bg-indigo-600 text-white text-sm rounded-md hover:bg-indigo-700 transition-colors flex items-center gap-1.5"
+                className="px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-1.5"
               >
                 <FolderInput className="w-3.5 h-3.5" />
                 Chuyển thư mục
@@ -256,7 +256,7 @@ export default function FlowTable({
               {moveFolderOpen && (
                 <>
                   <div className="fixed inset-0 z-10" onClick={() => setMoveFolderOpen(false)} />
-                  <div className="absolute right-0 top-9 z-20 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5 min-w-44 overflow-hidden">
+                  <div className="absolute right-0 top-9 z-20 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] py-1.5 min-w-44 overflow-hidden">
                     {folders.map(folder => (
                       <button
                         key={folder.id}
@@ -296,7 +296,7 @@ export default function FlowTable({
                 onBulkDelete(Array.from(selectedIds))
                 clearSelection()
               }}
-              className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors flex items-center gap-1.5"
+              className="px-3 py-1.5 bg-[#ff6b72] text-white text-sm rounded-md hover:bg-[#d9505c] transition-colors flex items-center gap-1.5"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Xóa
@@ -308,13 +308,13 @@ export default function FlowTable({
       <div className="flex-1 overflow-auto">
         <table className="w-full text-sm">
           <thead className="sticky top-0 bg-gray-50 z-10">
-            <tr className="border-b border-gray-200">
+            <tr className="border-b border-[#e6ebf1]">
               <th className="w-10 px-4 py-3">
                 <input
                   type="checkbox"
                   checked={flows.length > 0 && selectedIds.size === flows.length}
                   onChange={toggleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
               </th>
               <th className="px-4 py-3 text-left">
@@ -349,7 +349,7 @@ export default function FlowTable({
                     type="checkbox"
                     checked={selectedIds.has(flow.id)}
                     onChange={() => toggleSelect(flow.id)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                     onClick={e => e.stopPropagation()}
                   />
                 </td>
@@ -358,7 +358,7 @@ export default function FlowTable({
                 <td className="px-4 py-3">
                   {renamingId === flow.id ? (
                     <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
                         <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -372,7 +372,7 @@ export default function FlowTable({
                           if (e.key === 'Escape') cancelRename()
                         }}
                         onBlur={commitRename}
-                        className="flex-1 px-2 py-1 text-sm border border-blue-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white"
+                        className="flex-1 px-2 py-1 text-sm border border-[#699dff] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                         placeholder="Tên luồng..."
                       />
                       <button onClick={commitRename} className="p-1 text-green-600 hover:text-green-700">
@@ -387,7 +387,7 @@ export default function FlowTable({
                       onClick={() => onEdit(flow.id)}
                       className="flex items-center gap-2 font-medium text-gray-800 hover:text-blue-600 transition-colors group/name"
                     >
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
                         <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                         </svg>
@@ -445,7 +445,7 @@ export default function FlowTable({
                   ) : (
                     <button
                       onClick={() => startEditShortcut(flow)}
-                      className="opacity-0 group-hover:opacity-100 p-1 rounded-lg text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all"
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-[10px] text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all"
                       title="Thêm shortcut"
                     >
                       <Pencil className="w-3.5 h-3.5" />
@@ -465,7 +465,7 @@ export default function FlowTable({
                   <div className="relative">
                     <button
                       onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === flow.id ? null : flow.id) }}
-                      className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-all"
+                      className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <MoreHorizontal className="w-4 h-4" />
                     </button>
@@ -473,7 +473,7 @@ export default function FlowTable({
                     {menuOpenId === flow.id && (
                       <>
                         <div className="fixed inset-0 z-10" onClick={() => setMenuOpenId(null)} />
-                        <div className="absolute right-0 top-8 z-20 bg-white rounded-xl shadow-xl border border-gray-200 py-1.5 min-w-40 overflow-hidden">
+                        <div className="absolute right-0 top-8 z-20 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] py-1.5 min-w-40 overflow-hidden">
                           {/* Đổi tên */}
                           <button
                             onClick={() => startRename(flow)}
@@ -516,13 +516,13 @@ export default function FlowTable({
       </div>
 
       {/* Pagination */}
-      <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-white shrink-0">
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[#e6ebf1] bg-white shrink-0">
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <span>Hiển thị</span>
           <select
             value={pageSize}
             onChange={e => onPageSizeChange(Number(e.target.value))}
-            className="border border-gray-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="border border-[#e6ebf1] rounded-[10px] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
           >
             {[10, 20, 50].map(s => (
               <option key={s} value={s}>{s}</option>
@@ -535,7 +535,7 @@ export default function FlowTable({
           <button
             disabled={currentPage <= 1}
             onClick={() => onPageChange(currentPage - 1)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 text-sm rounded-[10px] border border-[#e6ebf1] text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             ← Trước
           </button>
@@ -544,9 +544,9 @@ export default function FlowTable({
               key={page}
               onClick={() => onPageChange(page)}
               className={cn(
-                'w-8 h-8 text-sm rounded-lg transition-colors',
+                'w-8 h-8 text-sm rounded-[10px] transition-colors',
                 currentPage === page
-                  ? 'bg-blue-600 text-white font-medium'
+                  ? 'bg-[#3e79f7] text-white font-medium'
                   : 'text-gray-600 hover:bg-gray-100'
               )}
             >
@@ -556,7 +556,7 @@ export default function FlowTable({
           <button
             disabled={currentPage >= totalPages}
             onClick={() => onPageChange(currentPage + 1)}
-            className="px-3 py-1.5 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="px-3 py-1.5 text-sm rounded-[10px] border border-[#e6ebf1] text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
           >
             Sau →
           </button>

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
@@ -59,7 +59,7 @@ export function ZbsSpendingTrendChart({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-white rounded-[10px] border p-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-gray-400" />
@@ -74,7 +74,7 @@ export function ZbsSpendingTrendChart({
   }
 
   return (
-    <div className="bg-white rounded-xl border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">

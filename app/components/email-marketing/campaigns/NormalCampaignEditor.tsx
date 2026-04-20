@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import {
@@ -51,17 +51,17 @@ function ChecklistItem({ title, description, isComplete, isRequired, icon, value
     <button
       onClick={onClick}
       className={`
-        w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all
+        w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all
         ${isComplete 
           ? 'border-green-200 bg-green-50 hover:bg-green-100' 
-          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+          : 'border-[#e6ebf1] hover:border-[#e6ebf1] hover:bg-gray-50'
         }
       `}
     >
       {/* Status indicator */}
       <div className={`
         flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
-        ${isComplete ? 'bg-green-500' : 'bg-gray-100'}
+        ${isComplete ? 'bg-[#2dc56a]' : 'bg-gray-100'}
       `}>
         {isComplete ? (
           <Check className="w-5 h-5 text-white" />
@@ -218,12 +218,12 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
   return (
     <div className="fixed inset-0 z-50 bg-gray-100">
       {/* Header */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4">
+      <div className="bg-white border-b border-[#e6ebf1] px-6 py-4">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -253,7 +253,7 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
             <button
               onClick={handleSave}
               disabled={isSaving}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
               {isSaving ? (
                 <div className="w-4 h-4 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
@@ -267,7 +267,7 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
             <button
               onClick={() => setShowConfirmStart(true)}
               disabled={!isComplete}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send className="w-4 h-4" />
               Bắt đầu gửi
@@ -279,14 +279,14 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
       {/* Content */}
       <div className="max-w-4xl mx-auto py-8 px-6">
         {/* Progress indicator */}
-        <div className="bg-white rounded-xl p-6 mb-6 shadow-sm">
+        <div className="bg-white rounded-[10px] p-6 mb-6 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Tiến độ hoàn thành</h3>
             <span className="text-sm text-gray-500">{completedCount}/{requiredCount} mục bắt buộc</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div
-              className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+              className="bg-[#3e79f7] h-2 rounded-full transition-all duration-300"
               style={{ width: `${(completedCount / requiredCount) * 100}%` }}
             />
           </div>
@@ -298,7 +298,7 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
         </div>
 
         {/* Checklist */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-[10px] shadow-sm overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <h3 className="text-lg font-semibold text-gray-900">Thiết lập chiến dịch</h3>
             <p className="text-sm text-gray-500">Hoàn thành các mục sau để gửi email</p>
@@ -364,7 +364,7 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
 
         {/* Warning if not complete */}
         {!isComplete && (
-          <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-xl">
+          <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-200 rounded-[10px]">
             <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
               <p className="font-medium text-yellow-800">Chiến dịch chưa hoàn thành</p>
@@ -453,10 +453,10 @@ function SenderSelectModal({ selectedId, onSelect, onClose }: SenderSelectModalP
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
-        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col">
+        <div className="flex-shrink-0 border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Chọn người gửi</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -474,10 +474,10 @@ function SenderSelectModal({ selectedId, onSelect, onClose }: SenderSelectModalP
                 key={sender.id}
                 onClick={() => onSelect(sender.id)}
                 className={`
-                  w-full flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all
+                  w-full flex items-center gap-3 p-4 rounded-[10px] border-2 text-left transition-all
                   ${selectedId === sender.id 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:border-gray-300'
+                    : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                   }
                 `}
               >
@@ -496,10 +496,10 @@ function SenderSelectModal({ selectedId, onSelect, onClose }: SenderSelectModalP
           )}
         </div>
 
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end">
+        <div className="flex-shrink-0 bg-gray-50 border-t border-[#e6ebf1] px-6 py-4 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-[10px] transition-colors"
           >
             Đóng
           </button>

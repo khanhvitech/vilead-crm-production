@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
@@ -1296,7 +1296,7 @@ const AssignPermissionContent = () => {
   return (
     <div className="flex gap-6 h-[calc(100vh-200px)]">
       {/* Left Sidebar - Role List */}
-      <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         <div className="p-2">
           {assignRolesList.map((role) => (
             <div
@@ -1371,7 +1371,7 @@ const AssignPermissionContent = () => {
                   <th className="text-left py-3 px-4 font-normal text-[#455560] w-10">
                     <input 
                       type="checkbox" 
-                      className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7]"
+                      className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
                       checked={selectedEmployees.length === employees.length && employees.length > 0}
                       onChange={toggleSelectAll}
                     />
@@ -1390,7 +1390,7 @@ const AssignPermissionContent = () => {
                     <td className="py-3 px-4">
                       <input 
                         type="checkbox" 
-                        className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7]"
+                        className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
                         checked={selectedEmployees.includes(employee.id)}
                         onChange={() => toggleSelectEmployee(employee.id)}
                       />
@@ -1659,7 +1659,7 @@ const RoleManagementNew = () => {
   return (
     <div className="flex gap-6 h-[calc(100vh-200px)]">
       {/* Left Sidebar - Role List */}
-      <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         <div className="p-2">
           {rolesList.map((role) => (
             <div
@@ -1686,7 +1686,7 @@ const RoleManagementNew = () => {
                   />
                   {/* Dropdown Menu */}
                   {showRoleDropdown === role.id && (
-                    <div className="absolute right-0 top-6 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[120px]">
+                    <div className="absolute right-0 top-6 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg py-1 z-20 min-w-[120px]">
                       <div
                         className="flex items-center gap-2 px-3 py-2 text-[#455560] hover:bg-gray-100 cursor-pointer text-sm"
                         onClick={(e) => {
@@ -1796,7 +1796,7 @@ const RoleManagementNew = () => {
                                       setEditRoleForm(prev => ({ ...prev, scopeTargets: prev.scopeTargets.filter(id => id !== item.id) }))
                                     }
                                   }}
-                                  className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7]"
+                                  className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
                                 />
                                 <span className="text-sm text-[#455560]">{item.name}</span>
                               </label>
@@ -1878,7 +1878,7 @@ const RoleManagementNew = () => {
 
         {/* Module Permissions Tree View */}
         <div className="flex-1 overflow-y-auto pr-2">
-          <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
             {filteredGroups.map((group, groupIndex) => {
               const groupAllChecked = isGroupAllChecked(group.id)
               const groupIndeterminate = isGroupIndeterminate(group.id)
@@ -1898,7 +1898,7 @@ const RoleManagementNew = () => {
                         checked={groupAllChecked}
                         ref={(el) => { if (el) el.indeterminate = groupIndeterminate }}
                         onChange={(e) => toggleGroupAll(group.id, e.target.checked)}
-                        className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
+                        className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
                       />
                     </div>
                     <span className="font-semibold text-sm text-[#1a3353] flex-1">{group.name}</span>
@@ -1942,7 +1942,7 @@ const RoleManagementNew = () => {
                                   checked={moduleAllChecked}
                                   ref={(el) => { if (el) el.indeterminate = moduleIndeterminate }}
                                   onChange={(e) => toggleModuleAll(module.id, e.target.checked)}
-                                  className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
+                                  className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
                                 />
                               </div>
                               <ModuleIcon className="w-4 h-4 text-gray-400 flex-shrink-0" />
@@ -1979,7 +1979,7 @@ const RoleManagementNew = () => {
                                       type="checkbox"
                                       checked={modulePermissions[module.id]?.[perm.key as keyof typeof modulePermissions[string]] || false}
                                       onChange={(e) => toggleModulePermission(module.id, perm.key, e.target.checked)}
-                                      className="w-3.5 h-3.5 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
+                                      className="w-3.5 h-3.5 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7] cursor-pointer"
                                     />
                                     <span className="text-xs text-[#455560]">{perm.label}</span>
                                   </label>
@@ -2001,7 +2001,7 @@ const RoleManagementNew = () => {
       {/* Add Role Modal */}
       {showAddRoleModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowAddRoleModal(false)}>
-          <div className="bg-white rounded-lg w-[480px] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-[10px] w-[480px] max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-4 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-[#1a3353]">Thêm mới vai trò mới</h3>
@@ -2076,7 +2076,7 @@ const RoleManagementNew = () => {
                                   setAddRoleForm(prev => ({ ...prev, scopeTargets: prev.scopeTargets.filter(id => id !== item.id) }))
                                 }
                               }}
-                              className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7]"
+                              className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
                             />
                             <span className="text-sm text-[#455560]">{item.name}</span>
                           </label>
@@ -2118,7 +2118,7 @@ const RoleManagementNew = () => {
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="bg-white rounded-lg w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-[10px] w-[400px] p-6" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
                 <AlertTriangle className="w-5 h-5 text-red-500" />
@@ -2632,7 +2632,7 @@ export default function SettingsManagement() {
 
     const getScopeColor = (scope: string) => {
       switch (scope) {
-        case 'global': return 'bg-indigo-100 text-indigo-800'
+        case 'global': return 'bg-[#f0f7ff] text-indigo-800'
         case 'team': return 'bg-cyan-100 text-cyan-800'
         case 'user': return 'bg-pink-100 text-pink-800'
         default: return 'bg-gray-100 text-gray-800'
@@ -2818,12 +2818,12 @@ export default function SettingsManagement() {
               {salesStages.sort((a, b) => a.order - b.order).map((stage, index) => (
                 <div 
                   key={stage.id} 
-                  className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
+                  className={`flex items-center justify-between p-3 border rounded-[10px] transition-all ${
                     stage.isFixed 
-                      ? 'bg-white border-gray-200' 
+                      ? 'bg-white border-[#e6ebf1]' 
                       : draggedStageId === stage.id 
                         ? 'bg-blue-50 border-blue-300 opacity-50' 
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                        : 'bg-white border-[#e6ebf1] hover:bg-gray-50'
                   }`}
                   draggable={!stage.isFixed}
                   onDragStart={(e) => handleDragStart(e, stage.id)}
@@ -2951,7 +2951,7 @@ export default function SettingsManagement() {
                   ].map((color) => (
                     <button
                       key={color}
-                      className="w-8 h-8 rounded border-2 border-gray-200 hover:border-gray-400"
+                      className="w-8 h-8 rounded border-2 border-[#e6ebf1] hover:border-gray-400"
                       style={{ backgroundColor: color }}
                     />
                   ))}
@@ -3067,7 +3067,7 @@ export default function SettingsManagement() {
                     <button
                       key={color}
                       className={`w-8 h-8 rounded border-2 ${
-                        editStatusForm.color === color ? 'border-gray-900' : 'border-gray-200'
+                        editStatusForm.color === color ? 'border-gray-900' : 'border-[#e6ebf1]'
                       } hover:border-gray-400`}
                       style={{ backgroundColor: color }}
                       onClick={() => setEditStatusForm(prev => ({ ...prev, color }))}
@@ -3195,12 +3195,12 @@ export default function SettingsManagement() {
                 </p>
               </div>
 
-              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded p-3">
                 <div className="flex items-center space-x-2 text-blue-800">
                   <Info className="w-4 h-4" />
                   <span className="font-medium">Lưu ý</span>
                 </div>
-                <p className="text-sm text-blue-700 mt-1">
+                <p className="text-sm text-[#3e79f7] mt-1">
                   Hệ thống luôn phải có ít nhất một trạng thái đơn hàng.
                 </p>
               </div>
@@ -3266,23 +3266,23 @@ export default function SettingsManagement() {
               </div>
 
               {/* Department/Team/Individual selection */}
-              <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3">
+              <div className="space-y-2 max-h-32 overflow-y-auto border rounded-[10px] p-3">
                 {(selectedAssignmentType === 'department' || !selectedAssignmentType) && (
                   <>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="dept-support" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="dept-support" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="dept-support" className="text-sm">Phòng support</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="dept-qa" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="dept-qa" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="dept-qa" className="text-sm">Phòng kiểm tra chất lượng</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="dept-dev" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="dept-dev" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="dept-dev" className="text-sm">Phòng Dev CRM</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="dept-sales" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="dept-sales" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="dept-sales" className="text-sm">Phòng sale</label>
                     </div>
                   </>
@@ -3291,19 +3291,19 @@ export default function SettingsManagement() {
                 {selectedAssignmentType === 'team' && (
                   <>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="team-sales-a" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="team-sales-a" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="team-sales-a" className="text-sm">Team Sales A</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="team-sales-b" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="team-sales-b" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="team-sales-b" className="text-sm">Team Sales B</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="team-telesales-1" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="team-telesales-1" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="team-telesales-1" className="text-sm">Team Telesales 1</label>
                     </div>
                     <div className="flex items-center space-x-3">
-                      <input type="checkbox" id="team-telesales-2" className="w-4 h-4 rounded border-gray-300" />
+                      <input type="checkbox" id="team-telesales-2" className="w-4 h-4 rounded border-[#e6ebf1]" />
                       <label htmlFor="team-telesales-2" className="text-sm">Team Telesales 2</label>
                     </div>
                   </>
@@ -3423,21 +3423,21 @@ export default function SettingsManagement() {
               <div>
                 <Label className="text-sm font-medium">Phương thức phân bổ</Label>
                 <div className="grid grid-cols-3 gap-3 mt-2">
-                  <div className="border-2 border-blue-500 rounded-lg p-3 cursor-pointer bg-blue-50">
+                  <div className="border-2 border-blue-500 rounded-[10px] p-3 cursor-pointer bg-blue-50">
                     <div className="flex flex-col items-center text-center">
                       <input type="radio" name="distribution-method" value="round_robin" defaultChecked className="mb-2" />
                       <h4 className="font-medium text-sm">Xoay vòng</h4>
                       <p className="text-xs text-gray-500 mt-1">Phân đều cho từng thành viên</p>
                     </div>
                   </div>
-                  <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                  <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                     <div className="flex flex-col items-center text-center">
                       <input type="radio" name="distribution-method" value="load_based" className="mb-2" />
                       <h4 className="font-medium text-sm">Theo tải</h4>
                       <p className="text-xs text-gray-500 mt-1">Dựa trên khối lượng công việc</p>
                     </div>
                   </div>
-                  <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                  <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                     <div className="flex flex-col items-center text-center">
                       <input type="radio" name="distribution-method" value="random" className="mb-2" />
                       <h4 className="font-medium text-sm">Ngẫu nhiên</h4>
@@ -3569,7 +3569,7 @@ export default function SettingsManagement() {
                 <div>
                   <Label>Phương thức phân bổ</Label>
                   <div className="grid grid-cols-3 gap-4 mt-2">
-                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'round_robin' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                    <div className={`border rounded-[10px] p-4 cursor-pointer ${selectedDistributionRule.method === 'round_robin' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
                       <div className="flex items-center space-x-2">
                         <input type="radio" name="edit-distribution-method" value="round_robin" defaultChecked={selectedDistributionRule.method === 'round_robin'} />
                         <div>
@@ -3578,7 +3578,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                     </div>
-                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'load_based' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                    <div className={`border rounded-[10px] p-4 cursor-pointer ${selectedDistributionRule.method === 'load_based' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
                       <div className="flex items-center space-x-2">
                         <input type="radio" name="edit-distribution-method" value="load_based" defaultChecked={selectedDistributionRule.method === 'load_based'} />
                         <div>
@@ -3587,7 +3587,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                     </div>
-                    <div className={`border rounded-lg p-4 cursor-pointer ${selectedDistributionRule.method === 'random' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
+                    <div className={`border rounded-[10px] p-4 cursor-pointer ${selectedDistributionRule.method === 'random' ? 'bg-blue-50 border-blue-300' : 'hover:bg-blue-50 hover:border-blue-300'}`}>
                       <div className="flex items-center space-x-2">
                         <input type="radio" name="edit-distribution-method" value="random" defaultChecked={selectedDistributionRule.method === 'random'} />
                         <div>
@@ -3601,7 +3601,7 @@ export default function SettingsManagement() {
 
                 <div>
                   <Label>Đối tượng được phân</Label>
-                  <div className="mt-2 p-3 border rounded-lg">
+                  <div className="mt-2 p-3 border rounded-[10px]">
                     <div className="flex flex-wrap gap-2">
                       {selectedDistributionRule.assignedTargets.map((target, index) => (
                         <Badge key={index} variant="secondary">
@@ -3661,7 +3661,7 @@ export default function SettingsManagement() {
                         </Select>
                         
                         {editTimeRange === 'custom' && (
-                          <div className="mt-3 p-3 border rounded-lg bg-gray-50">
+                          <div className="mt-3 p-3 border rounded-[10px] bg-gray-50">
                             <Label className="text-sm font-medium mb-2 block">Chọn khung giờ</Label>
                             <div className="grid grid-cols-2 gap-3">
                               <div>
@@ -3790,7 +3790,7 @@ export default function SettingsManagement() {
             
             {distributionRuleToDelete && (
               <div className="py-4">
-                <div className="bg-gray-50 p-4 rounded-lg">
+                <div className="bg-gray-50 p-4 rounded-[10px]">
                   <h4 className="font-medium text-gray-900">{distributionRuleToDelete.name}</h4>
                   <p className="text-sm text-gray-600 mt-1">{distributionRuleToDelete.description}</p>
                   <div className="flex items-center space-x-2 mt-2">
@@ -3910,10 +3910,10 @@ export default function SettingsManagement() {
                   {colorOptions.map((color) => (
                     <button
                       key={color.value}
-                      className={`w-12 h-12 rounded-lg border-2 ${
+                      className={`w-12 h-12 rounded-[10px] border-2 ${
                         interfaceSettings.primaryColor === color.value 
                           ? 'border-gray-900 scale-110' 
-                          : 'border-gray-200 hover:border-gray-400'
+                          : 'border-[#e6ebf1] hover:border-gray-400'
                       } transition-all`}
                       style={{ backgroundColor: color.value }}
                       onClick={() => setInterfaceSettings(prev => ({ ...prev, primaryColor: color.value }))}
@@ -3928,7 +3928,7 @@ export default function SettingsManagement() {
                 <Label className="text-sm font-medium">Logo công ty</Label>
                 <div className="mt-2 space-y-2">
                   <div className="flex items-center space-x-4">
-                    <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                    <div className="w-16 h-16 border-2 border-dashed border-[#e6ebf1] rounded-[10px] flex items-center justify-center bg-gray-50">
                       {interfaceSettings.logo.url ? (
                         <Image 
                           src={interfaceSettings.logo.url} 
@@ -4598,7 +4598,7 @@ export default function SettingsManagement() {
             </div>
 
             {/* Settings Section */}
-            <div className="border rounded-lg p-3 space-y-3 bg-gray-50">
+            <div className="border rounded-[10px] p-3 space-y-3 bg-gray-50">
               {/* Switch 1: Sync Messages */}
               <div className="flex items-center justify-between">
                 <Label htmlFor={`sync-messages-${integration.id}`} className="text-sm">
@@ -4802,7 +4802,7 @@ export default function SettingsManagement() {
                 </div>
 
                 {selectedIntegrationType === 'zalo-personal' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                  <div className="bg-blue-50 border border-[#c7d9fd] rounded p-3">
                     <p className="text-sm text-blue-800">
                       Quét mã QR bằng ứng dụng Zalo để kết nối tài khoản cá nhân với CRM
                     </p>
@@ -4851,11 +4851,11 @@ export default function SettingsManagement() {
               <div className="flex gap-8">
                 {/* Left: QR Code */}
                 <div className="flex-shrink-0">
-                  <div className="w-64 h-64 bg-gray-100 border-2 border-gray-300 rounded-lg flex items-center justify-center relative">
+                  <div className="w-64 h-64 bg-gray-100 border-2 border-[#e6ebf1] rounded-[10px] flex items-center justify-center relative">
                     {qrCheckStatus === 'pending' || qrCheckStatus === 'checking' ? (
                       <>
                         {/* Placeholder QR code - replace with real QR */}
-                        <div className="w-56 h-56 bg-white border border-gray-200 rounded flex items-center justify-center">
+                        <div className="w-56 h-56 bg-white border border-[#e6ebf1] rounded flex items-center justify-center">
                           <QrCode className="w-32 h-32 text-gray-400" />
                         </div>
                         {qrCheckStatus === 'checking' && (
@@ -4962,19 +4962,19 @@ export default function SettingsManagement() {
               <div className="space-y-6 py-4">
                 {/* Logo Section */}
                 <div className="flex items-center justify-center gap-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
                     <span className="text-2xl font-bold text-blue-600">V</span>
                   </div>
 
                   <RefreshCw className="w-6 h-6 text-gray-400" />
 
-                  <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center">
+                  <div className="w-16 h-16 bg-[#3e79f7] rounded-full flex items-center justify-center">
                     <Facebook className="w-8 h-8 text-white" />
                   </div>
                 </div>
 
                 {/* Info Message */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
+                <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 text-center">
                   <p className="text-sm text-gray-700">
                     Đăng nhập Facebook để kết nối các{' '}
                     <strong className="text-blue-600">Fanpage</strong> bạn quản lý{' '}
@@ -4984,7 +4984,7 @@ export default function SettingsManagement() {
 
                 {/* Connect Button */}
                 <Button
-                  className="w-full h-12 text-base bg-blue-600 hover:bg-blue-700"
+                  className="w-full h-12 text-base bg-[#3e79f7] hover:bg-[#699dff]"
                   onClick={() => {
                     // TODO: Implement Facebook OAuth
                     alert('Chức năng đang được phát triển')
@@ -5014,7 +5014,7 @@ export default function SettingsManagement() {
               <div className="space-y-6 py-4">
                 {/* Logo Section */}
                 <div className="flex items-center justify-center gap-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center">
+                  <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
                     <span className="text-2xl font-bold text-blue-600">V</span>
                   </div>
 
@@ -5026,7 +5026,7 @@ export default function SettingsManagement() {
                 </div>
 
                 {/* Warning Message */}
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4 text-center">
                   <p className="text-sm text-gray-700">
                     Zalo OA yêu cầu bạn phải mua gói{' '}
                     <strong className="text-yellow-800">OA Nâng cao</strong> hoặc{' '}
@@ -5197,7 +5197,7 @@ export default function SettingsManagement() {
           <CardContent>
             <div className="space-y-4">
               {templates.map((template) => (
-                <div key={template.id} className="border rounded-lg p-4 hover:bg-gray-50">
+                <div key={template.id} className="border rounded-[10px] p-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
@@ -5430,7 +5430,7 @@ export default function SettingsManagement() {
               </div>
 
               {accessSettings.workingHours.enabled && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-lg">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 rounded-[10px]">
                   <div>
                     <Label>Giờ bắt đầu</Label>
                     <Input
@@ -5517,7 +5517,7 @@ export default function SettingsManagement() {
           <CardContent>
             <div className="space-y-4">
               {userAccessRules.map((rule) => (
-                <div key={rule.id} className="border rounded-lg p-4">
+                <div key={rule.id} className="border rounded-[10px] p-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -5580,7 +5580,7 @@ export default function SettingsManagement() {
                 <div key={log.id} className="flex items-center justify-between p-3 border rounded">
                   <div className="flex items-center space-x-3">
                     <div className={`w-3 h-3 rounded-full ${
-                      log.status === 'allowed' ? 'bg-green-500' : 'bg-red-500'
+                      log.status === 'allowed' ? 'bg-[#2dc56a]' : 'bg-red-500'
                     }`} />
                     <div>
                       <p className="font-medium">{log.userName}</p>
@@ -5889,7 +5889,7 @@ export default function SettingsManagement() {
         lead_management: 'text-blue-600 bg-blue-100',
         deal_management: 'text-purple-600 bg-purple-100',
         customer_management: 'text-green-600 bg-green-100',
-        user_management: 'text-indigo-600 bg-indigo-100',
+        user_management: 'text-[#3e79f7] bg-[#f0f7ff]',
         permissions: 'text-emerald-600 bg-emerald-100',
         workflow: 'text-violet-600 bg-violet-100',
         integration: 'text-orange-600 bg-orange-100',
@@ -5915,7 +5915,7 @@ export default function SettingsManagement() {
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {/* Hôm nay */}
-          <Card className="bg-gradient-to-br from-purple-400 to-purple-600 border border-gray-300 text-white rounded-lg shadow-md">
+          <Card className="bg-gradient-to-br from-purple-400 to-purple-600 border border-[#e6ebf1] text-white rounded-[10px] shadow-md">
             <CardContent className="p-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium opacity-90">Hôm nay</p>
@@ -5925,7 +5925,7 @@ export default function SettingsManagement() {
           </Card>
 
           {/* Tuần này */}
-          <Card className="bg-gradient-to-br from-blue-400 to-blue-600 border border-gray-300 text-white rounded-lg shadow-md">
+          <Card className="bg-gradient-to-br from-blue-400 to-blue-600 border border-[#e6ebf1] text-white rounded-[10px] shadow-md">
             <CardContent className="p-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium opacity-90">Tuần này</p>
@@ -5935,7 +5935,7 @@ export default function SettingsManagement() {
           </Card>
 
           {/* Tháng này */}
-          <Card className="bg-gradient-to-br from-green-400 to-green-600 border border-gray-300 text-white rounded-lg shadow-md">
+          <Card className="bg-gradient-to-br from-green-400 to-green-600 border border-[#e6ebf1] text-white rounded-[10px] shadow-md">
             <CardContent className="p-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium opacity-90">Tháng này</p>
@@ -5945,7 +5945,7 @@ export default function SettingsManagement() {
           </Card>
 
           {/* Admin */}
-          <Card className="bg-gradient-to-br from-orange-400 to-orange-600 border border-gray-300 text-white rounded-lg shadow-md">
+          <Card className="bg-gradient-to-br from-orange-400 to-orange-600 border border-[#e6ebf1] text-white rounded-[10px] shadow-md">
             <CardContent className="p-6">
               <div className="space-y-2">
                 <p className="text-sm font-medium opacity-90">Admin</p>
@@ -5956,7 +5956,7 @@ export default function SettingsManagement() {
         </div>
 
         {/* Filters */}
-        <Card className="border border-gray-300 rounded-lg shadow-md">
+        <Card className="border border-[#e6ebf1] rounded-[10px] shadow-md">
           <CardHeader>
             <CardTitle>Bộ lọc & Tìm kiếm</CardTitle>
             <CardDescription>
@@ -6013,7 +6013,7 @@ export default function SettingsManagement() {
         </Card>
 
         {/* History Table */}
-        <Card className="border border-gray-300 rounded-lg shadow-md">
+        <Card className="border border-[#e6ebf1] rounded-[10px] shadow-md">
           <CardHeader>
             <CardTitle>Lịch sử Hệ thống</CardTitle>
             <CardDescription>Theo dõi chi tiết các thay đổi hệ thống theo thời gian</CardDescription>
@@ -6479,7 +6479,7 @@ export default function SettingsManagement() {
           {/* Main Content - Left sidebar + Right table */}
           <div className="flex gap-4">
           {/* Left Sidebar - Category List */}
-          <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
             <div className="p-2">
               {categories.map(cat => (
                 <div
@@ -6596,7 +6596,7 @@ export default function SettingsManagement() {
                             </button>
                           </div>
                           {productActionMenuOpen === p.id && (
-                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+                            <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-2 z-50">
                               {/* Thao tác nhanh */}
                               <div className="px-3 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wide">Thao tác nhanh</div>
                               <button
@@ -6674,7 +6674,7 @@ export default function SettingsManagement() {
 
               {/* Image Upload */}
               <div>
-                <div className="w-16 h-16 border border-dashed border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                <div className="w-16 h-16 border border-dashed border-[#e6ebf1] rounded-[10px] flex items-center justify-center bg-gray-50">
                   <ImageIcon className="w-6 h-6 text-gray-400" />
                 </div>
                 <Button variant="outline" size="sm" className="mt-2">
@@ -6743,7 +6743,7 @@ export default function SettingsManagement() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm">Thể loại <span className="text-red-500">*</span></Label>
-                  <div className={`mt-1.5 border rounded-lg p-3 space-y-2 max-h-[120px] overflow-y-auto ${productFormErrors.categoryIds ? 'border-red-500' : 'border-gray-200'}`}>
+                  <div className={`mt-1.5 border rounded-[10px] p-3 space-y-2 max-h-[120px] overflow-y-auto ${productFormErrors.categoryIds ? 'border-red-500' : 'border-[#e6ebf1]'}`}>
                     {categories.map(cat => (
                       <label key={cat.id} className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-1 py-0.5 rounded">
                         <input
@@ -6756,7 +6756,7 @@ export default function SettingsManagement() {
                             setProductForm(prev => ({ ...prev, categoryIds: newIds }))
                             if (productFormErrors.categoryIds) setProductFormErrors((prev: any) => ({ ...prev, categoryIds: '' }))
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                         />
                         <span className="text-sm">{cat.name}</span>
                       </label>
@@ -6834,7 +6834,7 @@ export default function SettingsManagement() {
                   <Label className="text-sm font-semibold">Biến thể <span className="text-red-500">*</span></Label>
                   
                   {variants.map((variant, vIndex) => (
-                    <div key={variant.id} className="border rounded-lg p-4 space-y-3 relative">
+                    <div key={variant.id} className="border rounded-[10px] p-4 space-y-3 relative">
                       {variants.length > 1 && (
                         <Button 
                           variant="ghost" 
@@ -6907,7 +6907,7 @@ export default function SettingsManagement() {
                   {variantCombinations.length > 0 && (
                     <div className="mt-4">
                       <Label className="text-sm font-semibold">Danh sách biến thể <span className="text-red-500">*</span></Label>
-                      <div className="border rounded-lg mt-2 overflow-hidden">
+                      <div className="border rounded-[10px] mt-2 overflow-hidden">
                         <Table>
                           <TableHeader>
                             <TableRow className="bg-gray-50">
@@ -7318,7 +7318,7 @@ export default function SettingsManagement() {
   //           {/* Main Content - Left sidebar + Right table */}
   //           <div className="flex gap-4">
   //             {/* Left Sidebar - Indicator Groups List */}
-  //             <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+  //             <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
   //               <div className="p-2">
   //                 {indicatorGroups.map(group => (
   //                   <div
@@ -7476,7 +7476,7 @@ export default function SettingsManagement() {
   //                     type="color"
   //                     value={indicatorForm.color}
   //                     onChange={(e: any) => setIndicatorForm(prev => ({ ...prev, color: e.target.value }))}
-  //                     className="w-10 h-10 rounded border border-gray-300 cursor-pointer"
+  //                     className="w-10 h-10 rounded border border-[#e6ebf1] cursor-pointer"
   //                   />
   //                 </div>
   //               </div> */}
@@ -7771,7 +7771,7 @@ export default function SettingsManagement() {
     return (
       <div className="flex gap-6" style={{ minHeight: '500px' }}>
         {/* Left Sidebar - Pipeline List */}
-        <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+        <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
           <div className="p-2">
             {pipelines.map((pipeline) => (
               <div
@@ -7794,7 +7794,7 @@ export default function SettingsManagement() {
                       onClick={(e) => { e.stopPropagation(); setShowPipelineDropdown(showPipelineDropdown === pipeline.id ? null : pipeline.id) }}
                     />
                     {showPipelineDropdown === pipeline.id && (
-                      <div className="absolute right-0 top-6 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-20 min-w-[130px]">
+                      <div className="absolute right-0 top-6 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg py-1 z-20 min-w-[130px]">
                         <div
                           className="flex items-center gap-2 px-3 py-2 text-[#455560] hover:bg-gray-100 cursor-pointer text-sm"
                           onClick={(e) => { e.stopPropagation(); openEditModal() }}
@@ -7863,12 +7863,12 @@ export default function SettingsManagement() {
               {selectedPipeline.stages.sort((a, b) => a.order - b.order).map((stage) => (
                 <div
                   key={stage.id}
-                  className={`flex items-center justify-between p-3 border rounded-lg transition-all ${
+                  className={`flex items-center justify-between p-3 border rounded-[10px] transition-all ${
                     stage.isFixed
-                      ? 'bg-white border-gray-200'
+                      ? 'bg-white border-[#e6ebf1]'
                       : draggedStageId_PL === stage.id
                         ? 'bg-blue-50 border-blue-300 opacity-50'
-                        : 'bg-white border-gray-200 hover:bg-gray-50'
+                        : 'bg-white border-[#e6ebf1] hover:bg-gray-50'
                   }`}
                   draggable={!stage.isFixed}
                   onDragStart={(e) => handleDragStartPL(e, stage.id)}
@@ -7950,7 +7950,7 @@ export default function SettingsManagement() {
                     {pipelineForm.productIds.map(pid => {
                       const prod = availableProducts.find(p => p.id === pid)
                       return prod ? (
-                        <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                        <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
                           {prod.name}
                           <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== pid) }))} className="hover:text-blue-900">
                             <X className="w-3 h-3" />
@@ -7971,7 +7971,7 @@ export default function SettingsManagement() {
                   />
                 </div>
                 {/* Product list */}
-                <div className="mt-2 border border-gray-200 rounded-lg max-h-[180px] overflow-y-auto">
+                <div className="mt-2 border border-[#e6ebf1] rounded-[10px] max-h-[180px] overflow-y-auto">
                   {(() => {
                     const productPipelineMap = getProductPipelineMap()
                     const filtered = availableProducts.filter(p => 
@@ -8001,7 +8001,7 @@ export default function SettingsManagement() {
                                 : pipelineForm.productIds.filter(id => id !== product.id)
                               setPipelineForm(prev => ({ ...prev, productIds: newIds }))
                             }}
-                            className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -8061,7 +8061,7 @@ export default function SettingsManagement() {
                       {pipelineForm.productIds.map(pid => {
                         const prod = availableProducts.find(p => p.id === pid)
                         return prod ? (
-                          <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-blue-700 px-2 py-1 rounded-full">
+                          <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
                             {prod.name}
                             <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== pid) }))} className="hover:text-blue-900">
                               <X className="w-3 h-3" />
@@ -8082,7 +8082,7 @@ export default function SettingsManagement() {
                     />
                   </div>
                   {/* Product list */}
-                  <div className="mt-2 border border-gray-200 rounded-lg max-h-[180px] overflow-y-auto">
+                  <div className="mt-2 border border-[#e6ebf1] rounded-[10px] max-h-[180px] overflow-y-auto">
                     {(() => {
                       const productPipelineMap = getProductPipelineMap()
                       const filtered = availableProducts.filter(p => 
@@ -8113,7 +8113,7 @@ export default function SettingsManagement() {
                                   : pipelineForm.productIds.filter(id => id !== product.id)
                                 setPipelineForm(prev => ({ ...prev, productIds: newIds }))
                               }}
-                              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                              className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
@@ -8238,7 +8238,7 @@ export default function SettingsManagement() {
           {/* 0. Cài đặt chung */}
           <button
             onClick={() => setActiveTab('general')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'general'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8250,7 +8250,7 @@ export default function SettingsManagement() {
           {/* 1. Thiết Lập (Công ty) */}
           <button
             onClick={() => setActiveTab('company')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'company'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8262,7 +8262,7 @@ export default function SettingsManagement() {
           {/* 2. Phân quyền */}
           <button
             onClick={() => setActiveTab('permissions')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'permissions'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8274,7 +8274,7 @@ export default function SettingsManagement() {
           {/* 3. Dịch vụ (Sản phẩm) */}
           <button
             onClick={() => setActiveTab('products')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'products'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8286,7 +8286,7 @@ export default function SettingsManagement() {
           {/* 4. Bán hàng (Quy trình) */}
           <button
             onClick={() => setActiveTab('workflow')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'workflow'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8299,7 +8299,7 @@ export default function SettingsManagement() {
           {/* 5. Gói và thanh toán */}
           <button
             onClick={() => setActiveTab('payment')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'payment'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8312,7 +8312,7 @@ export default function SettingsManagement() {
           {/* 5. KPI */}
           {/* <button
             onClick={() => setActiveTab('kpi')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'kpi'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8325,7 +8325,7 @@ export default function SettingsManagement() {
           <button
             onClick={() => setActiveTab('notifications')}
             disabled
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'notifications'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8337,7 +8337,7 @@ export default function SettingsManagement() {
           {/* 6. Lịch sử */}
           <button
             onClick={() => setActiveTab('history')}
-            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+            className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
               activeTab === 'history'
                 ? 'text-[#3e79f7] bg-[#f0f7ff]'
                 : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'
@@ -8384,7 +8384,7 @@ export default function SettingsManagement() {
                       id="tax-in-revenue"
                       checked={includeTaxInRevenue}
                       onChange={(e) => setIncludeTaxInRevenue(e.target.checked)}
-                      className="w-4 h-4 rounded border-gray-300 text-[#3e79f7] focus:ring-[#3e79f7]"
+                      className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
                     />
                     <label htmlFor="tax-in-revenue" className="text-sm text-[#455560] cursor-pointer select-none">
                       Tính thuế vào doanh số nhân viên
@@ -8467,9 +8467,9 @@ export default function SettingsManagement() {
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       {/* Rule 1 */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
-                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                          <div className="w-3 h-3 rounded-full bg-[#2dc56a]" />
                           <div>
                             <h4 className="font-medium text-gray-900">Phân bổ leads website</h4>
                             <p className="text-sm text-gray-500">Tự động phân bổ leads từ website cho team sales</p>
@@ -8501,9 +8501,9 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Rule 2 */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
-                          <div className="w-3 h-3 rounded-full bg-green-500" />
+                          <div className="w-3 h-3 rounded-full bg-[#2dc56a]" />
                           <div>
                             <h4 className="font-medium text-gray-900">Leads VIP tự động</h4>
                             <p className="text-sm text-gray-500">Phân bổ leads có điểm cao cho Team Sales A và B</p>
@@ -8536,7 +8536,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Rule 3 */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-3 h-3 rounded-full bg-gray-400" />
                           <div>
@@ -8588,7 +8588,7 @@ export default function SettingsManagement() {
                   {/* Ranking Cards */}
                   <div className="flex flex-wrap gap-4">
                     {/* Kim Cương */}
-                    <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg relative">
+                    <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-purple-600 to-pink-500 text-white shadow-lg relative">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="absolute top-2 right-2 p-1 rounded hover:bg-white/20">
@@ -8614,7 +8614,7 @@ export default function SettingsManagement() {
                     </div>
 
                     {/* Vàng */}
-                    <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-yellow-500 to-amber-400 text-white shadow-lg relative">
+                    <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-yellow-500 to-amber-400 text-white shadow-lg relative">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="absolute top-2 right-2 p-1 rounded hover:bg-white/20">
@@ -8640,7 +8640,7 @@ export default function SettingsManagement() {
                     </div>
 
                     {/* Bạc */}
-                    <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-gray-400 to-slate-500 text-white shadow-lg relative">
+                    <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-gray-400 to-slate-500 text-white shadow-lg relative">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="absolute top-2 right-2 p-1 rounded hover:bg-white/20">
@@ -8666,7 +8666,7 @@ export default function SettingsManagement() {
                     </div>
 
                     {/* Đồng */}
-                    <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg relative">
+                    <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-orange-500 to-amber-600 text-white shadow-lg relative">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="absolute top-2 right-2 p-1 rounded hover:bg-white/20">
@@ -8692,7 +8692,7 @@ export default function SettingsManagement() {
                     </div>
 
                     {/* Mới */}
-                    <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg relative">
+                    <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[200px] flex-1 bg-gradient-to-br from-blue-500 to-indigo-600 text-white shadow-lg relative">
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button className="absolute top-2 right-2 p-1 rounded hover:bg-white/20">
@@ -8720,7 +8720,7 @@ export default function SettingsManagement() {
 
                   {/* Edit Panel for Diamond */}
                   {editingTier === 'diamond' && (
-                    <div className="border border-purple-200 rounded-lg p-6 bg-gradient-to-r from-purple-50 to-pink-50">
+                    <div className="border border-purple-200 rounded-[10px] p-6 bg-gradient-to-r from-purple-50 to-pink-50">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-purple-800">Kim Cương (Diamond)</h3>
@@ -8770,7 +8770,7 @@ export default function SettingsManagement() {
 
                   {/* Edit Panel for Gold */}
                   {editingTier === 'gold' && (
-                    <div className="border border-yellow-200 rounded-lg p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
+                    <div className="border border-yellow-200 rounded-[10px] p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-yellow-800">Vàng (Gold)</h3>
@@ -8820,7 +8820,7 @@ export default function SettingsManagement() {
 
                   {/* Edit Panel for Silver */}
                   {editingTier === 'silver' && (
-                    <div className="border border-gray-200 rounded-lg p-6 bg-gradient-to-r from-gray-50 to-slate-50">
+                    <div className="border border-[#e6ebf1] rounded-[10px] p-6 bg-gradient-to-r from-gray-50 to-slate-50">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-gray-800">Bạc (Silver)</h3>
@@ -8870,7 +8870,7 @@ export default function SettingsManagement() {
 
                   {/* Edit Panel for Bronze */}
                   {editingTier === 'bronze' && (
-                    <div className="border border-orange-200 rounded-lg p-6 bg-gradient-to-r from-orange-50 to-amber-50">
+                    <div className="border border-orange-200 rounded-[10px] p-6 bg-gradient-to-r from-orange-50 to-amber-50">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-orange-800">Đồng (Bronze)</h3>
@@ -8920,7 +8920,7 @@ export default function SettingsManagement() {
 
                   {/* Edit Panel for New */}
                   {editingTier === 'new' && (
-                    <div className="border border-blue-200 rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                    <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
                       <div className="flex items-center justify-between mb-4">
                         <div>
                           <h3 className="text-lg font-bold text-blue-800">Mới (New)</h3>
@@ -8936,7 +8936,7 @@ export default function SettingsManagement() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-3">
-                          <h4 className="font-semibold text-blue-700">Tiêu chí chính:</h4>
+                          <h4 className="font-semibold text-[#3e79f7]">Tiêu chí chính:</h4>
                           <div className="space-y-3">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-blue-600 w-24">Tổng chi tiêu:</span>
@@ -8952,7 +8952,7 @@ export default function SettingsManagement() {
                         </div>
                         <div className="space-y-3">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-semibold text-blue-700">Đặc quyền:</h4>
+                            <h4 className="font-semibold text-[#3e79f7]">Đặc quyền:</h4>
                             <button onClick={() => addBenefit('new')} className="text-blue-600 hover:text-blue-800"><Plus className="w-4 h-4" /></button>
                           </div>
                           <div className="space-y-2">
@@ -8970,11 +8970,11 @@ export default function SettingsManagement() {
 
                   {/* Quy trình đánh giá */}
                   {!editingTier && (
-                    <div className="border border-blue-200 rounded-lg p-6 bg-blue-50">
+                    <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-blue-50">
                       <h3 className="text-lg font-bold text-blue-800 mb-4">Quy trình đánh giá</h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                          <h4 className="font-semibold text-blue-700 mb-2">Tần suất cập nhật:</h4>
+                          <h4 className="font-semibold text-[#3e79f7] mb-2">Tần suất cập nhật:</h4>
                           <ul className="text-sm text-blue-600 space-y-1">
                             <li>• Tự động: Mỗi đơn hàng mới</li>
                             <li>• Định kỳ: Cuối mỗi tháng</li>
@@ -8982,7 +8982,7 @@ export default function SettingsManagement() {
                           </ul>
                         </div>
                         <div>
-                          <h4 className="font-semibold text-blue-700 mb-2">Yếu tố bổ sung:</h4>
+                          <h4 className="font-semibold text-[#3e79f7] mb-2">Yếu tố bổ sung:</h4>
                           <ul className="text-sm text-blue-600 space-y-1">
                             <li>• Phản hồi khách hàng</li>
                             <li>• Mức độ tương tác</li>
@@ -9017,7 +9017,7 @@ export default function SettingsManagement() {
                   <CardContent className="pt-6">
                     <div className="space-y-4">
                       {/* Tag: VIP */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#F59E0B' }} />
                           <div>
@@ -9025,7 +9025,7 @@ export default function SettingsManagement() {
                               <h4 className="font-medium">VIP</h4>
                             </div>
                             <div className="flex items-center space-x-2 mt-1">
-                              <Badge className="bg-indigo-100 text-indigo-800 text-xs">Toàn cục</Badge>
+                              <Badge className="bg-[#f0f7ff] text-indigo-800 text-xs">Toàn cục</Badge>
                             </div>
                           </div>
                         </div>
@@ -9065,7 +9065,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Tag: Tiềm năng cao */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#10B981' }} />
                           <div>
@@ -9074,7 +9074,7 @@ export default function SettingsManagement() {
                               <Badge variant="outline" className="text-xs"><Star className="w-3 h-3 mr-1" />Mặc định</Badge>
                             </div>
                             <div className="flex items-center space-x-2 mt-1">
-                              <Badge className="bg-indigo-100 text-indigo-800 text-xs">Toàn cục</Badge>
+                              <Badge className="bg-[#f0f7ff] text-indigo-800 text-xs">Toàn cục</Badge>
                             </div>
                           </div>
                         </div>
@@ -9114,7 +9114,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Tag: Deal lớn */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#EF4444' }} />
                           <div>
@@ -9122,7 +9122,7 @@ export default function SettingsManagement() {
                               <h4 className="font-medium">Deal lớn</h4>
                             </div>
                             <div className="flex items-center space-x-2 mt-1">
-                              <Badge className="bg-indigo-100 text-indigo-800 text-xs">Toàn cục</Badge>
+                              <Badge className="bg-[#f0f7ff] text-indigo-800 text-xs">Toàn cục</Badge>
                             </div>
                           </div>
                         </div>
@@ -9162,7 +9162,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Tag: Khẩn cấp */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#DC2626' }} />
                           <div>
@@ -9170,7 +9170,7 @@ export default function SettingsManagement() {
                               <h4 className="font-medium">Khẩn cấp</h4>
                             </div>
                             <div className="flex items-center space-x-2 mt-1">
-                              <Badge className="bg-indigo-100 text-indigo-800 text-xs">Toàn cục</Badge>
+                              <Badge className="bg-[#f0f7ff] text-indigo-800 text-xs">Toàn cục</Badge>
                             </div>
                           </div>
                         </div>
@@ -9210,7 +9210,7 @@ export default function SettingsManagement() {
                         </div>
                       </div>
                       {/* Tag: Team A */}
-                      <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px] hover:bg-gray-50">
                         <div className="flex items-center space-x-4">
                           <div className="w-4 h-4 rounded" style={{ backgroundColor: '#3B82F6' }} />
                           <div>
@@ -9309,21 +9309,21 @@ export default function SettingsManagement() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="space-y-4">
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px]">
                         <div>
                           <h4 className="font-medium">Lead mới từ Website</h4>
                           <p className="text-sm text-[#455560]">Gửi email chào mừng khi có lead mới</p>
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px]">
                         <div>
                           <h4 className="font-medium">Nhắc follow-up</h4>
                           <p className="text-sm text-[#455560]">Nhắc nhân viên sau 3 ngày không liên hệ</p>
                         </div>
                         <Switch defaultChecked />
                       </div>
-                      <div className="flex items-center justify-between p-4 border rounded-lg">
+                      <div className="flex items-center justify-between p-4 border rounded-[10px]">
                         <div>
                           <h4 className="font-medium">Deal thắng</h4>
                           <p className="text-sm text-[#455560]">Thông báo khi deal chuyển sang Won</p>
@@ -9345,7 +9345,7 @@ export default function SettingsManagement() {
                 <Card>
                   <CardContent className="pt-6">
                     <div className="space-y-3">
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center gap-3">
                           <Mail className="w-4 h-4 text-[#3e79f7]" />
                           <div>
@@ -9358,7 +9358,7 @@ export default function SettingsManagement() {
                           <p className="text-xs text-[#455560] mt-1">2 phút trước</p>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center gap-3">
                           <Bell className="w-4 h-4 text-[#3e79f7]" />
                           <div>
@@ -9423,23 +9423,23 @@ export default function SettingsManagement() {
             </div>
 
             {/* Department/Team/Individual selection */}
-            <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3">
+            <div className="space-y-2 max-h-32 overflow-y-auto border rounded-[10px] p-3">
               {(selectedAssignmentType === 'department' || !selectedAssignmentType) && (
                 <>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="dept-support-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="dept-support-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="dept-support-main" className="text-sm">Phòng support</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="dept-qa-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="dept-qa-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="dept-qa-main" className="text-sm">Phòng kiểm tra chất lượng</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="dept-dev-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="dept-dev-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="dept-dev-main" className="text-sm">Phòng Dev CRM</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="dept-sales-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="dept-sales-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="dept-sales-main" className="text-sm">Phòng sale</label>
                   </div>
                 </>
@@ -9448,19 +9448,19 @@ export default function SettingsManagement() {
               {selectedAssignmentType === 'team' && (
                 <>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="team-sales-a-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="team-sales-a-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="team-sales-a-main" className="text-sm">Team Sales A</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="team-sales-b-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="team-sales-b-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="team-sales-b-main" className="text-sm">Team Sales B</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="team-telesales-1-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="team-telesales-1-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="team-telesales-1-main" className="text-sm">Team Telesales 1</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="team-telesales-2-main" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="team-telesales-2-main" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="team-telesales-2-main" className="text-sm">Team Telesales 2</label>
                   </div>
                 </>
@@ -9541,21 +9541,21 @@ export default function SettingsManagement() {
             <div>
               <Label className="text-sm font-medium">Phương thức phân bổ</Label>
               <div className="grid grid-cols-3 gap-3 mt-2">
-                <div className="border-2 border-blue-500 rounded-lg p-3 cursor-pointer bg-blue-50">
+                <div className="border-2 border-blue-500 rounded-[10px] p-3 cursor-pointer bg-blue-50">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="distribution-method-main" value="round_robin" defaultChecked className="mb-2" />
                     <h4 className="font-medium text-sm">Xoay vòng</h4>
                     <p className="text-xs text-gray-500 mt-1">Phân đều cho từng thành viên</p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="distribution-method-main" value="load_based" className="mb-2" />
                     <h4 className="font-medium text-sm">Theo tải</h4>
                     <p className="text-xs text-gray-500 mt-1">Dựa trên khối lượng công việc</p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="distribution-method-main" value="random" className="mb-2" />
                     <h4 className="font-medium text-sm">Ngẫu nhiên</h4>
@@ -9680,23 +9680,23 @@ export default function SettingsManagement() {
             </div>
 
             {/* Department/Team/Individual selection */}
-            <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3">
+            <div className="space-y-2 max-h-32 overflow-y-auto border rounded-[10px] p-3">
               {(selectedAssignmentType === 'department' || !selectedAssignmentType) && (
                 <>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-dept-support" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-dept-support" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-dept-support" className="text-sm">Phòng support</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-dept-qa" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-dept-qa" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-dept-qa" className="text-sm">Phòng kiểm tra chất lượng</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-dept-dev" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-dept-dev" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-dept-dev" className="text-sm">Phòng Dev CRM</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-dept-sales" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-dept-sales" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-dept-sales" className="text-sm">Phòng sale</label>
                   </div>
                 </>
@@ -9705,19 +9705,19 @@ export default function SettingsManagement() {
               {selectedAssignmentType === 'team' && (
                 <>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-team-sales-a" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-team-sales-a" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-team-sales-a" className="text-sm">Team Sales A</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-team-sales-b" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-team-sales-b" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-team-sales-b" className="text-sm">Team Sales B</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-team-telesales-1" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-team-telesales-1" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-team-telesales-1" className="text-sm">Team Telesales 1</label>
                   </div>
                   <div className="flex items-center space-x-3">
-                    <input type="checkbox" id="edit-team-telesales-2" className="w-4 h-4 rounded border-gray-300" />
+                    <input type="checkbox" id="edit-team-telesales-2" className="w-4 h-4 rounded border-[#e6ebf1]" />
                     <label htmlFor="edit-team-telesales-2" className="text-sm">Team Telesales 2</label>
                   </div>
                 </>
@@ -9795,21 +9795,21 @@ export default function SettingsManagement() {
             <div>
               <Label className="text-sm font-medium">Phương thức phân bổ</Label>
               <div className="grid grid-cols-3 gap-3 mt-2">
-                <div className="border-2 border-blue-500 rounded-lg p-3 cursor-pointer bg-blue-50">
+                <div className="border-2 border-blue-500 rounded-[10px] p-3 cursor-pointer bg-blue-50">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="edit-distribution-method" value="round_robin" defaultChecked className="mb-2" />
                     <h4 className="font-medium text-sm">Xoay vòng</h4>
                     <p className="text-xs text-gray-500 mt-1">Phân đều cho từng thành viên</p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="edit-distribution-method" value="load_based" className="mb-2" />
                     <h4 className="font-medium text-sm">Theo tải</h4>
                     <p className="text-xs text-gray-500 mt-1">Dựa trên khối lượng công việc</p>
                   </div>
                 </div>
-                <div className="border rounded-lg p-3 cursor-pointer hover:bg-gray-50 hover:border-gray-300">
+                <div className="border rounded-[10px] p-3 cursor-pointer hover:bg-gray-50 hover:border-[#e6ebf1]">
                   <div className="flex flex-col items-center text-center">
                     <input type="radio" name="edit-distribution-method" value="random" className="mb-2" />
                     <h4 className="font-medium text-sm">Ngẫu nhiên</h4>
@@ -9972,7 +9972,7 @@ export default function SettingsManagement() {
                       value: isAuto ? prev.name.toUpperCase().replace(/\s+/g, '_') : prev.value
                     }))
                   }}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <Label htmlFor="stage-auto" className="text-sm cursor-pointer">Tự động</Label>
               </div>
@@ -9983,7 +9983,7 @@ export default function SettingsManagement() {
                 Màu sắc <span className="text-red-500">*</span>
               </Label>
               <div
-                className="mt-1.5 h-10 rounded-md border border-gray-300 cursor-pointer hover:border-gray-400 transition-colors"
+                className="mt-1.5 h-10 rounded-md border border-[#e6ebf1] cursor-pointer hover:border-gray-400 transition-colors"
                 style={{ backgroundColor: newStageForm.color }}
                 onClick={() => openColorPicker('add')}
               />
@@ -10079,7 +10079,7 @@ export default function SettingsManagement() {
                       value: isAuto ? prev.name.toUpperCase().replace(/\s+/g, '_') : prev.value
                     }))
                   }}
-                  className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="w-4 h-4 rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <Label htmlFor="edit-stage-auto" className="text-sm cursor-pointer">Tự động</Label>
               </div>
@@ -10090,7 +10090,7 @@ export default function SettingsManagement() {
                 Màu sắc <span className="text-red-500">*</span>
               </Label>
               <div
-                className="mt-1.5 h-10 rounded-md border border-gray-300 cursor-pointer hover:border-gray-400 transition-colors"
+                className="mt-1.5 h-10 rounded-md border border-[#e6ebf1] cursor-pointer hover:border-gray-400 transition-colors"
                 style={{ backgroundColor: editStageForm.color }}
                 onClick={() => openColorPicker('edit')}
               />
@@ -10234,7 +10234,7 @@ export default function SettingsManagement() {
                   className={`w-6 h-6 rounded border ${
                     tempColor.hex.toUpperCase() === color.toUpperCase()
                       ? 'border-gray-900 ring-1 ring-gray-900'
-                      : 'border-gray-200 hover:border-gray-400'
+                      : 'border-[#e6ebf1] hover:border-gray-400'
                   }`}
                   style={{ backgroundColor: color }}
                   onClick={() => {
@@ -10387,7 +10387,7 @@ export default function SettingsManagement() {
                 Màu sắc <span className="text-red-500">*</span>
               </Label>
               <div
-                className="mt-1.5 h-10 rounded-md border border-gray-300 cursor-pointer hover:border-gray-400 transition-colors"
+                className="mt-1.5 h-10 rounded-md border border-[#e6ebf1] cursor-pointer hover:border-gray-400 transition-colors"
                 style={{ backgroundColor: selectedTag?.color || newTagForm.color }}
                 onClick={() => openColorPicker('tag')}
               />

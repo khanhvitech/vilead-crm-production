@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, Clock, Filter, Zap, ChevronDown, Check } from 'lucide-react'
@@ -23,8 +23,8 @@ const DEFAULT_CONDITION: StepCondition = { enabled: false, logic: 'all', rules: 
 // ─── Section wrapper ──────────────────────────────────────────────────────────
 function Section({ icon, title, children }: { icon: React.ReactNode; title: string; children: React.ReactNode }) {
   return (
-    <div className="border border-gray-200 rounded-2xl overflow-hidden">
-      <div className="flex items-center gap-2.5 px-5 py-3.5 bg-gray-50 border-b border-gray-200">
+    <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+      <div className="flex items-center gap-2.5 px-5 py-3.5 bg-gray-50 border-b border-[#e6ebf1]">
         <span className="text-gray-400">{icon}</span>
         <h4 className="text-sm font-bold text-gray-800">{title}</h4>
       </div>
@@ -60,16 +60,16 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6ebf1] shrink-0">
           <div>
             <h3 className="text-base font-bold text-gray-900">
               {isNew ? `Thêm bước ${stepCount + 1}` : `Cấu hình bước ${step?.step_order}`}
             </h3>
             <p className="text-xs text-gray-500 mt-0.5">Thiết lập thời gian, điều kiện và hành động</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors">
             <X size={18} className="text-gray-500" />
           </button>
         </div>
@@ -86,7 +86,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
               onChange={e => setName(e.target.value)}
               placeholder={`VD: Gửi tin chào mừng`}
               maxLength={100}
-              className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors"
             />
           </div>
 
@@ -123,12 +123,12 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                       type="number" min={1} max={365}
                       value={delay.value ?? 1}
                       onChange={e => setDelay(d => ({ ...d, value: Number(e.target.value) }))}
-                      className="w-20 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                      className="w-20 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
                     />
                     <select
                       value={delay.unit ?? 'days'}
                       onChange={e => setDelay(d => ({ ...d, unit: e.target.value as StepDelay['unit'] }))}
-                      className="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                      className="px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                     >
                       {DELAY_UNIT_OPTIONS.map(u => (
                         <option key={u.value} value={u.value}>{u.label}</option>
@@ -143,7 +143,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                         ...d,
                         time_window: d.time_window ? undefined : { from: '08:00', to: '18:00' },
                       }))}
-                      className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-colors ${delay.time_window ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}
+                      className={`w-4 h-4 rounded border-2 flex items-center justify-center cursor-pointer transition-colors ${delay.time_window ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1]'}`}
                     >
                       {delay.time_window && <Check size={10} color="white" />}
                     </div>
@@ -157,14 +157,14 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                         type="time"
                         value={delay.time_window.from}
                         onChange={e => setDelay(d => ({ ...d, time_window: { ...d.time_window!, from: e.target.value } }))}
-                        className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-2 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                       <span className="text-sm text-gray-500">đến</span>
                       <input
                         type="time"
                         value={delay.time_window.to}
                         onChange={e => setDelay(d => ({ ...d, time_window: { ...d.time_window!, to: e.target.value } }))}
-                        className="px-2 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-2 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                   )}
@@ -224,7 +224,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                   <button
                     type="button"
                     onClick={() => setActionDropOpen(o => !o)}
-                    className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                    className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-[#e6ebf1] rounded-[10px] text-sm hover:border-[#699dff] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors"
                   >
                     {actionType
                       ? <span className="text-gray-800">{ACTION_OPTIONS.find(a => a.type === actionType)?.icon} {ACTION_OPTIONS.find(a => a.type === actionType)?.label}</span>
@@ -232,7 +232,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                     <ChevronDown size={14} className={`text-gray-400 transition-transform ${actionDropOpen ? 'rotate-180' : ''}`} />
                   </button>
                   {actionDropOpen && (
-                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto">
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 max-h-64 overflow-y-auto">
                       {ACTION_OPTIONS.map(opt => (
                         <button
                           key={opt.type}
@@ -246,7 +246,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
                         >
                           <span className="text-base shrink-0">{opt.icon}</span>
                           <div>
-                            <p className={`text-sm font-semibold ${actionType === opt.type ? 'text-blue-700' : 'text-gray-800'}`}>{opt.label}</p>
+                            <p className={`text-sm font-semibold ${actionType === opt.type ? 'text-[#3e79f7]' : 'text-gray-800'}`}>{opt.label}</p>
                             <p className="text-xs text-gray-500 mt-0.5">{opt.description}</p>
                           </div>
                         </button>
@@ -269,11 +269,11 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200 shrink-0">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e6ebf1] shrink-0">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
@@ -281,7 +281,7 @@ export default function StepConfigModal({ step, stepCount, onSave, onClose }: Pr
             type="button"
             onClick={handleSave}
             disabled={!canSave}
-            className="px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="px-6 py-2.5 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {isNew ? 'Thêm bước' : 'Lưu bước'}
           </button>

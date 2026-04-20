@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { Mail, MessageSquare } from 'lucide-react'
@@ -37,7 +37,7 @@ export default function MarketingCampaigns() {
       {/* Channel Tabs */}
       <div className="flex">
         {/* Left vertical tabs */}
-        <div className="w-56 flex-shrink-0 border-r border-gray-200 pr-4">
+        <div className="w-56 flex-shrink-0 border-r border-[#e6ebf1] pr-4">
           <nav className="space-y-0.5">
             {channels.map((channel) => {
               const Icon = channel.icon
@@ -46,7 +46,7 @@ export default function MarketingCampaigns() {
                 <button
                   key={channel.id}
                   onClick={() => setActiveChannel(channel.id)}
-                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                  className={`w-full flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-[10px] transition-all duration-200 ${
                     isActive
                       ? 'text-[#3e79f7] bg-[#f0f7ff]'
                       : 'text-[#455560] hover:text-[#3e79f7] hover:bg-[#f8f9fa]'

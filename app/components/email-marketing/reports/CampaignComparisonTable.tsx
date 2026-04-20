@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { 
@@ -78,7 +78,7 @@ export function CampaignComparisonTable({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border p-6 animate-pulse">
+      <div className="bg-white rounded-[10px] border p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-5 h-5 bg-gray-200 rounded" />
           <div className="h-6 bg-gray-200 rounded w-48" />
@@ -94,7 +94,7 @@ export function CampaignComparisonTable({
   }
 
   return (
-    <div className="bg-white rounded-lg border overflow-hidden">
+    <div className="bg-white rounded-[10px] border overflow-hidden">
       {/* Header */}
       <div className="p-6 border-b">
         <div className="flex items-center gap-2">
@@ -153,7 +153,7 @@ export function CampaignComparisonTable({
                         <span className={`inline-block mt-1 px-2 py-0.5 text-xs rounded-full ${
                           campaign.type === 'ab' 
                             ? 'bg-purple-100 text-purple-700' 
-                            : 'bg-blue-100 text-blue-700'
+                            : 'bg-blue-100 text-[#3e79f7]'
                         }`}>
                           {campaign.type === 'ab' ? 'A/B Test' : 'Thường'}
                         </span>
@@ -185,7 +185,7 @@ export function CampaignComparisonTable({
                     {onViewCampaign && (
                       <button
                         onClick={() => onViewCampaign(campaign.id)}
-                        className="p-2 rounded-lg text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-2 rounded-[10px] text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                         title="Xem chi tiết"
                       >
                         <Eye className="h-4 w-4" />
@@ -209,7 +209,7 @@ export function CampaignComparisonTable({
             <button
               onClick={() => onPageChange(pagination.page - 1)}
               disabled={pagination.page <= 1}
-              className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-[10px] border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
             </button>
@@ -218,7 +218,7 @@ export function CampaignComparisonTable({
               <button
                 key={i}
                 onClick={() => onPageChange(i + 1)}
-                className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+                className={`px-3 py-1 rounded-[10px] text-sm transition-colors ${
                   pagination.page === i + 1
                     ? 'bg-blue-500 text-white'
                     : 'hover:bg-gray-100 text-gray-600'
@@ -231,7 +231,7 @@ export function CampaignComparisonTable({
             <button
               onClick={() => onPageChange(pagination.page + 1)}
               disabled={pagination.page >= pagination.total_pages}
-              className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-[10px] border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               <ChevronRight className="h-4 w-4" />
             </button>

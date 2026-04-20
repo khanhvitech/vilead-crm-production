@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo } from 'react'
 import { Search, ChevronDown, Users } from 'lucide-react'
@@ -127,13 +127,13 @@ export function PermissionTab({
             placeholder="Tìm nhân viên..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
-            className="pl-9 pr-4 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent w-64"
+            className="pl-9 pr-4 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent w-64"
           />
         </div>
       </div>
 
       {/* Table */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         <table className="w-full">
           <thead className="bg-[#fafafb]">
             <tr>
@@ -184,9 +184,9 @@ export function PermissionTab({
                       <button
                         onClick={() => setOpenDropdown(isDropdownOpen ? null : emp.id)}
                         className={cn(
-                          'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-sm',
+                          'flex items-center gap-2 px-3 py-1.5 rounded-[10px] border text-sm',
                           'hover:bg-gray-50 transition-colors min-w-[140px] justify-between',
-                          isDropdownOpen ? 'border-[#3e79f7] ring-2 ring-[#3e79f7]/20' : 'border-gray-300'
+                          isDropdownOpen ? 'border-[#3e79f7] ring-2 ring-[#3e79f7]/20' : 'border-[#e6ebf1]'
                         )}
                       >
                         <span className={cn(
@@ -202,7 +202,7 @@ export function PermissionTab({
                       </button>
 
                       {isDropdownOpen && (
-                        <div className="absolute z-50 mt-1 w-56 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                        <div className="absolute z-50 mt-1 w-56 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg py-1">
                           {PERMISSION_LEVEL_OPTIONS.map(option => {
                             // Chỉ cho phép chọn admin nếu chưa có admin hoặc đang là admin
                             const isAdminOption = option.value === 'admin'
@@ -266,7 +266,7 @@ export function PermissionTab({
 
       {/* Apply to others button */}
       {selectedEmployees.size > 1 && (
-        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg border border-blue-200">
+        <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-[10px] border border-[#c7d9fd]">
           <Users className="w-4 h-4 text-[#3e79f7]" />
           <span className="text-sm text-gray-700">
             Đã chọn <strong>{selectedEmployees.size}</strong> nhân viên
@@ -276,7 +276,7 @@ export function PermissionTab({
               const firstSelected = Array.from(selectedEmployees)[0]
               if (firstSelected) handleApplyToOthers(firstSelected)
             }}
-            className="ml-auto px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-lg hover:bg-[#2e69e7] transition-colors flex items-center gap-1"
+            className="ml-auto px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-[10px] hover:bg-[#2e69e7] transition-colors flex items-center gap-1"
           >
             <Users className="w-4 h-4" />
             Cùng áp dụng cho nhân viên khác

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -279,24 +279,24 @@ export default function CreateTaskModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
           <h2 className="text-xl font-semibold text-gray-900">Tạo Công việc mới</h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         {/* Progress Steps */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-[#e6ebf1]">
           <div className="flex items-center space-x-4">
             <div className={`flex items-center ${activeStep >= 1 ? 'text-blue-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
-                activeStep >= 1 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
+                activeStep >= 1 ? 'border-[#3e79f7] bg-[#3e79f7] text-white' : 'border-[#e6ebf1]'
               }`}>
                 1
               </div>
@@ -307,7 +307,7 @@ export default function CreateTaskModal({
             
             <div className={`flex items-center ${activeStep >= 2 ? 'text-blue-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
-                activeStep >= 2 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
+                activeStep >= 2 ? 'border-[#3e79f7] bg-[#3e79f7] text-white' : 'border-[#e6ebf1]'
               }`}>
                 2
               </div>
@@ -318,7 +318,7 @@ export default function CreateTaskModal({
             
             <div className={`flex items-center ${activeStep >= 3 ? 'text-blue-600' : 'text-gray-400'}`}>
               <div className={`w-8 h-8 rounded-full border-2 flex items-center justify-center text-sm font-medium ${
-                activeStep >= 3 ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-300'
+                activeStep >= 3 ? 'border-[#3e79f7] bg-[#3e79f7] text-white' : 'border-[#e6ebf1]'
               }`}>
                 3
               </div>
@@ -340,7 +340,7 @@ export default function CreateTaskModal({
                   <button
                     type="button"
                     onClick={() => setShowTemplates(!showTemplates)}
-                    className="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full flex items-center justify-between px-3 py-2 border border-[#e6ebf1] rounded-[10px] bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <span className="text-gray-500">
                       {formData.selectedTemplate ? 
@@ -352,7 +352,7 @@ export default function CreateTaskModal({
                   </button>
                   
                   {showTemplates && (
-                    <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg">
+                    <div className="absolute z-10 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg">
                       <div className="p-2">
                         <button
                           onClick={() => {
@@ -393,8 +393,8 @@ export default function CreateTaskModal({
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                   placeholder="Nhập tiêu đề công việc (tối đa 100 ký tự)"
                   maxLength={100}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.title ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                    errors.title ? 'border-red-300' : 'border-[#e6ebf1]'
                   }`}
                 />
                 {errors.title && (
@@ -414,8 +414,8 @@ export default function CreateTaskModal({
                   placeholder="Nhập mô tả chi tiết công việc (tối đa 1000 ký tự)"
                   maxLength={1000}
                   rows={4}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.description ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                    errors.description ? 'border-red-300' : 'border-[#e6ebf1]'
                   }`}
                 />
                 {errors.description && (
@@ -437,8 +437,8 @@ export default function CreateTaskModal({
                       value={formData.dueDate}
                       onChange={(e) => setFormData(prev => ({ ...prev, dueDate: e.target.value }))}
                       min={new Date().toISOString().split('T')[0]}
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.dueDate ? 'border-red-300' : 'border-gray-300'
+                      className={`w-full pl-10 pr-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                        errors.dueDate ? 'border-red-300' : 'border-[#e6ebf1]'
                       }`}
                     />
                   </div>
@@ -457,8 +457,8 @@ export default function CreateTaskModal({
                       type="time"
                       value={formData.dueTime}
                       onChange={(e) => setFormData(prev => ({ ...prev, dueTime: e.target.value }))}
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.dueTime ? 'border-red-300' : 'border-gray-300'
+                      className={`w-full pl-10 pr-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                        errors.dueTime ? 'border-red-300' : 'border-[#e6ebf1]'
                       }`}
                     />
                   </div>
@@ -504,7 +504,7 @@ export default function CreateTaskModal({
                           dueTime: targetDate.toTimeString().slice(0, 5)
                         }))
                       }}
-                      className="px-3 py-1 text-sm border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-1 text-sm border border-[#e6ebf1] rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       {option.label}
                     </button>
@@ -525,10 +525,10 @@ export default function CreateTaskModal({
                       key={priority.value}
                       type="button"
                       onClick={() => setFormData(prev => ({ ...prev, priority: priority.value }))}
-                      className={`p-3 border-2 rounded-lg text-center font-medium transition-all ${
+                      className={`p-3 border-2 rounded-[10px] text-center font-medium transition-all ${
                         formData.priority === priority.value 
                           ? priority.color + ' ring-2 ring-blue-500' 
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                       }`}
                     >
                       {priority.label}
@@ -567,10 +567,10 @@ export default function CreateTaskModal({
                         }
                         setSearchTerm('')
                       }}
-                      className={`p-3 border-2 rounded-lg text-center font-medium transition-all flex items-center justify-center space-x-2 ${
+                      className={`p-3 border-2 rounded-[10px] text-center font-medium transition-all flex items-center justify-center space-x-2 ${
                         formData.relatedType === type.value 
-                          ? 'border-blue-500 bg-blue-50 text-blue-700' 
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-blue-500 bg-blue-50 text-[#3e79f7]' 
+                          : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                       }`}
                     >
                       <type.icon className="w-4 h-4" />
@@ -594,7 +594,7 @@ export default function CreateTaskModal({
                             formData.relatedType === 'order' ? 'đơn hàng' : 'khách hàng'
                           }...`}
                           onFocus={() => setShowRelatedSearch(true)}
-                          className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                       {formData.relatedId && (
@@ -612,7 +612,7 @@ export default function CreateTaskModal({
                     </div>
 
                     {showRelatedSearch && getRelatedItems().length > 0 && (
-                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg max-h-60 overflow-y-auto">
                         {getRelatedItems().map(item => (
                           <button
                             key={item.id}
@@ -657,7 +657,7 @@ export default function CreateTaskModal({
 
                 {/* Selected Related Entity */}
                 {(formData.relatedType === 'general' || formData.relatedId) && (
-                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="mt-3 p-3 bg-blue-50 border border-[#c7d9fd] rounded-[10px]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         {formData.relatedType === 'lead' && <Building className="w-4 h-4 text-blue-600" />}
@@ -693,8 +693,8 @@ export default function CreateTaskModal({
                     <select
                       value={formData.assignedTo}
                       onChange={(e) => setFormData(prev => ({ ...prev, assignedTo: e.target.value, assignedTeam: '' }))}
-                      className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                        errors.assignedTo ? 'border-red-300' : 'border-gray-300'
+                      className={`w-full pl-10 pr-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                        errors.assignedTo ? 'border-red-300' : 'border-[#e6ebf1]'
                       }`}
                     >
                       <option value="">Chọn nhân viên</option>
@@ -717,7 +717,7 @@ export default function CreateTaskModal({
                     <select
                       value={formData.assignedTeam}
                       onChange={(e) => setFormData(prev => ({ ...prev, assignedTeam: e.target.value, assignedTo: '' }))}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     >
                       <option value="">Chọn đội</option>
                       {teams.map(team => (
@@ -757,7 +757,7 @@ export default function CreateTaskModal({
                       key={tag}
                       type="button"
                       onClick={() => addTag(tag)}
-                      className="px-2 py-1 text-sm border border-gray-300 rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="px-2 py-1 text-sm border border-[#e6ebf1] rounded-full hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       + {tag}
                     </button>
@@ -779,14 +779,14 @@ export default function CreateTaskModal({
                           addTag(newTag)
                         }
                       }}
-                      className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full pl-10 pr-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     />
                   </div>
                   <button
                     type="button"
                     onClick={() => addTag(newTag)}
                     disabled={!newTag.trim()}
-                    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
+                    className="px-3 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-1"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Thêm</span>
@@ -810,8 +810,8 @@ export default function CreateTaskModal({
                   placeholder="Thêm ghi chú nội bộ cho nhân viên phụ trách (tối đa 500 ký tự)"
                   maxLength={500}
                   rows={4}
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${
-                    errors.notes ? 'border-red-300' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${
+                    errors.notes ? 'border-red-300' : 'border-[#e6ebf1]'
                   }`}
                 />
                 {errors.notes && (
@@ -821,7 +821,7 @@ export default function CreateTaskModal({
               </div>
 
               {/* Summary */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-[10px] p-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Tóm tắt công việc</h3>
                 
                 <div className="space-y-3">
@@ -915,7 +915,7 @@ export default function CreateTaskModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200">
+        <div className="flex items-center justify-between p-6 border-t border-[#e6ebf1]">
           <div className="flex items-center space-x-3">
             {activeStep > 1 && (
               <button
@@ -938,14 +938,14 @@ export default function CreateTaskModal({
             {activeStep < 3 ? (
               <button
                 onClick={() => setActiveStep(activeStep + 1)}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                className="bg-[#3e79f7] text-white px-6 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium"
               >
                 Tiếp →
               </button>
             ) : (
               <button
                 onClick={handleSave}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-medium flex items-center space-x-2"
+                className="bg-[#2dc56a] text-white px-6 py-2 rounded-[10px] hover:bg-[#04d182] transition-colors font-medium flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu công việc</span>

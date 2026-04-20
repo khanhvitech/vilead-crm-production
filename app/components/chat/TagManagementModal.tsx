@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, Search, Plus, MoreHorizontal, Edit, Trash2 } from 'lucide-react'
@@ -98,7 +98,7 @@ export function TagManagementModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header */}
         <div className="px-5 py-3 border-b flex justify-between items-center bg-gray-50/50">
           <h3 className="font-semibold text-gray-900">Quản lý thẻ phân loại</h3>
@@ -112,7 +112,7 @@ export function TagManagementModal({
           
           {/* Editor Form */}
           {(isCreating || editingId) && (
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 mb-4">
+            <div className="bg-gray-50 p-4 rounded-[10px] border border-[#e6ebf1] space-y-3 mb-4">
               <div>
                 <label className="text-xs font-medium text-gray-700 mb-1 block">Tên thẻ mới</label>
                 <input 
@@ -121,7 +121,7 @@ export function TagManagementModal({
                   value={tagName}
                   onChange={e => setTagName(e.target.value)}
                   placeholder="Nhập tên thẻ phân loại"
-                  className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 />
               </div>
               <div>
@@ -152,7 +152,7 @@ export function TagManagementModal({
                 <button 
                   onClick={isCreating ? handleCreate : handleUpdate}
                   disabled={!tagName.trim()}
-                  className="px-3 py-1.5 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                  className="px-3 py-1.5 text-sm bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:opacity-50"
                 >
                   {isCreating ? 'Thêm thẻ' : 'Lưu lại'}
                 </button>
@@ -170,12 +170,12 @@ export function TagManagementModal({
                   value={searchTerm}
                   onChange={e => setSearchTerm(e.target.value)}
                   placeholder="Tìm kiếm thẻ..."
-                  className="w-full pl-9 pr-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full pl-9 pr-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 />
               </div>
               <button 
                 onClick={startCreate}
-                className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-lg text-sm font-medium hover:bg-blue-100"
+                className="flex items-center gap-1 px-3 py-2 bg-blue-50 text-blue-600 rounded-[10px] text-sm font-medium hover:bg-blue-100"
               >
                 <Plus className="w-4 h-4" /> Thêm thẻ
               </button>
@@ -188,7 +188,7 @@ export function TagManagementModal({
               <p className="text-center text-sm text-gray-500 py-8">Không tìm thấy thẻ nào</p>
             ) : (
               filteredTags.map(tag => (
-                <div key={tag.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-lg group">
+                <div key={tag.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded-[10px] group">
                   <div className="flex items-center gap-3">
                     <SolidTagIcon color={tag.color} className="w-3.5 h-3.5" />
                     <span className="text-sm font-medium text-gray-800">{tag.name}</span>
@@ -203,7 +203,7 @@ export function TagManagementModal({
                     </button>
                     
                     {activeMenuId === tag.id && (
-                      <div className="absolute right-0 top-full mt-1 w-32 bg-white border rounded-lg shadow-lg z-10 py-1 overflow-hidden">
+                      <div className="absolute right-0 top-full mt-1 w-32 bg-white border rounded-[10px] shadow-lg z-10 py-1 overflow-hidden">
                         <div className="fixed inset-0 z-[-1]" onClick={() => setActiveMenuId(null)} />
                         <button 
                           onClick={() => startEdit(tag)}

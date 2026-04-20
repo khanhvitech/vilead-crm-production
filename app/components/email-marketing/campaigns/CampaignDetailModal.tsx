@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useEffect, useMemo } from 'react';
 import { 
@@ -48,9 +48,9 @@ function StatCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border p-4">
+    <div className="bg-white rounded-[10px] border p-4">
       <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${colorClasses[color]}`}>
+        <div className={`w-10 h-10 rounded-[10px] flex items-center justify-center ${colorClasses[color]}`}>
           <Icon className="w-5 h-5" />
         </div>
         <div>
@@ -90,9 +90,9 @@ function ABTestResultsCard({
   };
 
   return (
-    <div className="bg-white rounded-xl border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       <div className="flex items-center gap-2 mb-4">
-        <div className="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
+        <div className="w-8 h-8 bg-purple-100 rounded-[10px] flex items-center justify-center">
           🔀
         </div>
         <h3 className="font-semibold text-gray-900">Kết quả A/B Testing</h3>
@@ -103,7 +103,7 @@ function ABTestResultsCard({
       <div className="grid grid-cols-2 gap-4 mb-4">
         {/* Version A */}
         <div className={`
-          p-4 rounded-lg border-2 
+          p-4 rounded-[10px] border-2 
           ${results.winner === 'a' ? 'border-green-500 bg-green-50' : 'border-red-200 bg-red-50'}
         `}>
           <div className="flex items-center gap-2 mb-2">
@@ -134,8 +134,8 @@ function ABTestResultsCard({
 
         {/* Version B */}
         <div className={`
-          p-4 rounded-lg border-2 
-          ${results.winner === 'b' ? 'border-green-500 bg-green-50' : 'border-blue-200 bg-blue-50'}
+          p-4 rounded-[10px] border-2 
+          ${results.winner === 'b' ? 'border-green-500 bg-green-50' : 'border-[#c7d9fd] bg-blue-50'}
         `}>
           <div className="flex items-center gap-2 mb-2">
             <span className="px-2 py-0.5 bg-blue-500 text-white text-xs font-bold rounded">B</span>
@@ -166,7 +166,7 @@ function ABTestResultsCard({
 
       {/* Comparison */}
       {results.evaluation_status === 'completed' && results.winner && results.winner !== 'tie' && (
-        <div className="p-3 bg-green-50 border border-green-200 rounded-lg mb-4">
+        <div className="p-3 bg-green-50 border border-green-200 rounded-[10px] mb-4">
           <p className="text-sm text-green-800 flex items-center gap-2">
             <Check className="w-4 h-4" />
             Kết luận: Phiên bản {results.winner.toUpperCase()} thắng với tỷ lệ mở cao hơn{' '}
@@ -181,7 +181,7 @@ function ABTestResultsCard({
 
       {/* Pending Evaluation */}
       {results.evaluation_status === 'pending' && (
-        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg mb-4">
+        <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-[10px] mb-4">
           <p className="text-sm text-yellow-800 flex items-center gap-2">
             <Clock className="w-4 h-4" />
             ⏳ Đang đánh giá... Vui lòng chờ để có kết quả chính xác
@@ -191,24 +191,24 @@ function ABTestResultsCard({
 
       {/* Send Remaining */}
       {results.can_send_remaining && (
-        <div className="p-4 bg-gray-50 border rounded-lg">
+        <div className="p-4 bg-gray-50 border rounded-[10px]">
           <p className="text-sm text-gray-700 mb-3">
             Gửi phần còn lại ({results.remaining_count.toLocaleString()} email)
           </p>
           <div className="flex gap-2">
             <button
               onClick={() => onSendRemaining('a')}
-              className="flex-1 px-3 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-50 text-sm"
+              className="flex-1 px-3 py-2 border border-red-300 text-red-700 rounded-[10px] hover:bg-red-50 text-sm"
             >
               Gửi phiên bản A
             </button>
             <button
               onClick={() => onSendRemaining('b')}
               className={`
-                flex-1 px-3 py-2 rounded-lg text-sm
+                flex-1 px-3 py-2 rounded-[10px] text-sm
                 ${results.winner === 'b' 
-                  ? 'bg-green-600 text-white hover:bg-green-700' 
-                  : 'border border-blue-300 text-blue-700 hover:bg-blue-50'
+                  ? 'bg-[#2dc56a] text-white hover:bg-[#04d182]' 
+                  : 'border border-blue-300 text-[#3e79f7] hover:bg-blue-50'
                 }
               `}
             >
@@ -257,11 +257,11 @@ function RecipientsList({
   ];
 
   return (
-    <div className="bg-white rounded-xl border">
+    <div className="bg-white rounded-[10px] border">
       {/* Header */}
       <div className="p-4 border-b flex items-center justify-between">
         <h3 className="font-semibold text-gray-900">Chi tiết người nhận</h3>
-        <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg">
+        <button className="flex items-center gap-2 px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-[10px]">
           <Download className="w-4 h-4" />
           Export Excel
         </button>
@@ -327,7 +327,7 @@ function RecipientsList({
                     {recipient.ab_version && (
                       <span className={`
                         px-2 py-0.5 text-xs font-bold rounded
-                        ${recipient.ab_version === 'a' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}
+                        ${recipient.ab_version === 'a' ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-[#3e79f7]'}
                       `}>
                         {recipient.ab_version.toUpperCase()}
                       </span>
@@ -378,7 +378,7 @@ export function CampaignDetailModal({ campaignId, onClose }: CampaignDetailModal
     return (
       <div className="fixed inset-0 z-50 bg-white flex items-center justify-center">
         <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-12 h-12 border-4 border-[#3e79f7] border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Đang tải...</p>
         </div>
       </div>
@@ -391,7 +391,7 @@ export function CampaignDetailModal({ campaignId, onClose }: CampaignDetailModal
         <div className="text-center">
           <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
           <p className="text-gray-600">Không tìm thấy chiến dịch</p>
-          <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-100 rounded-lg">
+          <button onClick={onClose} className="mt-4 px-4 py-2 bg-gray-100 rounded-[10px]">
             Đóng
           </button>
         </div>
@@ -409,7 +409,7 @@ export function CampaignDetailModal({ campaignId, onClose }: CampaignDetailModal
           <div className="flex items-center gap-4">
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors"
             >
               <ArrowLeft className="w-5 h-5 text-gray-600" />
             </button>
@@ -433,24 +433,24 @@ export function CampaignDetailModal({ campaignId, onClose }: CampaignDetailModal
           {/* Actions */}
           <div className="flex items-center gap-2">
             {campaign.status === 'running' && (
-              <button className="flex items-center gap-2 px-4 py-2 border border-yellow-300 text-yellow-700 rounded-lg hover:bg-yellow-50">
+              <button className="flex items-center gap-2 px-4 py-2 border border-yellow-300 text-yellow-700 rounded-[10px] hover:bg-yellow-50">
                 <Pause className="w-4 h-4" />
                 Tạm dừng
               </button>
             )}
             {campaign.status === 'paused' && (
-              <button className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+              <button className="flex items-center gap-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182]">
                 <Play className="w-4 h-4" />
                 Tiếp tục
               </button>
             )}
             {campaign.status === 'sent' && (
               <>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50">
                   <Copy className="w-4 h-4" />
                   Tạo bản sao
                 </button>
-                <button className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                <button className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50">
                   <Download className="w-4 h-4" />
                   Export
                 </button>
@@ -458,7 +458,7 @@ export function CampaignDetailModal({ campaignId, onClose }: CampaignDetailModal
             )}
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-gray-100"
+              className="p-2 rounded-[10px] hover:bg-gray-100"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>

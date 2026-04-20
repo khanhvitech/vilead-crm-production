@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { X, Zap, FolderOpen, Hash, AlertCircle } from 'lucide-react'
@@ -73,10 +73,10 @@ export default function CreateFlowModal({
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="relative bg-white rounded-[10px] shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         {/* Header */}
         <div className="flex items-center gap-3 px-6 py-5 border-b border-gray-100">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
+          <div className="w-10 h-10 rounded-[10px] bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shadow-sm">
             <Zap className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -85,7 +85,7 @@ export default function CreateFlowModal({
           </div>
           <button
             onClick={onClose}
-            className="ml-auto p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
+            className="ml-auto p-1.5 rounded-[10px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -105,10 +105,10 @@ export default function CreateFlowModal({
               placeholder="VD: Chào mừng khách hàng mới"
               autoFocus
               className={cn(
-                'w-full px-3.5 py-2.5 rounded-xl border text-sm outline-none transition-all',
+                'w-full px-3.5 py-2.5 rounded-[10px] border text-sm outline-none transition-all',
                 errors.name
                   ? 'border-red-300 ring-2 ring-red-100 focus:border-red-400'
-                  : 'border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100'
+                  : 'border-[#e6ebf1] focus:border-[#699dff] focus:ring-2 focus:ring-blue-100'
               )}
             />
             {errors.name && (
@@ -127,7 +127,7 @@ export default function CreateFlowModal({
             <select
               value={folderId}
               onChange={e => setFolderId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-gray-200 text-sm focus:border-blue-400 focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white"
+              className="w-full px-3.5 py-2.5 rounded-[10px] border border-[#e6ebf1] text-sm focus:border-[#699dff] focus:ring-2 focus:ring-blue-100 outline-none transition-all bg-white"
             >
               {folders.map(f => (
                 <option key={f.id} value={f.id}>{f.name}</option>
@@ -147,10 +147,10 @@ export default function CreateFlowModal({
               onChange={e => { handleShortcutChange(e.target.value); setErrors(p => ({ ...p, shortcut: '' })) }}
               placeholder="/chao"
               className={cn(
-                'w-full px-3.5 py-2.5 rounded-xl border text-sm font-mono outline-none transition-all',
+                'w-full px-3.5 py-2.5 rounded-[10px] border text-sm font-mono outline-none transition-all',
                 errors.shortcut
                   ? 'border-red-300 ring-2 ring-red-100'
-                  : 'border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100'
+                  : 'border-[#e6ebf1] focus:border-[#699dff] focus:ring-2 focus:ring-blue-100'
               )}
             />
             {errors.shortcut ? (
@@ -170,14 +170,14 @@ export default function CreateFlowModal({
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              className="flex-1 px-4 py-2.5 rounded-[10px] border border-[#e6ebf1] text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
             >
               Hủy
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
+              className="flex-1 px-4 py-2.5 rounded-[10px] bg-gradient-to-r from-blue-500 to-blue-600 text-white text-sm font-medium hover:from-blue-600 hover:to-blue-700 transition-all shadow-sm disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {submitting ? (
                 <span className="flex items-center justify-center gap-2">

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import {
@@ -137,7 +137,7 @@ function ZbsTemplateCard({
 
   return (
     <div
-      className="relative bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer group hover:shadow-lg hover:border-indigo-300 transition-all duration-200 flex flex-col h-full"
+      className="relative bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden cursor-pointer group hover:shadow-lg hover:border-indigo-300 transition-all duration-200 flex flex-col h-full"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -162,7 +162,7 @@ function ZbsTemplateCard({
           `}
         >
           <button
-            className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-800 rounded-lg text-xs font-medium hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 px-3 py-1.5 bg-white text-gray-800 rounded-[10px] text-xs font-medium hover:bg-gray-100 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onPreview(template);
@@ -173,7 +173,7 @@ function ZbsTemplateCard({
           </button>
           {showCreateCampaign && template.status === 'approved' && (
             <button
-              className="flex items-center gap-2 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-medium hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 bg-[#3e79f7] text-white rounded-[10px] text-xs font-medium hover:bg-[#699dff] transition-colors"
               onClick={(e) => {
                 e.stopPropagation();
                 onCreateCampaign(template);
@@ -237,7 +237,7 @@ function ZbsTemplateCard({
                       setShowMenu(false);
                     }}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-20">
                     <button
                       className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50"
                       onClick={(e) => {
@@ -341,7 +341,7 @@ export default function ZbsTemplateLibrary() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm theo tên mẫu..."
-            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+            className="w-full pl-10 pr-4 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
           />
         </div>
       </div>
@@ -383,7 +383,7 @@ export default function ZbsTemplateLibrary() {
           </div>
           
           {/* Red Note */}
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+          <div className="p-4 bg-red-50 border border-red-200 rounded-[10px]">
             <p className="text-sm text-red-600 font-medium">
               <span className="font-semibold">Lưu ý:</span> Khách hàng muốn đăng ký template ZBS mới vui lòng liên hệ Vilead-CRM để được hỗ trợ đăng ký.
             </p>

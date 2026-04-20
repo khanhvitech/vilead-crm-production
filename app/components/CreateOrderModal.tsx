@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { 
@@ -321,13 +321,13 @@ export default function CreateOrderModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
+      <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full max-h-screen overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
           <h2 className="text-xl font-semibold text-gray-900">Tạo đơn hàng mới</h2>
           <button 
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg"
+            className="p-2 hover:bg-gray-100 rounded-[10px]"
           >
             <X className="w-5 h-5" />
           </button>
@@ -344,7 +344,7 @@ export default function CreateOrderModal({
               <select
                 value={formData.customerId}
                 onChange={(e) => handleCustomerChange(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="">Chọn khách hàng</option>
                 {customers.map(customer => (
@@ -354,7 +354,7 @@ export default function CreateOrderModal({
                 ))}
               </select>
               {selectedCustomer && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg">
+                <div className="mt-2 p-3 bg-gray-50 rounded-[10px]">
                   <div className="text-sm">
                     <div><strong>Email:</strong> {selectedCustomer.email}</div>
                     {selectedCustomer.company && (
@@ -375,7 +375,7 @@ export default function CreateOrderModal({
                   <select
                     value={formData.status}
                     onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value }))}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                   >
                     <option value="draft">Nháp</option>
                     <option value="pending">Chờ xác nhận</option>
@@ -387,7 +387,7 @@ export default function CreateOrderModal({
                   <select
                     value={formData.paymentMethod}
                     onChange={(e) => setFormData(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                   >
                     <option value="cash">Tiền mặt</option>
                     <option value="transfer">Chuyển khoản</option>
@@ -402,7 +402,7 @@ export default function CreateOrderModal({
           </div>
 
           {/* Product Selection */}
-          <div className="border border-gray-200 rounded-lg p-4">
+          <div className="border border-[#e6ebf1] rounded-[10px] p-4">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Thêm sản phẩm</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
@@ -411,7 +411,7 @@ export default function CreateOrderModal({
                 <select
                   value={currentItem.productId}
                   onChange={(e) => setCurrentItem(prev => ({ ...prev, productId: e.target.value, variantId: '' }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                  className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                 >
                   <option value="">Chọn sản phẩm</option>
                   {products.map(product => (
@@ -428,7 +428,7 @@ export default function CreateOrderModal({
                   <select
                     value={currentItem.variantId}
                     onChange={(e) => setCurrentItem(prev => ({ ...prev, variantId: e.target.value }))}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                   >
                     <option value="">Mặc định ({formatCurrency(selectedProduct.basePrice)})</option>
                     {selectedProduct.variants.map(variant => (
@@ -447,7 +447,7 @@ export default function CreateOrderModal({
                   min="1"
                   value={currentItem.quantity}
                   onChange={(e) => setCurrentItem(prev => ({ ...prev, quantity: parseInt(e.target.value) || 1 }))}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                  className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                 />
               </div>
 
@@ -455,7 +455,7 @@ export default function CreateOrderModal({
                 <button
                   onClick={addProduct}
                   disabled={!currentItem.productId}
-                  className="w-full bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
+                  className="w-full bg-[#3e79f7] text-white px-4 py-2 rounded hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed text-sm"
                 >
                   <Plus className="w-4 h-4 inline mr-1" />
                   Thêm
@@ -471,7 +471,7 @@ export default function CreateOrderModal({
                   value={currentItem.notes}
                   onChange={(e) => setCurrentItem(prev => ({ ...prev, notes: e.target.value }))}
                   placeholder="Ví dụ: Khách yêu cầu tư vấn online"
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                  className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                 />
               </div>
             )}
@@ -479,12 +479,12 @@ export default function CreateOrderModal({
 
           {/* Order Items */}
           {formData.items.length > 0 && (
-            <div className="border border-gray-200 rounded-lg p-4">
+            <div className="border border-[#e6ebf1] rounded-[10px] p-4">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Sản phẩm đã chọn</h3>
               
               <div className="space-y-3">
                 {formData.items.map((item, index) => (
-                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div key={item.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">
                         {item.product.name}
@@ -513,7 +513,7 @@ export default function CreateOrderModal({
 
           {/* Suggestions */}
           {showSuggestions && (suggestions.upsell.length > 0 || suggestions.crosssell.length > 0) && (
-            <div className="border border-blue-200 rounded-lg p-4 bg-blue-50">
+            <div className="border border-[#c7d9fd] rounded-[10px] p-4 bg-blue-50">
               <h3 className="text-lg font-medium text-blue-900 mb-4">
                 <Zap className="w-5 h-5 inline mr-2" />
                 Đề xuất sản phẩm
@@ -531,7 +531,7 @@ export default function CreateOrderModal({
                         </div>
                         <button
                           onClick={() => addSuggestion(product, 'upsell')}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          className="px-3 py-1 bg-[#3e79f7] text-white rounded text-sm hover:bg-[#699dff]"
                         >
                           Thêm
                         </button>
@@ -553,7 +553,7 @@ export default function CreateOrderModal({
                         </div>
                         <button
                           onClick={() => addSuggestion(product, 'crosssell')}
-                          className="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+                          className="px-3 py-1 bg-[#3e79f7] text-white rounded text-sm hover:bg-[#699dff]"
                         >
                           Thêm
                         </button>
@@ -579,7 +579,7 @@ export default function CreateOrderModal({
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               <div className="space-y-4">
                 {/* Tax Selection */}
-                <div className="border border-gray-200 rounded-lg p-4">
+                <div className="border border-[#e6ebf1] rounded-[10px] p-4">
                   <h3 className="text-lg font-medium text-gray-900 mb-3">Thuế GTGT *</h3>
                   <select
                      value={formData.taxId}
@@ -587,7 +587,7 @@ export default function CreateOrderModal({
                        const tax = defaultTaxes.find(t => t.id === e.target.value)
                        setFormData(prev => ({ ...prev, taxId: e.target.value, taxRate: tax ? tax.rate : 0 }))
                      }}
-                     className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                     className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                      <option value="">Chọn mức thuế</option>
                      {defaultTaxes.filter(t => t.isActive).map(tax => (
@@ -597,7 +597,7 @@ export default function CreateOrderModal({
                 </div>
 
                 {/* Discount */}
-                <div className="border border-gray-200 rounded-lg p-4">
+                <div className="border border-[#e6ebf1] rounded-[10px] p-4">
                   <h3 className="text-lg font-medium text-gray-900 mb-3">Giảm giá</h3>
                   <div className="flex items-center space-x-3">
                     <input
@@ -605,13 +605,13 @@ export default function CreateOrderModal({
                       min="0"
                       value={formData.discount}
                       onChange={(e) => setFormData(prev => ({ ...prev, discount: parseFloat(e.target.value) || 0 }))}
-                      className="flex-1 border border-gray-300 rounded px-3 py-2 text-sm"
+                      className="flex-1 border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                       placeholder="0"
                     />
                     <select
                       value={formData.discountType}
                       onChange={(e) => setFormData(prev => ({ ...prev, discountType: e.target.value }))}
-                      className="border border-gray-300 rounded px-3 py-2 text-sm"
+                      className="border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                     >
                       <option value="amount">VNĐ</option>
                       <option value="percent">%</option>
@@ -634,7 +634,7 @@ export default function CreateOrderModal({
                     onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                     rows={3}
                     placeholder="Ví dụ: Gửi hợp đồng qua Zalo, Khách cần hóa đơn gấp"
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                     maxLength={500}
                   />
                   <div className="mt-1 text-xs text-gray-500">
@@ -655,7 +655,7 @@ export default function CreateOrderModal({
                         className={`px-3 py-1 rounded text-sm border ${
                           formData.tags.includes(tag)
                             ? 'bg-blue-100 border-blue-300 text-blue-800'
-                            : 'bg-gray-100 border-gray-300 text-gray-700 hover:bg-gray-200'
+                            : 'bg-gray-100 border-[#e6ebf1] text-gray-700 hover:bg-gray-200'
                         }`}
                       >
                         {tag}
@@ -673,13 +673,13 @@ export default function CreateOrderModal({
                     type="datetime-local"
                     value={formData.deadline}
                     onChange={(e) => setFormData(prev => ({ ...prev, deadline: e.target.value }))}
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm"
                   />
                 </div>
               </div>
 
               {/* Order Summary */}
-              <div className="border border-gray-200 rounded-lg p-4">
+              <div className="border border-[#e6ebf1] rounded-[10px] p-4">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Tổng kết đơn hàng</h3>
                 
                 <div className="space-y-3">
@@ -700,7 +700,7 @@ export default function CreateOrderModal({
                     <span>{formatCurrency(totals.tax)}</span>
                   </div>
                   
-                  <div className="border-t border-gray-200 pt-3">
+                  <div className="border-t border-[#e6ebf1] pt-3">
                     <div className="flex justify-between text-lg font-semibold">
                       <span>Tổng cộng:</span>
                       <span className="text-blue-600">{formatCurrency(totals.total)}</span>
@@ -719,14 +719,14 @@ export default function CreateOrderModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-between p-6 border-t border-[#e6ebf1] bg-gray-50">
           <div className="text-sm text-gray-600">
           </div>
           
           <div className="flex items-center space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50"
+              className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] text-gray-700 hover:bg-gray-50"
             >
               Hủy
             </button>
@@ -734,7 +734,7 @@ export default function CreateOrderModal({
             <button
               onClick={() => handleSave(true)}
               disabled={!formData.customerId || formData.items.length === 0}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] text-gray-700 hover:bg-gray-50 disabled:bg-gray-100 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               <Save className="w-4 h-4" />
               <span>Lưu nháp</span>
@@ -743,7 +743,7 @@ export default function CreateOrderModal({
             <button
               onClick={() => handleSave(false)}
               disabled={!formData.customerId || formData.items.length === 0}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               <Check className="w-4 h-4" />
               <span>Tạo đơn hàng</span>

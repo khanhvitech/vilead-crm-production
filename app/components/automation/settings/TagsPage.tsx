@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useEffect } from 'react'
 import {
@@ -55,7 +55,7 @@ function ActionMenu({ tag, onEdit, onLink, onDelete, onClose }: {
   }, [onClose])
 
   return (
-    <div ref={ref} className="absolute right-0 top-8 z-50 bg-white border border-gray-200 rounded-xl shadow-xl overflow-hidden" style={{ minWidth: 180 }}>
+    <div ref={ref} className="absolute right-0 top-8 z-50 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl overflow-hidden" style={{ minWidth: 180 }}>
       <button onClick={() => { onEdit(); onClose() }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors text-left">
         <Pencil size={14} className="text-gray-400" /> Sửa tag
       </button>
@@ -91,10 +91,10 @@ function TagModal({ tag, onClose, onSubmit }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">{tag ? 'Sửa tag' : 'Thêm thẻ mới'}</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-400">
             <X size={16} />
           </button>
         </div>
@@ -110,7 +110,7 @@ function TagModal({ tag, onClose, onSubmit }: {
               onChange={e => { setName(e.target.value); setError('') }}
               placeholder="Nhập tên tag..."
               maxLength={50}
-              className={`w-full px-3.5 py-2.5 text-sm bg-white border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors ${error ? 'border-red-400' : 'border-gray-200'}`}
+              className={`w-full px-3.5 py-2.5 text-sm bg-white border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors ${error ? 'border-red-400' : 'border-[#e6ebf1]'}`}
             />
             <div className="flex items-center justify-between mt-1.5">
               {error ? <p className="text-xs text-red-500">{error}</p> : <span />}
@@ -121,7 +121,7 @@ function TagModal({ tag, onClose, onSubmit }: {
           {/* Color */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Màu sắc</label>
-            <div className="p-3 bg-gray-50 rounded-xl">
+            <div className="p-3 bg-gray-50 rounded-[10px]">
               <ColorPicker value={color} onChange={setColor} />
             </div>
           </div>
@@ -133,10 +133,10 @@ function TagModal({ tag, onClose, onSubmit }: {
           </div>
 
           <div className="flex items-center gap-3 pt-1">
-            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
               Hủy
             </button>
-            <button type="submit" disabled={submitting} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+            <button type="submit" disabled={submitting} className="flex-1 px-4 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-semibold hover:bg-[#699dff] transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
               {submitting ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
               {tag ? 'Lưu thay đổi' : 'Tạo thẻ'}
             </button>
@@ -167,10 +167,10 @@ function LinkSequenceModal({ tag, sequences, onClose, onSubmit }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Liên kết kịch bản</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-400">
             <X size={16} />
           </button>
         </div>
@@ -188,7 +188,7 @@ function LinkSequenceModal({ tag, sequences, onClose, onSubmit }: {
               <button
                 type="button"
                 onClick={() => setOpen(o => !o)}
-                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-gray-200 rounded-xl text-sm hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="w-full flex items-center justify-between px-3.5 py-2.5 bg-white border border-[#e6ebf1] rounded-[10px] text-sm hover:border-[#699dff] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] transition-colors"
               >
                 <span className={selectedSeq ? 'text-gray-800' : 'text-gray-400'}>
                   {selectedSeq ? selectedSeq.name : 'Chọn kịch bản...'}
@@ -196,7 +196,7 @@ function LinkSequenceModal({ tag, sequences, onClose, onSubmit }: {
                 <ChevronDown size={15} className={`text-gray-400 transition-transform ${open ? 'rotate-180' : ''}`} />
               </button>
               {open && (
-                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden max-h-56 overflow-y-auto">
+                <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 overflow-hidden max-h-56 overflow-y-auto">
                   <button
                     onClick={() => { setSelected(null); setOpen(false) }}
                     className={`w-full flex items-center gap-2 px-4 py-2.5 text-sm text-left hover:bg-gray-50 transition-colors ${!selected ? 'text-blue-600 bg-blue-50' : 'text-gray-500'}`}
@@ -221,18 +221,18 @@ function LinkSequenceModal({ tag, sequences, onClose, onSubmit }: {
           </div>
 
           {/* Info */}
-          <div className="flex items-start gap-2.5 p-3.5 bg-blue-50 rounded-xl">
+          <div className="flex items-start gap-2.5 p-3.5 bg-blue-50 rounded-[10px]">
             <Info size={15} className="text-blue-500 mt-0.5 shrink-0" />
-            <p className="text-xs text-blue-700 leading-relaxed">
+            <p className="text-xs text-[#3e79f7] leading-relaxed">
               Khi gắn tag này cho hội thoại, khách hàng sẽ tự động được đăng ký vào kịch bản đã chọn.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
               Hủy
             </button>
-            <button onClick={handleSubmit} disabled={submitting} className="flex-1 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+            <button onClick={handleSubmit} disabled={submitting} className="flex-1 px-4 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-semibold hover:bg-[#699dff] transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
               {submitting && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               Lưu
             </button>
@@ -259,10 +259,10 @@ function DeleteTagModal({ tag, onClose, onConfirm }: {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-md mx-4 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
           <h2 className="text-base font-bold text-gray-900">Xóa tag</h2>
-          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400">
+          <button onClick={onClose} className="w-8 h-8 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-400">
             <X size={16} />
           </button>
         </div>
@@ -273,7 +273,7 @@ function DeleteTagModal({ tag, onClose, onConfirm }: {
             <TagBadge tag={tag} />
           </div>
           {hasWarning && (
-            <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+            <div className="p-4 bg-amber-50 border border-amber-200 rounded-[10px] space-y-2">
               <div className="flex items-center gap-2">
                 <AlertTriangle size={15} className="text-amber-500 shrink-0" />
                 <span className="text-sm font-semibold text-amber-700">Tag đang được sử dụng:</span>
@@ -286,10 +286,10 @@ function DeleteTagModal({ tag, onClose, onConfirm }: {
             </div>
           )}
           <div className="flex items-center gap-3 pt-1">
-            <button onClick={onClose} className="flex-1 px-4 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
+            <button onClick={onClose} className="flex-1 px-4 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-600 hover:bg-gray-50 transition-colors">
               Hủy
             </button>
-            <button onClick={handleConfirm} disabled={submitting} className="flex-1 px-4 py-2.5 bg-red-600 text-white rounded-xl text-sm font-semibold hover:bg-red-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
+            <button onClick={handleConfirm} disabled={submitting} className="flex-1 px-4 py-2.5 bg-[#ff6b72] text-white rounded-[10px] text-sm font-semibold hover:bg-[#d9505c] transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
               {submitting && <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />}
               Xác nhận xóa
             </button>
@@ -346,7 +346,7 @@ export default function TagsPage() {
       <div className="px-6 py-5 border-b border-gray-100">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-[10px] bg-blue-50 flex items-center justify-center">
               <TagIcon size={20} className="text-blue-600" />
             </div>
             <div>
@@ -356,7 +356,7 @@ export default function TagsPage() {
           </div>
           <button
             onClick={() => setModal({ type: 'create' })}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-semibold hover:bg-[#699dff] transition-colors shadow-sm"
           >
             <Plus size={16} />
             Thêm thẻ
@@ -371,7 +371,7 @@ export default function TagsPage() {
             placeholder="Tìm kiếm tag..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl bg-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] bg-white placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent transition-colors"
           />
         </div>
       </div>
@@ -380,7 +380,7 @@ export default function TagsPage() {
       <div className="flex-1 overflow-auto">
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-[10px] bg-gray-50 border-2 border-dashed border-[#e6ebf1] flex items-center justify-center">
               <TagIcon size={24} className="text-gray-300" />
             </div>
             <p className="text-sm font-medium text-gray-500">Không tìm thấy tag nào</p>
@@ -428,7 +428,7 @@ export default function TagsPage() {
                   <td className="px-3 py-3.5 relative">
                     <button
                       onClick={() => setActiveMenu(activeMenu === tag.id ? null : tag.id)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-all"
+                      className="w-8 h-8 flex items-center justify-center rounded-[10px] text-gray-400 hover:bg-gray-100 hover:text-gray-700 opacity-0 group-hover:opacity-100 transition-all"
                     >
                       <MoreHorizontal size={16} />
                     </button>

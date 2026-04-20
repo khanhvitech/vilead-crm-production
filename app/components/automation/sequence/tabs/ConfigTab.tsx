@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef, useCallback } from 'react'
 import { Plus, Zap, MessageSquare, ChevronDown, CheckSquare, Power, PowerOff, Copy, Trash2, X } from 'lucide-react'
@@ -165,9 +165,9 @@ export default function ConfigTab({ sequence, onChange }: Props) {
     <div className="space-y-4">
 
       {/* ══ BLOCK 1: Điều kiện khởi chạy ═══════════════════════════════════════ */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden mb-4">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden mb-4">
         <div className="px-6 py-4 border-b border-white bg-gray-50/80 flex items-center gap-3">
-          <div className="w-8 h-8 bg-orange-100 rounded-xl flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 bg-orange-100 rounded-[10px] flex items-center justify-center shrink-0">
             <Zap size={16} className="text-orange-500" />
           </div>
           <div className="flex-1">
@@ -187,7 +187,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
             <select
               value={sequence.trigger.type}
               onChange={e => handleTriggerTypeChange(e.target.value)}
-              className="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-3.5 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
             >
               {TRIGGER_GROUPS.map(group => (
                 <optgroup key={group.group} label={`── ${group.group} ──`}>
@@ -213,7 +213,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
       </div>
 
       {/* ══ BLOCK 2: Timeline Steps ═════════════════════════════════════════════ */}
-      <div className="bg-white border border-gray-200 rounded-lg">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px]">
 
 {/* ── Bulk action bar ── */}
         {selectedCount > 0 && (
@@ -230,12 +230,12 @@ export default function ConfigTab({ sequence, onChange }: Props) {
             <div className="flex-1" />
 
             <button onClick={handleSelectAll}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-blue-200 rounded-lg text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors shrink-0">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#c7d9fd] rounded-[10px] text-xs font-semibold text-[#3e79f7] hover:bg-blue-100 transition-colors shrink-0">
               <CheckSquare size={13} />Chọn tất cả ({sequence.steps.length})
             </button>
 
             <button onClick={handleBulkActivate}
-              className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors flex items-center gap-1.5">
+              className="px-3 py-1.5 bg-[#2dc56a] text-white text-sm rounded-md hover:bg-[#04d182] transition-colors flex items-center gap-1.5">
               <Power size={13} />Kích hoạt
             </button>
 
@@ -245,12 +245,12 @@ export default function ConfigTab({ sequence, onChange }: Props) {
             </button>
 
             <button onClick={handleBulkDuplicate}
-              className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1.5">
+              className="px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-1.5">
               <Copy size={13} />Nhân bản
             </button>
 
             <button onClick={handleBulkDelete}
-              className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition-colors flex items-center gap-1.5">
+              className="px-3 py-1.5 bg-[#ff6b72] text-white text-sm rounded-md hover:bg-[#d9505c] transition-colors flex items-center gap-1.5">
               <Trash2 size={13} />Xóa
             </button>
           </div>
@@ -275,7 +275,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
         <div className="px-4 pt-3 pb-2">
           {sequence.steps.length === 0 ? (
             <div className="text-center py-14">
-              <div className="w-16 h-16 bg-gray-50 border-2 border-dashed border-gray-200 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gray-50 border-2 border-dashed border-[#e6ebf1] rounded-[10px] flex items-center justify-center mx-auto mb-4">
                 <Plus size={24} className="text-gray-300" />
               </div>
               <p className="text-sm font-semibold text-gray-500">Chưa có bước nào</p>
@@ -318,7 +318,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
               <button
                 type="button"
                 onClick={() => setAddMenuOpen(o => !o)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-dashed border-gray-300 text-sm font-semibold text-gray-500 hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50 transition-all"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-[10px] border border-dashed border-[#e6ebf1] text-sm font-semibold text-gray-500 hover:border-[#699dff] hover:text-blue-600 hover:bg-blue-50 transition-all"
               >
                 <Plus size={15} />
                 Thêm mới
@@ -326,7 +326,7 @@ export default function ConfigTab({ sequence, onChange }: Props) {
               </button>
 
               {addMenuOpen && (
-                <div className="absolute left-0 top-full mt-1.5 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-52 overflow-hidden py-1">
+                <div className="absolute left-0 top-full mt-1.5 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 w-52 overflow-hidden py-1">
                   <button
                     onClick={handleAddMessage}
                     className="w-full flex items-start gap-3 px-4 py-3 hover:bg-gray-50 text-left transition-colors"

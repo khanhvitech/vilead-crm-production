@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useRef } from 'react';
 import { X, Upload, File, Trash2, AlertCircle, CheckCircle, Paperclip } from 'lucide-react';
@@ -117,16 +117,16 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-lg mx-4">
         {/* Header */}
-        <div className="border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-900">File đính kèm</h3>
             <p className="text-sm text-gray-500">
               {attachments.length}/{ATTACHMENT_CONSTRAINTS.maxFiles} file • {formatFileSize(totalSize)}/{formatFileSize(ATTACHMENT_CONSTRAINTS.maxTotalSize)}
             </p>
           </div>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -141,8 +141,8 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
             onDrop={handleDrop}
             onClick={() => canAddMore && fileInputRef.current?.click()}
             className={`
-              border-2 border-dashed rounded-lg p-8 text-center transition-colors cursor-pointer
-              ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-gray-400'}
+              border-2 border-dashed rounded-[10px] p-8 text-center transition-colors cursor-pointer
+              ${dragActive ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-gray-400'}
               ${!canAddMore ? 'opacity-50 cursor-not-allowed' : ''}
             `}
           >
@@ -166,7 +166,7 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
 
           {/* Error message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-[10px]">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span className="text-sm">{error}</span>
             </div>
@@ -179,7 +179,7 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
               {attachments.map(attachment => (
                 <div
                   key={attachment.id}
-                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                  className="flex items-center gap-3 p-3 bg-gray-50 rounded-[10px]"
                 >
                   <span className="text-2xl">{getFileIcon(attachment.file_type)}</span>
                   <div className="flex-1 min-w-0">
@@ -190,7 +190,7 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
                   </div>
                   <button
                     onClick={() => onRemove(attachment.id)}
-                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-[10px] transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
@@ -200,9 +200,9 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
           )}
 
           {/* Info */}
-          <div className="bg-blue-50 rounded-lg p-4">
+          <div className="bg-blue-50 rounded-[10px] p-4">
             <h4 className="text-sm font-medium text-blue-800 mb-2">Lưu ý:</h4>
-            <ul className="text-sm text-blue-700 space-y-1">
+            <ul className="text-sm text-[#3e79f7] space-y-1">
               <li>• File đính kèm sẽ tăng dung lượng email và có thể ảnh hưởng đến tỷ lệ gửi</li>
               <li>• Một số mail server có thể chặn email có file đính kèm lớn</li>
               <li>• Nên sử dụng link Google Drive/Dropbox cho file lớn</li>
@@ -211,10 +211,10 @@ export function AttachmentsModal({ attachments, onAdd, onRemove, onClose }: Atta
         </div>
 
         {/* Footer */}
-        <div className="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
+        <div className="bg-gray-50 border-t border-[#e6ebf1] px-6 py-4 flex justify-end gap-3 rounded-b-xl">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
           >
             Hoàn tất
           </button>

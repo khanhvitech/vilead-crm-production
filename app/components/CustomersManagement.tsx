@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import { 
@@ -400,8 +400,8 @@ export default function CustomersManagement() {
 
   // Customer source options
   const defaultCustomerSourceOptions: CreatableSelectOption[] = [
-    { value: 'website', label: 'Website', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { value: 'facebook', label: 'Facebook', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    { value: 'website', label: 'Website', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'facebook', label: 'Facebook', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'google', label: 'Google Ads', color: 'bg-red-100 text-red-700 border-red-200' },
     { value: 'referral', label: 'Giới thiệu', color: 'bg-green-100 text-green-700 border-green-200' },
     { value: 'cold-call', label: 'Cold Call', color: 'bg-orange-100 text-orange-700 border-orange-200' },
@@ -414,14 +414,14 @@ export default function CustomersManagement() {
 
   // Customer industry options
   const defaultCustomerIndustryOptions: CreatableSelectOption[] = [
-    { value: 'technology', label: 'Công nghệ thông tin', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { value: 'technology', label: 'Công nghệ thông tin', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'finance', label: 'Tài chính - Ngân hàng', color: 'bg-green-100 text-green-700 border-green-200' },
     { value: 'healthcare', label: 'Y tế - Sức khỏe', color: 'bg-red-100 text-red-700 border-red-200' },
     { value: 'education', label: 'Giáo dục', color: 'bg-purple-100 text-purple-700 border-purple-200' },
     { value: 'retail', label: 'Bán lẻ', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-    { value: 'manufacturing', label: 'Sản xuất', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+    { value: 'manufacturing', label: 'Sản xuất', color: 'bg-gray-100 text-gray-700 border-[#e6ebf1]' },
     { value: 'real-estate', label: 'Bất động sản', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-    { value: 'consulting', label: 'Tư vấn', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    { value: 'consulting', label: 'Tư vấn', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'marketing', label: 'Marketing', color: 'bg-pink-100 text-pink-700 border-pink-200' },
     { value: 'logistics', label: 'Vận chuyển - Logistics', color: 'bg-teal-100 text-teal-700 border-teal-200' },
   ]
@@ -1633,7 +1633,7 @@ export default function CustomersManagement() {
       customerType: 'returning',
       tags: [
         { id: '9', name: 'Khách hàng quay lại', color: 'bg-green-100 text-green-800', category: 'value' },
-        { id: '10', name: 'Giáo dục', color: 'bg-indigo-100 text-indigo-800', category: 'behavior' }
+        { id: '10', name: 'Giáo dục', color: 'bg-[#f0f7ff] text-indigo-800', category: 'behavior' }
       ],
       totalValue: '850,000',
       lifetimeValue: '1,700,000',
@@ -2470,7 +2470,7 @@ export default function CustomersManagement() {
       status: 'active',
       customerType: 'new',
       tags: [
-        { id: '23', name: 'Sách', color: 'bg-indigo-100 text-indigo-800', category: 'behavior' },
+        { id: '23', name: 'Sách', color: 'bg-[#f0f7ff] text-indigo-800', category: 'behavior' },
         { id: '24', name: 'Khách hàng mới', color: 'bg-green-100 text-green-800', category: 'value' }
       ],
       totalValue: '320,000',
@@ -3582,7 +3582,7 @@ export default function CustomersManagement() {
       {/* Remarketing Campaign Modal - Multi-step Flow */}
       {showRemarketingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden">
             {/* Header with Steps */}
             <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-orange-50 to-amber-50">
               <div className="flex items-center space-x-4">
@@ -3652,10 +3652,10 @@ export default function CustomersManagement() {
                     {/* Email Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('email')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'email' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3678,10 +3678,10 @@ export default function CustomersManagement() {
                     {/* SMS Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('sms')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'sms' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3704,10 +3704,10 @@ export default function CustomersManagement() {
                     {/* Phone Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('phone')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'phone' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3730,15 +3730,15 @@ export default function CustomersManagement() {
                     {/* Multi-Channel */}
                     <div 
                       onClick={() => setRemarketingCampaignType('multi')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'multi' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <Target className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 bg-[#f0f7ff] rounded-full flex items-center justify-center">
+                          <Target className="w-6 h-6 text-[#3e79f7]" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900">Multi-Channel</h4>
@@ -3756,10 +3756,10 @@ export default function CustomersManagement() {
                     {/* Social Media */}
                     <div 
                       onClick={() => setRemarketingCampaignType('social')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'social' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3782,10 +3782,10 @@ export default function CustomersManagement() {
                     {/* Promotion Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('promotion')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'promotion' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3808,10 +3808,10 @@ export default function CustomersManagement() {
                     {/* Birthday Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('birthday')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'birthday' 
                           ? 'border-pink-500 bg-pink-50' 
-                          : 'border-gray-200 hover:border-pink-300 hover:bg-pink-25'
+                          : 'border-[#e6ebf1] hover:border-pink-300 hover:bg-pink-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3844,13 +3844,13 @@ export default function CustomersManagement() {
                   </div>
 
                   {/* Filters */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-[10px]">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Mức độ rủi ro</label>
                       <select
                         value={remarketingFilters.riskLevel}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, riskLevel: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="high">Cao (≥70%)</option>
@@ -3864,7 +3864,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.daysSinceLastContact}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, daysSinceLastContact: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="7">≥ 7 ngày</option>
@@ -3879,7 +3879,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.customerType}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, customerType: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="diamond">Kim cương</option>
@@ -3894,7 +3894,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.engagementScore}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, engagementScore: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="high">Cao (≥70)</option>
@@ -3906,7 +3906,7 @@ export default function CustomersManagement() {
 
                   {/* Birthday Campaign Specific Filters */}
                   {remarketingCampaignType === 'birthday' && (
-                    <div className="p-4 bg-pink-50 border border-pink-200 rounded-lg">
+                    <div className="p-4 bg-pink-50 border border-pink-200 rounded-[10px]">
                       <h4 className="font-medium text-pink-800 mb-3 flex items-center">
                         🎂 Bộ lọc sinh nhật
                       </h4>
@@ -3916,7 +3916,7 @@ export default function CustomersManagement() {
                           <select
                             value={remarketingFilters.birthdayPeriod}
                             onChange={(e) => setRemarketingFilters(prev => ({ ...prev, birthdayPeriod: e.target.value, birthdayMonth: '' }))}
-                            className="w-full px-3 py-2 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                            className="w-full px-3 py-2 border border-pink-300 rounded-[10px] focus:ring-2 focus:ring-pink-500"
                           >
                             <option value="">Tháng này + tháng tới (mặc định)</option>
                             <option value="today">🎯 Hôm nay</option>
@@ -3932,7 +3932,7 @@ export default function CustomersManagement() {
                           <select
                             value={remarketingFilters.birthdayMonth}
                             onChange={(e) => setRemarketingFilters(prev => ({ ...prev, birthdayMonth: e.target.value, birthdayPeriod: '' }))}
-                            className="w-full px-3 py-2 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                            className="w-full px-3 py-2 border border-pink-300 rounded-[10px] focus:ring-2 focus:ring-pink-500"
                             disabled={remarketingFilters.birthdayPeriod !== ''}
                           >
                             <option value="">Chọn tháng sinh nhật</option>
@@ -3981,12 +3981,12 @@ export default function CustomersManagement() {
                     
                     <div className="max-h-80 overflow-y-auto space-y-2">
                       {getFilteredRemarketingCustomers().map(customer => (
-                        <div key={customer.id} className="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div key={customer.id} className="flex items-center space-x-3 p-3 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">
                           <input
                             type="checkbox"
                             checked={selectedRemarketingCustomers.find(c => c.id === customer.id) !== undefined}
                             onChange={() => handleRemarketingCustomerToggle(customer)}
-                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            className="rounded border-[#e6ebf1] text-orange-600 focus:ring-orange-500"
                           />
                           <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-medium">
                             {customer.name.charAt(0)}
@@ -4058,14 +4058,14 @@ export default function CustomersManagement() {
                                 ? `🎂 Chúc mừng sinh nhật - ${new Date().toLocaleDateString('vi-VN')}`
                                 : `Remarketing ${remarketingCampaignType.toUpperCase()} - ${new Date().toLocaleDateString('vi-VN')}`
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian bắt đầu</label>
                           <input
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         {remarketingCampaignType === 'promotion' && (
@@ -4076,7 +4076,7 @@ export default function CustomersManagement() {
                               defaultValue="20"
                               min="5"
                               max="50"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                             />
                           </div>
                         )}
@@ -4084,7 +4084,7 @@ export default function CustomersManagement() {
                           <div className="space-y-3">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">🎁 Ưu đãi sinh nhật</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="discount">Giảm giá 15%</option>
                                 <option value="gift">Quà tặng miễn phí</option>
                                 <option value="voucher">Voucher 100k</option>
@@ -4093,7 +4093,7 @@ export default function CustomersManagement() {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">📅 Gửi trước sinh nhật</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="0">Vào ngày sinh nhật</option>
                                 <option value="1">1 ngày trước</option>
                                 <option value="3">3 ngày trước</option>
@@ -4102,7 +4102,7 @@ export default function CustomersManagement() {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">💌 Template tin nhắn</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="formal">Lời chúc trang trọng</option>
                                 <option value="friendly">Lời chúc thân thiện</option>
                                 <option value="cute">Lời chúc dễ thương</option>
@@ -4116,7 +4116,7 @@ export default function CustomersManagement() {
                           <textarea
                             rows={3}
                             placeholder="Ghi chú thêm về chiến dịch..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -4142,7 +4142,7 @@ export default function CustomersManagement() {
                   </div>
 
                   {/* Campaign Preview */}
-                  <div className={`border rounded-lg p-6 ${
+                  <div className={`border rounded-[10px] p-6 ${
                     remarketingCampaignType === 'birthday' 
                       ? 'bg-gradient-to-r from-pink-50 to-purple-50 border-pink-200' 
                       : 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200'
@@ -4196,7 +4196,7 @@ export default function CustomersManagement() {
                     
                     {/* Birthday specific preview */}
                     {remarketingCampaignType === 'birthday' && (
-                      <div className="mt-4 p-4 bg-white rounded-lg border border-pink-200">
+                      <div className="mt-4 p-4 bg-white rounded-[10px] border border-pink-200">
                         <h5 className="font-medium text-pink-800 mb-2">💌 Preview tin nhắn sinh nhật:</h5>
                         <div className="text-sm text-gray-700 italic bg-pink-50 p-3 rounded border-l-4 border-pink-400">
                           &quot;🎉 Chúc mừng sinh nhật {selectedRemarketingCustomers[0]?.name || '[Tên khách hàng]'}! 🎂<br/>
@@ -4237,7 +4237,7 @@ export default function CustomersManagement() {
                       })
                     }
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-700 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                 >
                   {remarketingStep > 1 ? 'Quay lại' : 'Đóng'}
                 </button>
@@ -4274,7 +4274,7 @@ export default function CustomersManagement() {
                     (remarketingStep === 1 && !remarketingCampaignType) ||
                     (remarketingStep === 2 && selectedRemarketingCustomers.length === 0)
                   }
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {remarketingStep < 3 ? 'Tiếp tục' : 'Chạy chiến dịch'}
                 </button>
@@ -4287,8 +4287,8 @@ export default function CustomersManagement() {
       {/* Add Customer Modal - 2 Step Flow */}
       {showAddCustomerModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`bg-white rounded-lg shadow-xl w-full mx-4 max-h-[90vh] overflow-y-auto ${addCustomerStep === 1 ? 'max-w-2xl' : 'max-w-4xl'}`}>
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className={`bg-white rounded-[10px] shadow-xl w-full mx-4 max-h-[90vh] overflow-y-auto ${addCustomerStep === 1 ? 'max-w-2xl' : 'max-w-4xl'}`}>
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">
@@ -4297,7 +4297,7 @@ export default function CustomersManagement() {
                   {addCustomerStep === 1 && (
                     <button
                       onClick={() => setShowCustomerFieldSettingsModal(true)}
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-all"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 hover:text-gray-700 transition-all"
                     >
                       Thiết lập trường thông tin
                     </button>
@@ -4306,13 +4306,13 @@ export default function CustomersManagement() {
                 <div className="flex items-center gap-3">
                   {/* Step Indicator */}
                   <div className="flex items-center gap-2">
-                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 1 ? 'bg-blue-600 text-white' : 'bg-green-500 text-white'}`}>
+                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 1 ? 'bg-[#3e79f7] text-white' : 'bg-[#2dc56a] text-white'}`}>
                       {addCustomerStep === 1 ? '1' : '✓'}
                     </div>
                     <div className="w-8 h-0.5 bg-gray-300">
-                      <div className={`h-full ${addCustomerStep === 2 ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                      <div className={`h-full ${addCustomerStep === 2 ? 'bg-[#3e79f7]' : 'bg-gray-300'}`}></div>
                     </div>
-                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 2 ? 'bg-[#3e79f7] text-white' : 'bg-gray-200 text-gray-500'}`}>
                       2
                     </div>
                   </div>
@@ -4342,14 +4342,14 @@ export default function CustomersManagement() {
                   Loại khách hàng
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
                       value="individual"
                       checked={newCustomerData.customerType === 'individual'}
                       onChange={(e) => handleInputChange('customerType', e.target.value)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">👤 Cá nhân</div>
@@ -4357,14 +4357,14 @@ export default function CustomersManagement() {
                     </div>
                   </label>
                   
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
                       value="business"
                       checked={newCustomerData.customerType === 'business'}
                       onChange={(e) => handleInputChange('customerType', e.target.value)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">🏢 Công ty</div>
@@ -4394,7 +4394,7 @@ export default function CustomersManagement() {
                         handleInputChange('lastName', lastName)
                       }}
                       placeholder="Nhập tên khách hàng..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
                   <div>
@@ -4404,7 +4404,7 @@ export default function CustomersManagement() {
                       value={newCustomerData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="0901234567"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
                   <div>
@@ -4414,7 +4414,7 @@ export default function CustomersManagement() {
                       value={newCustomerData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="email@domain.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
                   <div>
@@ -4428,7 +4428,7 @@ export default function CustomersManagement() {
                           handleInputChange('estimatedRevenue', value ? formatCurrency(value) : '')
                         }}
                         placeholder="1.000.000"
-                        className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 pr-12 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                       <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">VNĐ</span>
                     </div>
@@ -4451,7 +4451,7 @@ export default function CustomersManagement() {
                         value={newCustomerData.company}
                         onChange={(e) => handleInputChange('company', e.target.value)}
                         placeholder="Tên công ty..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                     <div>
@@ -4461,7 +4461,7 @@ export default function CustomersManagement() {
                         value={newCustomerData.position}
                         onChange={(e) => handleInputChange('position', e.target.value)}
                         placeholder="CEO, Manager..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                     <div>
@@ -4484,7 +4484,7 @@ export default function CustomersManagement() {
                           handleInputChange('companySize', value)
                         }}
                         placeholder="Nhập số nhân viên"
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                   </div>
@@ -4513,7 +4513,7 @@ export default function CustomersManagement() {
                     <select
                       value={newCustomerData.province}
                       onChange={(e) => handleInputChange('province', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="hanoi">Hà Nội</option>
                       <option value="hcm">TP. Hồ Chí Minh</option>
@@ -4533,7 +4533,7 @@ export default function CustomersManagement() {
                     <select
                       value={newCustomerData.assignedTo}
                       onChange={(e) => handleInputChange('assignedTo', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="">Mặc định (Minh Expert - người tạo)</option>
                       <option value="Nguyễn Văn A">Nguyễn Văn A (12 leads hiện tại)</option>
@@ -4561,7 +4561,7 @@ export default function CustomersManagement() {
                       onChange={(e) => handleInputChange('interestedContent', e.target.value)}
                       placeholder="Mô tả nhu cầu, yêu cầu của khách hàng..."
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
                   <div>
@@ -4571,27 +4571,27 @@ export default function CustomersManagement() {
                       onChange={(e) => handleInputChange('notes', e.target.value)}
                       placeholder="Ghi chú thêm về khách hàng này..."
                       rows={2}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
                 </div>
               </div>
             </div>
             
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowAddCustomerModal(false)
                   setAddCustomerStep(1)
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={() => setAddCustomerStep(2)}
                 disabled={!newCustomerData.firstName && !newCustomerData.lastName || !newCustomerData.email || !newCustomerData.phone}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
                 Tạo đơn hàng
               </button>
@@ -4603,9 +4603,9 @@ export default function CustomersManagement() {
             {addCustomerStep === 2 && (
             <>
             {/* Customer Info Summary */}
-            <div className="flex items-center gap-3 mx-6 mt-4 mb-4 p-3 rounded-lg">
+            <div className="flex items-center gap-3 mx-6 mt-4 mb-4 p-3 rounded-[10px]">
               <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                   <User className="h-6 w-6" />
                 </span>
               </span>
@@ -4629,7 +4629,7 @@ export default function CustomersManagement() {
                 <textarea
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -4641,7 +4641,7 @@ export default function CustomersManagement() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="Tất cả">Tất cả</option>
                   <option value="Sản phẩm">Sản phẩm</option>
@@ -4649,12 +4649,12 @@ export default function CustomersManagement() {
               </div>
 
               {/* Product Selection - 2 Column Grid */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-[10px] p-4">
                 <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
                 <div className="max-h-80 overflow-y-auto">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
-                      <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                      <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                         <label className="flex items-start space-x-3 cursor-pointer">
                           <input
                             type="checkbox"
@@ -4677,7 +4677,7 @@ export default function CustomersManagement() {
                                 setProductQuantities(newQuantities)
                               }
                             }}
-                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -4696,7 +4696,7 @@ export default function CustomersManagement() {
                                 <select
                                   value={selectedPackages[product.id] || ''}
                                   onChange={(e) => setSelectedPackages({...selectedPackages, [product.id]: e.target.value})}
-                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                 >
                                   {availablePackages[product.id as keyof typeof availablePackages]?.map(pkg => (
                                     <option key={pkg.id} value={pkg.id}>
@@ -4712,7 +4712,7 @@ export default function CustomersManagement() {
                                   min={1}
                                   value={productQuantities[product.id] || 1}
                                   onChange={(e) => setProductQuantities({...productQuantities, [product.id]: Math.max(1, parseInt(e.target.value) || 1)})}
-                                  className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                 />
                               </div>
                             </div>
@@ -4746,7 +4746,7 @@ export default function CustomersManagement() {
                 const grandTotal = afterDiscount + vatAmount
                 
                 return (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                  <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
                     <h5 className="text-sm font-medium text-green-800 mb-3">
                       Đã chọn {selectedProducts.length} sản phẩm:
                     </h5>
@@ -4787,7 +4787,7 @@ export default function CustomersManagement() {
               })()}
 
               {/* Payment Info Section */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -4798,7 +4798,7 @@ export default function CustomersManagement() {
                       value={paymentDeadline}
                       onChange={(e) => setPaymentDeadline(e.target.value)}
                       min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     />
                   </div>
                   <div>
@@ -4811,7 +4811,7 @@ export default function CustomersManagement() {
                         value={discountPercent}
                         onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
                         placeholder="0"
-                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                       <select 
                         value={discountType}
@@ -4819,7 +4819,7 @@ export default function CustomersManagement() {
                           setDiscountType(e.target.value as '%' | 'VND')
                           setDiscountPercent(0)
                         }}
-                        className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       >
                         <option value="%">%</option>
                         <option value="VND">VNĐ</option>
@@ -4835,7 +4835,7 @@ export default function CustomersManagement() {
                     <select
                       value={paymentMethod}
                       onChange={(e) => setPaymentMethod(e.target.value)}
-                      className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     >
                       <option value="cash">Tiền mặt</option>
                       <option value="bank_transfer">Chuyển khoản</option>
@@ -4852,25 +4852,25 @@ export default function CustomersManagement() {
                   <div className="flex flex-wrap items-center gap-4">
                     <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
                     <div className="flex gap-3">
-                      <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                      <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                         <input
                           type="radio"
                           name="newCustomerPaymentMode"
                           value="full"
                           checked={paymentMode === 'full'}
                           onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                         />
                         <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
                       </label>
-                      <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                      <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                         <input
                           type="radio"
                           name="newCustomerPaymentMode"
                           value="installment"
                           checked={paymentMode === 'installment'}
                           onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                          className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                         />
                         <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
                       </label>
@@ -4880,7 +4880,7 @@ export default function CustomersManagement() {
 
                 {/* Installment Details */}
                 {paymentMode === 'installment' && (
-                <div className="border-t border-gray-200 pt-4">
+                <div className="border-t border-[#e6ebf1] pt-4">
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Số lần thanh toán</label>
                     <input
@@ -4896,7 +4896,7 @@ export default function CustomersManagement() {
                         )
                         setInstallmentData(newInstallments)
                       }}
-                      className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     />
                   </div>
 
@@ -4920,7 +4920,7 @@ export default function CustomersManagement() {
                     const isOverLimit = installment.amount > maxAllowed
                     
                     return (
-                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
                       <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                           Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
@@ -4936,7 +4936,7 @@ export default function CustomersManagement() {
                             setInstallmentData(newData)
                           }}
                           placeholder="0"
-                          className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                          className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
                         />
                       </div>
                       <div className="flex items-end gap-2">
@@ -4953,7 +4953,7 @@ export default function CustomersManagement() {
                               setInstallmentData(newData)
                             }}
                             min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           />
                         </div>
                       </div>
@@ -4969,10 +4969,10 @@ export default function CustomersManagement() {
               </p>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-between">
               <button
                 onClick={() => setAddCustomerStep(1)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
               >
                 ← Quay lại
               </button>
@@ -4982,14 +4982,14 @@ export default function CustomersManagement() {
                     setShowAddCustomerModal(false)
                     setAddCustomerStep(1)
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleAddCustomer}
                   disabled={selectedProducts.length === 0 || !paymentDeadline}
-                  className="px-4 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#2dc56a] border border-transparent rounded-[10px] hover:bg-[#04d182] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
                 >
                   Thêm khách hàng
                 </button>
@@ -5004,17 +5004,17 @@ export default function CustomersManagement() {
       {/* Customer Field Settings Modal */}
       {showCustomerFieldSettingsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-                    <button className="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-r border-gray-200">
+                  <div className="flex border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+                    <button className="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-r border-[#e6ebf1]">
                       Ẩn hiện trường dữ liệu
                     </button>
                     <button 
                       onClick={() => setShowCustomerFieldSettingsModal(false)}
-                      className="px-4 py-2 text-sm font-medium hover:bg-green-700 transition-all text-white bg-green-600 rounded-r-lg flex items-center gap-1"
+                      className="px-4 py-2 text-sm font-medium hover:bg-[#04d182] transition-all text-white bg-[#2dc56a] rounded-r-lg flex items-center gap-1"
                     >
                       Lưu
                     </button>
@@ -5031,118 +5031,118 @@ export default function CustomersManagement() {
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               <div className="space-y-3">
                 {/* Required fields - disabled */}
-                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-70 cursor-not-allowed">
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
                   <span className="text-sm text-gray-600">Số điện thoại</span>
                   <input 
                     disabled 
                     type="checkbox" 
                     checked 
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-not-allowed" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-70 cursor-not-allowed">
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
                   <span className="text-sm text-gray-600">Email</span>
                   <input 
                     disabled 
                     type="checkbox" 
                     checked 
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-not-allowed" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed" 
                   />
                 </label>
 
                 {/* Configurable fields */}
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Tên khách hàng</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.customerName}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, customerName: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Công ty</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.company}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, company: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Chức vụ</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.position}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, position: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Ngành nghề</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.industry}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, industry: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Quy mô công ty</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.companySize}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, companySize: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Địa chỉ</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.address}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, address: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Nguồn</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.source}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, source: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Sản phẩm quan tâm</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.product}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, product: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Nội dung quan tâm</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.content}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, content: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Ghi chú</span>
                   <input 
                     type="checkbox" 
                     checked={customerFormFieldVisibility.notes}
                     onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, notes: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer" 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
                   />
                 </label>
                 
-                <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-[#e6ebf1]">
                   <span className="text-red-500">*</span> Số điện thoại và Email là trường bắt buộc, không thể ẩn.
                 </p>
               </div>
@@ -5154,7 +5154,7 @@ export default function CustomersManagement() {
       {/* Ranking Definition Modal */}
       {showRankingDefinitionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b">
               <div className="flex items-center space-x-3">
                 <Crown className="w-6 h-6 text-yellow-600" />
@@ -5167,7 +5167,7 @@ export default function CustomersManagement() {
                 {!isEditingRanking ? (
                   <button
                     onClick={() => setIsEditingRanking(true)}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-[#c7d9fd] rounded-[10px] hover:bg-blue-100 transition-colors"
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     Chỉnh sửa
@@ -5176,14 +5176,14 @@ export default function CustomersManagement() {
                   <>
                     <button
                       onClick={handleSaveRankingSettings}
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-colors"
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#2dc56a] border border-transparent rounded-[10px] hover:bg-[#04d182] transition-colors"
                     >
                       <Save className="w-4 h-4 mr-1" />
                       Lưu
                     </button>
                     <button
                       onClick={handleCancelEditRanking}
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
                     >
                       Hủy
                     </button>
@@ -5202,7 +5202,7 @@ export default function CustomersManagement() {
               {/* Ranking Tiers */}
               <div className="space-y-6">
                 {/* Diamond */}
-                <div className="border border-purple-200 rounded-lg p-6 bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className="border border-purple-200 rounded-[10px] p-6 bg-gradient-to-r from-purple-50 to-pink-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
                       <Crown className="w-6 h-6 text-white" />
@@ -5223,7 +5223,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.totalSpent}
                               onChange={(e) => updateRankingSetting('diamond', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">VND</span>
                           </div>
@@ -5233,7 +5233,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.orderCount}
                               onChange={(e) => updateRankingSetting('diamond', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">đơn</span>
                           </div>
@@ -5243,7 +5243,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('diamond', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">tháng</span>
                           </div>
@@ -5280,7 +5280,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('diamond', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('diamond', index)}
@@ -5303,7 +5303,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Gold */}
-                <div className="border border-yellow-200 rounded-lg p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
+                <div className="border border-yellow-200 rounded-[10px] p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full flex items-center justify-center">
                       <Star className="w-6 h-6 text-white" />
@@ -5324,7 +5324,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.totalSpent}
                               onChange={(e) => updateRankingSetting('gold', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">VND</span>
                           </div>
@@ -5334,7 +5334,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.orderCount}
                               onChange={(e) => updateRankingSetting('gold', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">đơn</span>
                           </div>
@@ -5344,7 +5344,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('gold', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">tháng</span>
                           </div>
@@ -5381,7 +5381,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('gold', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('gold', index)}
@@ -5404,7 +5404,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Silver */}
-                <div className="border border-gray-200 rounded-lg p-6 bg-gradient-to-r from-gray-50 to-slate-50">
+                <div className="border border-[#e6ebf1] rounded-[10px] p-6 bg-gradient-to-r from-gray-50 to-slate-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-slate-400 rounded-full flex items-center justify-center">
                       <Award className="w-6 h-6 text-white" />
@@ -5425,7 +5425,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.totalSpent}
                               onChange={(e) => updateRankingSetting('silver', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">VND</span>
                           </div>
@@ -5435,7 +5435,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.orderCount}
                               onChange={(e) => updateRankingSetting('silver', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">đơn</span>
                           </div>
@@ -5445,7 +5445,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('silver', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">tháng</span>
                           </div>
@@ -5482,7 +5482,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('silver', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('silver', index)}
@@ -5505,7 +5505,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Bronze */}
-                <div className="border border-orange-200 rounded-lg p-6 bg-gradient-to-r from-orange-50 to-amber-50">
+                <div className="border border-orange-200 rounded-[10px] p-6 bg-gradient-to-r from-orange-50 to-amber-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full flex items-center justify-center">
                       <UserCheck className="w-6 h-6 text-white" />
@@ -5526,7 +5526,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.totalSpent}
                               onChange={(e) => updateRankingSetting('bronze', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">VND</span>
                           </div>
@@ -5536,7 +5536,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.orderCount}
                               onChange={(e) => updateRankingSetting('bronze', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">đơn</span>
                           </div>
@@ -5546,7 +5546,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('bronze', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">tháng</span>
                           </div>
@@ -5583,7 +5583,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('bronze', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('bronze', index)}
@@ -5606,7 +5606,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* New */}
-                <div className="border border-blue-200 rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                       <UserPlus className="w-6 h-6 text-white" />
@@ -5618,7 +5618,7 @@ export default function CustomersManagement() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-blue-700">Tiêu chí chính:</h4>
+                      <h4 className="font-semibold text-[#3e79f7]">Tiêu chí chính:</h4>
                       {isEditingRanking ? (
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2">
@@ -5627,7 +5627,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.totalSpent}
                               onChange={(e) => updateRankingSetting('new', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">VND</span>
                           </div>
@@ -5637,7 +5637,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.orderCount}
                               onChange={(e) => updateRankingSetting('new', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">đơn</span>
                           </div>
@@ -5647,7 +5647,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('new', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">tháng</span>
                           </div>
@@ -5662,7 +5662,7 @@ export default function CustomersManagement() {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-blue-700">Đặc quyền:</h4>
+                        <h4 className="font-semibold text-[#3e79f7]">Đặc quyền:</h4>
                         {isEditingRanking && (
                           <button
                             onClick={() => addBenefit('new')}
@@ -5684,7 +5684,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('new', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('new', index)}
@@ -5707,11 +5707,11 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Additional Info */}
-                <div className="border border-blue-200 rounded-lg p-6 bg-blue-50">
+                <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-blue-50">
                   <h3 className="text-lg font-bold text-blue-800 mb-4">📋 Quy trình đánh giá</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-blue-700 mb-2">Tần suất cập nhật:</h4>
+                      <h4 className="font-semibold text-[#3e79f7] mb-2">Tần suất cập nhật:</h4>
                       <ul className="text-sm text-blue-600 space-y-1">
                         <li>• Tự động: Mỗi đơn hàng mới</li>
                         <li>• Định kỳ: Cuối mỗi tháng</li>
@@ -5719,7 +5719,7 @@ export default function CustomersManagement() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-700 mb-2">Yếu tố bổ sung:</h4>
+                      <h4 className="font-semibold text-[#3e79f7] mb-2">Yếu tố bổ sung:</h4>
                       <ul className="text-sm text-blue-600 space-y-1">
                         <li>• Phản hồi khách hàng</li>
                         <li>• Mức độ tương tác</li>
@@ -5735,7 +5735,7 @@ export default function CustomersManagement() {
             <div className="flex items-center justify-end p-6 border-t bg-gray-50">
               <button
                 onClick={() => setShowRankingDefinitionModal(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff]"
               >
                 Đã hiểu
               </button>
@@ -5754,7 +5754,7 @@ export default function CustomersManagement() {
       </div>
 
       {/* Section 1: Tổng quan - Phân loại khách hàng */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Phân loại khách hàng</h2>
           <div className="flex items-center space-x-3">
@@ -5783,7 +5783,7 @@ export default function CustomersManagement() {
           {/* VIP Customer - Kim cương */}
           <div 
             onClick={() => handleCustomerTypeFilter('diamond')}
-            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
               filterCustomerType === 'diamond' ? 'ring-4 ring-purple-300' : ''
             }`}
           >
@@ -5805,7 +5805,7 @@ export default function CustomersManagement() {
           {/* Gold Customer - Vàng */}
           <div 
             onClick={() => handleCustomerTypeFilter('gold')}
-            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-yellow-500 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-yellow-500 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
               filterCustomerType === 'gold' ? 'ring-4 ring-yellow-300' : ''
             }`}
           >
@@ -5827,7 +5827,7 @@ export default function CustomersManagement() {
           {/* Silver Customer - Bạc */}
           <div 
             onClick={() => handleCustomerTypeFilter('silver')}
-            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-gray-500 to-gray-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-gray-500 to-gray-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
               filterCustomerType === 'silver' ? 'ring-4 ring-gray-300' : ''
             }`}
           >
@@ -5849,7 +5849,7 @@ export default function CustomersManagement() {
           {/* Bronze Customer - Đồng */}
           <div 
             onClick={() => handleCustomerTypeFilter('bronze')}
-            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
               filterCustomerType === 'bronze' ? 'ring-4 ring-orange-300' : ''
             }`}
           >
@@ -5871,7 +5871,7 @@ export default function CustomersManagement() {
           {/* New Customer - Mới */}
           <div 
             onClick={() => handleCustomerTypeFilter('new')}
-            className={`flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
               filterCustomerType === 'new' ? 'ring-4 ring-blue-300' : ''
             }`}
           >
@@ -5896,7 +5896,7 @@ export default function CustomersManagement() {
       {selectedView === 'list' && (
         <>
           {/* Section 3: Thanh công cụ tìm kiếm và lọc */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3 flex-wrap gap-y-3">
                 <div className="relative">
@@ -5906,13 +5906,13 @@ export default function CustomersManagement() {
                     placeholder="Tìm kiếm khách hàng..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="pl-10 pr-4 py-2 w-64 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
                   />
                 </div>
                 <select 
                   value={filterStatus} 
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
                 >
                   <option value="">Tất cả trạng thái</option>
                   <option value="vip">💎 VIP</option>
@@ -5925,7 +5925,7 @@ export default function CustomersManagement() {
                 <select 
                   value={filterCustomerType} 
                   onChange={(e) => setFilterCustomerType(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
                 >
                   <option value="">Tất cả hạng</option>
                   <option value="diamond">Kim cương</option>
@@ -5938,7 +5938,7 @@ export default function CustomersManagement() {
                 <select 
                   value={sortBy} 
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
                 >
                   <option value="name">Sắp xếp theo tên</option>
                   <option value="lastInteraction">Tương tác gần nhất</option>
@@ -5948,7 +5948,7 @@ export default function CustomersManagement() {
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                  className="flex items-center space-x-2 px-3 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Lọc nâng cao</span>
@@ -5957,13 +5957,13 @@ export default function CustomersManagement() {
                 <div className="relative">
                   <button
                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+                    className="flex items-center space-x-2 px-3 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
                   >
                     <Columns className="w-4 h-4" />
                     <span>Hiển thị cột</span>
                   </button>
                   {showColumnSelector && (
-                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-20">
                       <div className="p-4">
                         <h4 className="font-medium text-gray-900 mb-3">Tùy chỉnh cột hiển thị</h4>
                         <div className="grid grid-cols-2 gap-x-4 gap-y-2 max-h-72 overflow-y-auto">
@@ -5992,13 +5992,13 @@ export default function CustomersManagement() {
                                   ...prev,
                                   [column.key]: e.target.checked
                                 }))}
-                                className="w-4 h-4 text-blue-800 rounded focus:ring-blue-500 border-gray-300"
+                                className="w-4 h-4 text-blue-800 rounded focus:ring-[#3e79f7] border-[#e6ebf1]"
                               />
                               <span className="text-sm text-gray-700">{column.label}</span>
                             </label>
                           ))}
                         </div>
-                        <div className="flex gap-3 mt-4 pt-3 border-t border-gray-200">
+                        <div className="flex gap-3 mt-4 pt-3 border-t border-[#e6ebf1]">
                           <button
                             onClick={() => setVisibleColumns({
                               checkbox: true,
@@ -6027,7 +6027,7 @@ export default function CustomersManagement() {
                               customerScore: false,
                               actions: true
                             })}
-                            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-800 rounded-lg hover:bg-blue-900 transition-colors"
+                            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-800 rounded-[10px] hover:bg-blue-900 transition-colors"
                           >
                             Tất cả
                           </button>
@@ -6062,7 +6062,7 @@ export default function CustomersManagement() {
                               })
                               setShowColumnSelector(false)
                             }}
-                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                           >
                             Mặc định
                           </button>
@@ -6092,7 +6092,7 @@ export default function CustomersManagement() {
                     setInstallmentData([{amount: 0, date: ''}])
                     setShowAddCustomerModal(true)
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] text-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Thêm khách hàng</span>
@@ -6102,7 +6102,7 @@ export default function CustomersManagement() {
 
             {/* Advanced Filters - Inside toolbar container */}
             {showAdvancedFilters && (
-              <div className="mt-4 pt-4 border-t border-gray-200">
+              <div className="mt-4 pt-4 border-t border-[#e6ebf1]">
                 {/* Row 1: 4 columns - Người phụ trách, Khu vực, Sản phẩm đã mua, Tag */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
                   {/* Người phụ trách */}
@@ -6112,7 +6112,7 @@ export default function CustomersManagement() {
                       <select
                         value={filterAssignedPerson}
                         onChange={(e) => setFilterAssignedPerson(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="">Chọn người phụ trách</option>
                         <option value="Nguyễn Văn A">Nguyễn Văn A</option>
@@ -6132,7 +6132,7 @@ export default function CustomersManagement() {
                       <select
                         value={filterRegion}
                         onChange={(e) => setFilterRegion(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="">Chọn khu vực</option>
                         <option value="Hà Nội">Hà Nội</option>
@@ -6158,7 +6158,7 @@ export default function CustomersManagement() {
                             setFilterPurchasedProduct([])
                           }
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="">Chọn sản phẩm</option>
                         {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || []))).map(productName => (
@@ -6176,7 +6176,7 @@ export default function CustomersManagement() {
                       <select
                         value={filterTag}
                         onChange={(e) => setFilterTag(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="">Chọn tag</option>
                         {Array.from(new Set(customers.flatMap(c => c.tags?.map(t => t.name) || []))).sort().map(tagName => (
@@ -6199,14 +6199,14 @@ export default function CustomersManagement() {
                         placeholder="Từ"
                         value={filterOrderValue.min}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, min: e.target.value})}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                       <input
                         type="number"
                         placeholder="Đến"
                         value={filterOrderValue.max}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, max: e.target.value})}
-                        className="flex-1 px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="flex-1 px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                     </div>
                   </div>
@@ -6224,7 +6224,7 @@ export default function CustomersManagement() {
                           placeholder="Chọn ngày bắt đầu"
                           value={filterPurchaseDate.start}
                           onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                       <div className="flex-1 relative">
@@ -6236,7 +6236,7 @@ export default function CustomersManagement() {
                           placeholder="Chọn ngày kết thúc"
                           value={filterPurchaseDate.end}
                           onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -6250,7 +6250,7 @@ export default function CustomersManagement() {
                       // Apply filter logic
                       setShowAdvancedFilters(false)
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#2dc56a] rounded-md hover:bg-[#04d182] transition-colors"
                   >
                     Áp dụng bộ lọc
                   </button>
@@ -6268,7 +6268,7 @@ export default function CustomersManagement() {
                       setProductSearchTerm('')
                       setShowProductDropdown(false)
                     }}
-                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-md hover:bg-gray-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                     <span>Xóa bộ lọc nâng cao</span>
@@ -6280,10 +6280,10 @@ export default function CustomersManagement() {
           {/* End Section 3: Thanh công cụ tìm kiếm và lọc */}
 
           {/* Section 4: Bảng danh sách khách hàng */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             {/* Bulk Actions Toolbar */}
             {selectedCustomerIds.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium text-blue-900">
@@ -6302,7 +6302,7 @@ export default function CustomersManagement() {
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleCreateQuickTask()}
-                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Tạo task nhanh</span>
@@ -6310,14 +6310,14 @@ export default function CustomersManagement() {
                     <div className="relative">
                       <button
                         onClick={() => setShowExportDropdown(!showExportDropdown)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                       >
                         <Download className="w-4 h-4" />
                         <span>Xuất dữ liệu</span>
                         <ChevronDown className="w-4 h-4" />
                       </button>
                       {showExportDropdown && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-50">
                           <button
                             onClick={() => {
                               // Handle Excel export
@@ -6344,7 +6344,7 @@ export default function CustomersManagement() {
                     {/* Ẩn chức năng gửi email hàng loạt theo yêu cầu */}
                     {/* <button
                       onClick={() => handleBulkEmail()}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Gửi email hàng loạt</span>
@@ -6359,88 +6359,88 @@ export default function CustomersManagement() {
               <span>Hiển thị {filteredCustomers.length} trong tổng {customers.length} khách hàng</span>
             </div>
 
-            <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
               <table className="w-full border-collapse">
                 <thead className="bg-gray-50">
-                  <tr className="border-b border-gray-300">
+                  <tr className="border-b border-[#e6ebf1]">
                     {visibleColumns.checkbox && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                           checked={selectAll}
                           onChange={handleSelectAll}
                         />
                       </th>
                     )}
                     {visibleColumns.no && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">STT</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">STT</th>
                     )}
                     {visibleColumns.customerName && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TÊN KHÁCH HÀNG</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TÊN KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.phoneNumber && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ ĐIỆN THOẠI</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ ĐIỆN THOẠI</th>
                     )}
                     {visibleColumns.email && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">EMAIL</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">EMAIL</th>
                     )}
                     {visibleColumns.company && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">CÔNG TY</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">CÔNG TY</th>
                     )}
                     {visibleColumns.address && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">ĐỊA CHỈ</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">ĐỊA CHỈ</th>
                     )}
                     {visibleColumns.region && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">KHU VỰC</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">KHU VỰC</th>
                     )}
                     {visibleColumns.customerType && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LOẠI KHÁCH HÀNG</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LOẠI KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.segment && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">PHÂN LOẠI</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">PHÂN LOẠI</th>
                     )}
                     {visibleColumns.tags && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-[180px]">TAGS</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-[180px]">TAGS</th>
                     )}
                     {visibleColumns.source && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NGUỒN</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NGUỒN</th>
                     )}
                     {visibleColumns.accountManager && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SALES PHỤ TRÁCH</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SALES PHỤ TRÁCH</th>
                     )}
                     {visibleColumns.status && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TRẠNG THÁI</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TRẠNG THÁI</th>
                     )}
                     {visibleColumns.lifecycleStage && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LIFECYCLE STAGE</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LIFECYCLE STAGE</th>
                     )}
                     {visibleColumns.totalOrderValue && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">TỔNG GIÁ TRỊ ĐỠN</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TỔNG GIÁ TRỊ ĐỠN</th>
                     )}
                     {visibleColumns.orderCount && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ ĐƠN HÀNG</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ ĐƠN HÀNG</th>
                     )}
                     {visibleColumns.lastOrderDate && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">ĐƠN HÀNG GẦN NHẤT</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">ĐƠN HÀNG GẦN NHẤT</th>
                     )}
                     {visibleColumns.averageOrderValue && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">GIÁ TRỊ ĐƠN TB</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">GIÁ TRỊ ĐƠN TB</th>
                     )}
                     {visibleColumns.lastContactDate && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">LẦN LIÊN HỆ CUỐI</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LẦN LIÊN HỆ CUỐI</th>
                     )}
                     {visibleColumns.interactionCount && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">SỐ LẦN TƯƠNG TÁC</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ LẦN TƯƠNG TÁC</th>
                     )}
                     {visibleColumns.createdDate && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NGÀY TẠO</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NGÀY TẠO</th>
                     )}
                     {visibleColumns.customerScore && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">CUSTOMER SCORE</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">CUSTOMER SCORE</th>
                     )}
                     {visibleColumns.npsScore && (
-                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NPS SCORE</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NPS SCORE</th>
                     )}
                     {visibleColumns.actions && (
                       <th className="text-center py-3 px-4 font-bold text-gray-700 whitespace-nowrap min-w-fit sticky right-0 bg-gray-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">THAO TÁC</th>
@@ -6453,22 +6453,22 @@ export default function CustomersManagement() {
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                     }`}>
                       {visibleColumns.checkbox && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <input
                             type="checkbox"
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                             checked={selectedCustomerIds.includes(customer.id.toString())}
                             onChange={() => handleSelectCustomer(customer.id.toString())}
                           />
                         </td>
                       )}
                       {visibleColumns.no && (
-                        <td className="py-3 px-4 border-r border-gray-200 text-sm text-gray-700">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1] text-sm text-gray-700">
                           {index + 1}
                         </td>
                       )}
                       {visibleColumns.customerName && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <button 
                             onClick={() => handleCustomerSelect(customer)}
                             className="omi-link font-semibold text-left"
@@ -6478,7 +6478,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.phoneNumber && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.contact}</div>
                           {customer.phone2 && (
                             <div className="text-xs text-gray-500">{customer.phone2}</div>
@@ -6486,17 +6486,17 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.email && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.email}</div>
                         </td>
                       )}
                       {visibleColumns.company && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.company || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.address && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900 max-w-xs truncate" title={`${customer.address}, ${customer.city}`}>
                             {customer.address || '-'}
                           </div>
@@ -6506,12 +6506,12 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.region && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.city || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.customerType && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.company ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                           }`}>
@@ -6520,7 +6520,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.segment && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.status === 'vip' ? 'bg-purple-100 text-purple-800' :
                             (customer.totalSpent || 0) > 50000000 ? 'bg-yellow-100 text-yellow-800' :
@@ -6534,7 +6534,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.tags && (
-                        <td className="py-3 px-4 border-r border-gray-200 min-w-[180px]">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1] min-w-[180px]">
                           <div className="flex flex-nowrap gap-1 overflow-hidden">
                             {/* Tags đồng bộ từ sales management */}
                             {customer.tags && customer.tags.length > 0 ? (
@@ -6559,19 +6559,19 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.source && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className="text-sm text-gray-900">
                             🌐 Website
                           </span>
                         </td>
                       )}
                       {visibleColumns.accountManager && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.assignedSalesRep || customer.accountManager || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.status && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.status === 'active' ? 'bg-green-100 text-green-800' :
                             customer.status === 'inactive' ? 'bg-gray-100 text-gray-800' :
@@ -6587,7 +6587,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.lifecycleStage && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             (customer.totalOrders || 0) > 5 ? 'bg-purple-100 text-purple-800' :
                             (customer.totalOrders || 0) > 1 ? 'bg-green-100 text-green-800' :
@@ -6603,17 +6603,17 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.totalOrderValue && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="font-medium text-gray-900">{formatCurrency((customer.totalSpent || 0).toString())}</div>
                         </td>
                       )}
                       {visibleColumns.orderCount && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.totalOrders || 0}</div>
                         </td>
                       )}
                       {visibleColumns.lastOrderDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.lastPurchaseDate)}</div>
                           {customer.lastPurchaseDate && (
                             <div className="text-xs text-gray-500">
@@ -6623,14 +6623,14 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.averageOrderValue && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">
                             {formatCurrency((customer.totalOrders ? (customer.totalSpent || 0) / customer.totalOrders : 0).toString())}
                           </div>
                         </td>
                       )}
                       {visibleColumns.lastContactDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.lastInteraction) || 'Chưa có'}</div>
                           {customer.daysSinceLastInteraction && (
                             <div className="text-xs text-gray-500">{customer.daysSinceLastInteraction} ngày trước</div>
@@ -6638,12 +6638,12 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.interactionCount && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.interactions?.length || 0}</div>
                         </td>
                       )}
                       {visibleColumns.createdDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.createdAt)}</div>
                           {customer.createdAt && (
                             <div className="text-xs text-gray-500">
@@ -6653,7 +6653,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.customerScore && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="flex items-center space-x-2">
                             <div className="text-sm font-medium text-gray-900">{customer.engagementScore || 0}</div>
                             <div className={`w-2 h-2 rounded-full ${
@@ -6665,7 +6665,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.npsScore && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">-</div>
                         </td>
                       )}
@@ -6677,7 +6677,7 @@ export default function CustomersManagement() {
                                 e.stopPropagation()
                                 setOpenActionMenu(openActionMenu === customer.id ? null : customer.id)
                               }}
-                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-lg transition-colors"
+                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-[10px] transition-colors"
                             >
                               <Settings className="w-5 h-5" />
                             </button>
@@ -6687,7 +6687,7 @@ export default function CustomersManagement() {
                                   className="fixed inset-0 z-[998]" 
                                   onClick={() => setOpenActionMenu(null)}
                                 />
-                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 z-[999] py-2">
+                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-[999] py-2">
                                   {/* THÔNG TIN */}
                                   <div className="px-4 pb-1 text-left">
                                     <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
@@ -6768,7 +6768,7 @@ export default function CustomersManagement() {
         <div className="space-y-6">
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tổng khách hàng</p>
@@ -6782,7 +6782,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tổng doanh thu</p>
@@ -6800,7 +6800,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Doanh thu trung bình/KH</p>
@@ -6818,7 +6818,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tỷ lệ giữ chân</p>
@@ -6837,11 +6837,11 @@ export default function CustomersManagement() {
 
           {/* Status Distribution */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố theo trạng thái</h3>
               <div className="space-y-3">
                 {[
-                  { status: 'active', label: 'Hoạt động', color: 'bg-green-500', textColor: 'text-green-600', icon: '✅' },
+                  { status: 'active', label: 'Hoạt động', color: 'bg-[#2dc56a]', textColor: 'text-green-600', icon: '✅' },
                   { status: 'at-risk', label: 'Có nguy cơ', color: 'bg-red-500', textColor: 'text-red-600', icon: '⚠️' },
                   { status: 'inactive', label: 'Không hoạt động', color: 'bg-gray-500', textColor: 'text-gray-600', icon: '⏸️' },
                   { status: 'churned', label: 'Đã rời bỏ', color: 'bg-orange-500', textColor: 'text-orange-600', icon: '❌' },
@@ -6865,7 +6865,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố theo loại khách hàng</h3>
               <div className="space-y-3">
                 {[
@@ -6895,7 +6895,7 @@ export default function CustomersManagement() {
 
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Điểm tương tác</h3>
                 <Activity className="w-5 h-5 text-blue-600" />
@@ -6924,7 +6924,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Rủi ro Churn</h3>
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -6953,7 +6953,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Điểm trung thành</h3>
                 <Star className="w-5 h-5 text-yellow-600" />
@@ -6985,7 +6985,7 @@ export default function CustomersManagement() {
 
           {/* Industry & Geographic Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân tích theo ngành nghề</h3>
               <div className="space-y-3">
                 {(() => {
@@ -6999,7 +6999,7 @@ export default function CustomersManagement() {
                       .reduce((sum, c) => sum + parseInt(c.totalValue.replace(/,/g, '')), 0) / count || 0
                     
                     return (
-                      <div key={industry} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={industry} className="p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-900">{industry}</span>
                           <span className="text-sm text-gray-600">{count} KH ({percentage}%)</span>
@@ -7014,7 +7014,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân tích theo khu vực</h3>
               <div className="space-y-3">
                 {(() => {
@@ -7028,7 +7028,7 @@ export default function CustomersManagement() {
                       .reduce((sum, c) => sum + parseInt(c.totalValue.replace(/,/g, '')), 0) / count || 0
                     
                     return (
-                      <div key={city} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={city} className="p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <MapPin className="w-4 h-4 text-gray-400" />
@@ -7048,7 +7048,7 @@ export default function CustomersManagement() {
           </div>
 
           {/* Communication Preferences */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Phản hồi và Tương tác</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
@@ -7091,10 +7091,10 @@ export default function CustomersManagement() {
           </div>
 
           {/* Remarketing Insights */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin Remarketing</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <div className="text-center p-4 bg-orange-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-orange-600">
                   {remarketingCustomers.length}
                 </div>
@@ -7103,21 +7103,21 @@ export default function CustomersManagement() {
                   {filteredCustomers.length > 0 ? ((remarketingCustomers.length / filteredCustomers.length) * 100).toFixed(1) : 0}% tổng KH
                 </div>
               </div>
-              <div className="text-center p-4 bg-red-50 rounded-lg">
+              <div className="text-center p-4 bg-red-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-red-600">
                   {remarketingCustomers.filter(c => c.remarketing.priority === 'high').length}
                 </div>
                 <div className="text-sm text-red-700 mt-1">Ưu tiên cao</div>
                 <div className="text-xs text-red-600 mt-1">Cần xử lý ngay</div>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-center p-4 bg-yellow-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-yellow-600">
                   {remarketingCustomers.filter(c => c.remarketing.priority === 'medium').length}
                 </div>
                 <div className="text-sm text-yellow-700 mt-1">Ưu tiên trung bình</div>
                 <div className="text-xs text-yellow-600 mt-1">Theo dõi thường xuyên</div>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-4 bg-blue-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-blue-600">
                   {Math.round(
                     remarketingCustomers
@@ -7128,7 +7128,7 @@ export default function CustomersManagement() {
                       }, 0) / remarketingCustomers.filter(c => c.remarketing.campaigns.length > 0).length || 0
                   )}%
                 </div>
-                <div className="text-sm text-blue-700 mt-1">Tỷ lệ mở TB</div>
+                <div className="text-sm text-[#3e79f7] mt-1">Tỷ lệ mở TB</div>
                 <div className="text-xs text-blue-600 mt-1">Campaigns gần đây</div>
               </div>
             </div>
@@ -7140,7 +7140,7 @@ export default function CustomersManagement() {
     {/* Quick Task Modal */}
     {showQuickTaskModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-md mx-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Tạo task nhanh</h3>
             <button
@@ -7173,7 +7173,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={quickTaskData.title}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Gọi điện tư vấn sản phẩm mới"
               />
             </div>
@@ -7185,7 +7185,7 @@ export default function CustomersManagement() {
               <textarea
                 value={quickTaskData.description}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 rows={3}
                 placeholder="Mô tả chi tiết về task..."
               />
@@ -7199,7 +7199,7 @@ export default function CustomersManagement() {
                 <select
                   value={quickTaskData.priority}
                   onChange={(e) => setQuickTaskData(prev => ({ ...prev, priority: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="low">Thấp</option>
                   <option value="medium">Trung bình</option>
@@ -7216,7 +7216,7 @@ export default function CustomersManagement() {
                   type="date"
                   value={quickTaskData.dueDate}
                   onChange={(e) => setQuickTaskData(prev => ({ ...prev, dueDate: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
             </div>
@@ -7228,7 +7228,7 @@ export default function CustomersManagement() {
               <select
                 value={quickTaskData.assignedTo}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, assignedTo: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="">Chọn người thực hiện</option>
                 <option value="me">Tôi</option>
@@ -7250,7 +7250,7 @@ export default function CustomersManagement() {
             <button
               onClick={handleSubmitQuickTask}
               disabled={!quickTaskData.title.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo task
             </button>
@@ -7273,14 +7273,14 @@ export default function CustomersManagement() {
     {/* OLD Customer Detail Modal - REPLACED */}
     {false as boolean && selectedCustomer && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg w-full max-w-6xl mx-4 h-[90vh] flex flex-col">
+        <div className="bg-white rounded-[10px] w-full max-w-6xl mx-4 h-[90vh] flex flex-col">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
             <div className="flex items-center space-x-3">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold ${
                 selectedCustomer.status === 'vip' ? 'bg-purple-600' :
-                selectedCustomer.status === 'active' ? 'bg-green-600' :
-                selectedCustomer.status === 'at-risk' ? 'bg-red-600' : 'bg-gray-600'
+                selectedCustomer.status === 'active' ? 'bg-[#2dc56a]' :
+                selectedCustomer.status === 'at-risk' ? 'bg-[#ff6b72]' : 'bg-gray-600'
               }`}>
                 {selectedCustomer.name.charAt(0)}
               </div>
@@ -7294,14 +7294,14 @@ export default function CustomersManagement() {
                 <>
                   <button
                     onClick={handleSaveCustomer}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                   >
                     <Save className="w-4 h-4" />
                     <span>Lưu</span>
                   </button>
                   <button
                     onClick={() => setIsEditingCustomer(false)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200 transition-colors"
                   >
                     Hủy
                   </button>
@@ -7309,7 +7309,7 @@ export default function CustomersManagement() {
               ) : (
                 <button
                   onClick={() => setIsEditingCustomer(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Chỉnh sửa</span>
@@ -7325,7 +7325,7 @@ export default function CustomersManagement() {
           </div>
 
           {/* Modal Tabs */}
-          <div className="border-b border-gray-200 px-6">
+          <div className="border-b border-[#e6ebf1] px-6">
             <nav className="flex space-x-8">
               {[
                 { id: 'details', label: 'Thông tin chi tiết', icon: User },
@@ -7339,7 +7339,7 @@ export default function CustomersManagement() {
                   className={`flex items-center space-x-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -7354,7 +7354,7 @@ export default function CustomersManagement() {
             {activeTab === 'details' && (
               <div className="space-y-6">
                 {/* Basic Information */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cơ bản</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
@@ -7364,7 +7364,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.name || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.name || '-'}</p>
@@ -7385,7 +7385,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.company || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, company: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.company || '-'}</p>
@@ -7398,7 +7398,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.position || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, position: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.position || '-'}</p>
@@ -7414,7 +7414,7 @@ export default function CustomersManagement() {
                             const fullAddress = e.target.value
                             setEditCustomerData(prev => ({ ...prev, address: fullAddress }))
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           placeholder="Nhập địa chỉ đầy đủ..."
                         />
                       ) : (
@@ -7429,7 +7429,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Business Information */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin kinh doanh</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
@@ -7439,7 +7439,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.industry || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, industry: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.industry || '-'}</p>
@@ -7451,7 +7451,7 @@ export default function CustomersManagement() {
                         <select
                           value={editCustomerData.companySize || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, companySize: e.target.value as any }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="small">Nhỏ (1-50 nhân viên)</option>
                           <option value="medium">Trung bình (51-200 nhân viên)</option>
@@ -7473,7 +7473,7 @@ export default function CustomersManagement() {
                         <select
                           value={editCustomerData.status || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, status: e.target.value as any }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="active">Hoạt động</option>
                           <option value="inactive">Không hoạt động</option>
@@ -7503,7 +7503,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Statistics */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thống kê</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="text-center">
@@ -7531,7 +7531,7 @@ export default function CustomersManagement() {
                       <p className="text-sm text-gray-600">Tương tác gần nhất</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xl font-bold text-indigo-600">
+                      <p className="text-xl font-bold text-[#3e79f7]">
                         {selectedCustomer.lastPurchaseDate ? formatDate(selectedCustomer.lastPurchaseDate) : 'Chưa có'}
                       </p>
                       <p className="text-sm text-gray-600">Mua gần nhất</p>
@@ -7540,14 +7540,14 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Notes */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Ghi chú</h3>
                   {isEditingCustomer ? (
                     <textarea
                       value={(editCustomerData.notes as any) || ''}
                       onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value as any }))}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Nhập ghi chú về khách hàng..."
                     />
                   ) : (
@@ -7563,7 +7563,7 @@ export default function CustomersManagement() {
                   <h3 className="text-lg font-semibold text-gray-900">Lịch sử tương tác</h3>
                   <button
                     onClick={() => setShowAddInteractionModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Thêm tương tác</span>
@@ -7572,11 +7572,11 @@ export default function CustomersManagement() {
                 {selectedCustomer.interactions && selectedCustomer.interactions.length > 0 ? (
                   <div className="space-y-3">
                     {selectedCustomer.interactions.map((interaction, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <span className={`w-2 h-2 rounded-full ${
-                              interaction.status === 'success' ? 'bg-green-500' :
+                              interaction.status === 'success' ? 'bg-[#2dc56a]' :
                               interaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></span>
                             <span className="font-medium text-gray-900">{interaction.title}</span>
@@ -7673,7 +7673,7 @@ export default function CustomersManagement() {
                 {selectedCustomer.products && selectedCustomer.products.length > 0 ? (
                   <div className="space-y-3">
                     {selectedCustomer.products.map((product, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium text-gray-900">{product.name}</span>
                           <span className={`px-2 py-1 text-xs rounded-full ${
@@ -7714,28 +7714,28 @@ export default function CustomersManagement() {
             {activeTab === 'notes' && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Ghi chú chi tiết</h3>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Ghi chú công khai</h4>
                   {isEditingCustomer ? (
                     <textarea
                       value={(editCustomerData.notes as any) || ''}
                       onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value as any }))}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Ghi chú có thể chia sẻ với team..."
                     />
                   ) : (
                     <p className="text-gray-900">{(selectedCustomer.notes as any) || 'Chưa có ghi chú công khai'}</p>
                   )}
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Ghi chú nội bộ</h4>
                   {isEditingCustomer ? (
                     <textarea
                       value={editCustomerData.internalNotes || ''}
                       onChange={(e) => setEditCustomerData(prev => ({ ...prev, internalNotes: e.target.value }))}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Ghi chú nội bộ (chỉ team bán hàng xem được)..."
                     />
                   ) : (
@@ -7752,7 +7752,7 @@ export default function CustomersManagement() {
     {/* Add Interaction Modal */}
     {showAddInteractionModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-md mx-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác mới</h3>
             <button
@@ -7771,7 +7771,7 @@ export default function CustomersManagement() {
               <select
                 value={newInteractionData.type}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, type: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="call">Cuộc gọi</option>
                 <option value="email">Email</option>
@@ -7790,7 +7790,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={newInteractionData.channel}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, channel: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Điện thoại, Zalo, Email, ..."
               />
             </div>
@@ -7803,7 +7803,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={newInteractionData.title}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Tư vấn sản phẩm mới"
               />
             </div>
@@ -7815,7 +7815,7 @@ export default function CustomersManagement() {
               <textarea
                 value={newInteractionData.summary}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, summary: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 rows={3}
                 placeholder="Mô tả chi tiết về cuộc tương tác..."
               />
@@ -7828,7 +7828,7 @@ export default function CustomersManagement() {
               <select
                 value={newInteractionData.status}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="success">Thành công</option>
                 <option value="pending">Đang xử lý</option>
@@ -7847,7 +7847,7 @@ export default function CustomersManagement() {
             <button
               onClick={handleAddInteraction}
               disabled={!newInteractionData.title.trim() || !newInteractionData.channel.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Thêm tương tác
             </button>
@@ -7859,7 +7859,7 @@ export default function CustomersManagement() {
     {/* Create Order Modal */}
     {showCreateOrderModal && selectedCustomerForOrder && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng</h3>
@@ -7889,9 +7889,9 @@ export default function CustomersManagement() {
           </div>
 
           {/* Customer Info */}
-          <div className="flex items-center gap-3 mb-4 p-3 rounded-lg">
+          <div className="flex items-center gap-3 mb-4 p-3 rounded-[10px]">
             <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-              <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                 <User className="h-6 w-6" />
               </span>
             </span>
@@ -7913,7 +7913,7 @@ export default function CustomersManagement() {
               <textarea
                 value={orderNotes}
                 onChange={(e) => setOrderNotes(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 rows={2}
                 placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
               />
@@ -7925,7 +7925,7 @@ export default function CustomersManagement() {
               <select
                 value={selectedCategory}
                 onChange={(e) => setSelectedCategory(e.target.value)}
-                className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="Tất cả">Tất cả</option>
                 <option value="Sản phẩm">Sản phẩm</option>
@@ -7933,12 +7933,12 @@ export default function CustomersManagement() {
             </div>
 
             {/* Product Selection - 2 Column Grid */}
-            <div className="bg-gray-50 rounded-lg p-4">
+            <div className="bg-gray-50 rounded-[10px] p-4">
               <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
               <div className="max-h-80 overflow-y-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                    <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                       {/* Product Selection */}
                       <label className="flex items-start space-x-3 cursor-pointer">
                         <input
@@ -7969,7 +7969,7 @@ export default function CustomersManagement() {
                               })
                             }
                           }}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -7993,7 +7993,7 @@ export default function CustomersManagement() {
                                   ...prev,
                                   [product.id]: e.target.value
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               >
                                 {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
                                   <option key={pkg.id} value={pkg.id}>
@@ -8012,7 +8012,7 @@ export default function CustomersManagement() {
                                   ...prev,
                                   [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               />
                             </div>
                           </div>
@@ -8048,7 +8048,7 @@ export default function CustomersManagement() {
                   const grandTotal = afterDiscount + vatAmount
                   
                   return (
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
                       <h5 className="text-sm font-medium text-green-800 mb-3">
                         Đã chọn {selectedProducts.length} sản phẩm:
                       </h5>
@@ -8089,7 +8089,7 @@ export default function CustomersManagement() {
                 })()}
 
                 {/* Payment Info Section */}
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     {/* Tax Selection */}
                     <div>
@@ -8101,7 +8101,7 @@ export default function CustomersManagement() {
                            setTaxId(e.target.value)
                            setTaxRate(tax ? tax.rate : 0)
                          }}
-                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                         className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                          <option value="">Chọn mức thuế</option>
                          {defaultTaxes.filter(t => t.isActive).map(tax => (
@@ -8123,7 +8123,7 @@ export default function CustomersManagement() {
                           value={discountPercent}
                           onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
                           placeholder="0"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                         <select 
                           value={discountType}
@@ -8131,7 +8131,7 @@ export default function CustomersManagement() {
                             setDiscountType(e.target.value as '%' | 'VND')
                             setDiscountPercent(0)
                           }}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         >
                           <option value="%">%</option>
                           <option value="VND">VNĐ</option>
@@ -8149,7 +8149,7 @@ export default function CustomersManagement() {
                         value={paymentDeadline}
                         onChange={(e) => setPaymentDeadline(e.target.value)}
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                       {!paymentDeadline && (
                         <p className="mt-1 text-xs text-red-500">Vui lòng chọn thời hạn thanh toán</p>
@@ -8164,7 +8164,7 @@ export default function CustomersManagement() {
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="cash">Tiền mặt</option>
                         <option value="bank_transfer">Chuyển khoản</option>
@@ -8181,25 +8181,25 @@ export default function CustomersManagement() {
                     <div className="flex flex-wrap items-center gap-4">
                       <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
                       <div className="flex gap-3">
-                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                           <input
                             type="radio"
                             name="customerOrderPaymentMode"
                             value="full"
                             checked={paymentMode === 'full'}
                             onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
                         </label>
-                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                           <input
                             type="radio"
                             name="customerOrderPaymentMode"
                             value="installment"
                             checked={paymentMode === 'installment'}
                             onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
                         </label>
@@ -8209,7 +8209,7 @@ export default function CustomersManagement() {
 
                   {/* Payment Installments - Only show when installment mode selected */}
                   {paymentMode === 'installment' && (
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="border-t border-[#e6ebf1] pt-4">
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Số lần thanh toán
@@ -8227,7 +8227,7 @@ export default function CustomersManagement() {
                           )
                           setInstallmentData(newInstallments)
                         }}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                     </div>
 
@@ -8256,7 +8256,7 @@ export default function CustomersManagement() {
                       const isOverLimit = installment.amount > maxAllowed
                       
                       return (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
@@ -8272,7 +8272,7 @@ export default function CustomersManagement() {
                               setInstallmentData(newData)
                             }}
                             placeholder="0"
-                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
                           />
                           {isOverLimit && (
                             <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
@@ -8293,7 +8293,7 @@ export default function CustomersManagement() {
                               }}
                               min={new Date().toISOString().split('T')[0]}
                               placeholder="Thời gian thanh toán ..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                             />
                           </div>
                           {paymentInstallments > 1 && (
@@ -8306,7 +8306,7 @@ export default function CustomersManagement() {
                                   setPaymentInstallments(paymentInstallments - 1)
                                 }
                               }}
-                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
                               title="Xóa đợt thanh toán"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -8353,7 +8353,7 @@ export default function CustomersManagement() {
             <button
               onClick={handleSubmitOrder}
               disabled={selectedProducts.length === 0 || !paymentDeadline}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-[#2dc56a] text-white rounded-md hover:bg-[#04d182] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo đơn hàng
             </button>
@@ -8365,7 +8365,7 @@ export default function CustomersManagement() {
     {/* Quick Interaction Modal */}
     {showQuickInteractionModal && selectedCustomerForInteraction && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
           <div className="flex items-center justify-between p-6 border-b">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác nhanh</h3>
@@ -8400,10 +8400,10 @@ export default function CustomersManagement() {
                   <button
                     key={type.value}
                     onClick={() => setQuickInteractionType(type.value as any)}
-                    className={`p-2 text-xs font-medium rounded-lg border-2 transition-all ${
+                    className={`p-2 text-xs font-medium rounded-[10px] border-2 transition-all ${
                       quickInteractionType === type.value
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                     } ${type.color}`}
                   >
                     {type.label}
@@ -8427,7 +8427,7 @@ export default function CustomersManagement() {
                   quickInteractionType === 'meeting' ? 'cuộc gặp' :
                   'ghi chú'
                 }...`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
               />
             </div>
 
@@ -8446,7 +8446,7 @@ export default function CustomersManagement() {
                   'ghi chú'
                 }...`}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
@@ -8481,7 +8481,7 @@ export default function CustomersManagement() {
     {/* Edit Interaction Modal */}
     {showEditInteractionModal && editingInteraction && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-6 border-b">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa tương tác</h3>
@@ -8517,7 +8517,7 @@ export default function CustomersManagement() {
                 onChange={(e) => setEditReason(e.target.value)}
                 placeholder="Nhập lý do chỉnh sửa tương tác..."
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
@@ -8531,7 +8531,7 @@ export default function CustomersManagement() {
                   type="text"
                   value={editInteractionData.title}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 />
               </div>
 
@@ -8543,7 +8543,7 @@ export default function CustomersManagement() {
                 <select
                   value={editInteractionData.type}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, type: e.target.value as CustomerInteraction['type'] }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 >
                   <option value="email">Email</option>
                   <option value="call">Gọi điện</option>
@@ -8563,7 +8563,7 @@ export default function CustomersManagement() {
                   type="text"
                   value={editInteractionData.channel}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, channel: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 />
               </div>
 
@@ -8575,7 +8575,7 @@ export default function CustomersManagement() {
                 <select
                   value={editInteractionData.status}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, status: e.target.value as CustomerInteraction['status'] }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 >
                   <option value="success">Thành công</option>
                   <option value="pending">Đang xử lý</option>
@@ -8593,12 +8593,12 @@ export default function CustomersManagement() {
                 value={editInteractionData.summary}
                 onChange={(e) => setEditInteractionData(prev => ({ ...prev, summary: e.target.value }))}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
             {/* Original Data Preview */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Dữ liệu gốc:</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
                 <div><strong>Tiêu đề:</strong> {editingInteraction.title}</div>
@@ -8631,7 +8631,7 @@ export default function CustomersManagement() {
               <button
                 onClick={handleSubmitEditInteraction}
                 disabled={!editReason.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Lưu thay đổi

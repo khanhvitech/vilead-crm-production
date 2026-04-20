@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { TriggerType, TriggerConfig, TriggerConfigChannels, TriggerConfigReturning, TriggerConfigBirthday, TriggerConfigNoInteraction, TriggerConfigTag, TriggerConfigScheduled, TriggerConfigOrderStatus } from '../types'
@@ -27,7 +27,7 @@ function ChannelSelector({ channels, onChange }: {
           <label key={ch.value} className="flex items-center gap-2 cursor-pointer select-none">
             <div
               onClick={() => toggle(ch.value)}
-              className={`w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${channels.includes(ch.value) ? 'border-blue-600 bg-blue-600' : 'border-gray-300 bg-white'}`}
+              className={`w-4.5 h-4.5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${channels.includes(ch.value) ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1] bg-white'}`}
               style={{ width: 18, height: 18 }}
             >
               {channels.includes(ch.value) && (
@@ -72,7 +72,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
                 type="number" min={1} max={365}
                 value={c.inactive_days ?? 30}
                 onChange={e => onChange({ ...c, inactive_days: Number(e.target.value) } as TriggerConfigReturning)}
-                className="w-24 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                className="w-24 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
               />
               <span className="text-sm text-gray-600">ngày (1–365)</span>
             </div>
@@ -94,7 +94,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
           <select
             value={c.target_status ?? ''}
             onChange={e => onChange({ target_status: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
           >
             <option value="">-- Chọn trạng thái --</option>
             <option value="pending">Chờ xác nhận</option>
@@ -141,7 +141,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
                   type="number" min={1} max={30}
                   value={c.days_before ?? 1}
                   onChange={e => onChange({ mode: 'before_x_days', days_before: Number(e.target.value) })}
-                  className="w-16 px-2 py-1 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                  className="w-16 px-2 py-1 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
                 />
               )}
               {c.mode === 'before_x_days' && <span className="text-sm text-gray-600">ngày</span>}
@@ -162,7 +162,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
               type="number" min={1} max={365}
               value={c.days ?? 30}
               onChange={e => onChange({ days: Number(e.target.value) })}
-              className="w-24 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+              className="w-24 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
             />
             <span className="text-sm text-gray-600">ngày (1–365)</span>
           </div>
@@ -182,7 +182,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
           <select
             value={c.tag_id ?? ''}
             onChange={e => onChange({ tag_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
           >
             <option value="">-- Chọn tag --</option>
             {tags.map(tag => (
@@ -201,7 +201,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
         <div className="space-y-4">
           <div>
             <label className="block text-xs font-semibold text-gray-600 mb-1.5">Tần suất *</label>
-            <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+            <div className="flex rounded-[10px] border border-[#e6ebf1] overflow-hidden">
               {([
                 { v: 'daily',   l: 'Hàng ngày' },
                 { v: 'weekly',  l: 'Hàng tuần' },
@@ -211,7 +211,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
                   key={opt.v}
                   type="button"
                   onClick={() => onChange({ ...c, frequency: opt.v } as TriggerConfigScheduled)}
-                  className={`flex-1 py-2 text-xs font-semibold transition-colors ${freq === opt.v ? 'bg-blue-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
+                  className={`flex-1 py-2 text-xs font-semibold transition-colors ${freq === opt.v ? 'bg-[#3e79f7] text-white' : 'bg-white text-gray-500 hover:bg-gray-50'}`}
                 >
                   {opt.l}
                 </button>
@@ -224,7 +224,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
               type="time"
               value={c.time ?? '09:00'}
               onChange={e => onChange({ ...c, time: e.target.value } as TriggerConfigScheduled)}
-              className="px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
           {freq === 'weekly' && (
@@ -236,7 +236,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
                     key={i}
                     type="button"
                     onClick={() => onChange({ ...c, day_of_week: i } as TriggerConfigScheduled)}
-                    className={`w-9 h-9 text-xs font-semibold rounded-xl border transition-colors ${(c as TriggerConfigScheduled).day_of_week === i ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:border-blue-400'}`}
+                    className={`w-9 h-9 text-xs font-semibold rounded-[10px] border transition-colors ${(c as TriggerConfigScheduled).day_of_week === i ? 'bg-[#3e79f7] text-white border-[#3e79f7]' : 'bg-white text-gray-600 border-[#e6ebf1] hover:border-[#699dff]'}`}
                   >
                     {d}
                   </button>
@@ -251,7 +251,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
                 type="number" min={1} max={31}
                 value={(c as TriggerConfigScheduled).day_of_month ?? 1}
                 onChange={e => onChange({ ...c, day_of_month: Number(e.target.value) } as TriggerConfigScheduled)}
-                className="w-20 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center"
+                className="w-20 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center"
               />
             </div>
           )}
@@ -262,7 +262,7 @@ export default function TriggerConfigForm({ triggerType, config, onChange, tags 
     // ── No config triggers ─────────────────────────────────────────────────────
     default:
       return (
-        <div className="p-3.5 bg-gray-50 rounded-xl">
+        <div className="p-3.5 bg-gray-50 rounded-[10px]">
           <p className="text-sm text-gray-500 italic">Trigger này không cần cấu hình thêm.</p>
         </div>
       )

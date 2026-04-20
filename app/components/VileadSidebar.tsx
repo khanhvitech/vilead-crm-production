@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import {
@@ -209,16 +209,16 @@ export default function VileadSidebar({
       
       {/* Sidebar */}
       <div className={cn(
-        "fixed left-0 top-0 h-full bg-white border-r border-gray-200 z-50 transition-all duration-300 flex flex-col",
+        "fixed left-0 top-0 h-full bg-white border-r border-[#e6ebf1] z-50 transition-all duration-300 flex flex-col",
         isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         isCollapsed ? "w-16" : "w-64"
       )}>
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
           {!isCollapsed && (
             <>
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <div className="w-8 h-8 bg-[#3e79f7] rounded-[10px] flex items-center justify-center">
                   <span className="text-white font-bold text-sm">V</span>
                 </div>
                 <div>
@@ -262,7 +262,7 @@ export default function VileadSidebar({
 
         {/* Role Switcher - Hidden for now */}
         {/* {!isCollapsed && (
-          <div className="px-4 py-3 border-b border-gray-200">
+          <div className="px-4 py-3 border-b border-[#e6ebf1]">
             <div className="space-y-2">
               <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                 Quyền truy cập
@@ -300,7 +300,7 @@ export default function VileadSidebar({
                 }}
                 disabled={isDisabled}
                 className={cn(
-                  "w-full flex items-center space-x-3 p-3 rounded-lg transition-all duration-200 group",
+                  "w-full flex items-center space-x-3 p-3 rounded-[10px] transition-all duration-200 group",
                   isDisabled 
                     ? "cursor-not-allowed opacity-50 text-gray-400" 
                     : "cursor-pointer",

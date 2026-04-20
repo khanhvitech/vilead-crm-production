@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { 
@@ -78,7 +78,7 @@ export function TrendChart({
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border p-6 animate-pulse">
+      <div className="bg-white rounded-[10px] border p-6 animate-pulse">
         <div className="flex items-center justify-between mb-6">
           <div className="h-6 bg-gray-200 rounded w-48" />
           <div className="flex gap-2">
@@ -93,7 +93,7 @@ export function TrendChart({
   }
 
   return (
-    <div className="bg-white rounded-lg border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
         <div className="flex items-center gap-2">
@@ -112,9 +112,9 @@ export function TrendChart({
             <button
               key={line.key}
               onClick={() => onToggleMetric(line.key as 'sent' | 'opened' | 'clicked')}
-              className={`flex items-center gap-3 px-4 py-2 rounded-lg border transition-all ${
+              className={`flex items-center gap-3 px-4 py-2 rounded-[10px] border transition-all ${
                 isVisible 
-                  ? 'border-gray-300 bg-white shadow-sm' 
+                  ? 'border-[#e6ebf1] bg-white shadow-sm' 
                   : 'border-transparent bg-gray-100 opacity-50'
               }`}
             >
