@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { 
@@ -206,26 +206,26 @@ export default function OrderDetailModal({
 
   const renderInfoTab = () => (
     <div className="space-y-4">
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
         <table className="w-full">
           <thead className="bg-[#fafafb]">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Tên SP</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Gói SP</th>
-              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Số lượng</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Giá</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Tổng tiền</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tên SP</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Gói SP</th>
+              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Số lượng</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Giá</th>
+              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tổng tiền</th>
               <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Trạng thái TT</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {orderItems.map((item) => (
               <tr key={item.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-900">{item.productName}</td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-700">{item.productPackage}</td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-700 text-center">{item.quantity}</td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-900 text-right">{formatCurrency(item.price)}</td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-blue-600 text-right font-medium">{formatCurrency(item.total)}</td>
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900">{item.productName}</td>
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-700">{item.productPackage}</td>
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-700 text-center">{item.quantity}</td>
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900 text-right">{formatCurrency(item.price)}</td>
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-blue-600 text-right font-medium">{formatCurrency(item.total)}</td>
                 <td className="px-3 py-2 text-center">
                   <span className={'inline-flex px-2 py-1 text-xs font-medium rounded-full ' + getPaymentStatusColor(item.paymentStatus)}>
                     {getPaymentStatusText(item.paymentStatus)}
@@ -236,7 +236,7 @@ export default function OrderDetailModal({
           </tbody>
         </table>
       </div>
-      <div className="border-t border-gray-200 pt-4 space-y-2">
+      <div className="border-t border-[#e6ebf1] pt-4 space-y-2">
         <div className="flex justify-between items-center">
           <span className="text-sm text-gray-600">Tạm tính:</span>
           <span className="text-sm text-gray-900 text-right">{formatCurrency(subtotal)}</span>
@@ -249,7 +249,7 @@ export default function OrderDetailModal({
           <span className="text-sm text-gray-600">Thuế VAT:</span>
           <span className="text-sm text-gray-900 text-right">{formatCurrency(vat)}</span>
         </div>
-        <div className="flex justify-between items-center pt-2 border-t border-gray-200">
+        <div className="flex justify-between items-center pt-2 border-t border-[#e6ebf1]">
           <span className="text-base font-semibold text-gray-900">Tổng cộng:</span>
           <span className="text-lg font-bold text-blue-600">{formatCurrency(grandTotal)}</span>
         </div>
@@ -259,21 +259,21 @@ export default function OrderDetailModal({
 
   const renderInvoicesTab = () => (
     <div className="space-y-4">
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
         <table className="w-full">
           <thead className="bg-[#fafafb]">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200 w-16">Ảnh</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Tên file</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Ngày tạo</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Kích thước</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1] w-16">Ảnh</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tên file</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Ngày tạo</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Kích thước</th>
               <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase w-20">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {mockInvoices.map((invoice) => (
               <tr key={invoice.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-gray-200">
+                <td className="px-3 py-2 border-r border-[#e6ebf1]">
                   <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
                     {invoice.fileType.startsWith('image/') ? (
                       invoice.thumbnailUrl ? (
@@ -286,13 +286,13 @@ export default function OrderDetailModal({
                     )}
                   </div>
                 </td>
-                <td className="px-3 py-2 border-r border-gray-200">
+                <td className="px-3 py-2 border-r border-[#e6ebf1]">
                   <span className="text-sm text-blue-600 hover:underline cursor-pointer">{invoice.fileName}</span>
                 </td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-600">
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
                   {new Date(invoice.uploadedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(invoice.uploadedAt).toLocaleDateString('vi-VN')}
                 </td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-600">
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
                   {formatFileSize(invoice.fileSize)}
                 </td>
                 <td className="px-3 py-2 text-center relative">
@@ -303,7 +303,7 @@ export default function OrderDetailModal({
                     <MoreVertical className="w-4 h-4" />
                   </button>
                   {invoiceActionMenu === invoice.id && (
-                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
                       <button
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         onClick={() => {
@@ -342,22 +342,22 @@ export default function OrderDetailModal({
 
   const renderNotesTab = () => (
     <div className="space-y-4">
-      <div className="overflow-x-auto border border-gray-200 rounded-lg">
+      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
         <table className="w-full">
           <thead className="bg-[#fafafb]">
             <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200">Nội dung</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-gray-200 w-40">Ngày tạo</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Nội dung</th>
+              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1] w-40">Ngày tạo</th>
               <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase w-20">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {mockNotes.map((note) => (
               <tr key={note.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-900">
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900">
                   {note.content}
                 </td>
-                <td className="px-3 py-2 border-r border-gray-200 text-sm text-gray-600">
+                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
                   {new Date(note.createdAt).toLocaleDateString('vi-VN')}
                 </td>
                 <td className="px-3 py-2 text-center relative">
@@ -368,7 +368,7 @@ export default function OrderDetailModal({
                     <MoreVertical className="w-4 h-4" />
                   </button>
                   {noteActionMenu === note.id && (
-                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
                       <button
                         className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         onClick={() => handleEditNote(note)}
@@ -404,8 +404,8 @@ export default function OrderDetailModal({
   return (
     <>
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-xl w-full max-w-3xl shadow-2xl max-h-[90vh] flex flex-col">
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="bg-white rounded-[10px] w-full max-w-3xl shadow-2xl max-h-[90vh] flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
             <div className="flex items-center gap-2">
               <Info className="w-5 h-5 text-blue-500" />
               <h3 className="font-semibold text-gray-900">Chi tiết đơn hàng - {order.orderNumber}</h3>
@@ -415,7 +415,7 @@ export default function OrderDetailModal({
             </button>
           </div>
 
-          <div className="border-b border-gray-200 px-4">
+          <div className="border-b border-[#e6ebf1] px-4">
             <nav className="flex space-x-6">
               {tabs.map((tab) => (
                 <button
@@ -424,7 +424,7 @@ export default function OrderDetailModal({
                   className={'flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ' + (
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                   )}
                 >
                   {tab.icon}
@@ -440,8 +440,8 @@ export default function OrderDetailModal({
             {activeTab === 'notes' && renderNotesTab()}
           </div>
 
-          <div className="flex justify-end gap-2 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
-            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg">
+          <div className="flex justify-end gap-2 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
+            <button onClick={onClose} className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-[10px]">
               Đóng
             </button>
           </div>
@@ -450,8 +450,8 @@ export default function OrderDetailModal({
 
       {showEditInvoice && selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg w-full max-w-md mx-4 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Sửa hóa đơn</h3>
               <button onClick={() => setShowEditInvoice(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
@@ -465,12 +465,12 @@ export default function OrderDetailModal({
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Chọn file mới</label>
-                <input type="file" accept="image/*,.pdf" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100" />
+                <input type="file" accept="image/*,.pdf" className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-[#3e79f7] hover:file:bg-blue-100" />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
-              <button onClick={() => setShowEditInvoice(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={() => setShowEditInvoice(false)} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Lưu thay đổi</button>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
+              <button onClick={() => setShowEditInvoice(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">Hủy</button>
+              <button onClick={() => setShowEditInvoice(false)} className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]">Lưu thay đổi</button>
             </div>
           </div>
         </div>
@@ -478,14 +478,14 @@ export default function OrderDetailModal({
 
       {showDeleteInvoice && selectedInvoice && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg w-full max-w-sm mx-4 shadow-xl">
+          <div className="bg-white rounded-[10px] w-full max-w-sm mx-4 shadow-xl">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Xác nhận xóa</h3>
               <p className="text-sm text-gray-600">Bạn có chắc chắn muốn xóa hóa đơn &quot;{selectedInvoice.fileName}&quot;? Hành động này không thể hoàn tác.</p>
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
-              <button onClick={() => setShowDeleteInvoice(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleDeleteInvoice} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Xóa</button>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
+              <button onClick={() => setShowDeleteInvoice(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">Hủy</button>
+              <button onClick={handleDeleteInvoice} className="px-4 py-2 text-sm font-medium text-white bg-[#ff6b72] rounded-[10px] hover:bg-[#d9505c]">Xóa</button>
             </div>
           </div>
         </div>
@@ -493,8 +493,8 @@ export default function OrderDetailModal({
 
       {showEditNote && selectedNote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg w-full max-w-md mx-4 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Sửa ghi chú</h3>
               <button onClick={() => setShowEditNote(false)} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
@@ -502,11 +502,11 @@ export default function OrderDetailModal({
             </div>
             <div className="p-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung ghi chú <span className="text-red-500">*</span></label>
-              <textarea value={editNoteContent} onChange={(e) => setEditNoteContent(e.target.value)} rows={4} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none" placeholder="Nhập nội dung ghi chú..." />
+              <textarea value={editNoteContent} onChange={(e) => setEditNoteContent(e.target.value)} rows={4} className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none" placeholder="Nhập nội dung ghi chú..." />
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
-              <button onClick={() => setShowEditNote(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleSaveNote} disabled={!editNoteContent.trim()} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed">Lưu thay đổi</button>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
+              <button onClick={() => setShowEditNote(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">Hủy</button>
+              <button onClick={handleSaveNote} disabled={!editNoteContent.trim()} className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed">Lưu thay đổi</button>
             </div>
           </div>
         </div>
@@ -514,14 +514,14 @@ export default function OrderDetailModal({
 
       {showDeleteNote && selectedNote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg w-full max-w-sm mx-4 shadow-xl">
+          <div className="bg-white rounded-[10px] w-full max-w-sm mx-4 shadow-xl">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Xác nhận xóa</h3>
               <p className="text-sm text-gray-600">Bạn có chắc chắn muốn xóa ghi chú này? Hành động này không thể hoàn tác.</p>
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200">
-              <button onClick={() => setShowDeleteNote(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">Hủy</button>
-              <button onClick={handleDeleteNote} className="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">Xóa</button>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
+              <button onClick={() => setShowDeleteNote(false)} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">Hủy</button>
+              <button onClick={handleDeleteNote} className="px-4 py-2 text-sm font-medium text-white bg-[#ff6b72] rounded-[10px] hover:bg-[#d9505c]">Xóa</button>
             </div>
           </div>
         </div>

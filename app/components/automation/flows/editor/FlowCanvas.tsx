@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useCallback, useMemo, useRef, DragEvent } from 'react'
 import {
@@ -197,7 +197,7 @@ function InnerCanvas({ onDropNode }: InnerCanvasProps) {
       {isEmpty && (
         <Panel position="top-center">
           <div className="mt-20 flex flex-col items-center gap-3 pointer-events-none select-none">
-            <div className="w-16 h-16 rounded-2xl bg-white border-2 border-dashed border-gray-300 flex items-center justify-center shadow-sm">
+            <div className="w-16 h-16 rounded-[10px] bg-white border-2 border-dashed border-[#e6ebf1] flex items-center justify-center shadow-sm">
               <Plus size={24} className="text-gray-400" />
             </div>
             <p className="text-gray-500 text-sm font-medium">Kéo và thả node từ bảng bên trái</p>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { Search, X, ChevronRight, Clock, Check, SkipForward, Play, AlertCircle, FlaskConical } from 'lucide-react'
@@ -17,11 +17,11 @@ function JourneyDetailModal({ journey, onClose }: { journey: CustomerJourney; on
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="flex items-start justify-between px-6 py-5 border-b border-gray-200 shrink-0">
+        <div className="flex items-start justify-between px-6 py-5 border-b border-[#e6ebf1] shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold text-sm shrink-0">
+            <div className="w-10 h-10 bg-[#3e79f7] rounded-[10px] flex items-center justify-center text-white font-bold text-sm shrink-0">
               {journey.customer.name[0].toUpperCase()}
             </div>
             <div>
@@ -36,13 +36,13 @@ function JourneyDetailModal({ journey, onClose }: { journey: CustomerJourney; on
               <p className="text-xs text-gray-500">{journey.customer.phone} · {journey.customer.channel}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors">
             <X size={18} className="text-gray-500" />
           </button>
         </div>
 
         {/* Status row */}
-        <div className="px-6 py-3 bg-gray-50 border-b border-gray-200 flex items-center justify-between shrink-0">
+        <div className="px-6 py-3 bg-gray-50 border-b border-[#e6ebf1] flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <span
               className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
@@ -159,12 +159,12 @@ export default function CustomersTab({ sequenceId, totalSteps }: Props) {
       {/* Stats row */}
       <div className="grid grid-cols-4 gap-4">
         {[
-          { label: 'Tổng số',     value: stats.total,     color: 'text-gray-900', bg: 'bg-gray-50',   border: 'border-gray-200' },
-          { label: 'Đang chạy',   value: stats.running,   color: 'text-blue-700', bg: 'bg-blue-50',   border: 'border-blue-200' },
+          { label: 'Tổng số',     value: stats.total,     color: 'text-gray-900', bg: 'bg-gray-50',   border: 'border-[#e6ebf1]' },
+          { label: 'Đang chạy',   value: stats.running,   color: 'text-[#3e79f7]', bg: 'bg-blue-50',   border: 'border-[#c7d9fd]' },
           { label: 'Hoàn thành',  value: stats.completed, color: 'text-green-700',bg: 'bg-green-50',  border: 'border-green-200' },
           { label: 'Đã hủy',      value: stats.cancelled, color: 'text-red-700',  bg: 'bg-red-50',    border: 'border-red-200' },
         ].map(s => (
-          <div key={s.label} className={`p-4 ${s.bg} border ${s.border} rounded-2xl`}>
+          <div key={s.label} className={`p-4 ${s.bg} border ${s.border} rounded-[10px]`}>
             <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
             <p className="text-xs text-gray-500 mt-0.5">{s.label}</p>
           </div>
@@ -180,10 +180,10 @@ export default function CustomersTab({ sequenceId, totalSteps }: Props) {
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Tìm kiếm khách hàng..."
-            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+            className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
           />
         </div>
-        <div className="flex gap-1.5 p-1 bg-gray-100 rounded-xl">
+        <div className="flex gap-1.5 p-1 bg-gray-100 rounded-[10px]">
           {([
             { v: 'all',       l: 'Tất cả' },
             { v: 'running',   l: 'Đang chạy' },
@@ -194,7 +194,7 @@ export default function CustomersTab({ sequenceId, totalSteps }: Props) {
               key={opt.v}
               type="button"
               onClick={() => setStatusFilter(opt.v)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-[10px] transition-colors ${
                 statusFilter === opt.v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -205,9 +205,9 @@ export default function CustomersTab({ sequenceId, totalSteps }: Props) {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         {/* Table header */}
-        <div className="grid grid-cols-12 gap-0 px-5 py-3 bg-gray-50 border-b border-gray-200">
+        <div className="grid grid-cols-12 gap-0 px-5 py-3 bg-gray-50 border-b border-[#e6ebf1]">
           <div className="col-span-4 text-xs font-semibold text-gray-500 uppercase tracking-wide">Khách hàng</div>
           <div className="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Kênh</div>
           <div className="col-span-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">Tiến độ</div>
@@ -232,7 +232,7 @@ export default function CustomersTab({ sequenceId, totalSteps }: Props) {
               >
                 {/* Customer */}
                 <div className="col-span-4 flex items-center gap-3 min-w-0">
-                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-blue-700 shrink-0">
+                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-bold text-[#3e79f7] shrink-0">
                     {journey.customer.name[0].toUpperCase()}
                   </div>
                   <div className="min-w-0">

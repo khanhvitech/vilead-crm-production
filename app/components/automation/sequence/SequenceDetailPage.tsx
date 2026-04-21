@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { ChevronLeft, Play, Pause, Save, Check } from 'lucide-react'
@@ -47,14 +47,14 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
   return (
     <div className="h-full flex flex-col bg-[#F8FAFC]">
       {/* ── Top Header ────────────────────────────────────────────────────── */}
-      <div className="bg-white border-b border-gray-200 px-6 py-4 shrink-0">
+      <div className="bg-white border-b border-[#e6ebf1] px-6 py-4 shrink-0">
         <div className="flex items-center justify-between gap-4">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 min-w-0">
             <button
               type="button"
               onClick={onBack}
-              className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700 shrink-0"
+              className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700 shrink-0"
             >
               <ChevronLeft size={18} />
             </button>
@@ -88,7 +88,7 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
               <button
                 type="button"
                 onClick={handleToggleStatus}
-                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-[10px] transition-colors ${
                   sequence.status === 'active'
                     ? 'border border-amber-300 text-amber-700 bg-amber-50 hover:bg-amber-100'
                     : 'border border-green-300 text-green-700 bg-green-50 hover:bg-green-100'
@@ -107,7 +107,7 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
                 type="button"
                 onClick={() => setSequence(s => ({ ...s, status: 'active' }))}
                 disabled={sequence.steps.length === 0}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                className="flex items-center gap-2 px-4 py-2 bg-[#2dc56a] hover:bg-[#04d182] text-white text-sm font-semibold rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
               >
                 <Play size={14} />
                 Kích hoạt
@@ -118,10 +118,10 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
             <button
               type="button"
               onClick={handleSave}
-              className={`flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-xl transition-all shadow-sm ${
+              className={`flex items-center gap-2 px-5 py-2 text-sm font-semibold rounded-[10px] transition-all shadow-sm ${
                 saved
-                  ? 'bg-green-600 text-white'
-                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+                  ? 'bg-[#2dc56a] text-white'
+                  : 'bg-[#3e79f7] hover:bg-[#699dff] text-white'
               }`}
             >
               {saved ? <><Check size={14} /> Đã lưu</> : <><Save size={14} /> Lưu</>}
@@ -130,7 +130,7 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 mt-4 border-b border-gray-200 -mb-4">
+        <div className="flex gap-0 mt-4 border-b border-[#e6ebf1] -mb-4">
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -138,7 +138,7 @@ export default function SequenceDetailPage({ sequenceId, onBack }: Props) {
               onClick={() => setActiveTab(tab.id)}
               className={`px-5 py-3 text-sm font-semibold border-b-2 transition-colors ${
                 activeTab === tab.id
-                  ? 'border-blue-600 text-blue-600'
+                  ? 'border-[#3e79f7] text-blue-600'
                   : 'border-transparent text-gray-500 hover:text-gray-700'
               }`}
             >

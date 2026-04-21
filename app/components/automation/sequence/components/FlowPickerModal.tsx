@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo } from 'react'
 import { X, Search, Check, FolderOpen, MessageSquare } from 'lucide-react'
@@ -35,11 +35,11 @@ const FOLDER_COUNTS: Record<string, number> = {
 function StatusBadge({ status }: { status: 'published' | 'draft' }) {
   return status === 'published' ? (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-green-50 text-green-700 border border-green-100">
-      <span className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+      <span className="w-1.5 h-1.5 rounded-full bg-[#2dc56a] shrink-0" />
       Đã xuất bản
     </span>
   ) : (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-500 border border-gray-200">
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-gray-100 text-gray-500 border border-[#e6ebf1]">
       <span className="w-1.5 h-1.5 rounded-full bg-gray-400 shrink-0" />
       Bản nháp
     </span>
@@ -68,14 +68,14 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-4xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div>
             <h3 className="text-base font-bold text-gray-900">Chọn luồng tin nhắn</h3>
             <p className="text-xs text-gray-500 mt-0.5">Chọn 1 luồng tin nhắn sẽ được gửi khi điều kiện thỏa mãn</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors text-gray-400">
             <X size={18} />
           </button>
         </div>
@@ -91,7 +91,7 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
                 onClick={() => setActiveFolder(folder)}
                 className={`w-full flex items-center justify-between px-4 py-2 text-sm transition-colors ${
                   activeFolder === folder
-                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    ? 'bg-blue-50 text-[#3e79f7] font-semibold'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
               >
@@ -117,7 +117,7 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Tìm tên luồng hoặc shortcut..."
-                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="w-full pl-9 pr-4 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
                 />
               </div>
             </div>
@@ -152,7 +152,7 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
                     {/* Check indicator */}
                     <div className="w-8 shrink-0">
                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
-                        selected === flow.id ? 'border-blue-600 bg-blue-600' : 'border-gray-300'
+                        selected === flow.id ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1]'
                       }`}>
                         {selected === flow.id && <Check size={11} className="text-white" strokeWidth={3} />}
                       </div>
@@ -160,7 +160,7 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
 
                     {/* Name */}
                     <div className="flex-1 min-w-0 flex items-center gap-2.5">
-                      <div className="w-7 h-7 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                      <div className="w-7 h-7 rounded-[10px] bg-blue-100 flex items-center justify-center shrink-0">
                         <MessageSquare size={13} className="text-blue-600" />
                       </div>
                       <div className="min-w-0">
@@ -207,14 +207,14 @@ export default function FlowPickerModal({ currentFlowId, onSelect, onClose }: Pr
           <div className="flex items-center gap-3">
             <button
               onClick={onClose}
-              className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors"
+              className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-[10px] transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleConfirm}
               disabled={!selected}
-              className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors shadow-sm"
+              className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] disabled:opacity-50 disabled:cursor-not-allowed rounded-[10px] transition-colors shadow-sm"
             >
               <Check size={14} />
               Xác nhận

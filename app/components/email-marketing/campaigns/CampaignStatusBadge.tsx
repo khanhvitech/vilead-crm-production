@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { CampaignStatus } from '../types';
@@ -54,7 +54,7 @@ export function CampaignStatusDot({ status }: { status: CampaignStatus }) {
     scheduled: 'bg-yellow-400',
     running: 'bg-blue-500',
     paused: 'bg-orange-400',
-    sent: 'bg-green-500',
+    sent: 'bg-[#2dc56a]',
     cancelled: 'bg-red-400'
   };
 

@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { PieChart, Info } from 'lucide-react';
@@ -59,7 +59,7 @@ export function StatusDistributionChart({ data, loading = false }: StatusDistrib
 
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border p-6 animate-pulse">
+      <div className="bg-white rounded-[10px] border p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-5 h-5 bg-gray-200 rounded" />
           <div className="h-6 bg-gray-200 rounded w-48" />
@@ -83,7 +83,7 @@ export function StatusDistributionChart({ data, loading = false }: StatusDistrib
   const segments = calculateSegments();
 
   return (
-    <div className="bg-white rounded-lg border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -92,7 +92,7 @@ export function StatusDistributionChart({ data, loading = false }: StatusDistrib
         </div>
         <div className="group relative">
           <Info className="h-4 w-4 text-gray-400 cursor-help" />
-          <div className="invisible group-hover:visible absolute right-0 top-6 bg-gray-900 text-white text-xs rounded-lg p-3 w-64 z-10">
+          <div className="invisible group-hover:visible absolute right-0 top-6 bg-gray-900 text-white text-xs rounded-[10px] p-3 w-64 z-10">
             Biểu đồ hiển thị tỷ lệ phân bố các trạng thái email trong kỳ báo cáo đã chọn
           </div>
         </div>
@@ -136,7 +136,7 @@ export function StatusDistributionChart({ data, loading = false }: StatusDistrib
           {segments.map((segment, i) => (
             <div 
               key={i} 
-              className="flex items-center justify-between p-2 rounded-lg hover:bg-gray-50 transition-colors"
+              className="flex items-center justify-between p-2 rounded-[10px] hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
                 <div 

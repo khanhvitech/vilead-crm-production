@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, Download, FileSpreadsheet, Check, Loader2 } from 'lucide-react';
@@ -74,11 +74,11 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-md">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b">
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 rounded-lg">
+            <div className="p-2 bg-blue-50 rounded-[10px]">
               <Download className="h-5 w-5 text-blue-600" />
             </div>
             <div>
@@ -88,7 +88,7 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors"
             disabled={exporting}
           >
             <X className="h-5 w-5 text-gray-500" />
@@ -106,16 +106,16 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
               {REPORT_OPTIONS.map((option) => (
                 <label
                   key={option.key}
-                  className={`flex items-start gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                  className={`flex items-start gap-3 p-3 rounded-[10px] border cursor-pointer transition-colors ${
                     selectedReports.includes(option.key)
                       ? 'border-blue-500 bg-blue-50'
-                      : 'border-gray-200 hover:bg-gray-50'
+                      : 'border-[#e6ebf1] hover:bg-gray-50'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 mt-0.5 ${
                     selectedReports.includes(option.key)
                       ? 'bg-blue-500 border-blue-500'
-                      : 'border-gray-300'
+                      : 'border-[#e6ebf1]'
                   }`}>
                     {selectedReports.includes(option.key) && (
                       <Check className="h-3 w-3 text-white" />
@@ -146,10 +146,10 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
                 <button
                   key={format.key}
                   onClick={() => setSelectedFormat(format.key)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg border transition-colors ${
+                  className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-[10px] border transition-colors ${
                     selectedFormat === format.key
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-200 hover:bg-gray-50 text-gray-700'
+                      ? 'border-blue-500 bg-blue-50 text-[#3e79f7]'
+                      : 'border-[#e6ebf1] hover:bg-gray-50 text-gray-700'
                   }`}
                 >
                   <format.icon className="h-5 w-5" />
@@ -161,7 +161,7 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
 
           {/* Message */}
           {message && (
-            <div className={`p-3 rounded-lg text-sm ${
+            <div className={`p-3 rounded-[10px] text-sm ${
               message.type === 'success'
                 ? 'bg-green-50 text-green-700'
                 : 'bg-red-50 text-red-700'
@@ -176,14 +176,14 @@ export function ZbsExportReportModal({ open, onClose, onExport }: ZbsExportRepor
           <button
             onClick={onClose}
             disabled={exporting}
-            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors disabled:opacity-50"
           >
             Hủy
           </button>
           <button
             onClick={handleExport}
             disabled={exporting || selectedReports.length === 0}
-            className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            className="px-4 py-2 text-sm font-medium text-white bg-blue-500 hover:bg-[#3e79f7] rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
           >
             {exporting ? (
               <>

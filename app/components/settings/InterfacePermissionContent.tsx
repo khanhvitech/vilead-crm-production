@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useCallback } from 'react'
 import { 
@@ -402,7 +402,7 @@ interface RoleListPanelProps {
 
 function RoleListPanel({ roles, selectedRoleId, onRoleSelect }: RoleListPanelProps) {
   return (
-    <div className="w-56 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
       <div className="p-2">
         {roles.map(role => (
           <div
@@ -451,8 +451,8 @@ function ModuleListPanel({
   onModuleDragEnd
 }: ModuleListPanelProps) {
   return (
-    <div className="w-52 flex-shrink-0 bg-white border border-gray-200 rounded-lg overflow-hidden">
-      <div className="p-3 border-b border-gray-200">
+    <div className="w-52 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+      <div className="p-3 border-b border-[#e6ebf1]">
         <h3 className="text-sm font-semibold text-[#455560]">Module</h3>
       </div>
       <div className="p-2 space-y-1 max-h-[calc(100%-48px)] overflow-y-auto">
@@ -535,14 +535,14 @@ function ComponentConfigPanel({
 }: ComponentConfigPanelProps) {
   if (modules.length === 0) {
     return (
-      <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+      <div className="flex-1 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden flex items-center justify-center">
         <p className="text-gray-400 text-sm">Chọn module để cấu hình giao diện</p>
       </div>
     )
   }
 
   return (
-    <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden">
+    <div className="flex-1 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
       <div className="p-4 max-h-full overflow-y-auto space-y-4">
         {modules.map(module => (
           <ModuleConfigSection
@@ -627,7 +627,7 @@ function ModuleConfigSection({
 
   if (module.groups.length === 0) {
     return (
-      <div className="border border-gray-200 rounded-lg p-4">
+      <div className="border border-[#e6ebf1] rounded-[10px] p-4">
         <div className="flex items-center gap-2 text-[#455560]">
           <IconComponent className="w-5 h-5" />
           <span className="font-medium">{module.name}</span>
@@ -638,9 +638,9 @@ function ModuleConfigSection({
   }
 
   return (
-    <div className="border border-gray-200 rounded-lg overflow-hidden">
+    <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
       {/* Module Header - Parent Wrapper */}
-      <div className="flex items-center justify-between px-4 py-3 bg-[#fafafb] border-b border-gray-200">
+      <div className="flex items-center justify-between px-4 py-3 bg-[#fafafb] border-b border-[#e6ebf1]">
         <div className="flex items-center gap-2">
           <span className="text-sm font-semibold text-[#1a3353]">{module.name}</span>
           <span className="text-xs text-gray-500">({module.groups.length} modules)</span>
@@ -744,7 +744,7 @@ function GroupConfigSection({
   return (
     <div 
       className={cn(
-        "border border-gray-200 rounded-lg overflow-hidden bg-white",
+        "border border-[#e6ebf1] rounded-[10px] overflow-hidden bg-white",
         draggedGroupId === group.id && 'opacity-50',
         dragOverGroupId === group.id && draggedGroupId !== group.id && 'border-t-2 border-[#3e79f7]'
       )}

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import {
@@ -278,16 +278,16 @@ export default function SalesManagement() {
 
   // Task types for bulk creation
   const taskTypes = [
-    { id: 'call', name: 'Gọi điện', icon: '📞', description: 'Liên hệ qua điện thoại', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { id: 'call', name: 'Gọi điện', icon: '📞', description: 'Liên hệ qua điện thoại', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
     { id: 'email', name: 'Gửi email', icon: '✉️', description: 'Gửi email tư vấn', color: 'bg-green-100 text-green-700 border-green-200' },
-    { id: 'zalo', name: 'Nhắn tin Zalo', icon: '💬', description: 'Liên hệ qua Zalo', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { id: 'facebook', name: 'Nhắn Facebook', icon: '👥', description: 'Nhắn tin qua Facebook', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { id: 'zalo', name: 'Nhắn tin Zalo', icon: '💬', description: 'Liên hệ qua Zalo', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
+    { id: 'facebook', name: 'Nhắn Facebook', icon: '👥', description: 'Nhắn tin qua Facebook', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
     { id: 'followup', name: 'Follow-up', icon: '🔄', description: 'Theo dõi tình hình khách hàng', color: 'bg-orange-100 text-orange-700 border-orange-200' },
     { id: 'quote', name: 'Gửi báo giá', icon: '📄', description: 'Chuẩn bị và gửi báo giá', color: 'bg-purple-100 text-purple-700 border-purple-200' },
     { id: 'demo', name: 'Demo sản phẩm', icon: '🎯', description: 'Trình diễn sản phẩm', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-    { id: 'meeting', name: 'Hẹn gặp mặt', icon: '🤝', description: 'Sắp xếp cuộc hẹn trực tiếp', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    { id: 'meeting', name: 'Hẹn gặp mặt', icon: '🤝', description: 'Sắp xếp cuộc hẹn trực tiếp', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
     { id: 'online', name: 'Meeting online', icon: '📹', description: 'Cuộc họp trực tuyến', color: 'bg-teal-100 text-teal-700 border-teal-200' },
-    { id: 'contract', name: 'Chuẩn bị hợp đồng', icon: '📋', description: 'Soạn thảo hợp đồng', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+    { id: 'contract', name: 'Chuẩn bị hợp đồng', icon: '📋', description: 'Soạn thảo hợp đồng', color: 'bg-gray-100 text-gray-700 border-[#e6ebf1]' },
     { id: 'invoice', name: 'Gửi hóa đơn', icon: '💰', description: 'Xuất và gửi hóa đơn', color: 'bg-green-100 text-green-700 border-green-200' }
   ]
 
@@ -526,8 +526,8 @@ export default function SalesManagement() {
 
   // Default source options
   const defaultSourceOptions: CreatableSelectOption[] = [
-    { value: 'website', label: 'Website', color: 'bg-blue-100 text-blue-700 border-blue-200' },
-    { value: 'facebook', label: 'Facebook', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    { value: 'website', label: 'Website', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'facebook', label: 'Facebook', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'google', label: 'Google Ads', color: 'bg-red-100 text-red-700 border-red-200' },
     { value: 'referral', label: 'Giới thiệu', color: 'bg-green-100 text-green-700 border-green-200' },
     { value: 'cold-call', label: 'Cold Call', color: 'bg-orange-100 text-orange-700 border-orange-200' },
@@ -540,14 +540,14 @@ export default function SalesManagement() {
 
   // Default industry options
   const defaultIndustryOptions: CreatableSelectOption[] = [
-    { value: 'technology', label: 'Công nghệ thông tin', color: 'bg-blue-100 text-blue-700 border-blue-200' },
+    { value: 'technology', label: 'Công nghệ thông tin', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'finance', label: 'Tài chính - Ngân hàng', color: 'bg-green-100 text-green-700 border-green-200' },
     { value: 'healthcare', label: 'Y tế - Sức khỏe', color: 'bg-red-100 text-red-700 border-red-200' },
     { value: 'education', label: 'Giáo dục', color: 'bg-purple-100 text-purple-700 border-purple-200' },
     { value: 'retail', label: 'Bán lẻ', color: 'bg-orange-100 text-orange-700 border-orange-200' },
-    { value: 'manufacturing', label: 'Sản xuất', color: 'bg-gray-100 text-gray-700 border-gray-200' },
+    { value: 'manufacturing', label: 'Sản xuất', color: 'bg-gray-100 text-gray-700 border-[#e6ebf1]' },
     { value: 'real-estate', label: 'Bất động sản', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
-    { value: 'consulting', label: 'Tư vấn', color: 'bg-indigo-100 text-indigo-700 border-indigo-200' },
+    { value: 'consulting', label: 'Tư vấn', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
     { value: 'marketing', label: 'Marketing', color: 'bg-pink-100 text-pink-700 border-pink-200' },
     { value: 'logistics', label: 'Vận chuyển - Logistics', color: 'bg-teal-100 text-teal-700 border-teal-200' },
   ]
@@ -2897,7 +2897,7 @@ export default function SalesManagement() {
     return (
       <div className="space-y-6">
         {/* Pipeline Flow - Show in both table and kanban view */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-2">
               <h3 className="text-lg font-semibold text-gray-900">Quy trình Bán hàng</h3>
@@ -2908,7 +2908,7 @@ export default function SalesManagement() {
               >
                 <HelpCircle className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
                 {showTooltip === 'pipeline-overview' && (
-                  <div className="absolute left-0 top-7 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[280px]">
+                  <div className="absolute left-0 top-7 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[280px]">
                     <p>Theo dõi toàn bộ hành trình khách hàng từ lead mới đến chuyển đổi thành công.</p>
                     <div className="absolute top-[-6px] left-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                   </div>
@@ -2921,7 +2921,7 @@ export default function SalesManagement() {
           <div className="flex gap-6 overflow-x-auto py-3 scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 overflow-y-visible">
             {/* 1. Lead mới - BẮT BUỘC */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'new' ? 'ring-4 ring-purple-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'new' ? 'ring-4 ring-purple-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('new')}
             >
@@ -2933,7 +2933,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-new' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[200px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[200px]">
                       <p>Giai đoạn bắt đầu - không thể xóa hay đổi tên.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -2957,7 +2957,7 @@ export default function SalesManagement() {
 
             {/* 2. Đang tư vấn - LINH ĐỘNG */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'contacted' ? 'ring-4 ring-blue-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'contacted' ? 'ring-4 ring-blue-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('contacted')}
             >
@@ -2969,7 +2969,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-contacted' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
                       <p>Đang tư vấn và tìm hiểu nhu cầu khách hàng.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -2993,7 +2993,7 @@ export default function SalesManagement() {
 
             {/* 3. Đã gửi ĐX - LINH ĐỘNG */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'qualified' ? 'ring-4 ring-green-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'qualified' ? 'ring-4 ring-green-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('qualified')}
             >
@@ -3005,7 +3005,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-qualified' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
                       <p>Đã gửi đề xuất/hợp đồng cho khách.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3029,7 +3029,7 @@ export default function SalesManagement() {
 
             {/* 4. Đàm phán - LINH ĐỘNG */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-yellow-600 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'negotiation' ? 'ring-4 ring-yellow-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-yellow-600 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'negotiation' ? 'ring-4 ring-yellow-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('negotiation')}
             >
@@ -3041,7 +3041,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-negotiation' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[220px]">
                       <p>Đang thảo luận về giá cả và điều kiện.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3065,7 +3065,7 @@ export default function SalesManagement() {
 
             {/* 5. Chờ thanh toán - BẮT BUỘC */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-orange-600 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'payment_pending' ? 'ring-4 ring-orange-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-orange-600 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'payment_pending' ? 'ring-4 ring-orange-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('payment_pending')}
             >
@@ -3077,7 +3077,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-payment' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[240px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[240px]">
                       <p>Khách hàng đã đồng ý, đang chờ thanh toán.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3101,7 +3101,7 @@ export default function SalesManagement() {
 
             {/* 6. Đã chốt - BẮT BUỘC */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-emerald-600 to-emerald-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'converted' ? 'ring-4 ring-emerald-300 transform scale-105 z-10' : ''
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-emerald-600 to-emerald-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${selectedPipelineStage === 'converted' ? 'ring-4 ring-emerald-300 transform scale-105 z-10' : ''
                 }`}
               onClick={() => handlePipelineStageClick('converted')}
             >
@@ -3113,7 +3113,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-converted' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[200px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[200px]">
                       <p>Deal thành công, đã nhận thanh toán.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3137,7 +3137,7 @@ export default function SalesManagement() {
 
             {/* 7. Thất bại - BẮT BUỘC */}
             <div
-              className={`flex flex-col justify-between rounded-lg px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative ${selectedPipelineStage === 'lost' ? 'ring-2 ring-red-700' : ''}`}
+              className={`flex flex-col justify-between rounded-[10px] px-8 py-7 min-w-[220px] max-w-[240px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative ${selectedPipelineStage === 'lost' ? 'ring-2 ring-red-700' : ''}`}
               onClick={() => handlePipelineStageClick('lost')}
             >
               <div className="absolute top-2 right-2">
@@ -3148,7 +3148,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                   {showTooltip === 'stage-lost' && (
-                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[240px]">
+                    <div className="absolute right-0 top-6 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[240px]">
                       <p>Deal không thành công, phân tích nguyên nhân.</p>
                       <div className="absolute top-[-6px] right-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3181,7 +3181,7 @@ export default function SalesManagement() {
                 >
                   <HelpCircle className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
                   {showTooltip === 'progress-bar' && (
-                    <div className="absolute left-0 top-7 z-10 bg-white text-gray-600 text-sm rounded-xl py-3 px-4 shadow-lg border border-gray-100 min-w-[300px]">
+                    <div className="absolute left-0 top-7 z-10 bg-white text-gray-600 text-sm rounded-[10px] py-3 px-4 shadow-lg border border-gray-100 min-w-[300px]">
                       <p>Dựa trên tổng đơn hàng thành công và thực tế trên hợp đồng</p>
                       <div className="absolute top-[-6px] left-4 w-3 h-3 bg-white border-l border-t border-gray-100 transform rotate-45"></div>
                     </div>
@@ -3208,10 +3208,10 @@ export default function SalesManagement() {
         </div>
 
         {/* Search and Filter Controls */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-4">
           <div className="flex flex-col lg:flex-row gap-4">
             {/* View Mode Toggle */}
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <div className="flex bg-gray-100 rounded-[10px] p-1">
               <button
                 onClick={() => setViewMode('table')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors flex items-center gap-2 ${viewMode === 'table'
@@ -3243,7 +3243,7 @@ export default function SalesManagement() {
                   placeholder="Tìm theo tên, email, phone, công ty..."
                   value={leadSearchTerm}
                   onChange={(e) => setLeadSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 />
               </div>
             </div>
@@ -3253,7 +3253,7 @@ export default function SalesManagement() {
               <select
                 value={leadStatusFilter}
                 onChange={(e) => setLeadStatusFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="new">🆕 Lead mới</option>
@@ -3268,7 +3268,7 @@ export default function SalesManagement() {
               <select
                 value={leadSourceFilter}
                 onChange={(e) => setLeadSourceFilter(e.target.value)}
-                className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
               >
                 <option value="all">Tất cả nguồn</option>
                 <option value="facebook">Facebook</option>
@@ -3280,7 +3280,7 @@ export default function SalesManagement() {
 
               <button
                 onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-all duration-200 flex items-center gap-2"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200 transition-all duration-200 flex items-center gap-2"
               >
                 <Filter className="w-4 h-4" />
                 Lọc nâng cao
@@ -3290,13 +3290,13 @@ export default function SalesManagement() {
               <div className="relative">
                 <button
                   onClick={() => setShowColumnSelector(!showColumnSelector)}
-                  className="px-4 py-2 bg-indigo-100 text-indigo-700 rounded-lg hover:bg-indigo-200 hover:text-indigo-800 transition-all duration-200 shadow-sm hover:shadow-md"
+                  className="px-4 py-2 bg-[#f0f7ff] text-[#3e79f7] rounded-[10px] hover:bg-indigo-200 hover:text-indigo-800 transition-all duration-200 shadow-sm hover:shadow-md"
                 >
                   Hiển thị cột
                 </button>
 
                 {showColumnSelector && (
-                  <div className="absolute right-0 top-12 z-50 bg-white border border-gray-200 rounded-lg shadow-lg p-4 min-w-[300px]">
+                  <div className="absolute right-0 top-12 z-50 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 min-w-[300px]">
                     <h4 className="font-medium text-gray-900 mb-3">Tùy chỉnh cột hiển thị</h4>
                     <div className="grid grid-cols-2 gap-2 max-h-80 overflow-y-auto">
                       {Object.entries(columnLabels).map(([key, label]) => (
@@ -3308,13 +3308,13 @@ export default function SalesManagement() {
                               ...prev,
                               [key]: e.target.checked
                             }))}
-                            className="w-4 h-4 rounded border-gray-300 text-[#1a3353] focus:ring-[#1a3353]"
+                            className="w-4 h-4 rounded border-[#e6ebf1] text-[#1a3353] focus:ring-[#1a3353]"
                           />
                           <span className="text-gray-700">{label}</span>
                         </label>
                       ))}
                     </div>
-                    <div className="mt-4 pt-3 border-t border-gray-200 flex justify-start gap-3">
+                    <div className="mt-4 pt-3 border-t border-[#e6ebf1] flex justify-start gap-3">
                       <button
                         onClick={() => {
                           const allEnabled = Object.keys(visibleColumns).reduce((acc, key) => {
@@ -3323,7 +3323,7 @@ export default function SalesManagement() {
                           }, {} as typeof visibleColumns);
                           setVisibleColumns(allEnabled);
                         }}
-                        className="px-4 py-2 text-sm font-medium text-white bg-[#1a3353] rounded-lg hover:bg-[#2a4363] transition-colors"
+                        className="px-4 py-2 text-sm font-medium text-white bg-[#1a3353] rounded-[10px] hover:bg-[#2a4363] transition-colors"
                       >
                         Tất cả
                       </button>
@@ -3346,7 +3346,7 @@ export default function SalesManagement() {
               {/* Hidden: Automatic lead distribution button 
               <button 
                 onClick={() => setShowAutoAssignModal(true)}
-                className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 bg-purple-600 text-white rounded-[10px] hover:bg-purple-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Bot className="w-4 h-4" />
                 Phân leads tự động
@@ -3355,7 +3355,7 @@ export default function SalesManagement() {
 
               <button
                 onClick={() => setShowImportModal(true)}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Download className="w-4 h-4" />
                 Nhập leads
@@ -3363,7 +3363,7 @@ export default function SalesManagement() {
 
               <button
                 onClick={() => setShowAddLeadModal(true)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Plus className="w-4 h-4" />
                 Thêm Lead
@@ -3403,7 +3403,7 @@ export default function SalesManagement() {
 
           {/* Advanced Filters - Inside toolbar container */}
           {showAdvancedFilters && (
-            <div className="mt-4 pt-4 border-t border-gray-200">
+            <div className="mt-4 pt-4 border-t border-[#e6ebf1]">
               <h3 className="text-sm font-semibold text-gray-800 mb-3">Bộ lọc nâng cao</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
                 {/* Sales phụ trách */}
@@ -3412,7 +3412,7 @@ export default function SalesManagement() {
                   <select
                     value={filterAssignee}
                     onChange={(e) => setFilterAssignee(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-2 py-1.5 border border-[#e6ebf1] rounded-md text-xs bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
                   >
                     <option value="">Chọn sale</option>
                     <option value="Nguyễn Văn A">Nguyễn Văn A</option>
@@ -3427,7 +3427,7 @@ export default function SalesManagement() {
                 <div>
                   <label className="block text-xs font-medium text-gray-700 mb-1">Ngày tạo lead</label>
                   <div className="relative">
-                    <div className="flex items-center border border-gray-300 rounded-md bg-white overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                    <div className="flex items-center border border-[#e6ebf1] rounded-md bg-white overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                       <div className="flex items-center px-2 text-gray-400">
                         <Calendar className="w-3.5 h-3.5" />
                       </div>
@@ -3454,7 +3454,7 @@ export default function SalesManagement() {
                   <select
                     value={filterProductInterest}
                     onChange={(e) => setFilterProductInterest(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-2 py-1.5 border border-[#e6ebf1] rounded-md text-xs bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
                   >
                     <option value="">Chọn sản phẩm</option>
                     <option value="CRM Basic">CRM Basic</option>
@@ -3470,7 +3470,7 @@ export default function SalesManagement() {
                   <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
                   <div className="relative">
                     <div
-                      className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-white cursor-pointer flex items-center justify-between hover:border-gray-400 transition-colors"
+                      className="w-full px-2 py-1.5 border border-[#e6ebf1] rounded-md text-xs bg-white cursor-pointer flex items-center justify-between hover:border-gray-400 transition-colors"
                       onClick={() => setShowProvinceDropdown(!showProvinceDropdown)}
                     >
                       <span className={filterProvince ? 'text-gray-900' : 'text-gray-500'}>
@@ -3488,7 +3488,7 @@ export default function SalesManagement() {
                             setProvinceSearchTerm('')
                           }}
                         />
-                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-[999] max-h-[280px] overflow-hidden">
+                        <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-[999] max-h-[280px] overflow-hidden">
                           {/* Search input */}
                           <div className="p-2 border-b border-gray-100">
                             <div className="relative">
@@ -3498,7 +3498,7 @@ export default function SalesManagement() {
                                 placeholder="Tìm kiếm"
                                 value={provinceSearchTerm}
                                 onChange={(e) => setProvinceSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
                                 onClick={(e) => e.stopPropagation()}
                               />
                             </div>
@@ -3542,7 +3542,7 @@ export default function SalesManagement() {
                   <select
                     value={filterTag}
                     onChange={(e) => setFilterTag(e.target.value)}
-                    className="w-full px-2 py-1.5 border border-gray-300 rounded-md text-xs bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-2 py-1.5 border border-[#e6ebf1] rounded-md text-xs bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
                   >
                     <option value="">Chọn tag</option>
                     <option value="hot">Hot</option>
@@ -3561,7 +3561,7 @@ export default function SalesManagement() {
                     // TODO: Apply filter logic
                     setShowAdvancedFilters(false)
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#2dc56a] rounded-[10px] hover:bg-[#04d182] transition-colors"
                 >
                   <Check className="w-4 h-4" />
                   <span>Áp dụng bộ lọc</span>
@@ -3575,7 +3575,7 @@ export default function SalesManagement() {
                     setFilterTag('')
                     setProvinceSearchTerm('')
                   }}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                 >
                   <X className="w-4 h-4" />
                   <span>Xóa bộ lọc nâng cao</span>
@@ -3587,10 +3587,10 @@ export default function SalesManagement() {
 
         {/* Leads View - Table or Kanban */}
         {viewMode === 'table' ? (
-          <div className="bg-white rounded-lg border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
             {/* Bulk Actions Bar - Show when leads are selected */}
             {selectedLeadIds.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <span className="text-sm font-medium text-blue-900">
@@ -3609,14 +3609,14 @@ export default function SalesManagement() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={handleAssignSalesQuick}
-                      className="px-3 py-1.5 bg-green-600 text-white text-sm rounded-md hover:bg-green-700 transition-colors flex items-center gap-1"
+                      className="px-3 py-1.5 bg-[#2dc56a] text-white text-sm rounded-md hover:bg-[#04d182] transition-colors flex items-center gap-1"
                     >
                       <User className="w-4 h-4" />
                       Gán Sales nhanh
                     </button>
                     <button
                       onClick={() => setShowBulkStatusModal(true)}
-                      className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition-colors flex items-center gap-1"
+                      className="px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-1"
                     >
                       <TrendingUp className="w-4 h-4" />
                       Chuyển trạng thái
@@ -3655,7 +3655,7 @@ export default function SalesManagement() {
               <span>Hiển thị {filteredLeads.length} trong tổng {leads.length} khách hàng</span>
             </div>
 
-            <div className="omi-table-container overflow-x-auto rounded-lg border border-gray-200">
+            <div className="omi-table-container overflow-x-auto rounded-[10px] border border-[#e6ebf1]">
               <table className="omi-table">
                 <thead>
                   <tr>
@@ -3934,7 +3934,7 @@ export default function SalesManagement() {
                           <div className="relative">
                             <button
                               onClick={() => setOpenActionMenuId(openActionMenuId === lead.id ? null : lead.id)}
-                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-lg transition-colors"
+                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-[10px] transition-colors"
                             >
                               <Settings className="w-5 h-5" />
                             </button>
@@ -3945,7 +3945,7 @@ export default function SalesManagement() {
                                   className="fixed inset-0 z-[999]"
                                   onClick={() => setOpenActionMenuId(null)}
                                 />
-                                <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-[1000] py-2 text-left">
+                                <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] z-[1000] py-2 text-left">
                                   {/* THÔNG TIN */}
                                   <div className="px-3 py-1.5">
                                     <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
@@ -4035,12 +4035,12 @@ export default function SalesManagement() {
             </div>
 
             {/* Pagination */}
-            <div className="px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6 mt-4">
+            <div className="px-4 py-3 flex items-center justify-between border-t border-[#e6ebf1] sm:px-6 mt-4">
               <div className="flex-1 flex justify-between sm:hidden">
-                <button className="relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                <button className="relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-[10px] text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
                   Trước
                 </button>
-                <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-lg text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
+                <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-slate-300 text-sm font-medium rounded-[10px] text-slate-700 bg-slate-50 hover:bg-slate-100 hover:text-slate-800 transition-all duration-200 shadow-sm hover:shadow-md">
                   Sau
                 </button>
               </div>
@@ -4052,17 +4052,17 @@ export default function SalesManagement() {
                   </p>
                 </div>
                 <div>
-                  <nav className="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px" aria-label="Pagination">
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                  <nav className="relative z-0 inline-flex rounded-[10px] shadow-sm -space-x-px" aria-label="Pagination">
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-l-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-all duration-200">
                       <span className="sr-only">Trước</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" />
                       </svg>
                     </button>
-                    <button className="bg-blue-600 border-blue-600 text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium shadow-md hover:bg-blue-700 transition-all duration-200">
+                    <button className="bg-[#3e79f7] border-[#3e79f7] text-white relative inline-flex items-center px-4 py-2 border text-sm font-medium shadow-md hover:bg-[#699dff] transition-all duration-200">
                       1
                     </button>
-                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200">
+                    <button className="relative inline-flex items-center px-2 py-2 rounded-r-lg border border-slate-300 bg-slate-50 text-sm font-medium text-slate-600 hover:bg-slate-100 hover:text-slate-700 focus:z-10 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-all duration-200">
                       <span className="sr-only">Sau</span>
                       <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
                         <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
@@ -4083,22 +4083,22 @@ export default function SalesManagement() {
                 return (
                   <div
                     key={status}
-                    className="bg-white rounded-lg shadow-sm border border-gray-200 flex flex-col h-full"
+                    className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] flex flex-col h-full"
                     onDragOver={handleDragOver}
                     onDrop={(e) => handleDrop(e, status)}
                   >
                     {/* Column Header */}
-                    <div className={`p-4 border-b border-gray-200 flex items-center justify-between transition-colors ${draggedLead && draggedLead.status !== status ?
-                      (status === 'converted' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200')
+                    <div className={`p-4 border-b border-[#e6ebf1] flex items-center justify-between transition-colors ${draggedLead && draggedLead.status !== status ?
+                      (status === 'converted' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-[#c7d9fd]')
                       : ''
                       }`}>
                       <div className="flex items-center">
                         <span className={`w-3 h-3 rounded-full mr-2 ${status === 'new' ? 'bg-gray-500' :
                           status === 'contacted' ? 'bg-blue-500' :
-                            status === 'qualified' ? 'bg-green-500' :
+                            status === 'qualified' ? 'bg-[#2dc56a]' :
                               status === 'negotiation' ? 'bg-yellow-500' :
                                 status === 'payment_pending' ? 'bg-purple-500' :
-                                  status === 'converted' ? 'bg-green-600' :
+                                  status === 'converted' ? 'bg-[#2dc56a]' :
                                     'bg-red-500'
                           }`}></span>
                         <h3 className="font-medium text-gray-900">
@@ -4116,7 +4116,7 @@ export default function SalesManagement() {
                     {/* Cards Container */}
                     <div className="flex-1 p-2 overflow-y-auto">
                       {statusLeads.length === 0 ? (
-                        <div className={`text-center py-12 text-gray-400 border-2 border-dashed border-gray-200 rounded-lg transition-colors ${draggedLead && draggedLead.status !== status ? 'border-blue-400 bg-blue-50 text-blue-600' : ''
+                        <div className={`text-center py-12 text-gray-400 border-2 border-dashed border-[#e6ebf1] rounded-[10px] transition-colors ${draggedLead && draggedLead.status !== status ? 'border-[#699dff] bg-blue-50 text-blue-600' : ''
                           }`}>
                           <div className="flex flex-col items-center gap-2">
                             <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center">
@@ -4131,7 +4131,7 @@ export default function SalesManagement() {
                         statusLeads.map((lead) => (
                           <div
                             key={lead.id}
-                            className={`bg-white rounded-lg p-3 shadow-sm border border-gray-200 hover:shadow-md transition-all ${lead.status === 'converted'
+                            className={`bg-white rounded-[10px] p-3 shadow-sm border border-[#e6ebf1] hover:shadow-md transition-all ${lead.status === 'converted'
                               ? 'cursor-not-allowed border-green-300 bg-green-50'
                               : 'cursor-move'
                               } ${draggedLead?.id === lead.id ? 'opacity-50 rotate-2 scale-105' : 'hover:scale-102'
@@ -4216,7 +4216,7 @@ export default function SalesManagement() {
                                 <div className="flex items-center gap-1">
                                   <button
                                     onClick={() => handleViewLeadDetail(lead)}
-                                    className="p-1.5 text-slate-600 hover:text-white hover:bg-blue-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
+                                    className="p-1.5 text-slate-600 hover:text-white hover:bg-[#3e79f7] rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
                                     title="Xem chi tiết"
                                   >
                                     <Eye className="w-3.5 h-3.5" />
@@ -4261,7 +4261,7 @@ export default function SalesManagement() {
                                   ) : lead.status !== 'converted' && lead.status !== 'lost' ? (
                                     <button
                                       onClick={() => handleConvertLead(lead)}
-                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-green-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
+                                      className="p-1.5 text-slate-600 hover:text-white hover:bg-[#2dc56a] rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
                                       title="Chuyển đổi thành khách hàng"
                                     >
                                       <User className="w-3.5 h-3.5" />
@@ -4270,7 +4270,7 @@ export default function SalesManagement() {
 
                                   <button
                                     onClick={() => {/* TODO: Add delete function */ }}
-                                    className="p-1.5 text-slate-600 hover:text-white hover:bg-red-600 rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
+                                    className="p-1.5 text-slate-600 hover:text-white hover:bg-[#ff6b72] rounded-md transition-all duration-200 transform hover:scale-105 shadow-sm hover:shadow-md"
                                     title="Xóa"
                                   >
                                     <Trash2 className="w-3.5 h-3.5" />
@@ -4305,7 +4305,7 @@ export default function SalesManagement() {
     <div className="space-y-4">
       {/* Notification */}
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg ${notification?.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-[10px] shadow-lg ${notification?.type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
           }`}>
           <div className="flex items-center space-x-2">
             <CheckCircle className="w-5 h-5" />
@@ -4323,7 +4323,7 @@ export default function SalesManagement() {
       </div>
 
       {/* Pipeline Content */}
-      <div className="mb-4 bg-white p-2 rounded-lg border border-gray-200">
+      <div className="mb-4 bg-white p-2 rounded-[10px] border border-[#e6ebf1]">
         <div className="flex items-center space-x-2 overflow-x-auto">
           {pipelineTabs.map((tab) => (
             <button
@@ -4331,7 +4331,7 @@ export default function SalesManagement() {
               onClick={() => setActivePipelineTab(tab)}
               className={`px-4 py-2 text-sm font-medium rounded-md whitespace-nowrap transition-colors ${
                 activePipelineTab === tab
-                  ? 'bg-blue-100 text-blue-700'
+                  ? 'bg-blue-100 text-[#3e79f7]'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
               }`}
             >
@@ -4349,8 +4349,8 @@ export default function SalesManagement() {
       {/* Add Lead Modal */}
       {showAddLeadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-lg font-semibold text-gray-900">Thêm Lead mới</h3>
@@ -4361,7 +4361,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showTooltip === 'add-lead-title' && (
-                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-lg py-3 px-4 shadow-lg">
+                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-[10px] py-3 px-4 shadow-lg">
                         <div className="max-w-sm">
                           <p className="font-medium mb-2">📝 Tạo lead mới</p>
                           <p className="mb-2">Nhập thông tin khách hàng tiềm năng mới:</p>
@@ -4377,7 +4377,7 @@ export default function SalesManagement() {
                   </div>
                   <button
                     onClick={() => setShowFieldSettingsModal(true)}
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 hover:text-gray-700 transition-all"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 hover:text-gray-700 transition-all"
                   >
                     {/* <Sliders className="w-3.5 h-3.5" /> */}
                     Thiết lập trường thông tin
@@ -4402,7 +4402,7 @@ export default function SalesManagement() {
                   Loại khách hàng
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
@@ -4416,7 +4416,7 @@ export default function SalesManagement() {
                         companySize: '',
                         website: ''
                       }))}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">👤 Cá nhân</div>
@@ -4424,14 +4424,14 @@ export default function SalesManagement() {
                     </div>
                   </label>
 
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
                       value="business"
                       checked={newLead.customerType === 'business'}
                       onChange={(e) => setNewLead(prev => ({ ...prev, customerType: e.target.value as 'individual' | 'business' }))}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">🏢 Công ty</div>
@@ -4458,7 +4458,7 @@ export default function SalesManagement() {
                         value={newLead.name}
                         onChange={(e) => setNewLead(prev => ({ ...prev, name: e.target.value }))}
                         placeholder="Nhập tên khách hàng..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                   )}
@@ -4472,7 +4472,7 @@ export default function SalesManagement() {
                       value={newLead.phone}
                       onChange={(e) => setNewLead(prev => ({ ...prev, phone: e.target.value }))}
                       placeholder="0901234567"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
 
@@ -4485,7 +4485,7 @@ export default function SalesManagement() {
                       value={newLead.email}
                       onChange={(e) => setNewLead(prev => ({ ...prev, email: e.target.value }))}
                       placeholder="email@domain.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
 
@@ -4500,7 +4500,7 @@ export default function SalesManagement() {
                           value={newLead.estimatedRevenue}
                           onChange={handleEstimatedRevenueChange}
                           placeholder="1.000.000"
-                          className="w-full px-3 py-2 pr-12 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 pr-12 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                         <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">VNĐ</span>
                       </div>
@@ -4525,7 +4525,7 @@ export default function SalesManagement() {
                           value={newLead.company}
                           onChange={(e) => setNewLead(prev => ({ ...prev, company: e.target.value }))}
                           placeholder="Tên công ty..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4538,7 +4538,7 @@ export default function SalesManagement() {
                           value={newLead.jobTitle}
                           onChange={(e) => setNewLead(prev => ({ ...prev, jobTitle: e.target.value }))}
                           placeholder="CEO, Manager, Developer..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4564,7 +4564,7 @@ export default function SalesManagement() {
                           value={newLead.companySize}
                           onChange={(e) => setNewLead(prev => ({ ...prev, companySize: e.target.value }))}
                           placeholder="Quy mô bao nhiêu người..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4577,7 +4577,7 @@ export default function SalesManagement() {
                           value={newLead.website}
                           onChange={(e) => setNewLead(prev => ({ ...prev, website: e.target.value }))}
                           placeholder="https://domain.com"
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4590,7 +4590,7 @@ export default function SalesManagement() {
                           value={newLead.address}
                           onChange={(e) => setNewLead(prev => ({ ...prev, address: e.target.value }))}
                           placeholder="Địa chỉ công ty..."
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4624,7 +4624,7 @@ export default function SalesManagement() {
                       <select
                         value={newLead.region}
                         onChange={(e) => setNewLead(prev => ({ ...prev, region: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       >
                         <option value="hanoi">Hà Nội</option>
                         <option value="hcm">TP. Hồ Chí Minh</option>
@@ -4647,7 +4647,7 @@ export default function SalesManagement() {
                         >
                           <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
                           {showTooltip === 'assign-to' && (
-                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                            <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                               <div className="max-w-xs">
                                 <p className="text-gray-300">Mặc định phân công cho người tạo. Có thể chọn người khác hoặc để trống để phân công tự động sau.</p>
                               </div>
@@ -4659,7 +4659,7 @@ export default function SalesManagement() {
                       <select
                         value={newLead.assignedTo}
                         onChange={(e) => setNewLead(prev => ({ ...prev, assignedTo: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       >
                         <option value="">Mặc định (Minh Expert - người tạo)</option>
                         {getAvailableSalesPersons().map(person => (
@@ -4683,7 +4683,7 @@ export default function SalesManagement() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-xs font-medium text-gray-700 mb-2">Sản phẩm quan tâm</label>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-3 rounded-lg border border-gray-200">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-3 rounded-[10px] border border-[#e6ebf1]">
                         {productCategories.filter(c => c !== 'Tất cả').map(category => {
                           const categoryProducts = availableProducts.filter(p => p.category === category);
                           if (categoryProducts.length === 0) return null;
@@ -4695,7 +4695,7 @@ export default function SalesManagement() {
                                   <label key={product.id} className="flex items-start gap-2 cursor-pointer group">
                                     <input 
                                       type="checkbox" 
-                                      className="mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                                      className="mt-0.5 rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7] h-3.5 w-3.5"
                                       checked={newLead.interestedProducts.includes(product.id)}
                                       onChange={(e) => {
                                         if (e.target.checked) {
@@ -4734,7 +4734,7 @@ export default function SalesManagement() {
                           onChange={(e) => setNewLead(prev => ({ ...prev, content: e.target.value }))}
                           placeholder="Mô tả nhu cầu, yêu cầu của khách hàng..."
                           rows={3}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4747,7 +4747,7 @@ export default function SalesManagement() {
                           onChange={(e) => setNewLead(prev => ({ ...prev, notes: e.target.value }))}
                           placeholder="Ghi chú thêm về lead này..."
                           rows={2}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     )}
@@ -4756,7 +4756,7 @@ export default function SalesManagement() {
               )}
 
               {/* Preview Card */}
-              {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200">
+              {/* <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-[10px] p-4 border border-[#c7d9fd]">
                 <h4 className="text-sm font-medium text-blue-900 mb-2 flex items-center gap-2">
                   <Eye className="w-4 h-4" />
                   Xem trước Lead
@@ -4795,16 +4795,16 @@ export default function SalesManagement() {
               </div> */}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button
                 onClick={() => setShowAddLeadModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={handleAddLead}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] transition-all duration-200 flex items-center gap-2 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 <Plus className="w-4 h-4" />
                 Thêm Lead
@@ -4817,8 +4817,8 @@ export default function SalesManagement() {
       {/* Auto Assign Modal */}
       {showAutoAssignModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="bg-white rounded-[10px] shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900">Phân leads tự động</h3>
@@ -4829,7 +4829,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-5 h-5 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showAutoAssignTooltip === 'main-title' && (
-                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-lg py-3 px-4 shadow-lg">
+                      <div className="absolute left-0 top-7 z-50 bg-black text-white text-sm rounded-[10px] py-3 px-4 shadow-lg">
                         <div className="max-w-sm">
                           <p className="font-medium mb-2">🤖 Hệ thống phân leads tự động</p>
                           <p className="mb-2">Tự động phân công leads cho đội ngũ sales dựa trên:</p>
@@ -4859,7 +4859,7 @@ export default function SalesManagement() {
 
             <div className="p-4 sm:p-6 space-y-6 flex-1 overflow-y-auto">
               {/* Auto-assign Toggle */}
-              <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900">Trạng thái hệ thống</h4>
@@ -4867,7 +4867,7 @@ export default function SalesManagement() {
                   </div>
                   <button
                     onClick={() => setIsAutoAssignEnabled(!isAutoAssignEnabled)}
-                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isAutoAssignEnabled ? 'bg-green-600' : 'bg-gray-300'
+                    className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${isAutoAssignEnabled ? 'bg-[#2dc56a]' : 'bg-gray-300'
                       }`}
                   >
                     <span
@@ -4903,7 +4903,7 @@ export default function SalesManagement() {
                     >
                       <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
                       {showAutoAssignTooltip === 'strategy-section' && (
-                        <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                           <div className="max-w-xs">
                             <p className="font-medium mb-1">📋 Chọn phương pháp phân công phù hợp</p>
                             <p className="text-gray-300">Mỗi chiến lược có ưu điểm riêng, hãy chọn dựa trên tình hình thực tế của đội nhóm.</p>
@@ -4914,12 +4914,12 @@ export default function SalesManagement() {
                     </div>
                   </div>
 
-                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                  <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-3 mb-4">
                     <div className="flex items-start gap-2">
                       <svg className="w-4 h-4 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
-                      <div className="text-xs text-blue-700">
+                      <div className="text-xs text-[#3e79f7]">
                         <p className="font-medium">💡 Gợi ý chọn strategy:</p>
                         <ul className="mt-1 space-y-1">
                           <li>• <strong>Team mới:</strong> Round-Robin (phân đều)</li>
@@ -4933,7 +4933,7 @@ export default function SalesManagement() {
 
                   <div className="space-y-3">
                     {/* Round-Robin Strategy */}
-                    <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <label className="flex items-start space-x-3 p-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
                         name="strategy"
@@ -4952,7 +4952,7 @@ export default function SalesManagement() {
                     </label>
 
                     {/* Workload-based Strategy */}
-                    <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <label className="flex items-start space-x-3 p-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
                         name="strategy"
@@ -4971,7 +4971,7 @@ export default function SalesManagement() {
                     </label>
 
                     {/* Territory-based Strategy */}
-                    <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <label className="flex items-start space-x-3 p-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
                         name="strategy"
@@ -4990,7 +4990,7 @@ export default function SalesManagement() {
                     </label>
 
                     {/* Source-based Strategy */}
-                    <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <label className="flex items-start space-x-3 p-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
                         name="strategy"
@@ -5009,7 +5009,7 @@ export default function SalesManagement() {
                     </label>
 
                     {/* Shift-based Strategy */}
-                    <label className="flex items-start space-x-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                    <label className="flex items-start space-x-3 p-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 cursor-pointer">
                       <input
                         type="radio"
                         name="strategy"
@@ -5032,7 +5032,7 @@ export default function SalesManagement() {
               )}
 
               {/* Current Status */}
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Clock className="w-4 h-4 text-yellow-600" />
                   <h4 className="text-sm font-medium text-yellow-800">Trạng thái hiện tại</h4>
@@ -5056,7 +5056,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showAutoAssignTooltip === 'filters-section' && (
-                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                         <div className="max-w-xs">
                           <p className="font-medium mb-1">🔍 Lọc leads trước khi phân công</p>
                           <p className="text-gray-300">Chỉ phân công những leads phù hợp với điều kiện đã chọn. Bỏ trống để áp dụng cho tất cả leads.</p>
@@ -5067,7 +5067,7 @@ export default function SalesManagement() {
                   </div>
                 </div>
 
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-3 mb-4">
                   <div className="flex items-start gap-2">
                     <svg className="w-4 h-4 text-yellow-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -5081,7 +5081,7 @@ export default function SalesManagement() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Trạng thái</label>
-                    <select name="status" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="status" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]">
                       <option value="">Tất cả trạng thái</option>
                       <option value="new">Mới</option>
                       <option value="contacted">Đã liên hệ</option>
@@ -5091,7 +5091,7 @@ export default function SalesManagement() {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn</label>
-                    <select name="source" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="source" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]">
                       <option value="">Tất cả nguồn</option>
                       <option value="website">Website</option>
                       <option value="facebook">Facebook</option>
@@ -5103,7 +5103,7 @@ export default function SalesManagement() {
 
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
-                    <select name="region" className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select name="region" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]">
                       <option value="">Tất cả tỉnh thành</option>
                       <option value="hanoi">Hà Nội</option>
                       <option value="hcm">TP.HCM</option>
@@ -5125,7 +5125,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showAutoAssignTooltip === 'rules-section' && (
-                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                         <div className="max-w-xs">
                           <p className="font-medium mb-1">⚙️ Tùy chỉnh cách thức phân công</p>
                           <p className="text-gray-300">Các quy tắc bổ sung để điều chỉnh hành vi của hệ thống phân công tự động.</p>
@@ -5137,7 +5137,7 @@ export default function SalesManagement() {
                 </div>
 
                 <div className="space-y-3">
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-3">
+                  <div className="bg-green-50 border border-green-200 rounded-[10px] p-3 mb-3">
                     <div className="flex items-start gap-2">
                       <svg className="w-4 h-4 text-green-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
@@ -5158,7 +5158,7 @@ export default function SalesManagement() {
                     >
                       <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
                       {showAutoAssignTooltip === 'rule-unassigned' && (
-                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                           <div className="max-w-xs">
                             <p className="font-medium mb-1">🔒 Bảo vệ leads đã có người phụ trách</p>
                             <p className="text-gray-300">Chỉ phân công những leads chưa có ai đảm nhận, tránh làm gián đoạn công việc đang diễn ra.</p>
@@ -5179,7 +5179,7 @@ export default function SalesManagement() {
                     >
                       <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
                       {showAutoAssignTooltip === 'rule-override' && (
-                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                           <div className="max-w-xs">
                             <p className="font-medium mb-1">⚠️ Thay đổi người phụ trách</p>
                             <p className="text-gray-300">Phân công lại tất cả leads, bao gồm cả những leads đã có người đảm nhận. <strong>Cẩn thận khi sử dụng!</strong></p>
@@ -5200,7 +5200,7 @@ export default function SalesManagement() {
                     >
                       <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
                       {showAutoAssignTooltip === 'rule-notification' && (
-                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                           <div className="max-w-xs">
                             <p className="font-medium mb-1">📧 Thông báo tự động</p>
                             <p className="text-gray-300">Gửi email/SMS thông báo cho nhân viên về leads mới được phân công, kèm thông tin chi tiết.</p>
@@ -5221,7 +5221,7 @@ export default function SalesManagement() {
                     >
                       <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help" />
                       {showAutoAssignTooltip === 'rule-followup' && (
-                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                        <div className="absolute left-0 top-5 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                           <div className="max-w-xs">
                             <p className="font-medium mb-1">📅 Tạo lời nhắc tự động</p>
                             <p className="text-gray-300">Tự động tạo task nhắc nhở liên hệ lead trong 24-48h, đảm bảo không bỏ sót cơ hội.</p>
@@ -5245,7 +5245,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showAutoAssignTooltip === 'daily-limits-section' && (
-                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                         <div className="max-w-xs">
                           <p className="font-medium mb-1">📊 Cân bằng khối lượng công việc</p>
                           <p className="text-gray-300">Đặt giới hạn số leads tối đa mỗi người có thể nhận trong 1 ngày để đảm bảo chất lượng xử lý.</p>
@@ -5256,12 +5256,12 @@ export default function SalesManagement() {
                   </div>
                 </div>
 
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-3 mb-4">
                   <div className="flex items-start gap-2">
                     <svg className="w-4 h-4 text-blue-500 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
                       <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
-                    <div className="text-xs text-blue-700">
+                    <div className="text-xs text-[#3e79f7]">
                       <p className="font-medium">💡 Lợi ích của việc đặt giới hạn:</p>
                       <ul className="mt-1 space-y-1">
                         <li>• Đảm bảo chất lượng chăm sóc lead</li>
@@ -5275,7 +5275,7 @@ export default function SalesManagement() {
 
                 <div className="space-y-3 max-h-60 overflow-y-auto">
                   {salesTeam.map(member => (
-                    <div key={member.id} className="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg">
+                    <div key={member.id} className="flex items-center justify-between p-3 bg-white border border-[#e6ebf1] rounded-[10px]">
                       <div className="flex items-center space-x-3">
                         <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
                           {member.avatar}
@@ -5297,7 +5297,7 @@ export default function SalesManagement() {
                             ...prev,
                             [member.id]: parseInt(e.target.value) || 1
                           }))}
-                          className="w-16 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-16 px-2 py-1 text-sm border border-[#e6ebf1] rounded focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                         <span className="text-xs text-gray-500">leads</span>
                       </div>
@@ -5312,7 +5312,7 @@ export default function SalesManagement() {
               </div>
 
               {/* Preview */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-[10px] p-4">
                 <div className="flex items-center gap-2 mb-2">
                   <h4 className="text-sm font-medium text-gray-900">Xem trước kết quả</h4>
                   <div
@@ -5322,7 +5322,7 @@ export default function SalesManagement() {
                   >
                     <HelpCircle className="w-4 h-4 text-gray-400 hover:text-gray-600 cursor-help" />
                     {showAutoAssignTooltip === 'preview-section' && (
-                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-lg py-2 px-3 shadow-lg">
+                      <div className="absolute left-0 top-6 z-50 bg-black text-white text-xs rounded-[10px] py-2 px-3 shadow-lg">
                         <div className="max-w-xs">
                           <p className="font-medium mb-1">👁️ Kiểm tra trước khi thực hiện</p>
                           <p className="text-gray-300">Xem thông tin tổng quan về số lượng leads sẽ được phân công và phân bổ dự kiến.</p>
@@ -5342,7 +5342,7 @@ export default function SalesManagement() {
                 </div>
 
                 {getPreviewData().unassignedLeads === 0 && (
-                  <div className="mt-3 bg-yellow-100 border border-yellow-300 rounded-lg p-2">
+                  <div className="mt-3 bg-yellow-100 border border-yellow-300 rounded-[10px] p-2">
                     <div className="flex items-center gap-2">
                       <svg className="w-4 h-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
@@ -5354,10 +5354,10 @@ export default function SalesManagement() {
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button
                 onClick={() => setShowAutoAssignModal(false)}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
@@ -5385,7 +5385,7 @@ export default function SalesManagement() {
                   setTimeout(() => setNotification(null), 3000)
                   setShowAutoAssignModal(false)
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-lg hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+                className="px-4 py-2 text-sm font-medium text-white bg-purple-600 border border-transparent rounded-[10px] hover:bg-purple-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
               >
                 Thực hiện phân công
               </button>
@@ -5407,8 +5407,8 @@ export default function SalesManagement() {
       {/* Edit Lead Modal */}
       {showEditModal && editingLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-3xl w-full mx-4 max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-[#e6ebf1] flex-shrink-0">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa Lead - {editingLead.name}</h3>
                 <button
@@ -5426,7 +5426,7 @@ export default function SalesManagement() {
             <div className="flex-1 overflow-y-auto p-6">
               <div className="space-y-6">
                 {/* Thông tin cơ bản (read-only) */}
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                <div className="bg-gray-50 rounded-[10px] p-4 space-y-2">
                   <h4 className="text-sm font-semibold text-gray-700 mb-3">Thông tin cơ bản (không thể thay đổi)</h4>
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
@@ -5454,7 +5454,7 @@ export default function SalesManagement() {
                   <select
                     value={editingLead.source}
                     onChange={(e) => setEditingLead({ ...editingLead, source: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   >
                     <option value="facebook">Facebook</option>
                     <option value="google">Google Ads</option>
@@ -5471,7 +5471,7 @@ export default function SalesManagement() {
                   <select
                     value={editingLead.status}
                     onChange={(e) => setEditingLead({ ...editingLead, status: e.target.value as Lead['status'] })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   >
                     <option value="new">Mới</option>
                     <option value="contacted">Đã liên hệ</option>
@@ -5490,7 +5490,7 @@ export default function SalesManagement() {
                   <select
                     value={editingLead.assignedTo || ''}
                     onChange={(e) => setEditingLead({ ...editingLead, assignedTo: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   >
                     <option value="">Chưa phân công</option>
                     {salesTeam.map(member => (
@@ -5505,7 +5505,7 @@ export default function SalesManagement() {
                   <select
                     value={editingLead.product}
                     onChange={(e) => setEditingLead({ ...editingLead, product: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   >
                     <option value="CRM Premium">CRM Premium</option>
                     <option value="CRM Enterprise">CRM Enterprise</option>
@@ -5521,7 +5521,7 @@ export default function SalesManagement() {
                   <select
                     value={editingLead.region}
                     onChange={(e) => setEditingLead({ ...editingLead, region: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   >
                     <option value="ha_noi">Hà Nội</option>
                     <option value="ho_chi_minh">Hồ Chí Minh</option>
@@ -5539,7 +5539,7 @@ export default function SalesManagement() {
                     type="text"
                     value={editingLead.address || ''}
                     onChange={(e) => setEditingLead({ ...editingLead, address: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     placeholder="Nhập địa chỉ chi tiết"
                   />
                 </div>
@@ -5560,12 +5560,12 @@ export default function SalesManagement() {
                             setEditingLead({ ...editingLead, tags: newTags })
                           }}
                           className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${(editingLead.tags || []).includes(tag)
-                            ? tag === 'hot' ? 'bg-red-600 text-white' :
+                            ? tag === 'hot' ? 'bg-[#ff6b72] text-white' :
                               tag === 'warm' ? 'bg-orange-600 text-white' :
-                                tag === 'cold' ? 'bg-blue-600 text-white' :
+                                tag === 'cold' ? 'bg-[#3e79f7] text-white' :
                                   tag === 'enterprise' ? 'bg-purple-600 text-white' :
                                     tag === 'urgent' ? 'bg-pink-600 text-white' :
-                                      'bg-green-600 text-white'
+                                      'bg-[#2dc56a] text-white'
                             : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                             }`}
                         >
@@ -5588,20 +5588,20 @@ export default function SalesManagement() {
                     value={editingLead.notes || ''}
                     onChange={(e) => setEditingLead({ ...editingLead, notes: e.target.value })}
                     rows={4}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
                     placeholder="Nhập ghi chú bổ sung về lead này..."
                   />
                 </div>
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3 flex-shrink-0">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3 flex-shrink-0">
               <button
                 onClick={() => {
                   setShowEditModal(false)
                   setEditingLead(null)
                 }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-all duration-200"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-all duration-200"
               >
                 Hủy
               </button>
@@ -5613,13 +5613,13 @@ export default function SalesManagement() {
                     setEditingLead(null)
                     // Show success notification
                     const notification = document.createElement('div')
-                    notification.className = 'fixed top-4 right-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in'
+                    notification.className = 'fixed top-4 right-4 bg-[#2dc56a] text-white px-6 py-3 rounded-[10px] shadow-lg z-50 animate-fade-in'
                     notification.innerHTML = '<div class="flex items-center gap-2"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg><span>Cập nhật lead thành công!</span></div>'
                     document.body.appendChild(notification)
                     setTimeout(() => notification.remove(), 3000)
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 flex items-center gap-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] transition-all duration-200 flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
@@ -5632,8 +5632,8 @@ export default function SalesManagement() {
       {/* Import Excel Modal */}
       {showImportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full mx-4">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Import Leads từ Excel</h3>
                 <button
@@ -5656,17 +5656,17 @@ export default function SalesManagement() {
 
             <div className="px-6 py-4 space-y-4">
               {/* Download Template */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4">
                 <div className="flex items-start gap-3">
                   <Download className="w-5 h-5 text-blue-600 mt-0.5" />
                   <div className="flex-1">
                     <h4 className="font-medium text-blue-900 mb-1">Tải template Excel</h4>
-                    <p className="text-sm text-blue-700 mb-3">
+                    <p className="text-sm text-[#3e79f7] mb-3">
                       Tải file mẫu để đảm bảo định dạng đúng cho việc import leads
                     </p>
                     <button
                       onClick={downloadTemplate}
-                      className="text-sm bg-blue-600 text-white px-3 py-1.5 rounded hover:bg-blue-700 transition-colors"
+                      className="text-sm bg-[#3e79f7] text-white px-3 py-1.5 rounded hover:bg-[#699dff] transition-colors"
                     >
                       Tải template
                     </button>
@@ -5683,7 +5683,7 @@ export default function SalesManagement() {
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-[#3e79f7] hover:file:bg-blue-100"
                 />
                 {importFile && (
                   <div className="mt-2 space-y-2">
@@ -5693,7 +5693,7 @@ export default function SalesManagement() {
                     {importPreviewData.length > 0 && (
                       <button
                         onClick={() => setShowImportPreview(!showImportPreview)}
-                        className="text-sm bg-indigo-600 text-white px-3 py-1.5 rounded hover:bg-indigo-700 transition-colors flex items-center gap-2"
+                        className="text-sm bg-[#3e79f7] text-white px-3 py-1.5 rounded hover:bg-[#699dff] transition-colors flex items-center gap-2"
                       >
                         <Eye className="w-4 h-4" />
                         {showImportPreview ? 'Ẩn dữ liệu' : 'Xem dữ liệu'}
@@ -5705,7 +5705,7 @@ export default function SalesManagement() {
 
               {/* Data Preview */}
               {showImportPreview && importPreviewData.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                   <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
                     <Eye className="w-4 h-4" />
                     Preview dữ liệu ({importPreviewData.length} dòng đầu)
@@ -5741,14 +5741,14 @@ export default function SalesManagement() {
               )}
 
               {/* Auto Assignment Option */}
-              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+              <div className="bg-purple-50 border border-purple-200 rounded-[10px] p-4">
                 <div className="flex items-start gap-3">
                   <input
                     type="checkbox"
                     id="importAutoAssign"
                     checked={importAutoAssign}
                     onChange={(e) => setImportAutoAssign(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-purple-600 bg-gray-100 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                    className="mt-1 w-4 h-4 text-purple-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-purple-500 focus:ring-2"
                   />
                   <div className="flex-1">
                     <label htmlFor="importAutoAssign" className="font-medium text-purple-900 cursor-pointer">
@@ -5777,7 +5777,7 @@ export default function SalesManagement() {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-[#3e79f7] h-2 rounded-full transition-all duration-300"
                       style={{ width: `${importProgress}%` }}
                     ></div>
                   </div>
@@ -5786,7 +5786,7 @@ export default function SalesManagement() {
 
               {/* Error Message */}
               {importError && (
-                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3">
                   <div className="flex items-center gap-2 text-red-700">
                     <AlertCircle className="w-4 h-4" />
                     <span className="text-sm">{importError}</span>
@@ -5796,7 +5796,7 @@ export default function SalesManagement() {
 
               {/* Success Message */}
               {importSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="bg-green-50 border border-green-200 rounded-[10px] p-3">
                   <div className="flex items-center gap-2 text-green-700">
                     <CheckCircle className="w-4 h-4" />
                     <span className="text-sm">{importSuccess}</span>
@@ -5805,7 +5805,7 @@ export default function SalesManagement() {
               )}
 
               {/* Instructions */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-gray-50 rounded-[10px] p-4">
                 <h4 className="font-medium text-gray-900 mb-2">Hướng dẫn import:</h4>
                 <ul className="text-sm text-gray-600 space-y-1">
                   <li>• File phải có các cột: Tên, Số điện thoại, Email, Công ty</li>
@@ -5817,7 +5817,7 @@ export default function SalesManagement() {
               </div>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end gap-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end gap-3">
               <button
                 onClick={() => {
                   setShowImportModal(false)
@@ -5829,14 +5829,14 @@ export default function SalesManagement() {
                   setImportPreviewData([])
                   setShowImportPreview(false)
                 }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={handleImportExcel}
                 disabled={!importFile || importProgress > 0}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {importProgress > 0 ? 'Đang import...' : 'Import'}
               </button>
@@ -5848,8 +5848,8 @@ export default function SalesManagement() {
       {/* Edit Lead Modal */}
       {showEditLeadModal && editingLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa Lead</h3>
             </div>
 
@@ -5868,7 +5868,7 @@ export default function SalesManagement() {
                       type="text"
                       value={editingLead.name}
                       onChange={(e) => setEditingLead({ ...editingLead, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                       required
                     />
                   </div>
@@ -5882,7 +5882,7 @@ export default function SalesManagement() {
                       type="email"
                       value={editingLead.email}
                       onChange={(e) => setEditingLead({ ...editingLead, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                       required
                     />
                   </div>
@@ -5896,7 +5896,7 @@ export default function SalesManagement() {
                       type="tel"
                       value={editingLead.phone}
                       onChange={(e) => setEditingLead({ ...editingLead, phone: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                       required
                     />
                   </div>
@@ -5910,7 +5910,7 @@ export default function SalesManagement() {
                       type="text"
                       value={editingLead.company || ''}
                       onChange={(e) => setEditingLead({ ...editingLead, company: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     />
                   </div>
 
@@ -5922,7 +5922,7 @@ export default function SalesManagement() {
                     <select
                       value={editingLead.source}
                       onChange={(e) => setEditingLead({ ...editingLead, source: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     >
                       <option value="website">Website</option>
                       <option value="facebook">Facebook</option>
@@ -5941,7 +5941,7 @@ export default function SalesManagement() {
                     <select
                       value={editingLead.region}
                       onChange={(e) => setEditingLead({ ...editingLead, region: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     >
                       <option value="ha_noi">Hà Nội</option>
                       <option value="ho_chi_minh">TP. Hồ Chí Minh</option>
@@ -5960,7 +5960,7 @@ export default function SalesManagement() {
                       type="text"
                       value={editingLead.product}
                       onChange={(e) => setEditingLead({ ...editingLead, product: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     />
                   </div>
 
@@ -5973,7 +5973,7 @@ export default function SalesManagement() {
                       type="number"
                       value={editingLead.value}
                       onChange={(e) => setEditingLead({ ...editingLead, value: parseInt(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     />
                   </div>
 
@@ -5985,7 +5985,7 @@ export default function SalesManagement() {
                     <select
                       value={editingLead.assignedTo}
                       onChange={(e) => setEditingLead({ ...editingLead, assignedTo: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                     >
                       <option value="">Chưa phân công</option>
                       {getAvailableSalesPersons().map(person => (
@@ -6006,7 +6006,7 @@ export default function SalesManagement() {
                     value={editingLead.content}
                     onChange={(e) => setEditingLead({ ...editingLead, content: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   />
                 </div>
 
@@ -6019,7 +6019,7 @@ export default function SalesManagement() {
                     value={editingLead.notes}
                     onChange={(e) => setEditingLead({ ...editingLead, notes: e.target.value })}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                   />
                 </div>
 
@@ -6030,13 +6030,13 @@ export default function SalesManagement() {
                       setShowEditLeadModal(false)
                       setEditingLead(null)
                     }}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
                   >
                     Hủy
                   </button>
                   <button
                     type="submit"
-                    className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2"
                   >
                     <Edit className="w-4 h-4" />
                     Cập nhật Lead
@@ -6051,8 +6051,8 @@ export default function SalesManagement() {
       {/* Convert Lead Confirmation Modal */}
       {showConvertModal && selectedLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Chuyển vào chuyển đổi - chờ thanh toán</h3>
             </div>
 
@@ -6060,7 +6060,7 @@ export default function SalesManagement() {
               {/* Customer Info */}
               <div className="flex items-center gap-3 mb-4">
                 <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                  <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                  <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                     <User className="h-6 w-6" />
                   </span>
                 </span>
@@ -6081,7 +6081,7 @@ export default function SalesManagement() {
                 <textarea
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -6093,7 +6093,7 @@ export default function SalesManagement() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="Tất cả">Tất cả</option>
                   <option value="Khóa học">Khóa học</option>
@@ -6107,9 +6107,9 @@ export default function SalesManagement() {
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span>
                 </label>
-                <div className="max-h-80 overflow-y-auto space-y-3 border border-gray-300 rounded-lg p-3">
+                <div className="max-h-80 overflow-y-auto space-y-3 border border-[#e6ebf1] rounded-[10px] p-3">
                   {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                    <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                       {/* Product Selection */}
                       <label className="flex items-start space-x-3 cursor-pointer">
                         <input
@@ -6144,7 +6144,7 @@ export default function SalesManagement() {
                               })
                             }
                           }}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -6168,7 +6168,7 @@ export default function SalesManagement() {
                                   ...prev,
                                   [product.id]: e.target.value
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               >
                                 {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
                                   <option key={pkg.id} value={pkg.id}>
@@ -6187,7 +6187,7 @@ export default function SalesManagement() {
                                   ...prev,
                                   [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               />
                             </div>
                           </div>
@@ -6202,7 +6202,7 @@ export default function SalesManagement() {
 
                 {/* Selected Products Summary */}
                 {selectedProducts.length > 0 && (
-                  <div className="mt-3 p-3 bg-green-50 rounded-lg">
+                  <div className="mt-3 p-3 bg-green-50 rounded-[10px]">
                     <p className="text-sm font-medium text-green-800 mb-2">Đã chọn {selectedProducts.length} sản phẩm:</p>
                     <div className="space-y-1">
                       {selectedProducts.map(productId => {
@@ -6249,7 +6249,7 @@ export default function SalesManagement() {
               </div>
 
               {/* Payment Information */}
-              <div className="mb-4 p-4 border border-blue-200 rounded-lg bg-blue-50">
+              <div className="mb-4 p-4 border border-[#c7d9fd] rounded-[10px] bg-blue-50">
                 <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
 
                 {/* Discount */}
@@ -6263,7 +6263,7 @@ export default function SalesManagement() {
                     max="100"
                     value={discountPercent}
                     onChange={(e) => setDiscountPercent(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     placeholder="0"
                   />
                 </div>
@@ -6276,7 +6276,7 @@ export default function SalesManagement() {
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="flex-1 max-w-xs px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="flex-1 max-w-xs px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="cash">Tiền mặt</option>
                     <option value="bank_transfer">Chuyển khoản</option>
@@ -6289,7 +6289,7 @@ export default function SalesManagement() {
 
                 {/* Total calculation */}
                 {selectedProducts.length > 0 && (
-                  <div className="bg-white rounded-md p-3 border border-blue-200">
+                  <div className="bg-white rounded-md p-3 border border-[#c7d9fd]">
                     <div className="flex justify-between text-sm">
                       <span>Tổng tiền hàng:</span>
                       <span>{formatCurrency(
@@ -6316,7 +6316,7 @@ export default function SalesManagement() {
                         )} VNĐ</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
+                    <div className="flex justify-between text-sm font-medium border-t border-[#e6ebf1] pt-2 mt-2">
                       <span>Thành tiền:</span>
                       <span className="text-green-600">{formatCurrency(
                         (selectedProducts.reduce((sum, productId) => {
@@ -6332,7 +6332,7 @@ export default function SalesManagement() {
                 )}
               </div>
 
-              <div className="bg-green-50 rounded-lg p-4 mb-4">
+              <div className="bg-green-50 rounded-[10px] p-4 mb-4">
                 <h5 className="text-sm font-medium text-green-900 mb-2">Điều gì sẽ xảy ra:</h5>
                 <ul className="text-sm text-green-800 space-y-1">
                   <li>• Lead được chuyển thành trạng thái &quot;Chuyển đổi - chờ thanh toán&quot;</li>
@@ -6371,7 +6371,7 @@ export default function SalesManagement() {
               </p>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button
                 onClick={() => {
                   setShowConvertModal(false)
@@ -6384,15 +6384,15 @@ export default function SalesManagement() {
                   setPaymentMethod('cash') // Reset payment method
                   setSelectedCategory('Tất cả') // Reset category
                 }}
-                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmConvertLead}
                 disabled={selectedProducts.length === 0}
-                className={`px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${selectedProducts.length > 0
-                  ? 'text-white bg-green-600 hover:bg-green-700'
+                className={`px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center gap-2 ${selectedProducts.length > 0
+                  ? 'text-white bg-[#2dc56a] hover:bg-[#04d182]'
                   : 'text-gray-400 bg-gray-300 cursor-not-allowed'
                   }`}
               >
@@ -6407,8 +6407,8 @@ export default function SalesManagement() {
       {/* Drag Convert Modal */}
       {showDragConvertModal && pendingDragLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-2 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-2 max-h-[90vh] sm:max-h-[80vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">
                 Chuyển sang &quot;{getStatusName(dragTargetStatus)}&quot;
               </h3>
@@ -6423,7 +6423,7 @@ export default function SalesManagement() {
               {/* Customer Info */}
               <div className="flex items-center gap-3 mb-4">
                 <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                  <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                  <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                     <User className="h-6 w-6" />
                   </span>
                 </span>
@@ -6444,7 +6444,7 @@ export default function SalesManagement() {
                 <textarea
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -6456,7 +6456,7 @@ export default function SalesManagement() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="Tất cả">Tất cả</option>
                   <option value="Khóa học">Khóa học</option>
@@ -6473,9 +6473,9 @@ export default function SalesManagement() {
                     'Chọn sản phẩm chuyển đổi'
                   } <span className="text-red-500">*</span>
                 </label>
-                <div className="max-h-64 overflow-y-auto space-y-3 border border-gray-300 rounded-lg p-3">
+                <div className="max-h-64 overflow-y-auto space-y-3 border border-[#e6ebf1] rounded-[10px] p-3">
                   {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
-                    <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                    <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                       {/* Product Selection */}
                       <label className="flex items-start space-x-3 cursor-pointer">
                         <input
@@ -6510,7 +6510,7 @@ export default function SalesManagement() {
                               })
                             }
                           }}
-                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                         />
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
@@ -6534,7 +6534,7 @@ export default function SalesManagement() {
                                   ...prev,
                                   [product.id]: e.target.value
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               >
                                 {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
                                   <option key={pkg.id} value={pkg.id}>
@@ -6553,7 +6553,7 @@ export default function SalesManagement() {
                                   ...prev,
                                   [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                 }))}
-                                className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                               />
                             </div>
                           </div>
@@ -6610,7 +6610,7 @@ export default function SalesManagement() {
                       value={discountPercent}
                       onChange={(e) => setDiscountPercent(Number(e.target.value))}
                       placeholder="0"
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     />
                     <span className="text-sm text-gray-500">%</span>
                   </div>
@@ -6627,7 +6627,7 @@ export default function SalesManagement() {
                   <select
                     value={paymentMethod}
                     onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="cash">Tiền mặt</option>
                     <option value="bank_transfer">Chuyển khoản</option>
@@ -6643,7 +6643,7 @@ export default function SalesManagement() {
               {selectedProducts.length > 0 && (
                 <div className="mb-4">
                   {discountPercent > 0 && (
-                    <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="p-3 bg-blue-50 border border-[#c7d9fd] rounded-[10px]">
                       <div className="space-y-1 text-xs">
                         <div className="flex justify-between">
                           <span>Tổng tiền gốc:</span>
@@ -6697,7 +6697,7 @@ export default function SalesManagement() {
               </p>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => {
                   setShowDragConvertModal(false)
@@ -6712,17 +6712,17 @@ export default function SalesManagement() {
                   setPaymentMethod('cash') // Reset payment method
                   setSelectedCategory('Tất cả') // Reset category
                 }}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmDragConvert}
                 disabled={selectedProducts.length === 0}
-                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${selectedProducts.length > 0
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${selectedProducts.length > 0
                   ? dragTargetStatus === 'converted'
-                    ? 'text-white bg-green-600 hover:bg-green-700'
-                    : 'text-white bg-blue-600 hover:bg-blue-700'
+                    ? 'text-white bg-[#2dc56a] hover:bg-[#04d182]'
+                    : 'text-white bg-[#3e79f7] hover:bg-[#699dff]'
                   : 'text-gray-400 bg-gray-300 cursor-not-allowed'
                   }`}
               >
@@ -6744,8 +6744,8 @@ export default function SalesManagement() {
       {/* Create Task Modal */}
       {showCreateTaskModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-900">
                   Tạo Task cho {selectedLeadIds.length} leads đã chọn
@@ -6775,9 +6775,9 @@ export default function SalesManagement() {
                       setTaskExtraNote('')
                       setTaskAssignedTo('')
                     }}
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${selectedTaskType === task.id
+                    className={`p-4 border-2 rounded-[10px] cursor-pointer transition-all duration-200 hover:shadow-md ${selectedTaskType === task.id
                       ? 'border-blue-500 bg-blue-50'
-                      : `border-gray-200 hover:border-gray-300 ${task.color}`
+                      : `border-[#e6ebf1] hover:border-[#e6ebf1] ${task.color}`
                       }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -6812,7 +6812,7 @@ export default function SalesManagement() {
                       type="date"
                       value={taskDeadlineDate}
                       onChange={(e) => setTaskDeadlineDate(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md"
                     />
                   </div>
 
@@ -6822,7 +6822,7 @@ export default function SalesManagement() {
                       type="time"
                       value={taskDeadlineTime}
                       onChange={(e) => setTaskDeadlineTime(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md"
                     />
                   </div>
 
@@ -6831,7 +6831,7 @@ export default function SalesManagement() {
                     <select
                       value={taskAssignedTo}
                       onChange={(e) => setTaskAssignedTo(e.target.value)}
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md"
                     >
                       <option value="">Chọn người phụ trách</option>
                       <option value="Nguyễn Văn A">Nguyễn Văn A</option>
@@ -6850,7 +6850,7 @@ export default function SalesManagement() {
                       value={taskExtraNote}
                       onChange={(e) => setTaskExtraNote(e.target.value)}
                       placeholder="Ví dụ: Chuẩn bị tài liệu, gửi trước 1 ngày..."
-                      className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md"
+                      className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md"
                     />
                   </div>
                 </div>
@@ -6863,13 +6863,13 @@ export default function SalesManagement() {
                       setTaskExtraNote('')
                       setTaskAssignedTo('')
                     }}
-                    className="w-full sm:w-auto px-3 py-2 bg-white border border-gray-300 rounded-md text-sm hover:bg-gray-50"
+                    className="w-full sm:w-auto px-3 py-2 bg-white border border-[#e6ebf1] rounded-md text-sm hover:bg-gray-50"
                   >
                     Bỏ chọn
                   </button>
                   <button
                     onClick={() => confirmCreateTask(selectedTaskObj, taskDeadlineDate, taskDeadlineTime, taskExtraNote, taskAssignedTo)}
-                    className="w-full sm:w-auto px-3 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700"
+                    className="w-full sm:w-auto px-3 py-2 bg-[#3e79f7] text-white rounded-md text-sm hover:bg-[#699dff]"
                   >
                     Tạo task
                   </button>
@@ -6877,7 +6877,7 @@ export default function SalesManagement() {
               </div>
             )}
 
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] bg-gray-50 flex-shrink-0">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div className="text-sm text-gray-600 text-center sm:text-left">
                   💡 Mẹo: Task sẽ được thêm vào lịch sử tương tác của từng lead
@@ -6887,7 +6887,7 @@ export default function SalesManagement() {
                     setShowCreateTaskModal(false)
                     setSelectedTaskType('')
                   }}
-                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
                 >
                   Hủy
                 </button>
@@ -6903,23 +6903,23 @@ export default function SalesManagement() {
         const effectiveCount = getEffectiveLeadIds().length
         return (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
+            <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-[600px] max-h-[90vh] overflow-hidden flex flex-col">
               {/* Header */}
-              <div className="px-6 py-4 border-b border-gray-200 flex-shrink-0">
+              <div className="px-6 py-4 border-b border-[#e6ebf1] flex-shrink-0">
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-3">
                     <h3 className="text-lg font-semibold text-gray-900">Phân chia Lead</h3>
                     {/* Step indicator */}
                     {(assignStep === 'step1' || assignStep === 'step2') && (
                       <div className="flex items-center gap-1.5">
-                        <div className={`w-2 h-2 rounded-full ${assignStep === 'step1' ? 'bg-blue-600' : 'bg-blue-200'}`} />
-                        <div className={`w-2 h-2 rounded-full ${assignStep === 'step2' ? 'bg-blue-600' : 'bg-blue-200'}`} />
+                        <div className={`w-2 h-2 rounded-full ${assignStep === 'step1' ? 'bg-[#3e79f7]' : 'bg-blue-200'}`} />
+                        <div className={`w-2 h-2 rounded-full ${assignStep === 'step2' ? 'bg-[#3e79f7]' : 'bg-blue-200'}`} />
                       </div>
                     )}
                   </div>
                   <button
                     onClick={handleAssignClose}
-                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-lg"
+                    className="text-gray-400 hover:text-gray-600 transition-colors p-1 hover:bg-gray-100 rounded-[10px]"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -6937,15 +6937,15 @@ export default function SalesManagement() {
                   <div className="px-6 py-5 space-y-5">
                     {/* Lead Stats */}
                     <div className="grid grid-cols-3 gap-3">
-                      <div className="bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl rounded-lg p-4 text-center">
+                      <div className="bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl rounded-[10px] p-4 text-center">
                         <div className="text-2xl font-bold text-white">{stats.total}</div>
                         <div className="text-xs text-white mt-1">Lead được chọn</div>
                       </div>
-                      <div className="bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg relative transition-all hover:shadow-xl rounded-lg p-4 text-center ">
+                      <div className="bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg relative transition-all hover:shadow-xl rounded-[10px] p-4 text-center ">
                         <div className="text-2xl font-bold text-white">{stats.assigned}</div>
                         <div className="text-xs text-white mt-1">Đã được gán</div>
                       </div>
-                      <div className="bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl rounded-lg p-4 text-center">
+                      <div className="bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl rounded-[10px] p-4 text-center">
                         <div className="text-2xl font-bold text-white">{stats.newCount}</div>
                         <div className="text-xs text-white mt-1">Chưa được gán</div>
                       </div>
@@ -6959,14 +6959,14 @@ export default function SalesManagement() {
                         </div>
                         <div className="space-y-2">
                           <label
-                            className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${reassignOption === 'skip' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                            className={`flex items-center gap-3 p-3 border-2 rounded-[10px] cursor-pointer transition-all ${reassignOption === 'skip' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                               }`}
                           >
                             <input
                               type="radio" name="reassignOption" value="skip"
                               checked={reassignOption === 'skip'}
                               onChange={() => setReassignOption('skip')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7]"
                             />
                             <div>
                               <div className="text-sm font-medium text-gray-900">Bỏ qua lead đã được phân công</div>
@@ -6974,14 +6974,14 @@ export default function SalesManagement() {
                             </div>
                           </label>
                           <label
-                            className={`flex items-center gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${reassignOption === 'reassign' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                            className={`flex items-center gap-3 p-3 border-2 rounded-[10px] cursor-pointer transition-all ${reassignOption === 'reassign' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                               }`}
                           >
                             <input
                               type="radio" name="reassignOption" value="reassign"
                               checked={reassignOption === 'reassign'}
                               onChange={() => setReassignOption('reassign')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7]"
                             />
                             <div>
                               <div className="text-sm font-medium text-gray-900">Phân chia lại lead đã phân công</div>
@@ -6993,7 +6993,7 @@ export default function SalesManagement() {
                     )}
 
                     {/* Summary */}
-                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 text-sm text-gray-700">
+                    <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-3 text-sm text-gray-700">
                       <span className="font-medium">{reassignOption === 'skip' && stats.assigned > 0 ? stats.newCount : stats.total}</span> lead sẽ được phân chia ở bước tiếp theo.
                     </div>
                   </div>
@@ -7003,9 +7003,9 @@ export default function SalesManagement() {
                 {assignStep === 'step2' && (
                   <div className="px-6 py-5 space-y-5">
                     {/* Effective leads count */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 flex items-center gap-2 text-sm">
+                    <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-3 flex items-center gap-2 text-sm">
                       <Info className="w-4 h-4 text-blue-500 flex-shrink-0" />
-                      <span>Đang phân chia <span className="font-semibold text-blue-700">{effectiveCount} lead</span>
+                      <span>Đang phân chia <span className="font-semibold text-[#3e79f7]">{effectiveCount} lead</span>
                         {reassignOption === 'skip' && stats.assigned > 0 && <span className="text-gray-500"> (đã bỏ qua {stats.assigned} lead đã phân công)</span>}
                       </span>
                     </div>
@@ -7018,24 +7018,24 @@ export default function SalesManagement() {
                       </div>
                       <div className="space-y-2">
                         <label
-                          className={`flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${assignMethod === 'auto' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                          className={`flex items-start gap-3 p-3 border-2 rounded-[10px] cursor-pointer transition-all ${assignMethod === 'auto' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                             }`}
                         >
                           <input type="radio" name="assignMethod2" value="auto" checked={assignMethod === 'auto'}
                             onChange={() => setAssignMethod('auto')}
-                            className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                            className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-[#3e79f7]" />
                           <div>
                             <div className="text-sm font-medium text-gray-900">Tự động theo quy tắc đã cấu hình</div>
                             <div className="text-xs text-gray-500 mt-1">Hệ thống sẽ tự động phân chia theo rule: Territory → Source → Round-Robin</div>
                           </div>
                         </label>
                         <label
-                          className={`flex items-start gap-3 p-3 border-2 rounded-lg cursor-pointer transition-all ${assignMethod === 'manual' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+                          className={`flex items-start gap-3 p-3 border-2 rounded-[10px] cursor-pointer transition-all ${assignMethod === 'manual' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                             }`}
                         >
                           <input type="radio" name="assignMethod2" value="manual" checked={assignMethod === 'manual'}
                             onChange={() => setAssignMethod('manual')}
-                            className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-blue-500" />
+                            className="mt-0.5 h-4 w-4 text-blue-600 focus:ring-[#3e79f7]" />
                           <div className="text-sm font-medium text-gray-900">Chọn thủ công</div>
                         </label>
                       </div>
@@ -7066,7 +7066,7 @@ export default function SalesManagement() {
                             <label className="block text-sm font-medium text-gray-700 mb-1.5">
                               Chọn {assignType === 'department' ? 'phòng ban' : 'team'}
                             </label>
-                            <div className="space-y-2 max-h-32 overflow-y-auto border border-[#e6ebf1] rounded-lg p-3">
+                            <div className="space-y-2 max-h-32 overflow-y-auto border border-[#e6ebf1] rounded-[10px] p-3">
                               {(assignType === 'department'
                                 ? [
                                   { id: 'support', label: 'Phòng support' },
@@ -7090,7 +7090,7 @@ export default function SalesManagement() {
                                         ? prev.filter(d => d !== item.id)
                                         : [...prev, item.id]
                                     )}
-                                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                    className="w-4 h-4 rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                                   />
                                   <span className="text-sm text-gray-700">{item.label}</span>
                                 </label>
@@ -7114,10 +7114,10 @@ export default function SalesManagement() {
                                 type="text" placeholder="Tìm kiếm Sales..."
                                 value={salesSearchTerm}
                                 onChange={(e) => setSalesSearchTerm(e.target.value)}
-                                className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full pl-9 pr-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                               />
                             </div>
-                            <div className="border border-gray-200 rounded-lg max-h-52 overflow-y-auto divide-y divide-gray-100">
+                            <div className="border border-[#e6ebf1] rounded-[10px] max-h-52 overflow-y-auto divide-y divide-gray-100">
                               {filteredSalesTeam
                                 .sort((a, b) => a.activeLeads - b.activeLeads)
                                 .map((sales) => {
@@ -7143,7 +7143,7 @@ export default function SalesManagement() {
                                               : [...prev, sales.id]
                                           )
                                         }}
-                                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                        className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                                       />
                                       <span className="flex h-8 w-8 items-center justify-center rounded-full bg-[#3e79f7] text-white text-xs font-medium flex-shrink-0">{sales.name.split(' ').map((w: string) => w[0]).join('').slice(-3).toUpperCase()}</span>
                                       <div className="flex-1 min-w-0">
@@ -7182,16 +7182,16 @@ export default function SalesManagement() {
                             ].map(method => (
                               <label
                                 key={method.value}
-                                className={`p-4 border-2 rounded-lg text-center cursor-pointer transition-all ${distributionMethod === method.value
+                                className={`p-4 border-2 rounded-[10px] text-center cursor-pointer transition-all ${distributionMethod === method.value
                                   ? 'border-blue-500 bg-blue-50'
-                                  : 'border-gray-200 hover:border-gray-300'
+                                  : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                                   }`}
                               >
                                 <input
                                   type="radio" name="distributionMethod" value={method.value}
                                   checked={distributionMethod === method.value}
                                   onChange={() => setDistributionMethod(method.value)}
-                                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 mb-2"
+                                  className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] mb-2"
                                 />
                                 <div className="text-sm font-semibold text-gray-900">{method.label}</div>
                                 <div className="text-[11px] text-gray-500 mt-1 leading-tight">{method.desc}</div>
@@ -7245,7 +7245,7 @@ export default function SalesManagement() {
                 {/* ═══ Loading ═══ */}
                 {assignStep === 'loading' && (
                   <div className="px-6 py-12 flex flex-col items-center justify-center">
-                    <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
+                    <div className="w-10 h-10 border-4 border-[#c7d9fd] border-t-blue-600 rounded-full animate-spin mb-4" />
                     <p className="text-sm font-medium text-gray-700">Đang phân chia...</p>
                     <p className="text-xs text-gray-500 mt-1">Vui lòng đợi trong giây lát</p>
                   </div>
@@ -7260,7 +7260,7 @@ export default function SalesManagement() {
                       </div>
                       <h4 className="text-lg font-semibold text-gray-900">Phân chia thành công</h4>
                     </div>
-                    <div className="bg-gray-50 rounded-lg p-4 space-y-2 text-sm">
+                    <div className="bg-gray-50 rounded-[10px] p-4 space-y-2 text-sm">
                       <div>
                         <span className="font-medium">{effectiveCount} lead</span>
                         <span className="text-gray-600"> đã được phân chia {assignMethod === 'manual' ? 'thủ công' : 'tự động'} thành công.</span>
@@ -7289,7 +7289,7 @@ export default function SalesManagement() {
                       </div>
                       <h4 className="text-lg font-semibold text-gray-900">Phân chia thất bại</h4>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-700">
+                    <div className="bg-red-50 border border-red-200 rounded-[10px] p-4 text-sm text-red-700">
                       Không thể gán Lead. Vui lòng thử lại sau.
                     </div>
                   </div>
@@ -7297,11 +7297,11 @@ export default function SalesManagement() {
               </div>
 
               {/* Footer */}
-              <div className="px-6 py-4 border-t border-gray-200 flex-shrink-0">
+              <div className="px-6 py-4 border-t border-[#e6ebf1] flex-shrink-0">
                 {assignStep === 'step1' && (
                   <div className="flex items-center justify-between">
                     <button onClick={handleAssignClose}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                     >Hủy</button>
                     <button
                       onClick={() => {
@@ -7313,7 +7313,7 @@ export default function SalesManagement() {
                         }
                         setAssignStep('step2')
                       }}
-                      className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
+                      className="px-5 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] transition-colors shadow-sm flex items-center gap-2"
                     >
                       Tiếp tục
                       <ArrowRight className="w-4 h-4" />
@@ -7323,14 +7323,14 @@ export default function SalesManagement() {
                 {assignStep === 'step2' && (
                   <div className="flex items-center justify-between">
                     <button onClick={() => setAssignStep('step1')}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                     >Quay lại</button>
                     <button
                       onClick={handleAssignSubmit}
                       disabled={assignMethod === 'manual' && selectedSalesIds.length === 0}
-                      className={`px-5 py-2 text-sm font-medium rounded-lg transition-colors shadow-sm flex items-center gap-2 ${assignMethod === 'manual' && selectedSalesIds.length === 0
+                      className={`px-5 py-2 text-sm font-medium rounded-[10px] transition-colors shadow-sm flex items-center gap-2 ${assignMethod === 'manual' && selectedSalesIds.length === 0
                         ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'text-white bg-blue-600 hover:bg-blue-700'
+                        : 'text-white bg-[#3e79f7] hover:bg-[#699dff]'
                         }`}
                     >
                       <CheckSquare className="w-4 h-4" />
@@ -7341,17 +7341,17 @@ export default function SalesManagement() {
                 {assignStep === 'success' && (
                   <div className="flex justify-end">
                     <button onClick={handleAssignClose}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] transition-colors"
                     >Đóng</button>
                   </div>
                 )}
                 {assignStep === 'error' && (
                   <div className="flex items-center justify-end gap-3">
                     <button onClick={() => setAssignStep('step2')}
-                      className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-[#c7d9fd] rounded-[10px] hover:bg-blue-100 transition-colors"
                     >Thử lại</button>
                     <button onClick={handleAssignClose}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                     >Đóng</button>
                   </div>
                 )}
@@ -7364,8 +7364,8 @@ export default function SalesManagement() {
       {/* Bulk Status Change Modal */}
       {showBulkStatusModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 flex-shrink-0">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full max-h-[90vh] sm:max-h-[80vh] overflow-hidden flex flex-col">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] flex-shrink-0">
               <div className="flex justify-between items-center">
                 <h3 className="text-base sm:text-lg font-semibold text-gray-900">
                   Chuyển trạng thái cho {selectedLeadIds.length} leads
@@ -7386,7 +7386,7 @@ export default function SalesManagement() {
             <div className="px-4 sm:px-6 py-4 flex-1 overflow-y-auto">
               <div className="space-y-3">
                 {[
-                  { value: 'new', name: 'Lead mới', color: 'bg-gray-100 border-gray-300', icon: '🆕', description: 'Lead mới vừa được tạo, chưa được xử lý' },
+                  { value: 'new', name: 'Lead mới', color: 'bg-gray-100 border-[#e6ebf1]', icon: '🆕', description: 'Lead mới vừa được tạo, chưa được xử lý' },
                   { value: 'contacted', name: 'Đang tư vấn', color: 'bg-blue-100 border-blue-300', icon: '📞', description: 'Đã liên hệ và đang tư vấn khách hàng' },
                   { value: 'qualified', name: 'Đã gửi đề xuất', color: 'bg-yellow-100 border-yellow-300', icon: '📋', description: 'Đã gửi đề xuất/báo giá cho khách hàng' },
                   { value: 'negotiation', name: 'Đàm phán', color: 'bg-orange-100 border-orange-300', icon: '🤝', description: 'Đang trong quá trình thương lượng và đàm phán' },
@@ -7397,9 +7397,9 @@ export default function SalesManagement() {
                   <div
                     key={status.value}
                     onClick={() => setSelectedBulkStatus(status.value)}
-                    className={`p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 hover:shadow-md ${selectedBulkStatus === status.value
+                    className={`p-4 border-2 rounded-[10px] cursor-pointer transition-all duration-200 hover:shadow-md ${selectedBulkStatus === status.value
                       ? 'border-blue-500 bg-blue-50'
-                      : `border-gray-200 hover:border-gray-300 ${status.color}`
+                      : `border-[#e6ebf1] hover:border-[#e6ebf1] ${status.color}`
                       }`}
                   >
                     <div className="flex items-center space-x-3">
@@ -7421,7 +7421,7 @@ export default function SalesManagement() {
               </div>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 bg-gray-50 flex-shrink-0">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] bg-gray-50 flex-shrink-0">
               <div className="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div className="text-sm text-gray-600 text-center sm:text-left">
                   💡 Mẹo: Việc chuyển trạng thái sẽ được ghi lại trong lịch sử tương tác
@@ -7432,15 +7432,15 @@ export default function SalesManagement() {
                       setShowBulkStatusModal(false)
                       setSelectedBulkStatus('')
                     }}
-                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
                   >
                     Hủy
                   </button>
                   <button
                     onClick={() => confirmBulkStatusChange(selectedBulkStatus)}
                     disabled={!selectedBulkStatus}
-                    className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 flex items-center justify-center gap-2 ${selectedBulkStatus
-                      ? 'text-white bg-blue-600 hover:bg-blue-700 shadow-md hover:shadow-lg'
+                    className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 flex items-center justify-center gap-2 ${selectedBulkStatus
+                      ? 'text-white bg-[#3e79f7] hover:bg-[#699dff] shadow-md hover:shadow-lg'
                       : 'text-gray-400 bg-gray-300 cursor-not-allowed'
                       }`}
                   >
@@ -7466,8 +7466,8 @@ export default function SalesManagement() {
       {/* Bulk Convert Modal */}
       {showBulkConvertModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 sm:p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 relative">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] relative">
               <button
                 onClick={() => {
                   setShowBulkConvertModal(false)
@@ -7485,7 +7485,7 @@ export default function SalesManagement() {
                   setPaymentInstallments(1)
                   setInstallmentData([{ amount: 0, date: '' }])
                 }}
-                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
                 title="Đóng"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -7515,7 +7515,7 @@ export default function SalesManagement() {
                 return selectedLead ? (
                   <div className="flex items-center gap-3 mb-4">
                     <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                      <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                      <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                         <User className="h-6 w-6" />
                       </span>
                     </span>
@@ -7537,7 +7537,7 @@ export default function SalesManagement() {
                 <textarea
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -7551,7 +7551,7 @@ export default function SalesManagement() {
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   {productCategories.map(category => (
                     <option key={category} value={category}>{category}</option>
@@ -7567,12 +7567,12 @@ export default function SalesManagement() {
                     'Chọn sản phẩm và gói sản phẩm'
                   } <span className="text-red-500">*</span>
                 </label>
-                <div className="max-h-72 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                <div className="max-h-72 overflow-y-auto border border-[#e6ebf1] rounded-[10px] p-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {availableProducts
                       .filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory)
                       .map((product) => (
-                        <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                        <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                           {/* Product Selection */}
                           <label className="flex items-start space-x-3 cursor-pointer">
                             <input
@@ -7605,7 +7605,7 @@ export default function SalesManagement() {
                                   })
                                 }
                               }}
-                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                             />
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2">
@@ -7629,7 +7629,7 @@ export default function SalesManagement() {
                                       ...prev,
                                       [product.id]: e.target.value
                                     }))}
-                                    className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                    className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                   >
                                     {availablePackages[product.id as keyof typeof availablePackages]?.map(pkg => (
                                       <option key={pkg.id} value={pkg.id}>
@@ -7648,7 +7648,7 @@ export default function SalesManagement() {
                                       ...prev,
                                       [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                     }))}
-                                    className="w-full text-sm border border-gray-300 rounded px-2 py-1"
+                                    className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
                                   />
                                 </div>
                               </div>
@@ -7685,7 +7685,7 @@ export default function SalesManagement() {
                     const grandTotal = afterDiscount + vatAmount
 
                     return (
-                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
                         <h5 className="text-sm font-medium text-green-800 mb-3">
                           Đã chọn {selectedProducts.length} sản phẩm:
                         </h5>
@@ -7726,7 +7726,7 @@ export default function SalesManagement() {
                   })()}
 
                   {/* Payment Info Section */}
-                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                  <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
                     {/* Payment Deadline & Discount - Same Row */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                       {/* Payment Deadline */}
@@ -7739,7 +7739,7 @@ export default function SalesManagement() {
                           value={paymentDeadline}
                           onChange={(e) => setPaymentDeadline(e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                         {!paymentDeadline && (
                           <p className="mt-1 text-xs text-red-500">Vui lòng chọn thời hạn thanh toán</p>
@@ -7759,7 +7759,7 @@ export default function SalesManagement() {
                             value={discountPercent}
                             onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
                             placeholder="0"
-                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           />
                           <select
                             value={discountType}
@@ -7767,7 +7767,7 @@ export default function SalesManagement() {
                               setDiscountType(e.target.value as '%' | 'VND')
                               setDiscountPercent(0)
                             }}
-                            className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                           >
                             <option value="%">%</option>
                             <option value="VND">VNĐ</option>
@@ -7785,7 +7785,7 @@ export default function SalesManagement() {
                         <select
                           value={paymentMethod}
                           onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="cash">Tiền mặt</option>
                           <option value="bank_transfer">Chuyển khoản</option>
@@ -7804,25 +7804,25 @@ export default function SalesManagement() {
                           Thực hiện thanh toán
                         </label>
                         <div className="flex gap-3">
-                          <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                             <input
                               type="radio"
                               name="paymentMode"
                               value="full"
                               checked={paymentMode === 'full'}
                               onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
                           </label>
-                          <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                          <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                             <input
                               type="radio"
                               name="paymentMode"
                               value="installment"
                               checked={paymentMode === 'installment'}
                               onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                              className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                             />
                             <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
                           </label>
@@ -7832,7 +7832,7 @@ export default function SalesManagement() {
 
                     {/* Payment Installments - Only show when installment mode selected */}
                     {paymentMode === 'installment' && (
-                      <div className="border-t border-gray-200 pt-4">
+                      <div className="border-t border-[#e6ebf1] pt-4">
                         <div className="mb-4">
                           <label className="block text-sm font-medium text-gray-700 mb-2">
                             Số lần thanh toán
@@ -7851,7 +7851,7 @@ export default function SalesManagement() {
                               )
                               setInstallmentData(newInstallments)
                             }}
-                            className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                            className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           />
                         </div>
 
@@ -7880,7 +7880,7 @@ export default function SalesManagement() {
                           const isOverLimit = installment.amount > maxAllowed
 
                           return (
-                            <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                            <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
                               <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">
                                   Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
@@ -7896,7 +7896,7 @@ export default function SalesManagement() {
                                     setInstallmentData(newData)
                                   }}
                                   placeholder="0"
-                                  className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                                  className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
                                 />
                                 {isOverLimit && (
                                   <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
@@ -7917,7 +7917,7 @@ export default function SalesManagement() {
                                     }}
                                     min={new Date().toISOString().split('T')[0]}
                                     placeholder="Thời gian thanh toán ..."
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                                   />
                                 </div>
                                 {paymentInstallments > 1 && (
@@ -7930,7 +7930,7 @@ export default function SalesManagement() {
                                         setPaymentInstallments(paymentInstallments - 1)
                                       }
                                     }}
-                                    className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                                    className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
                                     title="Xóa đợt thanh toán"
                                   >
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -7958,7 +7958,7 @@ export default function SalesManagement() {
               </p>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => {
                   setShowBulkConvertModal(false)
@@ -7976,17 +7976,17 @@ export default function SalesManagement() {
                   setPaymentInstallments(1)
                   setInstallmentData([{ amount: 0, date: '' }])
                 }}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
               <button
                 onClick={confirmBulkConvert}
                 disabled={selectedProducts.length === 0 || !paymentDeadline}
-                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${selectedProducts.length > 0 && paymentDeadline
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${selectedProducts.length > 0 && paymentDeadline
                   ? bulkConvertTargetStatus === 'converted'
-                    ? 'text-white bg-green-600 hover:bg-green-700'
-                    : 'text-white bg-blue-600 hover:bg-blue-700'
+                    ? 'text-white bg-[#2dc56a] hover:bg-[#04d182]'
+                    : 'text-white bg-[#3e79f7] hover:bg-[#699dff]'
                   : 'text-gray-400 bg-gray-300 cursor-not-allowed'
                   }`}
               >
@@ -8010,8 +8010,8 @@ export default function SalesManagement() {
       {/* Column Management Modal */}
       {showColumnModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full max-h-[80vh] overflow-y-auto">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex justify-between items-center">
                 <h3 className="text-lg font-semibold text-gray-900">Quản lý hiển thị cột</h3>
                 <button
@@ -8025,7 +8025,7 @@ export default function SalesManagement() {
             </div>
 
             {/* Quick Actions */}
-            <div className="px-6 py-3 border-b border-gray-200 bg-gray-50">
+            <div className="px-6 py-3 border-b border-[#e6ebf1] bg-gray-50">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium text-gray-700">Thao tác nhanh:</span>
                 <button
@@ -8036,7 +8036,7 @@ export default function SalesManagement() {
                     }, {} as typeof visibleColumns);
                     setVisibleColumns(allEnabled);
                   }}
-                  className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                  className="px-3 py-1 text-xs bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors"
                 >
                   ✅ Hiển thị tất cả
                 </button>
@@ -8057,7 +8057,7 @@ export default function SalesManagement() {
                     };
                     setVisibleColumns(essential);
                   }}
-                  className="px-3 py-1 text-xs bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                  className="px-3 py-1 text-xs bg-[#2dc56a] text-white rounded-md hover:bg-[#04d182] transition-colors"
                 >
                   🎯 Chỉ cột thiết yếu
                 </button>
@@ -8100,7 +8100,7 @@ export default function SalesManagement() {
                 lastInteraction: '⏰ Lần tương tác cuối',
                 actions: '⚙️ Hành động'
               } as const).map(([key, label]) => (
-                <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                <div key={key} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] hover:bg-gray-100 transition-colors">
                   <label className="flex items-center cursor-pointer">
                     <input
                       type="checkbox"
@@ -8111,7 +8111,7 @@ export default function SalesManagement() {
                           [key]: e.target.checked
                         }))
                       }}
-                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+                      className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <span className="ml-3 text-sm font-medium text-gray-700">{label}</span>
                   </label>
@@ -8119,7 +8119,7 @@ export default function SalesManagement() {
               ))}
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-between">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-between">
               <div className="flex space-x-2">
                 <button
                   onClick={() => {
@@ -8128,7 +8128,7 @@ export default function SalesManagement() {
                       return acc
                     }, {} as typeof visibleColumns))
                   }}
-                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
                 >
                   Chọn tất cả
                 </button>
@@ -8139,14 +8139,14 @@ export default function SalesManagement() {
                       return acc
                     }, {} as typeof visibleColumns))
                   }}
-                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
+                  className="px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
                 >
                   Mặc định
                 </button>
               </div>
               <button
                 onClick={() => setShowColumnModal(false)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
               >
                 Áp dụng
               </button>
@@ -8158,7 +8158,7 @@ export default function SalesManagement() {
       {/* File Management Modal */}
       {showFileModal && selectedLeadForFile && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full mx-4 max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Quản lý tệp</h3>
@@ -8180,11 +8180,11 @@ export default function SalesManagement() {
               {/* Upload Section */}
               <div className="mb-6">
                 <h4 className="text-md font-medium text-gray-900 mb-3">Thêm tệp mới</h4>
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-4">
+                <div className="border-2 border-dashed border-[#e6ebf1] rounded-[10px] p-4">
                   <div className="text-center">
                     <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
                     <label className="cursor-pointer">
-                      <span className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                      <span className="text-sm text-blue-600 hover:text-[#3e79f7] font-medium">
                         Chọn tệp để upload
                       </span>
                       <input
@@ -8214,7 +8214,7 @@ export default function SalesManagement() {
                       ))}
                       <button
                         onClick={handleSubmitFiles}
-                        className="mt-3 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                        className="mt-3 px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors"
                       >
                         Upload tệp
                       </button>
@@ -8231,7 +8231,7 @@ export default function SalesManagement() {
                 {selectedLeadForFile.files && selectedLeadForFile.files.length > 0 ? (
                   <div className="space-y-2">
                     {selectedLeadForFile.files.map((file, index) => (
-                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                      <div key={index} className="flex items-center justify-between bg-gray-50 p-3 rounded-[10px]">
                         <div className="flex items-center gap-3">
                           <FileText className="w-5 h-5 text-blue-600" />
                           <div>
@@ -8247,7 +8247,7 @@ export default function SalesManagement() {
                               // Create a download link for the file
                               alert('Chức năng download sẽ được triển khai sau')
                             }}
-                            className="p-1 text-blue-600 hover:text-blue-700 transition-colors"
+                            className="p-1 text-blue-600 hover:text-[#3e79f7] transition-colors"
                             title="Tải xuống"
                           >
                             <DownloadIcon className="w-4 h-4" />
@@ -8278,7 +8278,7 @@ export default function SalesManagement() {
       {/* Add Note Modal */}
       {showAddNoteModal && selectedLeadForNote && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Thêm ghi chú</h3>
@@ -8306,7 +8306,7 @@ export default function SalesManagement() {
                   value={newNoteContent}
                   onChange={(e) => setNewNoteContent(e.target.value)}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   placeholder="Nhập nội dung ghi chú..."
                 />
               </div>
@@ -8338,7 +8338,7 @@ export default function SalesManagement() {
                   />
                   <label
                     htmlFor="note-file-input"
-                    className="flex items-center px-3 py-2 border border-gray-300 rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
+                    className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-md cursor-pointer hover:bg-gray-50 transition-colors"
                   >
                     <Paperclip className="w-4 h-4 mr-2 text-gray-600" />
                     <span className="text-sm text-gray-700">Chọn file</span>
@@ -8410,7 +8410,7 @@ export default function SalesManagement() {
       {/* Modal Sửa Ghi Chú */}
       {showEditNoteModal && selectedLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <svg className="w-5 h-5 text-blue-600" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -8437,7 +8437,7 @@ export default function SalesManagement() {
                 value={editNoteContent || selectedLead.notes || ''}
                 onChange={(e) => setEditNoteContent(e.target.value)}
                 rows={6}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
                 placeholder="Nhập ghi chú..."
               />
             </div>
@@ -8466,7 +8466,7 @@ export default function SalesManagement() {
                     setEditNoteContent('')
                   }
                 }}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Lưu thay đổi
@@ -8479,7 +8479,7 @@ export default function SalesManagement() {
       {/* Modal Xác Nhận Xóa Ghi Chú */}
       {showDeleteNoteConfirm && selectedLead && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full">
             <div className="flex items-center justify-between p-6 border-b">
               <h3 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                 <AlertCircle className="w-5 h-5 text-red-600" />
@@ -8519,7 +8519,7 @@ export default function SalesManagement() {
                     setShowDeleteNoteConfirm(false)
                   }
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#ff6b72] text-white rounded-md hover:bg-[#d9505c] transition-colors flex items-center gap-2"
               >
                 <Trash2 className="w-4 h-4" />
                 Đồng ý
@@ -8532,17 +8532,17 @@ export default function SalesManagement() {
       {/* Field Settings Modal */}
       {showFieldSettingsModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="flex border border-gray-200 rounded-lg overflow-hidden">
-                    <button className="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-r border-gray-200">
+                  <div className="flex border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+                    <button className="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-r border-[#e6ebf1]">
                       Ẩn hiện trường dữ liệu
                     </button>
                     <button
                       onClick={() => setShowFieldSettingsModal(false)}
-                      className="px-4 py-2 text-sm font-medium hover:bg-green-700 transition-all text-white bg-green-600 rounded-r-lg flex items-center gap-1"
+                      className="px-4 py-2 text-sm font-medium hover:bg-[#04d182] transition-all text-white bg-[#2dc56a] rounded-r-lg flex items-center gap-1"
                     >
                       Lưu
                     </button>
@@ -8560,168 +8560,168 @@ export default function SalesManagement() {
             <div className="p-6 max-h-[60vh] overflow-y-auto">
               <div className="space-y-3">
                 {/* Required fields - cannot be hidden */}
-                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-70 cursor-not-allowed">
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
                   <span className="text-sm text-gray-600">Số điện thoại</span>
                   <input
                     type="checkbox"
                     checked={true}
                     disabled
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-not-allowed"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-200 opacity-70 cursor-not-allowed">
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
                   <span className="text-sm text-gray-600">Email</span>
                   <input
                     type="checkbox"
                     checked={true}
                     disabled
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded cursor-not-allowed"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed"
                   />
                 </label>
 
                 {/* Optional fields */}
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Tên khách hàng</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.name}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, name: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Doanh thu ước tính</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.estimatedRevenue}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, estimatedRevenue: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Công ty</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.company}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, company: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Chức vụ</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.jobTitle}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, jobTitle: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Ngành nghề</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.industry}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, industry: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Quy mô công ty</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.companySize}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, companySize: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Website</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.website}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, website: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Địa chỉ</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.address}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, address: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Nguồn</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.source}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, source: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Tỉnh thành</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.region}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, region: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Phân công cho</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.assignedTo}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, assignedTo: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Sản phẩm quan tâm</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.product}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, product: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Nội dung quan tâm</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.content}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, content: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <label className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200 hover:bg-gray-50 cursor-pointer">
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
                   <span className="text-sm text-gray-700">Ghi chú</span>
                   <input
                     type="checkbox"
                     checked={leadFormFieldVisibility.notes}
                     onChange={(e) => setLeadFormFieldVisibility(prev => ({ ...prev, notes: e.target.checked }))}
-                    className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 cursor-pointer"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer"
                   />
                 </label>
 
-                <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-gray-200">
+                <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-[#e6ebf1]">
                   <span className="text-red-500">*</span> Số điện thoại và Email là trường bắt buộc, không thể ẩn.
                 </p>
               </div>

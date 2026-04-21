@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useEffect, useCallback, useMemo, useState } from 'react'
 import { AlertCircle, CheckCircle2, X } from 'lucide-react'
@@ -13,7 +13,7 @@ import PreviewPanel from './PreviewPanel'
 // ─── Toast components ─────────────────────────────────────────────────────────
 function ValidationToast({ errors, onClose }: { errors: Array<{ message: string; nodeId?: string }>; onClose: () => void }) {
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-96 bg-white rounded-2xl shadow-2xl border border-red-200 overflow-hidden">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-96 bg-white rounded-[10px] shadow-2xl border border-red-200 overflow-hidden">
       <div className="flex items-center gap-3 px-4 py-3 bg-red-50 border-b border-red-100">
         <AlertCircle className="w-5 h-5 text-red-500 shrink-0" />
         <span className="text-sm font-semibold text-red-700 flex-1">Flow chưa hợp lệ ({errors.length} lỗi)</span>
@@ -34,7 +34,7 @@ function ValidationToast({ errors, onClose }: { errors: Array<{ message: string;
 function SuccessToast({ message, onClose }: { message: string; onClose: () => void }) {
   useEffect(() => { const t = setTimeout(onClose, 3000); return () => clearTimeout(t) }, [onClose])
   return (
-    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-green-600 text-white rounded-2xl px-5 py-3 shadow-xl flex items-center gap-2.5">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-[#2dc56a] text-white rounded-[10px] px-5 py-3 shadow-xl flex items-center gap-2.5">
       <CheckCircle2 className="w-5 h-5 shrink-0" />
       <span className="text-sm font-medium">{message}</span>
     </div>
@@ -157,7 +157,7 @@ function FlowEditorInner({ flowData, onBack }: { flowData: FlowDetail; onBack: (
         {/* Right: Config Panel — flex sibling, pushes canvas left */}
         {selectedFlowNode && (
           <div
-            className="h-full shrink-0 shadow-2xl border-l border-gray-200 flex flex-col bg-white overflow-hidden"
+            className="h-full shrink-0 shadow-2xl border-l border-[#e6ebf1] flex flex-col bg-white overflow-hidden"
             style={{ width: 340 }}
           >
             <ConfigPanel

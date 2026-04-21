@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { 
@@ -55,7 +55,7 @@ const getPlanBadgeStyle = (plan: BrevoPlan) => {
     case 'free':
       return 'bg-gray-100 text-gray-700'
     case 'starter':
-      return 'bg-blue-100 text-blue-700'
+      return 'bg-blue-100 text-[#3e79f7]'
     case 'business':
       return 'bg-purple-100 text-purple-700'
     case 'enterprise':
@@ -164,7 +164,7 @@ export default function BrevoConnectionSection({
   const renderNotConnectedState = () => (
     <div className="space-y-5">
       {/* Instructions Card */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
+      <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-5">
         <div className="flex items-start space-x-3">
           <Link2 className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
           <div>
@@ -175,7 +175,7 @@ export default function BrevoConnectionSection({
                 href="https://app.brevo.com/account/register"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center text-blue-600 hover:text-blue-700 hover:underline ml-14"
+                className="inline-flex items-center text-blue-600 hover:text-[#3e79f7] hover:underline ml-14"
               >
                 Đăng ký Brevo <ExternalLink className="w-3.5 h-3.5 ml-1" />
               </a>
@@ -200,8 +200,8 @@ export default function BrevoConnectionSection({
               setErrorMessage('')
             }}
             placeholder="xkeysib-xxxxxx..."
-            className={`w-full px-4 py-2.5 pr-10 border rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-              errorMessage ? 'border-red-300' : 'border-gray-200'
+            className={`w-full px-4 py-2.5 pr-10 border rounded-[10px] font-mono text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
+              errorMessage ? 'border-red-300' : 'border-[#e6ebf1]'
             }`}
           />
           <button
@@ -221,9 +221,9 @@ export default function BrevoConnectionSection({
       <button
         onClick={handleConnect}
         disabled={!apiKeyInput.trim() || isConnecting}
-        className={`flex items-center justify-center space-x-2 px-5 py-2.5 rounded-lg font-medium transition-colors ${
+        className={`flex items-center justify-center space-x-2 px-5 py-2.5 rounded-[10px] font-medium transition-colors ${
           apiKeyInput.trim() && !isConnecting
-            ? 'bg-blue-600 text-white hover:bg-blue-700'
+            ? 'bg-[#3e79f7] text-white hover:bg-[#699dff]'
             : 'bg-gray-100 text-gray-400 cursor-not-allowed'
         }`}
       >
@@ -241,7 +241,7 @@ export default function BrevoConnectionSection({
 
   // Render Connected State
   const renderConnectedState = () => (
-    <div className="bg-white border border-gray-200 rounded-lg p-5">
+    <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-5">
       {showChangeApiKeyForm ? (
         // Change API Key Form
         <div className="space-y-4">
@@ -268,8 +268,8 @@ export default function BrevoConnectionSection({
                 setErrorMessage('')
               }}
               placeholder="xkeysib-xxxxxx..."
-              className={`w-full px-4 py-2.5 pr-10 border rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errorMessage ? 'border-red-300' : 'border-gray-200'
+              className={`w-full px-4 py-2.5 pr-10 border rounded-[10px] font-mono text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
+                errorMessage ? 'border-red-300' : 'border-[#e6ebf1]'
               }`}
             />
             <button
@@ -291,16 +291,16 @@ export default function BrevoConnectionSection({
                 setApiKeyInput('')
                 setErrorMessage('')
               }}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleChangeApiKey}
               disabled={!apiKeyInput.trim() || isConnecting}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+              className={`flex items-center space-x-2 px-4 py-2 rounded-[10px] font-medium transition-colors ${
                 apiKeyInput.trim() && !isConnecting
-                  ? 'bg-blue-600 text-white hover:bg-blue-700'
+                  ? 'bg-[#3e79f7] text-white hover:bg-[#699dff]'
                   : 'bg-gray-100 text-gray-400 cursor-not-allowed'
               }`}
             >
@@ -362,13 +362,13 @@ export default function BrevoConnectionSection({
           <div className="flex items-center space-x-3 pt-2">
             <button
               onClick={() => setShowChangeApiKeyForm(true)}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+              className="px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm font-medium"
             >
               Đổi API Key
             </button>
             <button
               onClick={() => setShowDisconnectConfirm(true)}
-              className="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium"
+              className="px-4 py-2 border border-red-300 text-red-600 rounded-[10px] hover:bg-red-50 transition-colors text-sm font-medium"
             >
               NGẮT KẾT NỐI
             </button>
@@ -399,7 +399,7 @@ export default function BrevoConnectionSection({
         <button
           onClick={handleCheckConnection}
           disabled={isChecking}
-          className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium"
+          className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm font-medium"
         >
           {isChecking ? (
             <>
@@ -415,7 +415,7 @@ export default function BrevoConnectionSection({
         </button>
         <button
           onClick={() => setShowChangeApiKeyForm(true)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+          className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors text-sm font-medium"
         >
           Đổi API Key
         </button>
@@ -423,7 +423,7 @@ export default function BrevoConnectionSection({
 
       {/* Change API Key Form (if shown) */}
       {showChangeApiKeyForm && (
-        <div className="bg-white border border-gray-200 rounded-lg p-5 mt-4">
+        <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-5 mt-4">
           <div className="flex items-center justify-between mb-4">
             <h4 className="font-medium text-gray-900">Nhập API Key mới</h4>
             <button
@@ -447,8 +447,8 @@ export default function BrevoConnectionSection({
                 setErrorMessage('')
               }}
               placeholder="xkeysib-xxxxxx..."
-              className={`w-full px-4 py-2.5 pr-10 border rounded-lg font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                errorMessage ? 'border-red-300' : 'border-gray-200'
+              className={`w-full px-4 py-2.5 pr-10 border rounded-[10px] font-mono text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${
+                errorMessage ? 'border-red-300' : 'border-[#e6ebf1]'
               }`}
             />
             <button
@@ -466,9 +466,9 @@ export default function BrevoConnectionSection({
           <button
             onClick={handleChangeApiKey}
             disabled={!apiKeyInput.trim() || isConnecting}
-            className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`flex items-center space-x-2 px-4 py-2 rounded-[10px] font-medium transition-colors ${
               apiKeyInput.trim() && !isConnecting
-                ? 'bg-blue-600 text-white hover:bg-blue-700'
+                ? 'bg-[#3e79f7] text-white hover:bg-[#699dff]'
                 : 'bg-gray-100 text-gray-400 cursor-not-allowed'
             }`}
           >
@@ -489,7 +489,7 @@ export default function BrevoConnectionSection({
   // Disconnect Confirmation Dialog
   const DisconnectConfirmDialog = () => (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4">
         <div className="p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-2">Ngắt kết nối Brevo?</h3>
           <p className="text-gray-600 text-sm">
@@ -499,14 +499,14 @@ export default function BrevoConnectionSection({
         <div className="flex items-center justify-end space-x-3 px-6 pb-6">
           <button
             onClick={() => setShowDisconnectConfirm(false)}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
           <button
             onClick={handleDisconnect}
             disabled={isDisconnecting}
-            className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
           >
             {isDisconnecting ? (
               <>
@@ -523,7 +523,7 @@ export default function BrevoConnectionSection({
   )
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm overflow-hidden">
       {/* Header */}
       <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
         <div>

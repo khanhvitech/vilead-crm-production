@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, RotateCcw, Send, Bot } from 'lucide-react'
@@ -161,13 +161,13 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
       {/* Panel */}
       <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-2xl z-40 flex flex-col">
         {/* Header */}
-        <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-blue-700">
+        <div className="flex items-center gap-3 px-5 py-4 border-b border-[#e6ebf1] bg-gradient-to-r from-blue-600 to-blue-700">
           <Bot className="w-5 h-5 text-white" />
           <div className="flex-1">
             <h3 className="text-sm font-semibold text-white">Xem trước luồng</h3>
             <p className="text-xs text-blue-200 mt-0.5">Mô phỏng trải nghiệm chat</p>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-blue-200 hover:text-white hover:bg-blue-500 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-[10px] text-blue-200 hover:text-white hover:bg-blue-500 transition-colors">
             <X className="w-4 h-4" />
           </button>
         </div>
@@ -183,7 +183,7 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
                   value={testVars[v.key] || ''}
                   onChange={e => setTestVars(prev => ({ ...prev, [v.key]: e.target.value }))}
                   placeholder={v.example}
-                  className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400"
+                  className="flex-1 px-2 py-1 text-xs border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:border-[#699dff]"
                 />
               </div>
             ))}
@@ -194,13 +194,13 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-slate-50">
           {!started && (
             <div className="flex flex-col items-center justify-center h-full gap-3 text-center">
-              <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center">
+              <div className="w-14 h-14 bg-blue-50 rounded-[10px] flex items-center justify-center">
                 <Bot className="w-7 h-7 text-blue-500" />
               </div>
               <p className="text-sm font-medium text-gray-600">Sẵn sàng xem trước</p>
               <button
                 onClick={startPreview}
-                className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 transition-colors shadow-sm"
+                className="px-5 py-2.5 bg-[#3e79f7] text-white text-sm font-medium rounded-[10px] hover:bg-[#699dff] transition-colors shadow-sm"
               >
                 Bắt đầu mô phỏng
               </button>
@@ -214,11 +214,11 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
             >
               {msg.role === 'bot' && (
                 <div className="flex items-start gap-2 max-w-[85%]">
-                  <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                  <div className="w-7 h-7 bg-[#3e79f7] rounded-[10px] flex items-center justify-center shrink-0 mt-0.5">
                     <Bot className="w-3.5 h-3.5 text-white" />
                   </div>
                   <div className="space-y-2">
-                    <div className="bg-white rounded-2xl rounded-tl-sm px-3.5 py-2.5 shadow-sm border border-gray-200">
+                    <div className="bg-white rounded-[10px] rounded-tl-sm px-3.5 py-2.5 shadow-sm border border-[#e6ebf1]">
                       <p className="text-sm text-gray-800 whitespace-pre-wrap">{msg.content}</p>
                     </div>
                     {msg.buttons && (
@@ -227,7 +227,7 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
                           <button
                             key={i}
                             onClick={continueFlow}
-                            className="w-full px-3.5 py-2 bg-white border-2 border-blue-300 text-blue-600 text-xs font-medium rounded-xl hover:bg-blue-50 transition-colors"
+                            className="w-full px-3.5 py-2 bg-white border-2 border-blue-300 text-blue-600 text-xs font-medium rounded-[10px] hover:bg-blue-50 transition-colors"
                           >
                             {btn}
                           </button>
@@ -255,7 +255,7 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
               )}
 
               {msg.role === 'user' && (
-                <div className="bg-blue-600 text-white text-sm rounded-2xl rounded-tr-sm px-3.5 py-2.5 max-w-[75%]">
+                <div className="bg-[#3e79f7] text-white text-sm rounded-[10px] rounded-tr-sm px-3.5 py-2.5 max-w-[75%]">
                   {msg.content}
                 </div>
               )}
@@ -266,7 +266,7 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
             <div className="flex justify-center">
               <button
                 onClick={continueFlow}
-                className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+                className="text-xs text-blue-600 hover:text-[#3e79f7] font-medium flex items-center gap-1"
               >
                 Tiếp tục → <span className="text-[10px] text-gray-400">(bước tiếp theo)</span>
               </button>
@@ -275,9 +275,9 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
         </div>
 
         {/* Input */}
-        <div className="p-4 border-t border-gray-200 bg-white">
+        <div className="p-4 border-t border-[#e6ebf1] bg-white">
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex-1 flex items-center gap-2 border border-gray-200 rounded-xl px-3 py-2">
+            <div className="flex-1 flex items-center gap-2 border border-[#e6ebf1] rounded-[10px] px-3 py-2">
               <input
                 value={userInput}
                 onChange={e => setUserInput(e.target.value)}
@@ -289,7 +289,7 @@ export default function PreviewPanel({ open, nodes, edges, onClose }: PreviewPan
             <button
               onClick={handleSend}
               disabled={!userInput.trim()}
-              className="w-9 h-9 bg-blue-600 text-white rounded-xl flex items-center justify-center hover:bg-blue-700 disabled:opacity-40 transition-colors"
+              className="w-9 h-9 bg-[#3e79f7] text-white rounded-[10px] flex items-center justify-center hover:bg-[#699dff] disabled:opacity-40 transition-colors"
             >
               <Send className="w-4 h-4" />
             </button>

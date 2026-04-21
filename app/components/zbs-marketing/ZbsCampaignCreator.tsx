@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import {
@@ -55,16 +55,16 @@ function ChecklistItem({ title, description, isComplete, isRequired, icon, value
     <button
       onClick={onClick}
       className={`
-        w-full flex items-center gap-4 p-4 rounded-lg border-2 text-left transition-all hover:shadow-sm
+        w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all hover:shadow-sm
         ${isComplete 
           ? 'border-green-200 bg-green-50 hover:bg-green-100' 
-          : 'border-gray-200 hover:border-blue-200 hover:bg-gray-50'
+          : 'border-[#e6ebf1] hover:border-[#c7d9fd] hover:bg-gray-50'
         }
       `}
     >
       <div className={`
         flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center
-        ${isComplete ? 'bg-green-500' : 'bg-gray-100'}
+        ${isComplete ? 'bg-[#2dc56a]' : 'bg-gray-100'}
       `}>
         {isComplete ? (
           <Check className="w-5 h-5 text-white" />
@@ -106,10 +106,10 @@ function CampaignSettingsModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 p-6">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-lg mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Tên chiến dịch và Kiểu gửi</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg">
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-[10px]">
             <X className="w-5 h-5 text-gray-500"/>
           </button>
         </div>
@@ -122,21 +122,21 @@ function CampaignSettingsModal({
               value={name} 
               onChange={(e) => setName(e.target.value)} 
               placeholder="VD: Khuyến mãi tháng 10" 
-              className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Kiểu gửi tin <span className="text-red-500">*</span></label>
             <div className="space-y-3">
-              <label className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${type === 'phone' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}>
+              <label className={`flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all ${type === 'phone' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}`}>
                 <input type="radio" checked={type === 'phone'} onChange={() => setType('phone')} className="mt-1" />
                 <div>
                   <span className="font-medium text-gray-900">Gửi bằng Số điện thoại</span>
                   <p className="text-sm text-gray-500">Gửi tin ZNS đến số điện thoại của khách hàng lưu trong hệ thống</p>
                 </div>
               </label>
-              <label className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${type === 'zalo_id' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}>
+              <label className={`flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all ${type === 'zalo_id' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}`}>
                 <input type="radio" checked={type === 'zalo_id'} onChange={() => setType('zalo_id')} className="mt-1" />
                 <div>
                   <span className="font-medium text-gray-900">Gửi bằng Zalo User ID</span>
@@ -148,10 +148,10 @@ function CampaignSettingsModal({
         </div>
 
         <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium">Hủy</button>
+          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-[10px] font-medium">Hủy</button>
           <button 
             onClick={() => { onSave(name, type); onClose(); }} 
-            className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+            className="px-6 py-2 bg-[#3e79f7] text-white hover:bg-[#699dff] rounded-[10px] font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
             disabled={!name.trim() || !type}
           >
             Lưu
@@ -172,22 +172,22 @@ function OASenderModal({ value, onSave, onClose }: { value: string | null, onSav
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Chọn Zalo OA Gửi Tin</h3>
-          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-lg"><X className="w-5 h-5 text-gray-500"/></button>
+          <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded-[10px]"><X className="w-5 h-5 text-gray-500"/></button>
         </div>
         <div className="space-y-3 mt-2">
           {mockupOAs.map(oa => (
-            <label key={oa.id} className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${selected === oa.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}>
+            <label key={oa.id} className={`flex items-center gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all ${selected === oa.id ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}`}>
               <input type="radio" checked={selected === oa.id} onChange={() => setSelected(oa.id)} className="mt-1" />
               <span className="font-medium text-gray-900">{oa.name}</span>
             </label>
           ))}
         </div>
         <div className="mt-8 flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg font-medium">Hủy</button>
-          <button onClick={() => { if(selected) onSave(selected); onClose(); }} className="px-6 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg font-medium disabled:opacity-50" disabled={!selected}>Lưu</button>
+          <button onClick={onClose} className="px-4 py-2 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-[10px] font-medium">Hủy</button>
+          <button onClick={() => { if(selected) onSave(selected); onClose(); }} className="px-6 py-2 bg-[#3e79f7] text-white hover:bg-[#699dff] rounded-[10px] font-medium disabled:opacity-50" disabled={!selected}>Lưu</button>
         </div>
       </div>
     </div>
@@ -230,11 +230,11 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-4xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex-shrink-0 border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Chọn mẫu ZNS</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -248,7 +248,7 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm mẫu ZNS..."
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+              className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
             />
           </div>
         </div>
@@ -266,10 +266,10 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
                 <div
                   key={template.id}
                   className={`
-                    relative rounded-lg border bg-white overflow-hidden transition-all cursor-pointer group
+                    relative rounded-[10px] border bg-white overflow-hidden transition-all cursor-pointer group
                     ${currentSelected === template.id
                       ? 'border-blue-500 ring-2 ring-blue-200 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                      : 'border-[#e6ebf1] hover:border-[#e6ebf1] hover:shadow-sm'
                     }
                   `}
                   onClick={() => setCurrentSelected(template.id)}
@@ -288,7 +288,7 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
                           e.stopPropagation();
                           alert('Xem trước mẫu: ' + template.name);
                         }}
-                        className="flex items-center gap-2 px-3 py-2 bg-white rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm"
+                        className="flex items-center gap-2 px-3 py-2 bg-white rounded-[10px] text-sm font-medium text-gray-700 hover:bg-gray-100 shadow-sm"
                       >
                         <Eye className="w-4 h-4" />
                         Xem trước
@@ -297,7 +297,7 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
 
                     {/* Selected check */}
                     {currentSelected === template.id && (
-                      <div className="absolute top-2 right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow-sm">
+                      <div className="absolute top-2 right-2 w-6 h-6 bg-[#3e79f7] rounded-full flex items-center justify-center shadow-sm">
                         <Check className="w-4 h-4 text-white" />
                       </div>
                     )}
@@ -343,17 +343,17 @@ function ZbsTemplateModal({ value, onSave, onClose }: { value: string | null, on
         )}
 
         {/* Footer */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 px-6 py-4 flex justify-end gap-3 rounded-b-xl">
+        <div className="flex-shrink-0 bg-white border-t border-[#e6ebf1] px-6 py-4 flex justify-end gap-3 rounded-b-xl">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
           <button
             onClick={handleConfirm}
             disabled={!currentSelected}
-            className="px-6 py-2 bg-blue-600 font-medium text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 bg-[#3e79f7] font-medium text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Chọn mẫu này
           </button>
@@ -426,11 +426,11 @@ export function ZbsCampaignCreator({ onClose }: ZbsCampaignCreatorProps) {
   return (
     <div className="fixed inset-0 z-[50] bg-gray-50 flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-4 h-16 flex items-center justify-between shadow-sm relative z-10">
+      <div className="flex-shrink-0 bg-white border-b border-[#e6ebf1] px-4 h-16 flex items-center justify-between shadow-sm relative z-10">
         <div className="flex items-center gap-4 flex-1">
           <button
             onClick={onClose}
-            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -448,7 +448,7 @@ export function ZbsCampaignCreator({ onClose }: ZbsCampaignCreatorProps) {
           </span>
           <button
             onClick={handleSaveDraft}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 bg-white hover:bg-gray-50 rounded-[10px] font-medium transition-colors shadow-sm"
           >
             <Save className="w-4 h-4" />
             <span className="hidden sm:inline">Lưu nháp</span>
@@ -456,7 +456,7 @@ export function ZbsCampaignCreator({ onClose }: ZbsCampaignCreatorProps) {
           <button
             onClick={() => setActiveModal('confirm')}
             disabled={!isComplete}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] font-medium hover:bg-[#699dff] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
             <span>Bắt đầu gửi</span>
@@ -472,7 +472,7 @@ export function ZbsCampaignCreator({ onClose }: ZbsCampaignCreatorProps) {
             <p className="text-gray-500 mt-2">Hoàn thành các bước dưới đây để có thể bắt đầu gửi tin</p>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-semibold text-gray-900">Tiến độ thiết lập</h2>
@@ -484,7 +484,7 @@ export function ZbsCampaignCreator({ onClose }: ZbsCampaignCreatorProps) {
               {/* Progress bar */}
               <div className="w-full bg-gray-100 rounded-full h-2 mb-8 overflow-hidden">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  className="bg-[#3e79f7] h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(completedCount / 4) * 100}%` }}
                 />
               </div>

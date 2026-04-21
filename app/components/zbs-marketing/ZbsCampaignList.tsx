@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import {
@@ -141,7 +141,7 @@ const getStatusConfig = (status: string) => {
     case 'draft':
       return { label: 'Nháp', color: 'text-blue-600', dot: 'bg-blue-500' }
     case 'running':
-      return { label: 'Đang chạy', color: 'text-green-600', dot: 'bg-green-500' }
+      return { label: 'Đang chạy', color: 'text-green-600', dot: 'bg-[#2dc56a]' }
     case 'paused':
       return { label: 'Tạm dừng', color: 'text-orange-600', dot: 'bg-orange-500' }
     case 'cancelled':
@@ -342,7 +342,7 @@ export default function ZbsCampaignList() {
   return (
     <div className="space-y-6">
       {/* OA Connection Header (List view) */}
-      <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-5 shadow-sm">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-blue-50 rounded-full flex items-center justify-center">
@@ -355,7 +355,7 @@ export default function ZbsCampaignList() {
               <div className="relative" ref={dropdownRef}>
                 <button
                   onClick={() => setShowAccountDropdown(!showAccountDropdown)}
-                  className="flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors h-10 min-w-[280px]"
+                  className="flex items-center justify-between px-3 py-2 border border-[#e6ebf1] rounded-[10px] bg-white hover:bg-gray-50 transition-colors h-10 min-w-[280px]"
                 >
                   <div className="flex items-center gap-2">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -369,7 +369,7 @@ export default function ZbsCampaignList() {
 
                 {/* Dropdown Menu */}
                 {showAccountDropdown && (
-                  <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-1">
+                  <div className="absolute top-full left-0 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-50 py-1">
                     {mockConnectedOAs.map((account) => (
                       <button
                         key={account.id}
@@ -403,7 +403,7 @@ export default function ZbsCampaignList() {
 
           <button
             onClick={() => setShowConnectionModal(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-green-600 text-white rounded-lg font-medium text-sm hover:bg-green-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#2dc56a] text-white rounded-[10px] font-medium text-sm hover:bg-[#04d182] transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Thêm kết nối
@@ -421,7 +421,7 @@ export default function ZbsCampaignList() {
           </div>
           <button 
             onClick={() => setShowCampaignWizard(true)}
-            className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white rounded-lg font-medium text-sm hover:bg-blue-700 transition-colors shadow-sm"
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#3e79f7] text-white rounded-[10px] font-medium text-sm hover:bg-[#699dff] transition-colors shadow-sm"
           >
             <Plus className="w-4 h-4" />
             Tạo chiến dịch
@@ -437,14 +437,14 @@ export default function ZbsCampaignList() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Tìm kiếm theo tên hoặc tiêu đề..."
-              className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              className="w-full pl-10 pr-4 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] transition-colors"
             />
           </div>
           <div className="relative">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="appearance-none pl-4 pr-10 py-2.5 border border-gray-200 rounded-xl text-sm font-medium text-gray-700 bg-white focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className="appearance-none pl-4 pr-10 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-700 bg-white focus:ring-2 focus:ring-[#3e79f7] cursor-pointer"
             >
               <option value="all">Tất cả ({campaigns.length})</option>
               <option value="draft">Nháp</option>
@@ -455,16 +455,16 @@ export default function ZbsCampaignList() {
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
           </div>
-          <button className="p-2.5 border border-gray-200 rounded-xl text-gray-500 hover:bg-gray-50 transition-colors">
+          <button className="p-2.5 border border-[#e6ebf1] rounded-[10px] text-gray-500 hover:bg-gray-50 transition-colors">
             <Filter className="w-4 h-4" />
           </button>
         </div>
 
         {/* Campaign Table */}
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+        <div className="bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
+              <tr className="bg-gray-50 border-b border-[#e6ebf1]">
                 <th className="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">
                   Tên chiến dịch
                 </th>
@@ -536,7 +536,7 @@ export default function ZbsCampaignList() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full ${
                         campaign.status === 'sent' ? 'bg-green-100 text-green-700' :
-                        campaign.status === 'running' ? 'bg-blue-100 text-blue-700' :
+                        campaign.status === 'running' ? 'bg-blue-100 text-[#3e79f7]' :
                         campaign.status === 'draft' ? 'bg-gray-100 text-gray-700' :
                         campaign.status === 'scheduled' ? 'bg-purple-100 text-purple-700' :
                         campaign.status === 'paused' ? 'bg-yellow-100 text-yellow-700' :
@@ -552,7 +552,7 @@ export default function ZbsCampaignList() {
                       <div className="relative">
                         <button
                           onClick={() => setOpenMenuId(openMenuId === campaign.id ? null : campaign.id)}
-                          className="p-1.5 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-1.5 hover:bg-gray-100 rounded-[10px] transition-colors"
                         >
                           <MoreHorizontal className="w-4 h-4 text-gray-500" />
                         </button>
@@ -562,7 +562,7 @@ export default function ZbsCampaignList() {
                               className="fixed inset-0 z-10"
                               onClick={() => setOpenMenuId(null)}
                             />
-                            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg z-20 py-1">
+                            <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-20 py-1">
                               {getActions(campaign).map((action, index) => (
                                 <button 
                                   key={index}
@@ -654,7 +654,7 @@ export default function ZbsCampaignList() {
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('delete', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-red-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -672,13 +672,13 @@ export default function ZbsCampaignList() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('delete', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={handleDelete}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
               >
                 Xóa chiến dịch
               </button>
@@ -694,7 +694,7 @@ export default function ZbsCampaignList() {
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('pause', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-orange-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-orange-600" />
@@ -712,13 +712,13 @@ export default function ZbsCampaignList() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('pause', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={handlePause}
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 transition-colors"
               >
                 Tạm dừng
               </button>
@@ -745,7 +745,7 @@ export default function ZbsCampaignList() {
             className="fixed inset-0 bg-black/50" 
             onClick={() => toggleModal('cancel', false)}
           />
-          <div className="relative bg-white rounded-xl shadow-xl w-full max-w-md mx-4 p-6">
+          <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-red-100 rounded-full">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
@@ -763,13 +763,13 @@ export default function ZbsCampaignList() {
             <div className="flex gap-3 justify-end">
               <button
                 onClick={() => toggleModal('cancel', false)}
-                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 Đóng
               </button>
               <button
                 onClick={handleCancelSchedule}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
               >
                 Hủy lịch gửi
               </button>

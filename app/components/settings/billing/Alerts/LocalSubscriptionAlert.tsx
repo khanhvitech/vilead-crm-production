@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React from 'react'
 import { AlertTriangle, Clock } from 'lucide-react'
@@ -27,7 +27,7 @@ export const LocalSubscriptionAlert: React.FC<LocalSubscriptionAlertProps> = ({ 
         </div>
         <button 
           onClick={onRenew}
-          className="bg-[#b91c1c] hover:bg-[#991b1b] text-white px-6 py-2.5 rounded-lg text-sm font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 z-10"
+          className="bg-[#b91c1c] hover:bg-[#991b1b] text-white px-6 py-2.5 rounded-[10px] text-sm font-bold whitespace-nowrap shadow-md hover:shadow-lg transition-all active:scale-95 z-10"
         >
           Gia hạn ngay
         </button>
@@ -37,9 +37,9 @@ export const LocalSubscriptionAlert: React.FC<LocalSubscriptionAlertProps> = ({ 
 
   if (status === 'pending_approval') {
     return (
-      <div className="bg-blue-50 border-l-4 border-blue-600 rounded-r-lg p-5 mb-6 shadow-sm relative overflow-hidden group hover:bg-blue-100 transition-colors">
+      <div className="bg-blue-50 border-l-4 border-[#3e79f7] rounded-r-lg p-5 mb-6 shadow-sm relative overflow-hidden group hover:bg-blue-100 transition-colors">
         <div className="flex items-center gap-4 relative z-10">
-          <div className="bg-blue-100 text-blue-600 p-2.5 rounded-full shrink-0 shadow-sm border border-blue-200">
+          <div className="bg-blue-100 text-blue-600 p-2.5 rounded-full shrink-0 shadow-sm border border-[#c7d9fd]">
             <Clock className="w-6 h-6 animate-pulse" />
           </div>
           <div>

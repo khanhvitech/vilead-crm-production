@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, Search, AlertTriangle, Check, User } from 'lucide-react'
@@ -48,23 +48,23 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-lg overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-[#e6ebf1]">
           <div>
             <h3 className="text-base font-bold text-gray-900">🧪 Gửi thử Kịch bản</h3>
             <p className="text-xs text-gray-500 mt-0.5">Kiểm tra kịch bản với khách hàng thật</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors">
             <X size={18} className="text-gray-500" />
           </button>
         </div>
 
         <div className="px-6 py-5 space-y-5">
           {/* Target sequence info */}
-          <div className="flex items-center gap-3 p-3.5 bg-blue-50 rounded-xl border border-blue-100">
-            <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center text-white text-sm font-bold shrink-0">KB</div>
+          <div className="flex items-center gap-3 p-3.5 bg-blue-50 rounded-[10px] border border-blue-100">
+            <div className="w-8 h-8 bg-[#3e79f7] rounded-[10px] flex items-center justify-center text-white text-sm font-bold shrink-0">KB</div>
             <div className="min-w-0">
               <p className="text-xs text-blue-600 font-semibold">Kịch bản</p>
               <p className="text-sm font-bold text-blue-900 truncate">{sequenceName}</p>
@@ -81,12 +81,12 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
                 value={query}
                 onChange={e => setQuery(e.target.value)}
                 placeholder="Tìm kiếm tên hoặc số điện thoại..."
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               />
             </div>
 
             {/* Customer list */}
-            <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden max-h-44 overflow-y-auto">
+            <div className="mt-2 border border-[#e6ebf1] rounded-[10px] overflow-hidden max-h-44 overflow-y-auto">
               {filtered.length === 0 ? (
                 <div className="py-8 text-center text-sm text-gray-400">Không tìm thấy khách hàng</div>
               ) : (
@@ -100,7 +100,7 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
                     }`}
                   >
                     <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-                      selected?.id === c.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                      selected?.id === c.id ? 'bg-[#3e79f7] text-white' : 'bg-gray-200 text-gray-600'
                     }`}>
                       {selected?.id === c.id
                         ? <Check size={14} />
@@ -119,8 +119,8 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
 
           {/* Selected customer summary */}
           {selected && (
-            <div className="flex items-center gap-3 p-3.5 bg-green-50 rounded-xl border border-green-100">
-              <div className="w-9 h-9 bg-green-500 rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
+            <div className="flex items-center gap-3 p-3.5 bg-green-50 rounded-[10px] border border-green-100">
+              <div className="w-9 h-9 bg-[#2dc56a] rounded-full flex items-center justify-center text-white text-sm font-bold shrink-0">
                 {selected.name[0].toUpperCase()}
               </div>
               <div>
@@ -132,7 +132,7 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
           )}
 
           {/* Warning */}
-          <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-xl border border-amber-200">
+          <div className="flex items-start gap-3 p-4 bg-amber-50 rounded-[10px] border border-amber-200">
             <AlertTriangle size={16} className="text-amber-500 shrink-0 mt-0.5" />
             <div className="text-sm text-amber-800 space-y-1">
               <p className="font-semibold">Lưu ý quan trọng</p>
@@ -148,7 +148,7 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
           <label className="flex items-center gap-3 cursor-pointer select-none">
             <div
               onClick={() => setConfirmed(c => !c)}
-              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0 ${confirmed ? 'border-blue-600 bg-blue-600' : 'border-gray-300'}`}
+              className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer shrink-0 ${confirmed ? 'border-[#3e79f7] bg-[#3e79f7]' : 'border-[#e6ebf1]'}`}
             >
               {confirmed && <Check size={12} color="white" />}
             </div>
@@ -159,11 +159,11 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-200">
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[#e6ebf1]">
           <button
             type="button"
             onClick={onClose}
-            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+            className="px-5 py-2.5 text-sm font-semibold text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             Hủy
           </button>
@@ -171,7 +171,7 @@ export default function TestModeModal({ sequenceName, onClose, onTest }: Props) 
             type="button"
             onClick={handleSend}
             disabled={!selected || !confirmed || sent}
-            className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+            className="flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
           >
             {sent ? (
               <>

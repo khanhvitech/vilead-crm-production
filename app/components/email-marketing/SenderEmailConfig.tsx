@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useCallback } from 'react'
 import { 
@@ -36,7 +36,7 @@ function BrevoStatusBadge({ status }: { status: BrevoSenderStatus }) {
     },
     unverified: { 
       label: 'Chưa xác thực', 
-      className: 'bg-gray-100 text-gray-600 border-gray-200' 
+      className: 'bg-gray-100 text-gray-600 border-[#e6ebf1]' 
     }
   }
 
@@ -54,12 +54,12 @@ function ViLeadStatusBadge({ status }: { status: ViLeadSenderStatus }) {
   const statusConfig = {
     active: { 
       label: 'Hoạt động', 
-      className: 'bg-blue-100 text-blue-800 border-blue-200',
+      className: 'bg-blue-100 text-blue-800 border-[#c7d9fd]',
       icon: CheckCircle
     },
     disabled: { 
       label: 'Đã tắt', 
-      className: 'bg-gray-100 text-gray-600 border-gray-200',
+      className: 'bg-gray-100 text-gray-600 border-[#e6ebf1]',
       icon: Ban
     }
   }
@@ -235,8 +235,8 @@ export default function SenderEmailConfig() {
     <div className="space-y-6">
       {/* Toast Notification */}
       {toast.show && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-slide-in ${
-          toast.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-[10px] shadow-lg flex items-center space-x-2 animate-slide-in ${
+          toast.type === 'success' ? 'bg-[#2dc56a] text-white' : 'bg-red-500 text-white'
         }`}>
           {toast.type === 'success' ? (
             <CheckCircle className="w-5 h-5" />
@@ -258,9 +258,9 @@ export default function SenderEmailConfig() {
       />
 
       {/* SECTION 2: Sender Email Configuration */}
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm">
         {/* Section Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
+        <div className="px-6 py-4 border-b border-[#e6ebf1]">
           <h3 className="text-lg font-semibold text-gray-900">Cấu hình email gửi</h3>
           <p className="text-sm text-gray-500 mt-1">
             Quản lý danh sách sender để gửi chiến dịch email
@@ -312,14 +312,14 @@ export default function SenderEmailConfig() {
                     placeholder="Tìm email sender..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent w-72"
+                    className="pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent w-72"
                   />
                 </div>
                 {/* Status Filter */}
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+                  className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] bg-white"
                 >
                   {statusOptions.map(option => (
                     <option key={option.value} value={option.value}>
@@ -334,7 +334,7 @@ export default function SenderEmailConfig() {
                 <button
                   onClick={handleSyncFromBrevo}
                   disabled={syncing}
-                  className="flex items-center space-x-2 px-4 py-2 border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+                  className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
                   <RefreshCw className={`w-4 h-4 ${syncing ? 'animate-spin' : ''}`} />
                   <span>{syncing ? 'Đang cập nhật...' : 'Cập nhật từ Brevo'}</span>
@@ -342,7 +342,7 @@ export default function SenderEmailConfig() {
                 {/* Add Sender button */}
                 <button
                   onClick={() => toggleModal('addSender', true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Thêm Sender mới</span>
@@ -351,7 +351,7 @@ export default function SenderEmailConfig() {
             </div>
 
             {/* Info Alert */}
-            {/* <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-lg">
+            {/* <div className="flex items-start gap-3 p-3 bg-blue-50 border border-blue-100 rounded-[10px]">
               <AlertTriangle className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
               <div className="text-sm text-blue-800">
                 <p>
@@ -361,7 +361,7 @@ export default function SenderEmailConfig() {
                   href="https://app.brevo.com/senders/" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center text-blue-600 hover:text-blue-700 font-medium mt-1"
+                  className="inline-flex items-center text-blue-600 hover:text-[#3e79f7] font-medium mt-1"
                 >
                   Quản lý sender trên Brevo
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />
@@ -370,7 +370,7 @@ export default function SenderEmailConfig() {
             </div> */}
 
             {/* Sender Table */}
-            <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
@@ -429,12 +429,12 @@ export default function SenderEmailConfig() {
                                   e.stopPropagation()
                                   setOpenDropdownId(openDropdownId === sender.id ? null : sender.id)
                                 }}
-                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
                               >
                                 <MoreVertical className="w-4 h-4" />
                               </button>
                               {openDropdownId === sender.id && (
-                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-10">
                                   {/* Phân quyền sử dụng */}
                                   {canManagePermission && (
                                     <button
@@ -514,7 +514,7 @@ export default function SenderEmailConfig() {
                     <button
                       onClick={handleSyncFromBrevo}
                       disabled={syncing}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center"
+                      className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium flex items-center"
                     >
                       <RefreshCw className={`w-4 h-4 mr-1 ${syncing ? 'animate-spin' : ''}`} />
                       Đồng bộ từ Brevo
@@ -522,7 +522,7 @@ export default function SenderEmailConfig() {
                     <span className="text-gray-300">|</span>
                     <button
                       onClick={() => toggleModal('addSender', true)}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                      className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium"
                     >
                       + Thêm sender mới
                     </button>

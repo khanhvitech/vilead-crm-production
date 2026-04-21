@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useState, useEffect } from 'react'
 import {
@@ -105,7 +105,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[900px] bg-white p-0 overflow-hidden border-0 rounded-xl">
+      <DialogContent className="sm:max-w-[900px] bg-white p-0 overflow-hidden border-0 rounded-[10px]">
         <DialogHeader className="px-6 py-4 bg-[#1a56db] text-white">
           <DialogTitle className="text-xl text-white font-bold">Thêm đơn hàng mới</DialogTitle>
           <p className="text-sm text-white mt-1 font-medium">Quản lý thông tin thanh toán và chứng từ đơn hàng.</p>
@@ -113,7 +113,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
 
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50/50">
           {/* Left Column: Order Details */}
-          <div className="bg-white rounded-xl p-5 border border-gray-200">
+          <div className="bg-white rounded-[10px] p-5 border border-[#e6ebf1]">
             <div className="flex items-center gap-2 text-gray-900 font-bold mb-6">
               <FileText className="w-5 h-5 text-blue-600" />
               <span className="text-base">Thông tin đơn hàng</span>
@@ -122,7 +122,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
             <div className="space-y-4">
               <div>
                 <Label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-2 block">Chọn khách hàng</Label>
-                <div className="p-3 border border-gray-200 rounded-lg bg-gray-50 text-sm font-semibold text-gray-700">
+                <div className="p-3 border border-[#e6ebf1] rounded-[10px] bg-gray-50 text-sm font-semibold text-gray-700">
                   CÔNG TY TNHH VILEAD (Mặc định)
                 </div>
               </div>
@@ -141,12 +141,12 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                         key={plan.id}
                         disabled={disabled}
                         onClick={() => setSelectedPlan(plan.id)}
-                        className={`px-1 py-2 border-2 rounded-lg text-[13px] font-bold flex flex-col items-center justify-center transition-colors ${
+                        className={`px-1 py-2 border-2 rounded-[10px] text-[13px] font-bold flex flex-col items-center justify-center transition-colors ${
                           selectedPlan === plan.id 
-                            ? 'border-blue-600 bg-blue-50 text-blue-700' 
+                            ? 'border-[#3e79f7] bg-blue-50 text-[#3e79f7]' 
                             : disabled 
                               ? 'border-gray-100 bg-gray-50 text-gray-400 cursor-not-allowed'
-                              : 'border-gray-200 bg-white text-gray-700 hover:border-blue-300'
+                              : 'border-[#e6ebf1] bg-white text-gray-700 hover:border-blue-300'
                         }`}
                       >
                         <span className="truncate w-full text-center">{plan.id}</span>
@@ -165,7 +165,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                     min={1} 
                     value={users} 
                     onChange={(e) => setUsers(parseInt(e.target.value) || 1)}
-                    className="font-bold border-gray-300 text-xs px-2.5 h-10"
+                    className="font-bold border-[#e6ebf1] text-xs px-2.5 h-10"
                   />
                 </div>
                 <div>
@@ -175,7 +175,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                     min={1} 
                     value={months} 
                     onChange={(e) => handleMonthsChange(parseInt(e.target.value) || 1)}
-                    className="font-bold border-gray-300 text-xs px-2.5 h-10"
+                    className="font-bold border-[#e6ebf1] text-xs px-2.5 h-10"
                   />
                 </div>
                 <div>
@@ -185,14 +185,14 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                     value={endDate}
                     min={new Date().toISOString().split('T')[0]} 
                     onChange={(e) => handleEndDateChange(e.target.value)}
-                    className="font-bold border-gray-300 text-xs px-2.5 h-10"
+                    className="font-bold border-[#e6ebf1] text-xs px-2.5 h-10"
                   />
                 </div>
               </div>
               
-              <div className="mt-4 pt-4 border-t border-dashed border-gray-200">
+              <div className="mt-4 pt-4 border-t border-dashed border-[#e6ebf1]">
                 <Label className="text-xs font-bold text-gray-400 uppercase tracking-wide mb-3 block">Thông tin chuyển khoản</Label>
-                <div className="bg-[#f0f5ff] border border-blue-100 rounded-lg p-4 text-[13px] text-gray-700 space-y-2.5">
+                <div className="bg-[#f0f5ff] border border-blue-100 rounded-[10px] p-4 text-[13px] text-gray-700 space-y-2.5">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500 w-28">Ngân hàng:</span>
                     <span className="font-bold text-gray-900 text-right">MB Bank (Ngân hàng Quân Đội)</span>
@@ -205,7 +205,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                     <span className="text-gray-500 w-28">Số tài khoản:</span>
                     <span className="font-extrabold text-[#1a56db] text-base text-right tracking-wider select-all">0969 0909 0909</span>
                   </div>
-                  <div className="flex justify-between items-center pt-2.5 mt-1 border-t border-blue-200/60">
+                  <div className="flex justify-between items-center pt-2.5 mt-1 border-t border-[#c7d9fd]/60">
                     <span className="text-gray-500 w-28">Nội dung CK:</span>
                     <span className="font-extrabold text-orange-600 tracking-wider text-right select-all">VILEAD OR2026 0001</span>
                   </div>
@@ -218,7 +218,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
           <div className="space-y-6">
             
             {/* Total Block */}
-            <div className="bg-[#f0f5ff] rounded-xl p-5 border border-blue-100 flex flex-col justify-center items-center text-center">
+            <div className="bg-[#f0f5ff] rounded-[10px] p-5 border border-blue-100 flex flex-col justify-center items-center text-center">
               <span className="text-xs font-bold text-blue-500 uppercase tracking-wider mb-2">Tổng thanh toán (Đã gồm VAT)</span>
               <div className="text-3xl font-extrabold text-[#1a56db]">
                 {totalAmount.toLocaleString('vi-VN')} VND
@@ -229,13 +229,13 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
             </div>
 
             {/* Upload Area */}
-            <div className="bg-white rounded-xl p-5 border border-gray-200 flex-1 flex flex-col">
+            <div className="bg-white rounded-[10px] p-5 border border-[#e6ebf1] flex-1 flex flex-col">
               <div className="flex items-center gap-2 text-gray-900 font-bold mb-4">
                 <Upload className="w-5 h-5 text-blue-600" />
                 <span className="text-base">Hóa đơn / Chứng từ</span>
               </div>
 
-              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors flex-1">
+              <div className="border-2 border-dashed border-[#e6ebf1] rounded-[10px] p-6 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors flex-1">
                 <div className="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4">
                   <Upload className="w-6 h-6" />
                 </div>
@@ -243,7 +243,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                 <div className="text-xs text-gray-400 mb-4 whitespace-nowrap truncate max-w-full px-2">PDF, PNG, JPG (Tối đa 5MB)</div>
                 
                 <Label htmlFor="upload-receipt" className="cursor-pointer">
-                  <span className="bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold shadow-sm transition-colors">
+                  <span className="bg-white border border-[#e6ebf1] hover:bg-gray-50 text-gray-700 px-4 py-2 rounded-[10px] text-sm font-semibold shadow-sm transition-colors">
                     CHỌN TỆP
                   </span>
                   <input
@@ -257,7 +257,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
               </div>
 
               {selectedFile && (
-                <div className="mt-4 bg-[#f8fafc] border border-gray-200 rounded-lg p-3 flex items-center justify-between">
+                <div className="mt-4 bg-[#f8fafc] border border-[#e6ebf1] rounded-[10px] p-3 flex items-center justify-between">
                   <div className="flex items-center gap-3 overflow-hidden">
                     <div className="w-10 h-10 bg-white rounded flex border items-center justify-center shrink-0">
                       <CheckCircle2 className="w-5 h-5 text-green-500" />
@@ -267,7 +267,7 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
                       <div className="text-[11px] text-gray-500">{(selectedFile.size / 1024 / 1024).toFixed(2)} MB • Hoàn thành</div>
                     </div>
                   </div>
-                  <button onClick={clearFile} className="p-2 hover:bg-red-50 text-red-500 rounded-lg transition-colors ml-2">
+                  <button onClick={clearFile} className="p-2 hover:bg-red-50 text-red-500 rounded-[10px] transition-colors ml-2">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
@@ -277,8 +277,8 @@ export const PaymentOrderModal: React.FC<PaymentOrderModalProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end gap-3 sm:justify-end">
-          <Button variant="outline" onClick={onClose} className="font-semibold px-6 border-gray-300">
+        <DialogFooter className="px-6 py-4 bg-gray-50 border-t border-[#e6ebf1] flex justify-end gap-3 sm:justify-end">
+          <Button variant="outline" onClick={onClose} className="font-semibold px-6 border-[#e6ebf1]">
             Hủy
           </Button>
           <Button 

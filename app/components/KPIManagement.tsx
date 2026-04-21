@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useRef } from 'react'
 import { 
@@ -2088,7 +2088,7 @@ export default function KPIManagement() {
       case 'critical': return 'bg-red-500'
       case 'high': return 'bg-orange-500'
       case 'medium': return 'bg-yellow-500'
-      case 'low': return 'bg-green-500'
+      case 'low': return 'bg-[#2dc56a]'
       default: return 'bg-gray-500'
     }
   }
@@ -2213,7 +2213,7 @@ export default function KPIManagement() {
 
       {/* Tabs */}
       {false && (
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[#e6ebf1]">
         <nav className="flex space-x-8">
           {[
             // { id: 'overview', label: 'Tổng quan', icon: BarChart3 },
@@ -2229,7 +2229,7 @@ export default function KPIManagement() {
                 className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                 }`}
               >
                 <Icon className="w-4 h-4" />
@@ -2246,7 +2246,7 @@ export default function KPIManagement() {
         <div className="space-y-6">
           {/* Metrics Cards */}
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Tổng KPIs</p>
@@ -2256,7 +2256,7 @@ export default function KPIManagement() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Đang hoạt động</p>
@@ -2266,7 +2266,7 @@ export default function KPIManagement() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Đã hoàn thành</p>
@@ -2276,7 +2276,7 @@ export default function KPIManagement() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Tiến độ TB</p>
@@ -2286,7 +2286,7 @@ export default function KPIManagement() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Cần chú ý</p>
@@ -2296,7 +2296,7 @@ export default function KPIManagement() {
               </div>
             </div>
 
-            <div className="bg-white p-4 rounded-lg shadow border">
+            <div className="bg-white p-4 rounded-[10px] shadow border">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-medium text-gray-600">Quá hạn</p>
@@ -2308,14 +2308,14 @@ export default function KPIManagement() {
           </div>
 
           {/* Quick KPI Status */}
-          <div className="bg-white rounded-lg shadow border">
+          <div className="bg-white rounded-[10px] shadow border">
             <div className="p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Trạng thái KPI quan trọng</h3>
               <div className="space-y-4">
                 {kpiTargets.filter(k => k.priority === 'critical' || k.priority === 'high').slice(0, 3).map(kpi => (
-                  <div key={kpi.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div key={kpi.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-[10px]">
                     <div className="flex items-center space-x-4">
-                      <div className={`p-2 rounded-lg ${getCategoryColor(kpi.category)}`}>
+                      <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)}`}>
                         {getCategoryIcon(kpi.category)}
                       </div>
                       <div>
@@ -2334,7 +2334,7 @@ export default function KPIManagement() {
                         <div className="bg-gray-200 rounded-full h-2">
                           <div 
                             className={`h-2 rounded-full ${
-                              kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                              kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                               kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                               kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                             }`}
@@ -2355,7 +2355,7 @@ export default function KPIManagement() {
       {/* Always show targets content */}
       <div className="space-y-6">
           {/* Sub-tabs */}
-          <div className="border-b border-gray-200">
+          <div className="border-b border-[#e6ebf1]">
             <nav className="flex space-x-8">
               {[
                 { id: 'individual', label: 'Cá nhân', icon: User },
@@ -2371,7 +2371,7 @@ export default function KPIManagement() {
                     className={`flex items-center space-x-2 py-2 px-1 border-b-2 font-medium text-sm ${
                       activeTargetTab === tab.id
                         ? 'border-blue-500 text-blue-600'
-                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                     }`}
                   >
                     <Icon className="w-4 h-4" />
@@ -2384,10 +2384,10 @@ export default function KPIManagement() {
 
           {/* Company Level Tab */}
           {activeTargetTab === 'company' && (
-            <div className="bg-white rounded-lg shadow border">
+            <div className="bg-white rounded-[10px] shadow border">
               <div className="p-6">
                 {/* Filters for Company */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex-1 min-w-64">
                       <div className="relative">
@@ -2397,7 +2397,7 @@ export default function KPIManagement() {
                           placeholder="Tìm kiếm KPI công ty..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -2405,7 +2405,7 @@ export default function KPIManagement() {
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả danh mục</option>
                       <option value="revenue">Doanh thu</option>
@@ -2418,7 +2418,7 @@ export default function KPIManagement() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
                       <option value="active">Đang hoạt động</option>
@@ -2430,7 +2430,7 @@ export default function KPIManagement() {
                     <select
                       value={filterMonth}
                       onChange={(e) => setFilterMonth(Number(e.target.value))}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value={0}>Chọn tháng</option>
                       <option value={1}>Tháng 1</option>
@@ -2450,7 +2450,7 @@ export default function KPIManagement() {
                     <select
                       value={filterYear}
                       onChange={(e) => setFilterYear(Number(e.target.value))}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
                         <option key={year} value={year}>Năm {year}</option>
@@ -2459,7 +2459,7 @@ export default function KPIManagement() {
 
                     <button
                       onClick={resetFilters}
-                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center space-x-2"
+                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
@@ -2468,7 +2468,7 @@ export default function KPIManagement() {
                     {/* Settings Dropdown for Company Tab */}
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <button className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center space-x-2">
+                        <button className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2">
                           <Settings className="w-4 h-4" />
                           <span>Cài đặt</span>
                           <ChevronDown className="w-4 h-4" />
@@ -2549,7 +2549,7 @@ export default function KPIManagement() {
                         <tr key={kpi.id} className="hover:bg-gray-50">
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
-                              <div className={`p-2 rounded-lg ${getCategoryColor(kpi.category)} mr-3`}>
+                              <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                 {getCategoryIcon(kpi.category)}
                               </div>
                               <div>
@@ -2590,7 +2590,7 @@ export default function KPIManagement() {
                               <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
                                 <div 
                                   className={`h-2 rounded-full ${
-                                    kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                                    kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                                     kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                                     kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                   }`}
@@ -2619,7 +2619,7 @@ export default function KPIManagement() {
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
-                                <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                <button className="p-2 hover:bg-gray-100 rounded-[10px]">
                                   <MoreVertical className="w-4 h-4 text-gray-500" />
                                 </button>
                               </DropdownMenuTrigger>
@@ -2661,10 +2661,10 @@ export default function KPIManagement() {
 
           {/* Department Level Tab */}
           {activeTargetTab === 'department' && (
-            <div className="bg-white rounded-lg shadow border">
+            <div className="bg-white rounded-[10px] shadow border">
               <div className="p-6">
                 {/* Filters for Department */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex-1 min-w-64">
                       <div className="relative">
@@ -2674,7 +2674,7 @@ export default function KPIManagement() {
                           placeholder="Tìm kiếm KPI phòng ban..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -2682,7 +2682,7 @@ export default function KPIManagement() {
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả danh mục</option>
                       <option value="revenue">Doanh thu</option>
@@ -2695,7 +2695,7 @@ export default function KPIManagement() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
                       <option value="active">Đang hoạt động</option>
@@ -2709,7 +2709,7 @@ export default function KPIManagement() {
                       placeholder="Từ ngày"
                       value={startDateFilter}
                       onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <input
@@ -2717,12 +2717,12 @@ export default function KPIManagement() {
                       placeholder="Đến ngày"
                       value={endDateFilter}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <button
                       onClick={resetFilters}
-                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center space-x-2"
+                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
@@ -2731,7 +2731,7 @@ export default function KPIManagement() {
                 </div>
 
                 {/* Grouped by Department View */}
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-[10px] overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -2826,7 +2826,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4"></td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center pl-4">
-                                      <div className={`p-2 rounded-lg ${getCategoryColor(kpi.category)} mr-3`}>
+                                      <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                         {getCategoryIcon(kpi.category)}
                                       </div>
                                       <div>
@@ -2866,7 +2866,7 @@ export default function KPIManagement() {
                                       <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
                                         <div 
                                           className={`h-2 rounded-full ${
-                                            kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                                            kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                                             kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                                             kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                           }`}
@@ -2895,7 +2895,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                        <button className="p-2 hover:bg-gray-100 rounded-[10px]">
                                           <MoreVertical className="w-4 h-4 text-gray-500" />
                                         </button>
                                       </DropdownMenuTrigger>
@@ -2942,10 +2942,10 @@ export default function KPIManagement() {
 
           {/* Team Level Tab */}
           {activeTargetTab === 'team' && (
-            <div className="bg-white rounded-lg shadow border">
+            <div className="bg-white rounded-[10px] shadow border">
               <div className="p-6">
                 {/* Filters for Team */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex-1 min-w-64">
                       <div className="relative">
@@ -2955,7 +2955,7 @@ export default function KPIManagement() {
                           placeholder="Tìm kiếm KPI team..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -2963,7 +2963,7 @@ export default function KPIManagement() {
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả danh mục</option>
                       <option value="revenue">Doanh thu</option>
@@ -2976,7 +2976,7 @@ export default function KPIManagement() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
                       <option value="active">Đang hoạt động</option>
@@ -2990,7 +2990,7 @@ export default function KPIManagement() {
                       placeholder="Từ ngày"
                       value={startDateFilter}
                       onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <input
@@ -2998,12 +2998,12 @@ export default function KPIManagement() {
                       placeholder="Đến ngày"
                       value={endDateFilter}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <button
                       onClick={resetFilters}
-                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center space-x-2"
+                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
@@ -3012,7 +3012,7 @@ export default function KPIManagement() {
                 </div>
 
                 {/* Grouped by Team View */}
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-[10px] overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -3107,7 +3107,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4"></td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center pl-4">
-                                      <div className={`p-2 rounded-lg ${getCategoryColor(kpi.category)} mr-3`}>
+                                      <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                         {getCategoryIcon(kpi.category)}
                                       </div>
                                       <div>
@@ -3147,7 +3147,7 @@ export default function KPIManagement() {
                                       <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
                                         <div 
                                           className={`h-2 rounded-full ${
-                                            kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                                            kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                                             kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                                             kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                           }`}
@@ -3176,7 +3176,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                        <button className="p-2 hover:bg-gray-100 rounded-[10px]">
                                           <MoreVertical className="w-4 h-4 text-gray-500" />
                                         </button>
                                       </DropdownMenuTrigger>
@@ -3223,10 +3223,10 @@ export default function KPIManagement() {
 
           {/* Individual Level Tab - Grouped by Employee */}
           {activeTargetTab === 'individual' && (
-            <div className="bg-white rounded-lg shadow border">
+            <div className="bg-white rounded-[10px] shadow border">
               <div className="p-6">
                 {/* Filters for Individual */}
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+                <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
                     <div className="flex-1 min-w-64">
                       <div className="relative">
@@ -3236,7 +3236,7 @@ export default function KPIManagement() {
                           placeholder="Tìm kiếm KPI cá nhân..."
                           value={searchTerm}
                           onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -3244,7 +3244,7 @@ export default function KPIManagement() {
                     <select
                       value={categoryFilter}
                       onChange={(e) => setCategoryFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả danh mục</option>
                       <option value="revenue">Doanh thu</option>
@@ -3257,7 +3257,7 @@ export default function KPIManagement() {
                     <select
                       value={statusFilter}
                       onChange={(e) => setStatusFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
                       <option value="active">Đang hoạt động</option>
@@ -3271,7 +3271,7 @@ export default function KPIManagement() {
                       placeholder="Từ ngày"
                       value={startDateFilter}
                       onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <input
@@ -3279,12 +3279,12 @@ export default function KPIManagement() {
                       placeholder="Đến ngày"
                       value={endDateFilter}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     />
 
                     <button
                       onClick={resetFilters}
-                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200 flex items-center space-x-2"
+                      className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
@@ -3292,7 +3292,7 @@ export default function KPIManagement() {
 
                     {<button
                       onClick={() => setShowAddKPIModal(true)}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                      className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] flex items-center space-x-2"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Thêm KPI</span>
@@ -3300,7 +3300,7 @@ export default function KPIManagement() {
                   </div>
                 </div>
                 {/* Grouped by Employee View */}
-                <div className="border rounded-lg overflow-hidden">
+                <div className="border rounded-[10px] overflow-hidden">
                   <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
@@ -3395,7 +3395,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4"></td>
                                   <td className="px-6 py-4 whitespace-nowrap">
                                     <div className="flex items-center pl-4">
-                                      <div className={`p-2 rounded-lg ${getCategoryColor(kpi.category)} mr-3`}>
+                                      <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                         {getCategoryIcon(kpi.category)}
                                       </div>
                                       <div>
@@ -3435,7 +3435,7 @@ export default function KPIManagement() {
                                       <div className="flex-1 bg-gray-200 rounded-full h-2 mr-2">
                                         <div 
                                           className={`h-2 rounded-full ${
-                                            kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                                            kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                                             kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                                             kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                           }`}
@@ -3464,7 +3464,7 @@ export default function KPIManagement() {
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
-                                        <button className="p-2 hover:bg-gray-100 rounded-lg">
+                                        <button className="p-2 hover:bg-gray-100 rounded-[10px]">
                                           <MoreVertical className="w-4 h-4 text-gray-500" />
                                         </button>
                                       </DropdownMenuTrigger>
@@ -3512,11 +3512,11 @@ export default function KPIManagement() {
       {/* Reports Tab */}
       {false && activeTab === 'reports' && (
         <div className="space-y-6">
-          <div className="bg-white p-8 rounded-lg shadow border text-center">
+          <div className="bg-white p-8 rounded-[10px] shadow border text-center">
             <BarChart3 className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Báo cáo KPI</h3>
             <p className="text-gray-600 mb-4">Tính năng báo cáo chi tiết sẽ được phát triển trong phiên bản tiếp theo</p>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <button className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff]">
               Xem báo cáo mẫu
             </button>
           </div>
@@ -3526,11 +3526,11 @@ export default function KPIManagement() {
       {/* Settings Tab */}
       {false && activeTab === 'settings' && (
         <div className="space-y-6">
-          <div className="bg-white p-8 rounded-lg shadow border text-center">
+          <div className="bg-white p-8 rounded-[10px] shadow border text-center">
             <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">Cài đặt KPI</h3>
             <p className="text-gray-600 mb-4">Tính năng cài đặt nâng cao sẽ được phát triển trong phiên bản tiếp theo</p>
-            <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+            <button className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff]">
               Xem cài đặt hiện tại
             </button>
           </div>
@@ -3540,7 +3540,7 @@ export default function KPIManagement() {
       {/* Add KPI Modal */}
       {showAddKPIModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-xl w-full m-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-xl w-full m-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-gray-900">Thêm KPI</h2>
@@ -3562,7 +3562,7 @@ export default function KPIManagement() {
                     type="text"
                     value={newKPI.name}
                     onChange={(e) => setNewKPI({...newKPI, name: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     placeholder="Nhập tên mục tiêu KPI..."
                   />
                 </div>
@@ -3573,7 +3573,7 @@ export default function KPIManagement() {
                   <select
                     value={newKPI.assignedTo[0] || ''}
                     onChange={(e) => setNewKPI({...newKPI, assignedTo: e.target.value ? [e.target.value] : []})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="">Chọn người được giao</option>
                     {organizationStructure.individuals.map((person, idx) => (
@@ -3588,7 +3588,7 @@ export default function KPIManagement() {
                   <select
                     value={newKPI.linkedGroup}
                     onChange={(e) => setNewKPI({...newKPI, linkedGroup: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="">Chọn nhóm liên kết</option>
                     {organizationStructure.teams.map((team) => (
@@ -3616,7 +3616,7 @@ export default function KPIManagement() {
                         category: (e.target.value || 'revenue') as KPITarget['category']
                       })
                     }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="">Chọn loại KPI</option>
                     <option value="revenue">Doanh số</option>
@@ -3633,7 +3633,7 @@ export default function KPIManagement() {
                     type="number"
                     value={newKPI.targetValue || ''}
                     onChange={(e) => setNewKPI({...newKPI, targetValue: Number(e.target.value)})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     placeholder="0"
                   />
                 </div>
@@ -3648,7 +3648,7 @@ export default function KPIManagement() {
                         setKpiYear(Number(e.target.value))
                         setKpiWeek(1)
                       }}
-                      className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     >
                       {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
                         <option key={year} value={year}>Năm {year}</option>
@@ -3660,7 +3660,7 @@ export default function KPIManagement() {
                         setKpiMonth(Number(e.target.value))
                         setKpiWeek(1)
                       }}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     >
                       <option value={0}>Chọn tháng</option>
                       <option value={1}>Tháng 1</option>
@@ -3679,7 +3679,7 @@ export default function KPIManagement() {
                     <select
                       value={kpiWeek}
                       onChange={(e) => setKpiWeek(Number(e.target.value))}
-                      className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       disabled={kpiMonth === 0}
                     >
                       <option value={0}>Theo tháng</option>
@@ -3693,7 +3693,7 @@ export default function KPIManagement() {
                 {/* Người theo dõi (Watchers) */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Người theo dõi</label>
-                  <div className="space-y-2 max-h-32 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                  <div className="space-y-2 max-h-32 overflow-y-auto border border-[#e6ebf1] rounded-[10px] p-3">
                     {organizationStructure.individuals.map((person, index) => (
                       <label key={index} className="flex items-center space-x-2 cursor-pointer">
                         <input
@@ -3706,7 +3706,7 @@ export default function KPIManagement() {
                               setNewKPI({...newKPI, watchers: newKPI.watchers.filter(w => w !== person)})
                             }
                           }}
-                          className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                          className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                         />
                         <span className="text-sm text-gray-700">{person}</span>
                       </label>
@@ -3720,7 +3720,7 @@ export default function KPIManagement() {
                   <select
                     value={newKPI.status}
                     onChange={(e) => setNewKPI({...newKPI, status: e.target.value as typeof newKPI.status})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   >
                     <option value="not_started">Chưa bắt đầu</option>
                     <option value="active">Đang hoạt động</option>
@@ -3736,7 +3736,7 @@ export default function KPIManagement() {
                   <textarea
                     value={newKPI.description}
                     onChange={(e) => setNewKPI({...newKPI, description: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                     rows={3}
                     placeholder="Mô tả chi tiết về KPI..."
                   />
@@ -3747,14 +3747,14 @@ export default function KPIManagement() {
               <div className="flex justify-end space-x-3 mt-6 pt-4 border-t">
                 <button
                   onClick={() => setShowAddKPIModal(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-[10px] hover:bg-gray-200"
                 >
                   Hủy
                 </button>
                 <button
                   onClick={handleAddKPI}
                   disabled={!newKPI.name}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Lưu
                 </button>
@@ -3767,7 +3767,7 @@ export default function KPIManagement() {
       {/* Combined Tree Diagram + Report Modal */}
       {showTreeReportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full m-4 max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-6xl w-full m-4 max-h-[90vh] flex flex-col">
             <div className="p-6 flex flex-col h-full">
               {/* Header with Tabs */}
               <div className="flex items-center justify-between mb-4">
@@ -3824,16 +3824,16 @@ export default function KPIManagement() {
                     </div>
                     <div className="flex items-center space-x-2">
                       <button 
-                        className="p-2 border rounded-lg hover:bg-gray-100"
+                        className="p-2 border rounded-[10px] hover:bg-gray-100"
                         onClick={() => setTreeZoom(prev => Math.min(prev + 10, 150))}
                       >
                         <Plus className="w-4 h-4 text-gray-600" />
                       </button>
-                      <span className="px-3 py-1 bg-gray-100 rounded-lg text-sm font-medium min-w-[3.5rem] text-center">
+                      <span className="px-3 py-1 bg-gray-100 rounded-[10px] text-sm font-medium min-w-[3.5rem] text-center">
                         {treeZoom}%
                       </span>
                       <button 
-                        className="p-2 border rounded-lg hover:bg-gray-100"
+                        className="p-2 border rounded-[10px] hover:bg-gray-100"
                         onClick={() => setTreeZoom(prev => Math.max(prev - 10, 30))}
                       >
                         <span className="text-gray-600 text-sm font-medium">−</span>
@@ -3873,11 +3873,11 @@ export default function KPIManagement() {
                     >
                       {/* Root Node - Quarter Target */}
                       <div className="flex flex-col items-center">
-                        <div className="bg-blue-800 text-white rounded-lg p-4 shadow-lg min-w-[200px] text-center mb-8">
+                        <div className="bg-blue-800 text-white rounded-[10px] p-4 shadow-lg min-w-[200px] text-center mb-8">
                           <h3 className="font-bold text-lg">Chỉ tiêu chi nhánh Q4/2...</h3>
                           <p className="text-sm text-blue-200">Oct 01 - Dec 31 2025</p>
                           <p className="text-2xl font-bold mt-2">17.07%</p>
-                          <div className="w-full bg-blue-600 rounded-full h-2 mt-2">
+                          <div className="w-full bg-[#3e79f7] rounded-full h-2 mt-2">
                             <div className="h-2 bg-white rounded-full" style={{ width: '17%' }} />
                           </div>
                         </div>
@@ -3896,7 +3896,7 @@ export default function KPIManagement() {
                               <div key={companyKPI.id} className="flex flex-col items-center">
                                 {/* Company KPI Card */}
                                 <div 
-                                  className="bg-white rounded-lg shadow border border-gray-200 p-3 min-w-[180px] max-w-[200px] cursor-pointer hover:shadow-md transition-shadow"
+                                  className="bg-white rounded-[10px] shadow border border-[#e6ebf1] p-3 min-w-[180px] max-w-[200px] cursor-pointer hover:shadow-md transition-shadow"
                                   onClick={() => {
                                     setExpandedTreeNodes(prev => 
                                       prev.includes(companyKPI.id) 
@@ -3942,7 +3942,7 @@ export default function KPIManagement() {
                                         return (
                                           <div key={deptKPI.id} className="flex flex-col items-center">
                                             <div 
-                                              className="bg-white rounded-lg shadow border border-gray-200 p-2.5 min-w-[160px] max-w-[180px] cursor-pointer hover:shadow-md transition-shadow"
+                                              className="bg-white rounded-[10px] shadow border border-[#e6ebf1] p-2.5 min-w-[160px] max-w-[180px] cursor-pointer hover:shadow-md transition-shadow"
                                               onClick={(e) => {
                                                 e.stopPropagation()
                                                 setExpandedTreeNodes(prev => 
@@ -3985,7 +3985,7 @@ export default function KPIManagement() {
                                                     const teamProgressColor = teamKPI.progressPercentage >= 50 ? 'bg-green-400' : 'bg-red-400'
                                                     
                                                     return (
-                                                      <div key={teamKPI.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-2 min-w-[140px] max-w-[160px]">
+                                                      <div key={teamKPI.id} className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-2 min-w-[140px] max-w-[160px]">
                                                         <div className="text-xs text-gray-400 mb-1">
                                                           MT cá nhân · okr · 📎
                                                         </div>
@@ -4024,7 +4024,7 @@ export default function KPIManagement() {
                 <div className="flex-1 overflow-auto">
                   {/* Overview Cards */}
                   <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-blue-600 font-medium">Tổng KPI</p>
@@ -4033,7 +4033,7 @@ export default function KPIManagement() {
                         <Target className="w-8 h-8 text-blue-500" />
                       </div>
                     </div>
-                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-green-600 font-medium">Hoàn thành</p>
@@ -4042,7 +4042,7 @@ export default function KPIManagement() {
                         <CheckCircle className="w-8 h-8 text-green-500" />
                       </div>
                     </div>
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-[10px] p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-yellow-600 font-medium">Đang thực hiện</p>
@@ -4051,7 +4051,7 @@ export default function KPIManagement() {
                         <Clock className="w-8 h-8 text-yellow-500" />
                       </div>
                     </div>
-                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                    <div className="bg-red-50 border border-red-200 rounded-[10px] p-4">
                       <div className="flex items-center justify-between">
                         <div>
                           <p className="text-sm text-red-600 font-medium">Cần chú ý</p>
@@ -4065,7 +4065,7 @@ export default function KPIManagement() {
                   {/* Chart Area */}
                   <div className="grid grid-cols-2 gap-6 mb-6">
                     {/* Pie Chart Placeholder */}
-                    <div className="border rounded-lg p-4">
+                    <div className="border rounded-[10px] p-4">
                       <h3 className="font-semibold text-gray-900 mb-4">Phân bổ theo trạng thái</h3>
                       <div className="flex items-center justify-center h-48">
                         <div className="relative w-40 h-40">
@@ -4080,7 +4080,7 @@ export default function KPIManagement() {
                       </div>
                       <div className="flex justify-center space-x-4 mt-4">
                         <div className="flex items-center space-x-1">
-                          <div className="w-3 h-3 bg-green-500 rounded-full" />
+                          <div className="w-3 h-3 bg-[#2dc56a] rounded-full" />
                           <span className="text-xs text-gray-600">Hoàn thành</span>
                         </div>
                         <div className="flex items-center space-x-1">
@@ -4099,7 +4099,7 @@ export default function KPIManagement() {
                     </div>
 
                     {/* Progress Overview */}
-                    <div className="border rounded-lg p-4">
+                    <div className="border rounded-[10px] p-4">
                       <h3 className="font-semibold text-gray-900 mb-4">Tiến độ trung bình theo cấp</h3>
                       <div className="space-y-4">
                         <div>
@@ -4108,7 +4108,7 @@ export default function KPIManagement() {
                             <span className="font-medium">{Math.round(kpiTargets.filter(k => k.assignmentLevel === 'company').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'company').length, 1))}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
-                            <div className="bg-blue-600 h-3 rounded-full" style={{ width: `${Math.round(kpiTargets.filter(k => k.assignmentLevel === 'company').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'company').length, 1))}%` }} />
+                            <div className="bg-[#3e79f7] h-3 rounded-full" style={{ width: `${Math.round(kpiTargets.filter(k => k.assignmentLevel === 'company').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'company').length, 1))}%` }} />
                           </div>
                         </div>
                         <div>
@@ -4117,7 +4117,7 @@ export default function KPIManagement() {
                             <span className="font-medium">{Math.round(kpiTargets.filter(k => k.assignmentLevel === 'department').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'department').length, 1))}%</span>
                           </div>
                           <div className="w-full bg-gray-200 rounded-full h-3">
-                            <div className="bg-green-600 h-3 rounded-full" style={{ width: `${Math.round(kpiTargets.filter(k => k.assignmentLevel === 'department').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'department').length, 1))}%` }} />
+                            <div className="bg-[#2dc56a] h-3 rounded-full" style={{ width: `${Math.round(kpiTargets.filter(k => k.assignmentLevel === 'department').reduce((sum, k) => sum + k.progressPercentage, 0) / Math.max(kpiTargets.filter(k => k.assignmentLevel === 'department').length, 1))}%` }} />
                           </div>
                         </div>
                         <div>
@@ -4143,7 +4143,7 @@ export default function KPIManagement() {
                   </div>
 
                   {/* Performance Table */}
-                  <div className="border rounded-lg overflow-hidden">
+                  <div className="border rounded-[10px] overflow-hidden">
                     <div className="bg-gray-50 px-4 py-3">
                       <h3 className="font-semibold text-gray-900">Chi tiết hiệu suất KPI</h3>
                     </div>
@@ -4167,7 +4167,7 @@ export default function KPIManagement() {
                               </td>
                               <td className="px-4 py-3">
                                 <span className={`px-2 py-1 text-xs rounded-full ${
-                                  kpi.assignmentLevel === 'company' ? 'bg-blue-100 text-blue-700' :
+                                  kpi.assignmentLevel === 'company' ? 'bg-blue-100 text-[#3e79f7]' :
                                   kpi.assignmentLevel === 'department' ? 'bg-green-100 text-green-700' :
                                   kpi.assignmentLevel === 'team' ? 'bg-orange-100 text-orange-700' :
                                   'bg-purple-100 text-purple-700'
@@ -4183,7 +4183,7 @@ export default function KPIManagement() {
                                   <div className="w-16 bg-gray-200 rounded-full h-2">
                                     <div 
                                       className={`h-2 rounded-full ${
-                                        kpi.progressPercentage >= 100 ? 'bg-green-500' :
+                                        kpi.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
                                         kpi.progressPercentage >= 80 ? 'bg-blue-500' :
                                         kpi.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
                                       }`}
@@ -4206,12 +4206,12 @@ export default function KPIManagement() {
               <div className="flex justify-end mt-6 pt-4 border-t space-x-3">
                 <button
                   onClick={() => setShowTreeReportModal(false)}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200"
                 >
                   Đóng
                 </button>
                 {treeReportTab === 'report' && (
-                  <button className="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 flex items-center space-x-2">
+                  <button className="px-4 py-2 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 flex items-center space-x-2">
                     <Download className="w-4 h-4" />
                     <span>Xuất báo cáo</span>
                   </button>
@@ -4225,7 +4225,7 @@ export default function KPIManagement() {
       {/* Detail Modal */}
       {showDetailModal && selectedKPIForDetail && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full m-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-6xl w-full m-4 max-h-[90vh] overflow-y-auto">
             <div className="p-6">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
@@ -4278,7 +4278,7 @@ export default function KPIManagement() {
 
               {/* KPI con - Tree List with Hierarchy */}
               <div className="mb-6">
-                <div className="border rounded-lg overflow-hidden max-h-[400px] overflow-y-auto">
+                <div className="border rounded-[10px] overflow-hidden max-h-[400px] overflow-y-auto">
                   {selectedKPIForDetail.childKPIs && selectedKPIForDetail.childKPIs.length > 0 ? (
                     <div>
                       {/* Render hierarchical KPI tree */}
@@ -4430,7 +4430,7 @@ export default function KPIManagement() {
                                             <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded cursor-pointer">
                                               {indKPI.currentValue}/{indKPI.targetValue} ({indKPI.unit})
                                             </span>
-                                            <div className="hidden group-hover:block absolute right-0 top-6 z-10 bg-white border shadow-lg rounded-lg p-2 text-xs whitespace-nowrap">
+                                            <div className="hidden group-hover:block absolute right-0 top-6 z-10 bg-white border shadow-lg rounded-[10px] p-2 text-xs whitespace-nowrap">
                                               {indKPI.currentValue}/{indKPI.targetValue} ({indKPI.unit})<br/>
                                               {indKPI.progressPercentage.toFixed(2)}%
                                             </div>
@@ -4448,11 +4448,11 @@ export default function KPIManagement() {
                     </div>
                   ) : (
                     /* Task Table for Individual KPI */
-                    <div className="border rounded-lg overflow-hidden">
+                    <div className="border rounded-[10px] overflow-hidden">
                       {/* Header with Create Task button */}
                       <div className="flex items-center justify-between p-4 border-b bg-gradient-to-r from-orange-50 to-orange-100">
                         <div className="flex items-center space-x-3">
-                          <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center">
+                          <div className="w-8 h-8 bg-orange-500 rounded-[10px] flex items-center justify-center">
                             <CheckSquare className="w-4 h-4 text-white" />
                           </div>
                           <div>
@@ -4460,7 +4460,7 @@ export default function KPIManagement() {
                             <span className="text-xs text-gray-500 ml-2">({kpiTasks.length} công việc)</span>
                           </div>
                         </div>
-                        <button className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 text-sm font-medium shadow-sm">
+                        <button className="flex items-center space-x-2 px-4 py-2 bg-orange-500 text-white rounded-[10px] hover:bg-orange-600 text-sm font-medium shadow-sm">
                           <Plus className="w-4 h-4" />
                           <span>Tạo công việc</span>
                         </button>
@@ -4472,7 +4472,7 @@ export default function KPIManagement() {
                           <thead className="bg-gray-50">
                             <tr>
                               {/* <th className="w-8 px-3 py-3">
-                                <input type="checkbox" className="rounded border-gray-300" />
+                                <input type="checkbox" className="rounded border-[#e6ebf1]" />
                               </th> */}
                               <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Công việc</th>
                               <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Phân loại</th>
@@ -4492,7 +4492,7 @@ export default function KPIManagement() {
                               return (
                                 <tr key={task.id} className={`hover:bg-gray-50 ${isOverdue ? 'bg-red-50' : ''}`}>
                                   {/* <td className="px-3 py-3">
-                                    <input type="checkbox" className="rounded border-gray-300" />
+                                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                                   </td> */}
                                   <td className="px-4 py-3">
                                     <div>
@@ -4578,7 +4578,7 @@ export default function KPIManagement() {
                                   <td className="px-4 py-3 relative">
                                     <button 
                                       onClick={() => setOpenTaskDropdownId(openTaskDropdownId === task.id ? null : task.id)}
-                                      className="p-2 hover:bg-gray-100 rounded-lg"
+                                      className="p-2 hover:bg-gray-100 rounded-[10px]"
                                     >
                                       <Settings className="w-4 h-4 text-gray-500" />
                                     </button>
@@ -4590,7 +4590,7 @@ export default function KPIManagement() {
                                           className="fixed inset-0 z-[999]" 
                                           onClick={() => setOpenTaskDropdownId(null)}
                                         />
-                                        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-xl shadow-xl border border-gray-200 z-[1000] py-2 text-left">
+                                        <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] z-[1000] py-2 text-left">
                                           {/* Thông tin Section */}
                                           <div className="px-3 py-1.5">
                                             <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
@@ -4694,7 +4694,7 @@ export default function KPIManagement() {
                     <div key={comment.id} className="space-y-3">
                       {/* Main Comment */}
                       <div className="flex space-x-3">
-                        <div className="w-10 h-10 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <div className="w-10 h-10 bg-[#3e79f7] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                           <span className="text-white font-medium text-sm">{comment.authorName.split(' ').pop()?.charAt(0)}</span>
                         </div>
                         <div className="flex-1">
@@ -4723,7 +4723,7 @@ export default function KPIManagement() {
                             <div className="mt-3 space-y-3 pl-2 border-l-2 border-gray-100">
                               {comment.replies.map((reply) => (
                                 <div key={reply.id} className="flex space-x-3">
-                                  <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
+                                  <div className="w-8 h-8 bg-[#3e79f7] rounded-full flex items-center justify-center overflow-hidden flex-shrink-0">
                                     <span className="text-white font-medium text-xs">{reply.authorName.split(' ').pop()?.charAt(0)}</span>
                                   </div>
                                   <div className="flex-1">
@@ -4735,7 +4735,7 @@ export default function KPIManagement() {
                                     {reply.attachments && reply.attachments.length > 0 && (
                                       <div className="mt-2">
                                         {reply.attachments.map((file, idx) => (
-                                          <div key={idx} className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-lg">
+                                          <div key={idx} className="inline-flex items-center space-x-2 px-3 py-2 bg-gray-100 rounded-[10px]">
                                             <div className="w-8 h-8 bg-green-100 rounded flex items-center justify-center">
                                               <FileText className="w-4 h-4 text-green-600" />
                                             </div>
@@ -4766,19 +4766,19 @@ export default function KPIManagement() {
                           
                           {/* Reply Input for this comment */}
                           {replyingToCommentId === comment.id && (
-                            <div className="mt-3 flex items-center space-x-2 bg-gray-50 rounded-lg p-2">
+                            <div className="mt-3 flex items-center space-x-2 bg-gray-50 rounded-[10px] p-2">
                               <input
                                 type="text"
                                 placeholder="Trả lời bình luận này"
                                 value={newReplyText}
                                 onChange={(e) => setNewReplyText(e.target.value)}
-                                className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                                className="flex-1 px-3 py-2 bg-white border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
                               />
-                              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" title="Đính kèm file">
+                              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" title="Đính kèm file">
                                 <Paperclip className="w-4 h-4" />
                               </button>
                               <button 
-                        className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" 
+                        className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" 
                         title="Mention @"
                         onClick={() => {
                           setNewCommentText(prev => prev + '@')
@@ -4788,10 +4788,10 @@ export default function KPIManagement() {
                       >
                         <span className="text-sm font-bold">@</span>
                       </button>
-                              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" title="Emoji">
+                              <button className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" title="Emoji">
                                 <span>😊</span>
                               </button>
-                              <button className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                              <button className="p-2 bg-blue-500 text-white rounded-[10px] hover:bg-[#3e79f7]">
                                 <Send className="w-4 h-4" />
                               </button>
                             </div>
@@ -4805,7 +4805,7 @@ export default function KPIManagement() {
                   ))}
                   
                   {/* Add new comment input - Always visible at bottom */}
-                  <div className="pt-4 border-t bg-gray-50 rounded-lg p-3">
+                  <div className="pt-4 border-t bg-gray-50 rounded-[10px] p-3">
                     <div className="flex items-center space-x-2 relative">
                       <div className="flex-1 relative">
                         <input
@@ -4823,12 +4823,12 @@ export default function KPIManagement() {
                               setShowMentionDropdown(false)
                             }
                           }}
-                          className="w-full px-3 py-2 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                          className="w-full px-3 py-2 bg-white border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
                         />
                         
                         {/* @Mention Dropdown */}
                         {showMentionDropdown && (
-                          <div className="absolute bottom-full mb-2 left-0 w-64 bg-white border rounded-lg shadow-lg z-50 max-h-48 overflow-y-auto">
+                          <div className="absolute bottom-full mb-2 left-0 w-64 bg-white border rounded-[10px] shadow-lg z-50 max-h-48 overflow-y-auto">
                             <div className="p-2 text-xs text-gray-500 border-b">Chọn người để mention</div>
                             {mentionableUsers
                               .filter(user => user.name.toLowerCase().includes(mentionSearch.toLowerCase()))
@@ -4844,7 +4844,7 @@ export default function KPIManagement() {
                                     setShowMentionDropdown(false)
                                   }}
                                 >
-                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-blue-700">
+                                  <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-xs font-medium text-[#3e79f7]">
                                     {user.avatar}
                                   </div>
                                   <span className="text-sm text-gray-700">{user.name}</span>
@@ -4857,11 +4857,11 @@ export default function KPIManagement() {
                         )}
                       </div>
                       
-                      <button className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" title="Đính kèm file">
+                      <button className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" title="Đính kèm file">
                         <Paperclip className="w-4 h-4" />
                       </button>
                       <button 
-                        className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" 
+                        className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" 
                         title="Mention @"
                         onClick={() => {
                           setNewCommentText(prev => prev + '@')
@@ -4873,7 +4873,7 @@ export default function KPIManagement() {
                       </button>
                       <div className="relative">
                         <button 
-                          className="p-2 text-gray-500 hover:text-gray-700 rounded-lg hover:bg-gray-100" 
+                          className="p-2 text-gray-500 hover:text-gray-700 rounded-[10px] hover:bg-gray-100" 
                           title="Emoji"
                           onClick={() => setShowEmojiPicker(!showEmojiPicker)}
                         >
@@ -4882,7 +4882,7 @@ export default function KPIManagement() {
                         
                         {/* Emoji Picker Dropdown */}
                         {showEmojiPicker && (
-                          <div className="absolute bottom-full mb-2 right-0 bg-white border rounded-lg shadow-lg z-50 p-3">
+                          <div className="absolute bottom-full mb-2 right-0 bg-white border rounded-[10px] shadow-lg z-50 p-3">
                             <div className="text-xs text-gray-500 mb-2">Chọn biểu tượng cảm xúc</div>
                             <div className="grid grid-cols-6 gap-1">
                               {commonEmojis.map((emoji, idx) => (
@@ -4901,7 +4901,7 @@ export default function KPIManagement() {
                           </div>
                         )}
                       </div>
-                      <button className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
+                      <button className="p-2 bg-blue-500 text-white rounded-[10px] hover:bg-[#3e79f7]">
                         <Send className="w-4 h-4" />
                       </button>
                     </div>
@@ -4910,21 +4910,21 @@ export default function KPIManagement() {
               ) : (
                 <div>
                   <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-[10px] border">
                       <FileText className="w-4 h-4 text-orange-600" />
                       <span className="text-sm text-gray-700">report_q4_2024.xlsx</span>
                       <button className="text-gray-400 hover:text-red-500">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
-                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-lg border">
+                    <div className="flex items-center space-x-2 px-3 py-2 bg-gray-50 rounded-[10px] border">
                       <FileText className="w-4 h-4 text-orange-600" />
                       <span className="text-sm text-gray-700">kpi_details.pdf</span>
                       <button className="text-gray-400 hover:text-red-500">
                         <X className="w-3 h-3" />
                       </button>
                     </div>
-                    <button className="flex items-center space-x-2 px-3 py-2 border border-dashed border-gray-300 rounded-lg text-gray-500 hover:text-orange-500 hover:border-orange-300">
+                    <button className="flex items-center space-x-2 px-3 py-2 border border-dashed border-[#e6ebf1] rounded-[10px] text-gray-500 hover:text-orange-500 hover:border-orange-300">
                       <Plus className="w-4 h-4" />
                       <span className="text-sm">Thêm tệp</span>
                     </button>
@@ -4939,7 +4939,7 @@ export default function KPIManagement() {
                     setShowDetailModal(false)
                     setSelectedKPIForDetail(null)
                   }}
-                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200"
+                  className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200"
                 >
                   Đóng
                 </button>

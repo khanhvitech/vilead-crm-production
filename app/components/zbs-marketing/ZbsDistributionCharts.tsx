@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { PieChart } from 'lucide-react';
@@ -108,7 +108,7 @@ function ChartLegend({ data }: { data: { name: string; value: number; color: str
 
 function ChartSkeleton() {
   return (
-    <div className="bg-white rounded-xl border p-6 animate-pulse">
+    <div className="bg-white rounded-[10px] border p-6 animate-pulse">
       <div className="h-5 w-40 bg-gray-200 rounded mb-6" />
       <div className="flex justify-center">
         <div className="w-48 h-48 rounded-full bg-gray-200" />
@@ -136,7 +136,7 @@ export function ZbsDistributionCharts({ data, loading = false }: ZbsDistribution
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* By Message Type */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-white rounded-[10px] border p-6">
         <div className="flex items-center gap-2 mb-4">
           <PieChart className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold text-gray-900">Thống kê lịch sử gửi tin theo loại tin</h3>
@@ -148,7 +148,7 @@ export function ZbsDistributionCharts({ data, loading = false }: ZbsDistribution
       </div>
 
       {/* By Template */}
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-white rounded-[10px] border p-6">
         <div className="flex items-center gap-2 mb-4">
           <PieChart className="h-5 w-5 text-blue-600" />
           <h3 className="font-semibold text-gray-900">Thống kê lịch sử gửi tin theo mẫu tin</h3>

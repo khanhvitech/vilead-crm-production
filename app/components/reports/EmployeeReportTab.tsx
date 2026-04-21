@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 import {
@@ -319,7 +319,7 @@ export default function EmployeeReportTab() {
     if (!benchmark) return null
     const diff = Math.abs(value - benchmark.value) / benchmark.value
     if (diff <= 0.05) return <span className="inline-block w-2.5 h-2.5 rounded-full bg-yellow-400 ml-1.5" title="Bằng TB" />
-    if (value > benchmark.value * 1.05) return <span className="inline-block w-2.5 h-2.5 rounded-full bg-green-500 ml-1.5" title="Trên TB" />
+    if (value > benchmark.value * 1.05) return <span className="inline-block w-2.5 h-2.5 rounded-full bg-[#2dc56a] ml-1.5" title="Trên TB" />
     return <span className="inline-block w-2.5 h-2.5 rounded-full bg-red-400 ml-1.5" title="Dưới TB" />
   }
 
@@ -330,14 +330,14 @@ export default function EmployeeReportTab() {
 
   const getTaskStatusBadge = (status: string) => {
     const map: Record<string, string> = {
-      'Chưa làm': 'bg-gray-100 text-gray-700', 'Đang làm': 'bg-blue-100 text-blue-700',
+      'Chưa làm': 'bg-gray-100 text-gray-700', 'Đang làm': 'bg-blue-100 text-[#3e79f7]',
       'Hoàn thành': 'bg-green-100 text-green-700', 'Quá hạn': 'bg-red-100 text-red-700',
     }
     return map[status] || 'bg-gray-100 text-gray-700'
   }
 
   const getKpiBarColor = (pct: number) => {
-    if (pct >= 90) return 'bg-green-500'
+    if (pct >= 90) return 'bg-[#2dc56a]'
     if (pct >= 70) return 'bg-blue-500'
     if (pct >= 50) return 'bg-orange-500'
     return 'bg-red-500'
@@ -367,7 +367,7 @@ export default function EmployeeReportTab() {
         <div className="flex items-center space-x-3">
           <select
             value={timeRange} onChange={e => setTimeRange(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
           >
             <option value="today">Hôm nay</option>
             <option value="yesterday">Hôm qua</option>
@@ -376,13 +376,13 @@ export default function EmployeeReportTab() {
             <option value="this_quarter">Quý này</option>
             <option value="custom">Chọn thời gian</option>
           </select>
-          <select className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+          <select className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
             <option>Phòng Sales</option>
           </select>
           <select
             value={selectedTeamId || ''}
             onChange={e => handleTeamSelect(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
           >
             <option value="">Tất cả Team</option>
             {mockOrg.teams.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
@@ -399,12 +399,12 @@ export default function EmployeeReportTab() {
               const colors: Record<string, string> = {
                 red: 'bg-red-100 text-red-700',
                 green: 'bg-green-100 text-green-700',
-                blue: 'bg-blue-100 text-blue-700',
+                blue: 'bg-blue-100 text-[#3e79f7]',
                 orange: 'bg-orange-100 text-orange-700',
                 purple: 'bg-purple-100 text-purple-700',
                 teal: 'bg-teal-100 text-teal-700',
                 pink: 'bg-pink-100 text-pink-700',
-                indigo: 'bg-indigo-100 text-indigo-700',
+                indigo: 'bg-[#f0f7ff] text-[#3e79f7]',
               }
               return colors[empColors[idx % empColors.length]]
             }
@@ -417,7 +417,7 @@ export default function EmployeeReportTab() {
               <div className="relative" ref={empDropdownRef}>
                 <button
                   onClick={() => setShowEmpDropdown(!showEmpDropdown)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500 flex items-center space-x-2 min-w-[170px] hover:border-blue-400 transition-colors"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] flex items-center space-x-2 min-w-[170px] hover:border-[#699dff] transition-colors"
                 >
                   {selectedEmpObj ? (
                     <>
@@ -441,7 +441,7 @@ export default function EmployeeReportTab() {
                 </button>
 
                 {showEmpDropdown && (
-                  <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 overflow-hidden">
+                  <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg z-50 overflow-hidden">
                     <div className="p-2 border-b border-gray-100">
                       <div className="relative">
                         <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
@@ -450,7 +450,7 @@ export default function EmployeeReportTab() {
                           placeholder="Tìm kiếm"
                           value={employeeSearch}
                           onChange={(e) => setEmployeeSearch(e.target.value)}
-                          className="w-full pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           autoFocus
                         />
                       </div>
@@ -482,7 +482,7 @@ export default function EmployeeReportTab() {
               </div>
             )
           })()}
-          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 rounded-[10px] h-10 px-4 py-[8.5px] bg-green-600 hover:bg-green-700 text-white">
+          <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 rounded-[10px] h-10 px-4 py-[8.5px] bg-[#2dc56a] hover:bg-[#04d182] text-white">
             <Download className="w-4 h-4 mr-2" />
             Xuất Excel
           </button>
@@ -492,7 +492,7 @@ export default function EmployeeReportTab() {
       {/* Summary Cards */}
       <div className={`grid gap-4 ${level === 'employee' ? 'grid-cols-2 lg:grid-cols-3 xl:grid-cols-6' : 'grid-cols-2 lg:grid-cols-5'}`}>
         {currentSummary.map((card: SummaryCard, idx: number) => (
-          <div key={idx} className={`relative rounded-xl px-5 py-4 text-white shadow-lg bg-gradient-to-br ${cardGradients[idx % cardGradients.length]} transition-all hover:shadow-xl hover:scale-[1.02]`}>
+          <div key={idx} className={`relative rounded-[10px] px-5 py-4 text-white shadow-lg bg-gradient-to-br ${cardGradients[idx % cardGradients.length]} transition-all hover:shadow-xl hover:scale-[1.02]`}>
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/60 hover:text-white cursor-help" />
             </div>
@@ -514,7 +514,7 @@ export default function EmployeeReportTab() {
 
       {/* Top Performer Highlight (Team level only) */}
       {level === 'team' && selectedTeamId && teamSummaryData[selectedTeamId] && (
-        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl">
+        <div className="flex items-center gap-3 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-[10px]">
           <Trophy className="w-6 h-6 text-yellow-600" />
           <span className="text-sm font-semibold text-yellow-800">
             Top performer: {teamSummaryData[selectedTeamId].topPerformer} — Tỷ lệ chốt {teamSummaryData[selectedTeamId].comparison[0]?.closeRate}%, KPI {teamSummaryData[selectedTeamId].comparison[0]?.kpiPct}%
@@ -524,7 +524,7 @@ export default function EmployeeReportTab() {
 
       {/* Comparison Table (Department & Team level) */}
       {(level === 'department' || level === 'team') && (
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-100">
             <h3 className="text-lg font-bold text-gray-900">
               {level === 'department' ? 'So sánh Team' : 'So sánh Nhân viên'}
@@ -565,7 +565,7 @@ export default function EmployeeReportTab() {
                       <td className="px-4 py-3 text-center">
                         <button
                           onClick={() => drillDown(row.entityId, row.name, level === 'department' ? 'team' : 'employee')}
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-[#3e79f7] bg-blue-50 rounded-[10px] hover:bg-blue-100 transition-colors"
                         >
                           Xem ▸
                         </button>
@@ -591,7 +591,7 @@ export default function EmployeeReportTab() {
                 { label: 'Tỷ lệ chuyển đổi TB', value: fmtCurrencyFull(empDetail.revenue.avgOrderValue) },
                 { label: 'Tỷ lệ thanh toán', value: `${empDetail.revenue.cancelledOrders} (${empDetail.revenue.cancelledPct}%)` },
               ].map((m, i) => (
-                <div key={i} className="bg-gray-50 rounded-lg p-3">
+                <div key={i} className="bg-gray-50 rounded-[10px] p-3">
                   <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                   <p className="text-xl font-bold text-gray-900">{m.value}</p>
                 </div>
@@ -633,14 +633,14 @@ export default function EmployeeReportTab() {
                 { label: 'Tỷ lệ chốt TB', val: `${empDetail.performance.closeRate}%` },
                 { label: 'Tổng doanh số', val: fmtCurrency(empDetail.performance.revenueClosed) },
               ].map((m, i) => (
-                <div key={i} className="bg-gray-50 rounded-lg p-4">
+                <div key={i} className="bg-gray-50 rounded-[10px] p-4">
                   <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                   <p className="text-xl font-bold text-gray-900">{m.val}</p>
                 </div>
               ))}
             </div>
             <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b-2 border-gray-200"><tr>
+              <thead className="bg-gray-50 border-b-2 border-[#e6ebf1]"><tr>
                 {['STT', 'NGUỒN', 'LEAD ĐƯỢC GIAO', 'ĐƠN CHỐT', 'TỶ LỆ CHỐT', 'DOANH SỐ'].map(h => (
                   <th key={h} className="px-4 py-3 text-left font-bold text-gray-700 uppercase text-xs tracking-wider">{h}</th>
                 ))}
@@ -658,7 +658,7 @@ export default function EmployeeReportTab() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50 border-t-2 border-gray-300">
+                <tr className="bg-gray-50 border-t-2 border-[#e6ebf1]">
                   <td colSpan={4} className="px-4 py-3"></td>
                   <td className="px-4 py-3 font-bold text-gray-700 text-right">Tổng doanh số:</td>
                   <td className="px-4 py-3 font-bold text-blue-600">{fmtCurrencyFull(empDetail.leadSource.reduce((sum: number, s: any) => sum + s.revenue, 0))}</td>
@@ -672,7 +672,7 @@ export default function EmployeeReportTab() {
             <div className="flex items-center justify-center gap-2 mb-4 flex-wrap">
               {empDetail.pipeline.map((s: any, i: number) => (
                 <div key={i} className="flex items-center">
-                  <div className={`px-4 py-2 rounded-lg text-center ${s.dropRate >= 35 ? 'bg-red-50 border-2 border-red-300' : 'bg-blue-50 border border-blue-200'}`}>
+                  <div className={`px-4 py-2 rounded-[10px] text-center ${s.dropRate >= 35 ? 'bg-red-50 border-2 border-red-300' : 'bg-blue-50 border border-[#c7d9fd]'}`}>
                     <p className="text-xs font-medium text-gray-600">{s.stage}</p>
                     <p className="text-lg font-bold text-gray-900">{s.count}</p>
                     {i > 0 && <p className="text-xs text-gray-500">{s.conversionRate}%</p>}
@@ -724,7 +724,7 @@ export default function EmployeeReportTab() {
                 })}
               </tbody>
               <tfoot>
-                <tr className="bg-gray-50 border-t-2 border-gray-300 font-semibold">
+                <tr className="bg-gray-50 border-t-2 border-[#e6ebf1] font-semibold">
                   <td className="px-3 py-2"></td>
                   <td className="px-3 py-2"></td>
                   <td className="px-3 py-2"></td>
@@ -745,7 +745,7 @@ export default function EmployeeReportTab() {
                 { label: 'Khách hàng mới', value: empDetail.customers.newInPeriod },
                 { label: 'GTB / khách hàng', value: fmtCurrency(empDetail.customers.avgOrderValue) },
               ].map((m, i) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
+                <div key={i} className="bg-gray-50 rounded-[10px] p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                     <p className="text-xl font-bold text-gray-900">{m.value}</p>
@@ -764,7 +764,7 @@ export default function EmployeeReportTab() {
                   <tr key={i} className="hover:bg-gray-50">
                     <td className="px-3 py-2 font-medium">{c.name}</td>
                     <td className="px-3 py-2"><span className={`px-2 py-0.5 rounded-full text-xs ${c.type === 'DN' ? 'bg-purple-100 text-purple-700' : 'bg-sky-100 text-sky-700'}`}>{c.type === 'DN' ? 'Doanh nghiệp' : 'Cá nhân'}</span></td>
-                    <td className="px-3 py-2"><span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700">{c.label}</span></td>
+                    <td className="px-3 py-2"><span className="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-[#3e79f7]">{c.label}</span></td>
                     <td className="px-3 py-2">{c.orders}</td>
                     <td className="px-3 py-2 font-medium text-blue-600">{fmtCurrencyFull(c.revenue)}</td>
                     <td className="px-3 py-2 text-gray-500">{c.lastOrder}</td>
@@ -785,7 +785,7 @@ export default function EmployeeReportTab() {
                 { label: 'Quá hạn', value: empDetail.tasksKpi.tasks.filter((t: any) => t.overdueDays > 0 && t.status !== 'Hoàn tất').length },
                 { label: 'Cần ưu tiên', value: empDetail.tasksKpi.tasks.filter((t: any) => t.priority === 'Cao').length },
               ].map((m, i) => (
-                <div key={i} className="bg-gray-50 rounded-xl p-4 flex items-center justify-between">
+                <div key={i} className="bg-gray-50 rounded-[10px] p-4 flex items-center justify-between">
                   <div>
                     <p className="text-xs text-gray-500 mb-1">{m.label}</p>
                     <p className="text-xl font-bold text-gray-900">{m.value}</p>
@@ -873,9 +873,9 @@ export default function EmployeeReportTab() {
       {/* Task Detail Modal */}
       {showTaskDetail && selectedTask && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden mx-4">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
               <div className="flex items-center space-x-3">
                 <h2 className="text-xl font-semibold text-gray-900">{selectedTask.name}</h2>
               </div>
@@ -883,32 +883,32 @@ export default function EmployeeReportTab() {
                 <button className="p-2 text-gray-400 hover:text-blue-600 transition-colors" title="Chỉnh sửa">
                   <PenSquare className="w-5 h-5" />
                 </button>
-                <button onClick={() => { setShowTaskDetail(false); setSelectedTask(null); setTaskDetailTab('overview') }} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+                <button onClick={() => { setShowTaskDetail(false); setSelectedTask(null); setTaskDetailTab('overview') }} className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors">
                   <X className="w-5 h-5 text-gray-500" />
                 </button>
               </div>
             </div>
 
             {/* Tabs */}
-            <div className="border-b border-gray-200">
+            <div className="border-b border-[#e6ebf1]">
               <nav className="-mb-px flex space-x-8 px-6 overflow-x-auto">
                 <button
                   onClick={() => setTaskDetailTab('overview')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'overview' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'overview' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'}`}
                 >
                   <FileText className="w-4 h-4" />
                   <span>Tổng quan</span>
                 </button>
                 <button
                   onClick={() => setTaskDetailTab('reminders')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'reminders' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'reminders' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'}`}
                 >
                   <Bell className="w-4 h-4" />
                   <span>Nhắc nhở</span>
                 </button>
                 <button
                   onClick={() => setTaskDetailTab('history')}
-                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
+                  className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${taskDetailTab === 'history' ? 'border-blue-500 text-blue-600' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'}`}
                 >
                   <History className="w-4 h-4" />
                   <span>Lịch sử</span>
@@ -921,7 +921,7 @@ export default function EmployeeReportTab() {
               {taskDetailTab === 'overview' && (
                 <div className="space-y-6">
                   {/* Status Bar */}
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="bg-gray-50 rounded-[10px] p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-3">
                         <span className={`px-3 py-1 text-sm font-medium rounded-full ${getTaskStatusBadge(selectedTask.status)}`}>{selectedTask.status}</span>
@@ -933,7 +933,7 @@ export default function EmployeeReportTab() {
                         )}
                       </div>
                       {selectedTask.status === 'Chưa làm' && (
-                        <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1">
+                        <button className="px-3 py-1 bg-[#3e79f7] text-white text-sm rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-1">
                           <span>Bắt đầu</span>
                         </button>
                       )}
@@ -1012,7 +1012,7 @@ export default function EmployeeReportTab() {
                   {selectedTask.note && (
                     <div>
                       <label className="text-sm font-medium text-gray-500">Ghi chú nội bộ</label>
-                      <div className="mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-gray-900">
+                      <div className="mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-[10px] text-gray-900">
                         {selectedTask.note}
                       </div>
                     </div>
@@ -1045,7 +1045,7 @@ function DetailSection({ title, icon, sectionKey, expanded, onToggle, children }
   title: string; icon: React.ReactNode; sectionKey: string; expanded: boolean; onToggle: (key: string) => void; children: React.ReactNode
 }) {
   return (
-    <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-[10px] border border-[#e6ebf1] shadow-sm overflow-hidden">
       <button
         onClick={() => onToggle(sectionKey)}
         className="w-full flex items-center justify-between px-6 py-4 hover:bg-gray-50 transition-colors"

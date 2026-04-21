@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { 
@@ -109,7 +109,7 @@ export default function AccountantDashboard() {
           <select
             value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
           >
             <option value="thisWeek">Tuần này</option>
             <option value="thisMonth">Tháng này</option>
@@ -121,7 +121,7 @@ export default function AccountantDashboard() {
 
       {/* Financial Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Tổng doanh thu</p>
@@ -135,7 +135,7 @@ export default function AccountantDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Đã thu</p>
@@ -148,7 +148,7 @@ export default function AccountantDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Chưa thu</p>
@@ -161,7 +161,7 @@ export default function AccountantDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Quá hạn</p>
@@ -178,7 +178,7 @@ export default function AccountantDashboard() {
 
       {/* Payment Performance */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="lg:col-span-2 bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Hiệu suất thu hồi</h3>
           
           <div className="grid grid-cols-3 gap-4 mb-6">
@@ -197,7 +197,7 @@ export default function AccountantDashboard() {
           </div>
 
           {/* Payment Timeline Chart Placeholder */}
-          <div className="h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+          <div className="h-48 bg-gray-50 rounded-[10px] flex items-center justify-center">
             <div className="text-center">
               <BarChart3 className="w-12 h-12 text-gray-400 mx-auto mb-2" />
               <p className="text-gray-500">Biểu đồ doanh thu theo thời gian</p>
@@ -205,7 +205,7 @@ export default function AccountantDashboard() {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Phương thức thanh toán</h3>
           
           <div className="space-y-4">
@@ -218,7 +218,7 @@ export default function AccountantDashboard() {
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-[#3e79f7] h-2 rounded-full transition-all duration-300"
                       style={{ width: `${method.percentage}%` }}
                     ></div>
                   </div>
@@ -228,7 +228,7 @@ export default function AccountantDashboard() {
             ))}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="mt-6 pt-4 border-t border-[#e6ebf1]">
             <div className="flex items-center justify-center">
               <PieChart className="w-8 h-8 text-gray-400 mr-2" />
               <span className="text-sm text-gray-600">Chi tiết phân tích</span>
@@ -240,7 +240,7 @@ export default function AccountantDashboard() {
       {/* Recent Activities */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent Invoices */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Hóa đơn gần đây</h3>
             <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
@@ -250,7 +250,7 @@ export default function AccountantDashboard() {
           
           <div className="space-y-3">
             {recentInvoices.map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                 <div className="flex-1">
                   <div className="flex items-center justify-between">
                     <span className="font-medium text-gray-900">{invoice.number}</span>
@@ -270,7 +270,7 @@ export default function AccountantDashboard() {
         </div>
 
         {/* Financial Tasks */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Công việc cần xử lý</h3>
             <span className="bg-red-100 text-red-800 text-xs font-medium px-2 py-1 rounded-full">
@@ -279,7 +279,7 @@ export default function AccountantDashboard() {
           </div>
           
           <div className="space-y-3">
-            <div className="flex items-center p-3 bg-red-50 rounded-lg border border-red-100">
+            <div className="flex items-center p-3 bg-red-50 rounded-[10px] border border-red-100">
               <AlertTriangle className="w-5 h-5 text-red-600 mr-3" />
               <div className="flex-1">
                 <div className="font-medium text-red-900">8 hóa đơn quá hạn thanh toán</div>
@@ -287,7 +287,7 @@ export default function AccountantDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-yellow-50 rounded-lg border border-yellow-100">
+            <div className="flex items-center p-3 bg-yellow-50 rounded-[10px] border border-yellow-100">
               <Calendar className="w-5 h-5 text-yellow-600 mr-3" />
               <div className="flex-1">
                 <div className="font-medium text-yellow-900">15 hóa đơn sắp đến hạn</div>
@@ -295,15 +295,15 @@ export default function AccountantDashboard() {
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-blue-50 rounded-lg border border-blue-100">
+            <div className="flex items-center p-3 bg-blue-50 rounded-[10px] border border-blue-100">
               <FileText className="w-5 h-5 text-blue-600 mr-3" />
               <div className="flex-1">
                 <div className="font-medium text-blue-900">Báo cáo tài chính tháng</div>
-                <div className="text-sm text-blue-700">Cần hoàn thành trước ngày 30/6</div>
+                <div className="text-sm text-[#3e79f7]">Cần hoàn thành trước ngày 30/6</div>
               </div>
             </div>
 
-            <div className="flex items-center p-3 bg-green-50 rounded-lg border border-green-100">
+            <div className="flex items-center p-3 bg-green-50 rounded-[10px] border border-green-100">
               <CreditCard className="w-5 h-5 text-green-600 mr-3" />
               <div className="flex-1">
                 <div className="font-medium text-green-900">24 thanh toán cần xác nhận</div>
@@ -315,26 +315,26 @@ export default function AccountantDashboard() {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác nhanh</h3>
         
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <button className="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+          <button className="flex flex-col items-center p-4 bg-blue-50 hover:bg-blue-100 rounded-[10px] transition-colors">
             <Receipt className="w-8 h-8 text-blue-600 mb-2" />
             <span className="text-sm font-medium text-blue-900">Tạo hóa đơn</span>
           </button>
 
-          <button className="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+          <button className="flex flex-col items-center p-4 bg-green-50 hover:bg-green-100 rounded-[10px] transition-colors">
             <CreditCard className="w-8 h-8 text-green-600 mb-2" />
             <span className="text-sm font-medium text-green-900">Ghi nhận TT</span>
           </button>
 
-          <button className="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+          <button className="flex flex-col items-center p-4 bg-purple-50 hover:bg-purple-100 rounded-[10px] transition-colors">
             <BarChart3 className="w-8 h-8 text-purple-600 mb-2" />
             <span className="text-sm font-medium text-purple-900">Báo cáo</span>
           </button>
 
-          <button className="flex flex-col items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-lg transition-colors">
+          <button className="flex flex-col items-center p-4 bg-orange-50 hover:bg-orange-100 rounded-[10px] transition-colors">
             <AlertTriangle className="w-8 h-8 text-orange-600 mb-2" />
             <span className="text-sm font-medium text-orange-900">Nợ quá hạn</span>
           </button>

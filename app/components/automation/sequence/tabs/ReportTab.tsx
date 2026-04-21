@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { Calendar, TrendingUp, Users, CheckCircle, XCircle, ShoppingBag } from 'lucide-react'
@@ -17,8 +17,8 @@ function MetricCard({ label, value, sub, icon, color }: {
   color: string;
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 flex items-start gap-4">
-      <div className={`w-11 h-11 rounded-xl flex items-center justify-center shrink-0`} style={{ background: color + '20' }}>
+    <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-5 flex items-start gap-4">
+      <div className={`w-11 h-11 rounded-[10px] flex items-center justify-center shrink-0`} style={{ background: color + '20' }}>
         <div style={{ color }}>{icon}</div>
       </div>
       <div className="min-w-0">
@@ -51,10 +51,10 @@ function FunnelChart({ steps }: { steps: StepFunnel[] }) {
             </div>
 
             {/* Bar */}
-            <div className="flex-1 h-8 bg-gray-100 rounded-xl overflow-hidden relative">
+            <div className="flex-1 h-8 bg-gray-100 rounded-[10px] overflow-hidden relative">
               {/* Relative width based on max */}
               <div
-                className="h-full flex rounded-xl overflow-hidden"
+                className="h-full flex rounded-[10px] overflow-hidden"
                 style={{ width: `${barWidth}%` }}
               >
                 {/* Completed portion */}
@@ -215,7 +215,7 @@ export default function ReportTab({ sequenceId }: Props) {
       {/* Date filter */}
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-gray-800">Báo cáo hiệu quả</h3>
-        <div className="flex gap-1 p-1 bg-gray-100 rounded-xl">
+        <div className="flex gap-1 p-1 bg-gray-100 rounded-[10px]">
           {([
             { v: '7d',  l: '7 ngày' },
             { v: '30d', l: '30 ngày' },
@@ -225,7 +225,7 @@ export default function ReportTab({ sequenceId }: Props) {
               key={opt.v}
               type="button"
               onClick={() => setPreset(opt.v)}
-              className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${
+              className={`px-3 py-1.5 text-xs font-semibold rounded-[10px] transition-colors ${
                 preset === opt.v ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -281,9 +281,9 @@ export default function ReportTab({ sequenceId }: Props) {
       </div>
 
       {/* Step funnel */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-6">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-2 h-5 bg-blue-600 rounded-full" />
+          <div className="w-2 h-5 bg-[#3e79f7] rounded-full" />
           <h4 className="text-sm font-bold text-gray-900">Phễu theo bước</h4>
           <span className="text-xs text-gray-500 ml-auto">{report.step_funnel.length} bước</span>
         </div>
@@ -291,9 +291,9 @@ export default function ReportTab({ sequenceId }: Props) {
       </div>
 
       {/* Timeline chart */}
-      <div className="bg-white border border-gray-200 rounded-2xl p-6">
+      <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-6">
         <div className="flex items-center gap-2 mb-6">
-          <div className="w-2 h-5 bg-green-500 rounded-full" />
+          <div className="w-2 h-5 bg-[#2dc56a] rounded-full" />
           <h4 className="text-sm font-bold text-gray-900">Xu hướng theo thời gian</h4>
           <div className="ml-auto flex items-center gap-1.5 text-xs text-gray-500">
             <Calendar size={13} />

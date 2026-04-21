@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, Calendar, ChevronRight, ChevronDown } from 'lucide-react'
@@ -56,7 +56,7 @@ export default function StepStatsModal({ step, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div>
@@ -65,7 +65,7 @@ export default function StepStatsModal({ step, onClose }: Props) {
             </div>
             <p className="text-xs text-gray-500 mt-0.5">Thống kê gửi tin theo ngày</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors text-gray-400">
             <X size={18} />
           </button>
         </div>
@@ -75,10 +75,10 @@ export default function StepStatsModal({ step, onClose }: Props) {
           <Calendar size={14} className="text-gray-400 shrink-0" />
           <span className="text-xs font-semibold text-gray-600 shrink-0">Khoảng thời gian:</span>
           <input type="date" value={dateFrom} onChange={e => setDateFrom(e.target.value)}
-            className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            className="px-2.5 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white" />
           <span className="text-gray-400 text-xs">–</span>
           <input type="date" value={dateTo} onChange={e => setDateTo(e.target.value)}
-            className="px-2.5 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white" />
+            className="px-2.5 py-1.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white" />
         </div>
 
         {/* Table */}
@@ -109,7 +109,7 @@ export default function StepStatsModal({ step, onClose }: Props) {
                   >
                     <span className="text-sm text-gray-500">{idx + 1}</span>
                     <span className="text-sm font-medium text-gray-800">{formatDate(log.date)}</span>
-                    <span className="text-sm font-bold text-center text-blue-700">{log.sent}</span>
+                    <span className="text-sm font-bold text-center text-[#3e79f7]">{log.sent}</span>
                     <div className="flex justify-end">
                       {expandedDay === log.date
                         ? <ChevronDown size={14} className="text-gray-400" />
@@ -150,11 +150,11 @@ export default function StepStatsModal({ step, onClose }: Props) {
               ))}
 
               {/* Total row */}
-              <div className="grid items-center px-6 py-3.5 bg-gray-50 border-t border-gray-200 font-bold"
+              <div className="grid items-center px-6 py-3.5 bg-gray-50 border-t border-[#e6ebf1] font-bold"
                 style={{ gridTemplateColumns: '48px 1fr 120px 32px' }}>
                 <span className="text-sm text-gray-500" />
                 <span className="text-sm text-gray-700">Tổng</span>
-                <span className="text-sm font-bold text-center text-blue-700">{totalSent}</span>
+                <span className="text-sm font-bold text-center text-[#3e79f7]">{totalSent}</span>
                 <span />
               </div>
             </>
@@ -164,7 +164,7 @@ export default function StepStatsModal({ step, onClose }: Props) {
         {/* Footer */}
         <div className="flex justify-end px-6 py-4 border-t border-gray-100 bg-gray-50/60 shrink-0">
           <button onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">
+            className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-[10px] transition-colors">
             Đóng
           </button>
         </div>

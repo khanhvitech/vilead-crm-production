@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { BarChart3 } from 'lucide-react';
@@ -36,7 +36,7 @@ export function ZbsSendResultChart({ data, loading = false }: ZbsSendResultChart
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl border p-6">
+      <div className="bg-white rounded-[10px] border p-6">
         <div className="flex items-center gap-2 mb-4">
           <BarChart3 className="h-5 w-5 text-gray-400" />
           <h3 className="font-semibold text-gray-900">Kết quả gửi tin</h3>
@@ -49,7 +49,7 @@ export function ZbsSendResultChart({ data, loading = false }: ZbsSendResultChart
   }
 
   return (
-    <div className="bg-white rounded-xl border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
@@ -60,7 +60,7 @@ export function ZbsSendResultChart({ data, loading = false }: ZbsSendResultChart
         {/* Legend */}
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-4 h-3 bg-green-500 rounded-sm" />
+            <div className="w-4 h-3 bg-[#2dc56a] rounded-sm" />
             <span className="text-sm text-gray-600">Thành công</span>
           </div>
           <div className="flex items-center gap-2">

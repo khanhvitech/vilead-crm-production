@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Calendar, RefreshCw, Filter, ChevronDown } from 'lucide-react';
@@ -43,7 +43,7 @@ export function ZbsReportFilters({
   templateOptions = []
 }: ZbsReportFiltersProps) {
   return (
-    <div className="bg-white rounded-xl border p-4 space-y-4">
+    <div className="bg-white rounded-[10px] border p-4 space-y-4">
       {/* Period Quick Select */}
       <div className="flex flex-wrap items-center gap-4">
         <div className="flex items-center gap-2">
@@ -56,7 +56,7 @@ export function ZbsReportFilters({
             <button
               key={option.value}
               onClick={() => onUpdateFilters({ period: option.value as ZbsReportFilter['period'] })}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`px-4 py-2 text-sm font-medium rounded-[10px] transition-colors ${
                 filters.period === option.value
                   ? 'bg-blue-500 text-white'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -75,14 +75,14 @@ export function ZbsReportFilters({
               type="date"
               value={filters.startDate || ''}
               onChange={(e) => onUpdateFilters({ startDate: e.target.value })}
-              className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 text-sm border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
             <span className="text-gray-400">-</span>
             <input
               type="date"
               value={filters.endDate || ''}
               onChange={(e) => onUpdateFilters({ endDate: e.target.value })}
-              className="px-3 py-2 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-3 py-2 text-sm border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
             />
           </div>
         )}
@@ -92,7 +92,7 @@ export function ZbsReportFilters({
           <button
             onClick={onApplyFilters}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-[10px] hover:bg-blue-100 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             <span>Làm mới</span>
@@ -109,7 +109,7 @@ export function ZbsReportFilters({
             <select
               value={filters.oaId || ''}
               onChange={(e) => onUpdateFilters({ oaId: e.target.value })}
-              className="appearance-none pl-3 pr-8 py-2 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-2 text-sm border rounded-[10px] bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7] cursor-pointer"
             >
               <option value="">Tất cả</option>
               {oaOptions.map((oa) => (
@@ -127,7 +127,7 @@ export function ZbsReportFilters({
             <select
               value={filters.templateId || ''}
               onChange={(e) => onUpdateFilters({ templateId: e.target.value })}
-              className="appearance-none pl-3 pr-8 py-2 text-sm border rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className="appearance-none pl-3 pr-8 py-2 text-sm border rounded-[10px] bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7] cursor-pointer"
             >
               <option value="">Tất cả</option>
               {templateOptions.map((t) => (

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect, useRef } from 'react'
 import { 
@@ -981,11 +981,11 @@ export default function OrderManagement() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'processing':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'completed':
@@ -995,7 +995,7 @@ export default function OrderManagement() {
       case 'refunded':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -1010,7 +1010,7 @@ export default function OrderManagement() {
       case 'refunded':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -1044,11 +1044,11 @@ export default function OrderManagement() {
       case 'khẩn cấp':
         return 'bg-red-100 text-red-800 border-red-200'
       case 'chờ ký hợp đồng':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'thanh toán trễ':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -1432,7 +1432,7 @@ Trân trọng,
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Tổng đơn hàng</div>
@@ -1442,7 +1442,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Tổng doanh thu</div>
@@ -1452,7 +1452,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Chưa thanh toán</div>
@@ -1462,7 +1462,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Đã thanh toán</div>
@@ -1475,11 +1475,11 @@ Trân trọng,
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Đơn hàng cần chú ý</h3>
           <div className="space-y-3">
             {orders.filter(o => o.paymentStatus === 'unpaid' || (o.deadline && new Date(o.deadline) < new Date())).slice(0, 5).map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                 <div>
                   <div className="font-medium text-gray-900">{order.orderNumber}</div>
                   <div className="text-sm text-gray-500">{order.customer.name}</div>
@@ -1499,24 +1499,24 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Hoạt động gần đây</h3>
           <div className="space-y-3">
-            <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center p-3 bg-blue-50 rounded-[10px]">
               <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Đơn mới được tạo</div>
                 <div className="text-xs text-gray-500">DH20250611001 - 2 giờ trước</div>
               </div>
             </div>
-            <div className="flex items-center p-3 bg-green-50 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+            <div className="flex items-center p-3 bg-green-50 rounded-[10px]">
+              <div className="w-2 h-2 bg-[#2dc56a] rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Thanh toán thành công</div>
                 <div className="text-xs text-gray-500">DH20250610005 - 4 giờ trước</div>
               </div>
             </div>
-            <div className="flex items-center p-3 bg-yellow-50 rounded-lg">
+            <div className="flex items-center p-3 bg-yellow-50 rounded-[10px]">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Nhắc thanh toán lần 2</div>
@@ -1588,7 +1588,7 @@ Trân trọng,
     return (
       <div className="space-y-6">
         {/* Reminder Statistics */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
           {/* Header with Help Icon */}
           <div className="flex items-center gap-2 mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Quản lý nhắc thanh toán</h3>
@@ -1599,7 +1599,7 @@ Trân trọng,
             >
               <HelpCircle className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
               {showReminderTooltip && (
-                <div className="absolute left-0 top-6 z-50 w-80 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg">
+                <div className="absolute left-0 top-6 z-50 w-80 bg-gray-900 text-white text-xs rounded-[10px] p-3 shadow-lg">
                   <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
                   Tính năng này giúp bạn tự động gửi nhắc thanh toán đến khách hàng (qua email/SMS) và thông báo cho người phụ trách để theo dõi các đơn hàng chưa thanh toán.
                 </div>
@@ -1608,7 +1608,7 @@ Trân trọng,
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
               <div className="absolute top-2 right-2">
                 <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
               </div>
@@ -1618,7 +1618,7 @@ Trân trọng,
               </div>
             </div>
 
-            <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-yellow-600 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-yellow-600 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
               <div className="absolute top-2 right-2">
                 <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
               </div>
@@ -1628,7 +1628,7 @@ Trân trọng,
               </div>
             </div>
 
-            <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
               <div className="absolute top-2 right-2">
                 <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
               </div>
@@ -1638,7 +1638,7 @@ Trân trọng,
               </div>
             </div>
 
-            <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
               <div className="absolute top-2 right-2">
                 <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
               </div>
@@ -1653,7 +1653,7 @@ Trân trọng,
         </div>
 
         {/* Filter Section */}
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
           <div className="flex items-center justify-between gap-4">
             {/* Left side: Search and Filters */}
             <div className="flex items-center gap-3 flex-1">
@@ -1665,7 +1665,7 @@ Trân trọng,
                   placeholder="Tìm kiếm khách hàng..."
                   value={reminderFilters.search}
                   onChange={(e) => setReminderFilters(prev => ({ ...prev, search: e.target.value }))}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
                 />
               </div>
 
@@ -1673,7 +1673,7 @@ Trân trọng,
               <select
                 value={reminderFilters.status}
                 onChange={(e) => setReminderFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[160px]"
+                className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm min-w-[160px]"
               >
                 <option value="all">Tất cả trạng thái</option>
                 <option value="overdue">Quá hạn</option>
@@ -1684,7 +1684,7 @@ Trân trọng,
               <select
                 value={reminderFilters.sortBy}
                 onChange={(e) => setReminderFilters(prev => ({ ...prev, sortBy: e.target.value }))}
-                className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm min-w-[180px]"
+                className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm min-w-[180px]"
               >
                 <option value="deadline">Sắp xếp: Thời hạn</option>
                 <option value="amount">Sắp xếp: Giá trị đơn hàng</option>
@@ -1696,7 +1696,7 @@ Trân trọng,
 
         {/* Bulk Actions Bar for Reminders */}
         {selectedReminderOrders.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium text-blue-900">
@@ -1712,21 +1712,21 @@ Trân trọng,
               <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowSendReminderDialog(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+                  className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-2 text-sm"
                 >
                   <Send className="w-4 h-4" />
                   <span>Gửi nhắc hàng loạt</span>
                 </button>
                 <button
                   onClick={() => handleBulkOperation('mark_paid')}
-                  className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2 text-sm"
+                  className="px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors flex items-center space-x-2 text-sm"
                 >
                   <Check className="w-4 h-4" />
                   <span>Đánh dấu đã thanh toán</span>
                 </button>
                 <button
                   onClick={() => exportOrdersToCSV(filteredAndSortedOrders)}
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-2 text-sm"
+                  className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 transition-colors flex items-center space-x-2 text-sm"
                 >
                   <Download className="w-4 h-4" />
                   <span>Xuất dữ liệu</span>
@@ -1737,7 +1737,7 @@ Trân trọng,
         )}
 
         {/* Unified Reminders Table */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -1753,7 +1753,7 @@ Trân trọng,
                           setSelectedReminderOrders([])
                         }
                       }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                     />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
@@ -1807,7 +1807,7 @@ Trân trọng,
                                 setSelectedReminderOrders(selectedReminderOrders.filter(id => id !== order.id))
                               }
                             }}
-                            className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -1861,7 +1861,7 @@ Trân trọng,
                         <td className="px-6 py-4 whitespace-nowrap">
                           <button 
                             onClick={() => setSelectedOrder(order)}
-                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors"
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-[#3e79f7] hover:bg-blue-50 rounded-[10px] transition-colors"
                           >
                             <Eye className="w-4 h-4 mr-1" />
                             Xem chi tiết
@@ -1882,7 +1882,7 @@ Trân trọng,
   const renderOrders = () => (
     <div className="space-y-4">
       {/* Statistics Cards */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
         {/* Tổng quan đơn hàng */}
         <div className="flex items-center gap-2 mb-4">
           <h3 className="text-lg font-semibold text-gray-900">Tổng quan đơn hàng</h3>
@@ -1892,7 +1892,7 @@ Trân trọng,
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -1902,7 +1902,7 @@ Trân trọng,
             </div>
           </div>
         
-          <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -1914,7 +1914,7 @@ Trân trọng,
             </div>
           </div>
         
-          <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -1926,7 +1926,7 @@ Trân trọng,
             </div>
           </div>
         
-          <div className="flex flex-col justify-center rounded-lg px-6 py-6 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -1941,7 +1941,7 @@ Trân trọng,
       </div>
       
       {/* Header and filters */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
           {/* Inline Filters */}
           <div className="flex flex-col lg:flex-row gap-3 lg:items-center flex-1">
@@ -1953,7 +1953,7 @@ Trân trọng,
                 placeholder="Tìm kiếm đơn hàng theo mã, khách hàng..."
                 value={filters.search}
                 onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+                className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
               />
             </div>
           
@@ -1963,7 +1963,7 @@ Trân trọng,
               <select 
                 value={filters.status}
                 onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
                 <option value="">Tất cả trạng thái</option>
                 <option value="draft">Nháp</option>
                 <option value="pending">Chờ xác nhận</option>
@@ -1977,7 +1977,7 @@ Trân trọng,
               <select 
                 value={filters.paymentStatus}
                 onChange={(e) => setFilters(prev => ({ ...prev, paymentStatus: e.target.value }))}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
                 <option value="">Tình trạng thanh toán</option>
                 <option value="unpaid">Chưa thanh toán</option>
                 <option value="partial">Thanh toán một phần</option>
@@ -1988,7 +1988,7 @@ Trân trọng,
               {/* Custom Date Range Picker - hiển thị khi chọn custom */}
               {filters.timeRange === 'custom' && (
                 <div className="relative">
-                  <div className="flex items-center border border-gray-300 rounded-md bg-white overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                  <div className="flex items-center border border-[#e6ebf1] rounded-md bg-white overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
                     <div className="flex items-center px-2 text-gray-400">
                       <Calendar className="w-3.5 h-3.5" />
                     </div>
@@ -2013,7 +2013,7 @@ Trân trọng,
               <select 
                 value={filters.timeRange}
                 onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e.target.value }))}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
                 <option value="">Thời gian</option>
                 <option value="today">Hôm nay</option>
                 <option value="yesterday">Hôm qua</option>
@@ -2030,7 +2030,7 @@ Trân trọng,
                     setFilters({ status: '', paymentStatus: '', timeRange: '', search: '', tags: [] })
                     setCustomDateRange({ startDate: '', endDate: '' })
                   }}
-                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-1"
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors flex items-center space-x-1"
                 >
                   <X className="w-4 h-4" />
                   <span>Xóa bộ lọc</span>
@@ -2042,7 +2042,7 @@ Trân trọng,
           {/* Create Order Button - chuyển về bên phải */}
           <button 
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm whitespace-nowrap"
+            className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm whitespace-nowrap"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo đơn hàng</span>
@@ -2051,7 +2051,7 @@ Trân trọng,
       </div>
 
       {/* Table Container with white background and border */}
-      <div className="bg-white rounded-lg border border-gray-200 p-6">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
         {/* Filter Results Summary */}
         <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
           <span>
@@ -2069,7 +2069,7 @@ Trân trọng,
 
         {/* Bulk Actions Bar */}
         {selectedOrders.length > 0 && (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <span className="text-sm font-medium text-blue-900">
@@ -2086,7 +2086,7 @@ Trân trọng,
                 <button
                   onClick={() => handleBulkOperation('mark_paid')}
                   disabled={isLoading}
-                  className="px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                  className="px-3 py-2 bg-[#2dc56a] text-white text-sm rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
                 >
                   {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
                   <span>Đánh dấu đã thanh toán</span>
@@ -2094,7 +2094,7 @@ Trân trọng,
                 <button
                   onClick={() => handleBulkOperation('send_reminder')}
                   disabled={isLoading}
-                  className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                  className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-[10px] hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
                 >
                   {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
                   <span>Gửi nhắc nhở</span>
@@ -2103,14 +2103,14 @@ Trân trọng,
                   <button
                     onClick={() => setShowExportDropdown(!showExportDropdown)}
                     disabled={isLoading}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                   >
                     <Download className="w-4 h-4" />
                     <span>Xuất dữ liệu</span>
                     <ChevronDown className="w-4 h-4" />
                   </button>
                   {showExportDropdown && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-50">
                       <button
                         onClick={() => {
                           handleBulkOperation('export_excel')
@@ -2140,7 +2140,7 @@ Trân trọng,
         )}
 
         {/* Orders Table */}
-        <div className="rounded-lg border border-gray-200 overflow-hidden">
+        <div className="rounded-[10px] border border-[#e6ebf1] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
@@ -2156,7 +2156,7 @@ Trân trọng,
                         setSelectedOrders([])
                       }
                     }}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                   />
                 </th>
                 <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mã đơn</th>
@@ -2187,7 +2187,7 @@ Trân trọng,
                           setSelectedOrders(prev => prev.filter(id => id !== order.id))
                         }
                       }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                     />
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -2292,7 +2292,7 @@ Trân trọng,
                         <Settings className="w-4 h-4" />
                       </button>
                       {openActionMenu === order.id && (
-                        <div className="absolute right-0 mt-1 w-52 bg-white rounded-lg shadow-lg border border-gray-200 z-[999] py-2">
+                        <div className="absolute right-0 mt-1 w-52 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-[999] py-2">
                           {/* Thông tin Section */}
                           <div className="px-4 pb-1 text-left">
                             <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
@@ -2395,7 +2395,7 @@ Trân trọng,
             {/* Summary Stats Row - aligned with table columns */}
             {getFilteredOrders().length > 0 && (
               <tfoot>
-                <tr className="bg-gray-50 border-t-2 border-gray-300">
+                <tr className="bg-gray-50 border-t-2 border-[#e6ebf1]">
                   {/* Checkbox column */}
                   <td className="px-4 py-3"></td>
                   {/* Mã đơn column */}
@@ -2466,7 +2466,7 @@ Trân trọng,
               ) : (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#3e79f7] hover:bg-[#699dff]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Tạo đơn hàng đầu tiên
@@ -2490,7 +2490,7 @@ Trân trọng,
 
       {/* Navigation Tabs */}
       <div>
-        <div className="border-b border-gray-200">
+        <div className="border-b border-[#e6ebf1]">
           <nav className="flex space-x-8">
             {[
               { id: 'orders', name: 'Đơn hàng', icon: <ShoppingCart className="w-4 h-4" /> },
@@ -2502,7 +2502,7 @@ Trân trọng,
                 className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                 }`}
               >
                 <span className={activeTab === tab.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
@@ -2523,8 +2523,8 @@ Trân trọng,
 
       {/* Notifications */}
       {notification && (
-        <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
-          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        <div className={`fixed top-4 right-4 px-4 py-2 rounded-[10px] shadow-lg ${
+          notification.type === 'success' ? 'bg-[#2dc56a] text-white' : 'bg-red-500 text-white'
         }`}>
           {notification.message}
         </div>
@@ -2533,8 +2533,8 @@ Trân trọng,
       {/* Modals */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mx-4">
-            <div className="px-4 sm:px-6 py-4 border-b border-gray-200 relative">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mx-4">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] relative">
               <button
                 onClick={() => {
                   setShowCreateModal(false)
@@ -2554,7 +2554,7 @@ Trân trọng,
                   setTaxId('vat-10')
                   setTaxRate(10)
                 }}
-                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
                 title="Đóng"
               >
                 <X className="h-5 w-5" />
@@ -2573,7 +2573,7 @@ Trân trọng,
                     const customer = customers.find(c => c.id === customerId)
                     setSelectedCustomerForNewOrder(customer || null)
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="">Chọn khách hàng</option>
                   {customers.map(customer => (
@@ -2588,7 +2588,7 @@ Trân trọng,
               {selectedCustomerForNewOrder && (
                 <div className="flex items-center gap-3 mb-4">
                   <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
-                    <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-semibold">
+                    <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
                       <User className="h-6 w-6" />
                     </span>
                   </span>
@@ -2609,7 +2609,7 @@ Trân trọng,
                 <textarea
                   value={orderNotes}
                   onChange={(e) => setOrderNotes(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                   rows={2}
                   placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
                 />
@@ -2621,7 +2621,7 @@ Trân trọng,
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="w-full sm:w-64 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   {productCategories.map(category => (
                     <option key={category} value={category}>{category}</option>
@@ -2634,12 +2634,12 @@ Trân trọng,
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Chọn sản phẩm và gói sản phẩm <span className="text-red-500">*</span>
                 </label>
-                <div className="max-h-72 overflow-y-auto border border-gray-300 rounded-lg p-3">
+                <div className="max-h-72 overflow-y-auto border border-[#e6ebf1] rounded-[10px] p-3">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {availableProducts
                       .filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory)
                       .map((product) => (
-                      <div key={product.id} className="border border-gray-200 rounded-lg p-3 bg-white hover:border-blue-300 transition-colors">
+                      <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
                         <label className="flex items-start space-x-3 cursor-pointer">
                           <input
                             type="checkbox"
@@ -2669,7 +2669,7 @@ Trân trọng,
                                 })
                               }
                             }}
-                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
                           />
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
@@ -2695,7 +2695,7 @@ Trân trọng,
                                       [product.id]: e.target.value
                                     }))
                                   }}
-                                  className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-xs border border-[#e6ebf1] rounded px-2 py-1"
                                 >
                                   {availablePackages[product.id]?.map((pkg) => (
                                     <option key={pkg.id} value={pkg.id}>
@@ -2716,7 +2716,7 @@ Trân trọng,
                                       [product.id]: Math.max(1, parseInt(e.target.value) || 1)
                                     }))
                                   }}
-                                  className="w-full text-xs border border-gray-300 rounded px-2 py-1"
+                                  className="w-full text-xs border border-[#e6ebf1] rounded px-2 py-1"
                                 />
                               </div>
                             </div>
@@ -2745,7 +2745,7 @@ Trân trọng,
                 const grandTotal = afterDiscount + vatAmount
                 
                 return (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <div className="bg-green-50 border border-green-200 rounded-[10px] p-4 mb-4">
                     <h5 className="text-sm font-medium text-green-800 mb-3">
                       Đã chọn {selectedProducts.length} sản phẩm:
                     </h5>
@@ -2787,7 +2787,7 @@ Trân trọng,
 
               {/* Payment Info Section */}
               {selectedProducts.length > 0 && (
-                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 mb-4">
+                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4 mb-4">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                     {/* Tax Selection */}
                     <div>
@@ -2799,7 +2799,7 @@ Trân trọng,
                            setTaxId(e.target.value)
                            setTaxRate(tax ? tax.rate : 0)
                          }}
-                         className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                         className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                          <option value="">Chọn mức thuế</option>
                          {defaultTaxes.filter(t => t.isActive).map(tax => (
@@ -2819,7 +2819,7 @@ Trân trọng,
                           value={discountPercent}
                           onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
                           placeholder="0"
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                         <select 
                           value={discountType}
@@ -2827,7 +2827,7 @@ Trân trọng,
                             setDiscountType(e.target.value as '%' | 'VND')
                             setDiscountPercent(0)
                           }}
-                          className="px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         >
                           <option value="%">%</option>
                           <option value="VND">VNĐ</option>
@@ -2845,7 +2845,7 @@ Trân trọng,
                         value={paymentDeadline}
                         onChange={(e) => setPaymentDeadline(e.target.value)}
                         min={new Date().toISOString().split('T')[0]}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                     </div>
                   </div>
@@ -2857,7 +2857,7 @@ Trân trọng,
                       <select
                         value={paymentMethod}
                         onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-auto px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       >
                         <option value="cash">Tiền mặt</option>
                         <option value="bank_transfer">Chuyển khoản</option>
@@ -2874,25 +2874,25 @@ Trân trọng,
                     <div className="flex flex-wrap items-center gap-4">
                       <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
                       <div className="flex gap-3">
-                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                           <input
                             type="radio"
                             name="newOrderPaymentMode"
                             value="full"
                             checked={paymentMode === 'full'}
                             onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
                         </label>
-                        <label className="flex items-center px-3 py-2 border border-gray-200 rounded-lg cursor-pointer hover:bg-white transition-colors bg-white">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
                           <input
                             type="radio"
                             name="newOrderPaymentMode"
                             value="installment"
                             checked={paymentMode === 'installment'}
                             onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
-                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
                           />
                           <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
                         </label>
@@ -2902,7 +2902,7 @@ Trân trọng,
 
                   {/* Payment Installments - Only show when installment mode selected */}
                   {paymentMode === 'installment' && (
-                  <div className="border-t border-gray-200 pt-4">
+                  <div className="border-t border-[#e6ebf1] pt-4">
                     <div className="mb-4">
                       <label className="block text-sm font-medium text-gray-700 mb-2">
                         Số lần thanh toán
@@ -2921,7 +2921,7 @@ Trân trọng,
                           )
                           setInstallmentData(newInstallments)
                         }}
-                        className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                     </div>
 
@@ -2950,7 +2950,7 @@ Trân trọng,
                       const isOverLimit = installment.amount > maxAllowed
                       
                       return (
-                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-lg border border-gray-100">
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">
                             Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
@@ -2966,7 +2966,7 @@ Trân trọng,
                               setInstallmentData(newData)
                             }}
                             placeholder="0"
-                            className={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-gray-300'}`}
+                            className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
                           />
                           {isOverLimit && (
                             <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
@@ -2987,7 +2987,7 @@ Trân trọng,
                               }}
                               min={new Date().toISOString().split('T')[0]}
                               placeholder="Thời gian thanh toán ..."
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                             />
                           </div>
                           {paymentInstallments > 1 && (
@@ -3000,7 +3000,7 @@ Trân trọng,
                                   setPaymentInstallments(paymentInstallments - 1)
                                 }
                               }}
-                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
                               title="Xóa đợt thanh toán"
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3022,7 +3022,7 @@ Trân trọng,
               </p>
             </div>
 
-            <div className="px-4 sm:px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
               <button
                 onClick={() => {
                   setShowCreateModal(false)
@@ -3038,7 +3038,7 @@ Trân trọng,
                   setDiscountType('%')
                   setPaymentMode('full')
                 }}
-                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-lg hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 Hủy
               </button>
@@ -3119,7 +3119,7 @@ Trân trọng,
                   setPaymentMode('full')
                 }}
                 disabled={!selectedCustomerForNewOrder || selectedProducts.length === 0 || !paymentDeadline}
-                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-lg transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${
                   selectedCustomerForNewOrder && selectedProducts.length > 0 && paymentDeadline
                     ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
                     : 'text-gray-400 bg-gray-300 cursor-not-allowed'
@@ -3148,7 +3148,7 @@ Trân trọng,
       {/* Edit Order Modal */}
       {showEditModal && editingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className={`bg-white rounded-lg shadow-xl ${editingOrder.paymentStatus === 'partial' || editingOrder.paymentMode === 'installment' ? 'max-w-5xl' : 'max-w-md'} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
+          <div className={`bg-white rounded-[10px] shadow-xl ${editingOrder.paymentStatus === 'partial' || editingOrder.paymentMode === 'installment' ? 'max-w-5xl' : 'max-w-md'} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Thanh toán đơn hàng</h3>
@@ -3197,7 +3197,7 @@ Trân trọng,
                       return {...prev, paymentStatus: newPaymentStatus}
                     })
                   }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 >
                   <option value="unpaid">Chưa thanh toán</option>
                   <option value="partial">Thanh toán một phần</option>
@@ -3245,7 +3245,7 @@ Trân trọng,
                           return (
                             <div 
                               key={installment.id} 
-                              className={`p-4 rounded-lg border ${isCompleted ? 'bg-gray-50 border-gray-200 opacity-70' : 'bg-white border-gray-200'}`}
+                              className={`p-4 rounded-[10px] border ${isCompleted ? 'bg-gray-50 border-[#e6ebf1] opacity-70' : 'bg-white border-[#e6ebf1]'}`}
                             >
                               {/* Header with Phase Label and Submit Button */}
                               <div className="flex items-center justify-between mb-3">
@@ -3320,7 +3320,7 @@ Trân trọng,
                                         className={`px-3 py-1.5 rounded-md transition-colors text-sm ${
                                           !canSubmitPayment
                                             ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                            : 'bg-green-600 text-white hover:bg-green-700'
+                                            : 'bg-[#2dc56a] text-white hover:bg-[#04d182]'
                                         }`}
                                         title={!allPreviousCompleted 
                                           ? 'Vui lòng hoàn thành thanh toán các đợt trước' 
@@ -3346,7 +3346,7 @@ Trân trọng,
                                     type="text"
                                     value={installment.plannedAmount.toLocaleString('vi-VN')}
                                     disabled
-                                    className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md text-sm text-gray-700"
+                                    className="w-full px-3 py-2 bg-gray-100 border border-[#e6ebf1] rounded-md text-sm text-gray-700"
                                   />
                                 </div>
                                 
@@ -3357,7 +3357,7 @@ Trân trọng,
                                     type="text"
                                     value={installment.plannedDate ? new Date(installment.plannedDate).toLocaleDateString('vi-VN') : 'Thời gian thanh toán ...'}
                                     disabled
-                                    className="w-full px-3 py-2 bg-gray-100 border border-gray-200 rounded-md text-sm text-gray-500"
+                                    className="w-full px-3 py-2 bg-gray-100 border border-[#e6ebf1] rounded-md text-sm text-gray-500"
                                   />
                                 </div>
                                 
@@ -3403,10 +3403,10 @@ Trân trọng,
                                     }}
                                     disabled={isCompleted || !allPreviousCompleted}
                                     placeholder="0"
-                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 ${
-                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-gray-200 text-gray-500' : 
+                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] ${
+                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-[#e6ebf1] text-gray-500' : 
                                       isOverPaid ? 'border-red-500 bg-red-50 text-red-700' : 
-                                      isLastInstallmentShort ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-300'
+                                      isLastInstallmentShort ? 'border-red-500 bg-red-50 text-red-700' : 'border-[#e6ebf1]'
                                     }`}
                                   />
                                   {!allPreviousCompleted && !isCompleted && (
@@ -3438,8 +3438,8 @@ Trân trọng,
                                       setEditingOrder(prev => prev ? {...prev, installments: newInstallments} : null)
                                     }}
                                     disabled={isCompleted || !allPreviousCompleted}
-                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-blue-500 ${
-                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-gray-200 text-gray-500' : 'border-gray-300'
+                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] ${
+                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-[#e6ebf1] text-gray-500' : 'border-[#e6ebf1]'
                                     }`}
                                   />
                                 </div>
@@ -3452,12 +3452,12 @@ Trân trọng,
                     
                     {/* Statistics Container */}
                     <div className="w-64 shrink-0">
-                      <div className="bg-gray-50 rounded-lg p-4 space-y-4 sticky top-0">
+                      <div className="bg-gray-50 rounded-[10px] p-4 space-y-4 sticky top-0">
                         {/* Total Planned */}
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-1">Tổng số Tiền thanh toán</label>
                           <div className={`px-3 py-2 border rounded-md text-sm font-medium ${
-                            (editingOrder.totalPaid || 0) !== editingOrder.total ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-300 bg-white'
+                            (editingOrder.totalPaid || 0) !== editingOrder.total ? 'border-red-500 bg-red-50 text-red-700' : 'border-[#e6ebf1] bg-white'
                           }`}>
                             {editingOrder.total.toLocaleString('vi-VN')}
                           </div>
@@ -3491,7 +3491,7 @@ Trân trọng,
 
               {/* Hint for non-installment */}
               {editingOrder.paymentStatus === 'partial' && (!editingOrder.installments || editingOrder.installments.length === 0) && editingOrder.paymentMode !== 'installment' && (
-                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-[10px]">
                   <p className="text-sm text-yellow-700">
                     Đơn hàng này chưa có thông tin thanh toán theo giai đoạn. 
                     Vui lòng chọn trạng thái thanh toán khác.
@@ -3515,7 +3515,7 @@ Trân trọng,
                   <button
                     onClick={() => handleSaveEditOrder(editingOrder)}
                     disabled={editingOrder.paymentStatus === 'partial' && (!editingOrder.installments || editingOrder.installments.length === 0) && editingOrder.paymentMode !== 'installment'}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                    className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                   >
                     Lưu thay đổi
                   </button>
@@ -3529,7 +3529,7 @@ Trân trọng,
       {/* Cancel Order Modal */}
       {showCancelModal && cancelingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Hủy đơn hàng</h3>
@@ -3568,7 +3568,7 @@ Trân trọng,
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Nhập lý do hủy đơn hàng..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                 />
               </div>
 
@@ -3587,7 +3587,7 @@ Trân trọng,
                 <button
                   onClick={handleConfirmCancelOrder}
                   disabled={!cancelReason.trim()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#ff6b72] text-white rounded-md hover:bg-[#d9505c] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Xác nhận hủy
@@ -3601,7 +3601,7 @@ Trân trọng,
       {/* Send Reminder Confirmation Dialog */}
       {showSendReminderDialog && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full">
             <div className="p-6">
               <div className="flex items-start space-x-3 mb-4">
                 <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
@@ -3613,16 +3613,16 @@ Trân trọng,
                   </h3>
                   <div className="text-sm text-gray-600 space-y-3">
                     <p>Khi gửi nhắc thanh toán, hệ thống sẽ tự động gửi thông báo đến cả hai bên:</p>
-                    <div className="bg-gray-50 rounded-lg p-3 space-y-2">
+                    <div className="bg-gray-50 rounded-[10px] p-3 space-y-2">
                       <div className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div className="w-1.5 h-1.5 bg-[#3e79f7] rounded-full mt-1.5 flex-shrink-0"></div>
                         <div>
                           <p className="font-medium text-gray-900">Khách hàng:</p>
                           <p className="text-gray-600">Nhận email/SMS nhắc thanh toán với chi tiết đơn hàng và hướng dẫn thanh toán</p>
                         </div>
                       </div>
                       <div className="flex items-start space-x-2">
-                        <div className="w-1.5 h-1.5 bg-blue-600 rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div className="w-1.5 h-1.5 bg-[#3e79f7] rounded-full mt-1.5 flex-shrink-0"></div>
                         <div>
                           <p className="font-medium text-gray-900">Người phụ trách:</p>
                           <p className="text-gray-600">Nhận thông báo để theo dõi và liên hệ khách hàng nếu cần</p>
@@ -3637,7 +3637,7 @@ Trân trọng,
             <div className="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 rounded-b-lg">
               <button
                 onClick={() => setShowSendReminderDialog(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -3646,7 +3646,7 @@ Trân trọng,
                   handleBulkOperation('send_reminder')
                   setShowSendReminderDialog(false)
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-2"
               >
                 <Send className="w-4 h-4" />
                 <span>Gửi</span>
@@ -3683,8 +3683,8 @@ Trân trọng,
       {/* Add Note Dialog */}
       {showAddNoteDialog && orderForAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <div className="flex items-center gap-2">
                 <StickyNote className="w-5 h-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-900">Thêm ghi chú - {orderForAction.orderNumber}</h3>
@@ -3701,14 +3701,14 @@ Trân trọng,
                 id="order-note-content"
                 rows={4}
                 placeholder="Nhập nội dung ghi chú cho đơn hàng..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none"
               />
               <p className="text-sm text-red-500 mt-1">Vui lòng nhập nội dung ghi chú</p>
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
               <button
                 onClick={() => { setShowAddNoteDialog(false); setOrderForAction(null) }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
               >
                 Hủy
               </button>
@@ -3722,7 +3722,7 @@ Trân trọng,
                     setOrderForAction(null)
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
               >
                 Lưu ghi chú
               </button>
@@ -3734,8 +3734,8 @@ Trân trọng,
       {/* Refund Dialog */}
       {showRefundDialog && orderForAction && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-          <div className="bg-white rounded-xl w-full max-w-md mx-4 shadow-2xl">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-blue-500" />
                 <h3 className="font-semibold text-gray-900">Hoàn tiền/Hủy đơn</h3>
@@ -3753,7 +3753,7 @@ Trân trọng,
                   id="refund-amount"
                   type="text"
                   placeholder="Nhập số tiền hoàn..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
               <div>
@@ -3762,7 +3762,7 @@ Trân trọng,
                 </label>
                 <select
                   id="refund-method"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] bg-white"
                 >
                   <option value="custom">Tùy chỉnh</option>
                   <option value="bank_transfer">Chuyển khoản</option>
@@ -3778,14 +3778,14 @@ Trân trọng,
                   id="refund-reason"
                   rows={3}
                   placeholder="Khách hủy, sai hợp đồng, chưa thanh toán..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none"
                 />
               </div>
             </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
               <button
                 onClick={() => { setShowRefundDialog(false); setOrderForAction(null) }}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
               >
                 Hủy
               </button>
@@ -3800,7 +3800,7 @@ Trân trọng,
                     setOrderForAction(null)
                   }
                 }}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
               >
                 Đồng ý
               </button>

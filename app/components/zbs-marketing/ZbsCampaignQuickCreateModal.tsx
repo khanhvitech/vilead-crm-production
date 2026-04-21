@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { X, UploadCloud, FileSpreadsheet, Download, CheckCircle, Clock, Send } from 'lucide-react';
@@ -54,7 +54,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
     <div className="fixed inset-0 z-[70] flex flex-col items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh]">
+      <div className="relative w-full max-w-3xl bg-white rounded-[10px] shadow-2xl flex flex-col overflow-hidden z-10 max-h-[90vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <h2 className="text-xl font-semibold text-gray-900">
@@ -72,9 +72,9 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-1">Nội dung tệp mẫu</h3>
                 <p className="text-xs text-gray-500 italic mb-3">Dữ liệu trong tập danh sách tải lên cần phải đúng thứ tự cột và quy định về tham số như bên dưới:</p>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
                   <table className="w-full text-left text-sm">
-                    <thead className="bg-gray-100/70 text-gray-700 border-b border-gray-200">
+                    <thead className="bg-gray-100/70 text-gray-700 border-b border-[#e6ebf1]">
                       <tr>
                         <th className="py-2.5 px-4 font-medium">Tên tham số</th>
                         <th className="py-2.5 px-4 font-medium">Chiều dài kí tự</th>
@@ -96,7 +96,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
 
               <div>
                 <h3 className="text-sm font-semibold text-gray-900 mb-2">Tải danh sách mẫu</h3>
-                <button className="flex items-center gap-2 px-4 py-2 border border-green-500 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors">
+                <button className="flex items-center gap-2 px-4 py-2 border border-green-500 text-green-600 rounded-[10px] font-medium hover:bg-green-50 transition-colors">
                   <FileSpreadsheet className="w-5 h-5" /> Tải file mẫu <Download className="w-4 h-4 ml-1" />
                 </button>
               </div>
@@ -109,7 +109,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
                       type="checkbox" 
                       checked={checkDuplicates} 
                       onChange={(e) => setCheckDuplicates(e.target.checked)} 
-                      className="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500" 
+                      className="w-4 h-4 rounded border-[#e6ebf1] text-green-600 focus:ring-green-500" 
                     />
                   </div>
                   <div>
@@ -119,7 +119,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
                 </label>
 
                 <div 
-                  className="w-full border-2 border-dashed border-green-300 rounded-xl p-8 flex flex-col items-center justify-center bg-green-50/30 hover:bg-green-50/50 cursor-pointer transition-colors"
+                  className="w-full border-2 border-dashed border-green-300 rounded-[10px] p-8 flex flex-col items-center justify-center bg-green-50/30 hover:bg-green-50/50 cursor-pointer transition-colors"
                   onClick={() => handleNext()}
                 >
                   <UploadCloud className="w-8 h-8 text-green-500 mb-3" />
@@ -132,18 +132,18 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
 
           {step === 2 && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+              <div className="flex items-center gap-3 p-4 bg-blue-50 border border-blue-100 rounded-[10px]">
                 <CheckCircle className="w-6 h-6 text-blue-500" />
                 <div>
                   <h3 className="font-medium text-blue-900">Đã nạp file dữ liệu thành công</h3>
-                  <p className="text-sm text-blue-700">Tìm thấy {mockData.length} dòng dữ liệu hợp lệ.</p>
+                  <p className="text-sm text-[#3e79f7]">Tìm thấy {mockData.length} dòng dữ liệu hợp lệ.</p>
                 </div>
               </div>
 
-              <div className="border border-gray-200 rounded-lg overflow-hidden">
+              <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-sm whitespace-nowrap">
-                    <thead className="bg-gray-100/70 text-gray-700 border-b border-gray-200">
+                    <thead className="bg-gray-100/70 text-gray-700 border-b border-[#e6ebf1]">
                       <tr>
                         <th className="py-2.5 px-4 font-medium">Customer Name</th>
                         <th className="py-2.5 px-4 font-medium">Phone</th>
@@ -176,14 +176,14 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
                   value={campaignName}
                   onChange={(e) => setCampaignName(e.target.value)}
                   placeholder="Nhập tên chiến dịch (VD: CSKH tháng 10...)" 
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-3">Thời gian gửi chiến dịch</label>
                 <div className="space-y-3">
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${sendTime === 'now' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}>
+                  <label className={`flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all ${sendTime === 'now' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}`}>
                     <input type="radio" checked={sendTime === 'now'} onChange={() => setSendTime('now')} className="mt-1" />
                     <div className="flex items-center gap-2">
                        <Send className="w-5 h-5 text-gray-600" />
@@ -194,7 +194,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
                     </div>
                   </label>
 
-                  <label className={`flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all ${sendTime === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}`}>
+                  <label className={`flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all ${sendTime === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}`}>
                     <input type="radio" checked={sendTime === 'scheduled'} onChange={() => setSendTime('scheduled')} className="mt-1" />
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
@@ -207,7 +207,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
                           type="datetime-local" 
                           value={scheduleDate}
                           onChange={(e) => setScheduleDate(e.target.value)}
-                          className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full sm:w-64 px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       )}
                     </div>
@@ -222,7 +222,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 shrink-0 bg-gray-50">
           <button
             onClick={handleBack}
-            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-100 transition-colors"
+            className="px-6 py-2.5 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-100 transition-colors"
           >
             Quay lại
           </button>
@@ -230,7 +230,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
           {step < 3 ? (
             <button
               onClick={handleNext}
-              className="px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-2.5 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] transition-colors"
             >
               Tiếp tục
             </button>
@@ -238,7 +238,7 @@ export function ZbsCampaignQuickCreateModal({ open, onClose, template }: ZbsCamp
             <button
                onClick={handleFinish}
                disabled={!campaignName}
-               className="px-6 py-2.5 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+               className="px-6 py-2.5 text-sm font-medium text-white bg-[#2dc56a] rounded-[10px] hover:bg-[#04d182] transition-colors disabled:opacity-50"
             >
                Tạo chiến dịch
             </button>

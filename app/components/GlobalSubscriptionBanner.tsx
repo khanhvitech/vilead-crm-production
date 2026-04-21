@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React from 'react';
 import { useSubscription } from '@/app/contexts/SubscriptionContext';
@@ -16,7 +16,7 @@ export const GlobalSubscriptionBanner: React.FC = () => {
   return (
     <>
       {status === 'expiring_7d' && (
-        <div className="bg-red-600 text-white px-4 py-2 flex items-center justify-center gap-3 w-full shrink-0 z-50 text-sm">
+        <div className="bg-[#ff6b72] text-white px-4 py-2 flex items-center justify-center gap-3 w-full shrink-0 z-50 text-sm">
           <span className="font-medium">
             Thời gian dùng thử <strong>CRM Hệ thống</strong> chỉ còn <strong className="text-white">6 ngày</strong>. Quý khách vui lòng nâng cấp lên bản trả phí để không bị gián đoạn công việc.
           </span>

@@ -1,15 +1,15 @@
-'use client';
+﻿'use client';
 
 // ==================== TEMPLATE CARD COMPONENT ====================
 // Card hiển thị một template email với hover actions
 
 import React, { useState } from 'react';
-import { 
-  MoreVertical, 
-  Eye, 
-  Copy, 
-  Edit, 
-  Trash2, 
+import {
+  MoreVertical,
+  Eye,
+  Copy,
+  Edit,
+  Trash2,
   Mail,
   Calendar
 } from 'lucide-react';
@@ -25,8 +25,8 @@ interface TemplateCardProps {
   onDelete?: (template: EmailTemplate) => void;
 }
 
-export function TemplateCard({ 
-  template, 
+export function TemplateCard({
+  template,
   showEditActions,
   onPreview,
   onClone,
@@ -39,7 +39,7 @@ export function TemplateCard({
   // Generate placeholder thumbnail based on template name
   const getPlaceholderBg = (name: string) => {
     const colors = [
-      'from-indigo-500 to-purple-600',
+      'from-[#3e79f7] to-[#a461d8]',
       'from-blue-500 to-cyan-500',
       'from-green-500 to-teal-500',
       'from-orange-500 to-red-500',
@@ -52,7 +52,7 @@ export function TemplateCard({
 
   return (
     <div
-      className="relative bg-white rounded-xl border border-gray-200 overflow-hidden cursor-pointer group hover:shadow-lg hover:border-indigo-300 transition-all duration-200"
+      className="relative bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden cursor-pointer group hover:shadow-lg hover:border-[#699dff] transition-all duration-200"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => {
         setIsHovered(false);
@@ -70,7 +70,7 @@ export function TemplateCard({
         </div>
 
         {/* Hover Overlay with actions */}
-        <div 
+        <div
           className={`
             absolute inset-0 bg-black/50 flex items-center justify-center gap-3
             transition-opacity duration-200
@@ -78,7 +78,7 @@ export function TemplateCard({
           `}
         >
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-[10px] text-sm font-medium hover:bg-gray-100 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onPreview(template);
@@ -88,7 +88,7 @@ export function TemplateCard({
             Xem trước
           </button>
           <button
-            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-gray-800 rounded-[10px] text-sm font-medium hover:bg-gray-100 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
               onClone(template);
@@ -143,14 +143,14 @@ export function TemplateCard({
               {/* Dropdown Menu */}
               {showMenu && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
+                  <div
+                    className="fixed inset-0 z-10"
                     onClick={(e) => {
                       e.stopPropagation();
                       setShowMenu(false);
                     }}
                   />
-                  <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-20">
+                  <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-20">
                     <button
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50"
                       onClick={(e) => {
@@ -204,12 +204,12 @@ interface CreateNewTemplateCardProps {
 export function CreateNewTemplateCard({ onClick }: CreateNewTemplateCardProps) {
   return (
     <div
-      className="relative bg-white rounded-xl border-2 border-dashed border-gray-300 overflow-hidden cursor-pointer group hover:border-indigo-400 hover:bg-indigo-50/30 transition-all duration-200"
+      className="relative bg-white rounded-[10px] border-2 border-dashed border-[#e6ebf1] overflow-hidden cursor-pointer group hover:border-[#699dff] hover:bg-[#f0f7ff]/30 transition-all duration-200"
       onClick={onClick}
     >
       <div className="flex flex-col items-center justify-center h-64 text-center p-6">
-        <div className="w-16 h-16 rounded-full bg-indigo-100 flex items-center justify-center mb-4 group-hover:bg-indigo-200 transition-colors">
-          <span className="text-3xl font-light text-indigo-600">+</span>
+        <div className="w-16 h-16 rounded-full bg-[#f0f7ff] flex items-center justify-center mb-4 group-hover:bg-[#d6e8ff] transition-colors">
+          <span className="text-3xl font-light text-[#3e79f7]">+</span>
         </div>
         <h3 className="font-semibold text-gray-900 mb-2">Tạo mới</h3>
         <p className="text-sm text-gray-500">

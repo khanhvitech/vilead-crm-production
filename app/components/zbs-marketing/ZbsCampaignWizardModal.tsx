@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
 import {
@@ -157,8 +157,8 @@ function StepIndicator({ currentStep, steps }: { currentStep: number; steps: str
               <div
                 className={`
                   w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all
-                  ${isCompleted ? 'bg-green-500 text-white' : ''}
-                  ${isActive ? 'bg-blue-600 text-white ring-4 ring-blue-100' : ''}
+                  ${isCompleted ? 'bg-[#2dc56a] text-white' : ''}
+                  ${isActive ? 'bg-[#3e79f7] text-white ring-4 ring-blue-100' : ''}
                   ${!isActive && !isCompleted ? 'bg-gray-200 text-gray-500' : ''}
                 `}
               >
@@ -169,7 +169,7 @@ function StepIndicator({ currentStep, steps }: { currentStep: number; steps: str
               </span>
             </div>
             {index < steps.length - 1 && (
-              <div className={`w-12 h-0.5 ${currentStep > stepNum ? 'bg-green-500' : 'bg-gray-200'}`} />
+              <div className={`w-12 h-0.5 ${currentStep > stepNum ? 'bg-[#2dc56a]' : 'bg-gray-200'}`} />
             )}
           </React.Fragment>
         );
@@ -221,7 +221,7 @@ function Step1TemplateSelection({
           value={searchQuery}
           onChange={(e) => onSearchChange(e.target.value)}
           placeholder="Tìm kiếm mẫu theo tên hoặc ID..."
-          className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full pl-10 pr-4 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
         />
       </div>
 
@@ -242,9 +242,9 @@ function Step1TemplateSelection({
                 key={template.id}
                 onClick={() => !isDisabled && onSelect(template)}
                 className={`
-                  relative rounded-xl border-2 overflow-hidden transition-all
+                  relative rounded-[10px] border-2 overflow-hidden transition-all
                   ${isDisabled ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'}
-                  ${isSelected ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-gray-200 hover:border-gray-300'}
+                  ${isSelected ? 'border-blue-500 ring-2 ring-blue-100 shadow-md' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'}
                 `}
               >
                 {/* Thumbnail */}
@@ -269,7 +269,7 @@ function Step1TemplateSelection({
 
                   {/* Selected Checkmark */}
                   {isSelected && (
-                    <div className="absolute top-2 right-2 w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center shadow">
+                    <div className="absolute top-2 right-2 w-6 h-6 bg-[#3e79f7] rounded-full flex items-center justify-center shadow">
                       <Check className="w-4 h-4 text-white" />
                     </div>
                   )}
@@ -353,9 +353,9 @@ function Step2UploadExcel({
         <p className="text-xs text-gray-500 italic mb-3">
           Dữ liệu trong tập danh sách tải lên cần phải đúng thứ tự cột và quy định về tham số như bên dưới:
         </p>
-        <div className="border border-gray-200 rounded-lg overflow-hidden">
+        <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
+            <thead className="bg-gray-50 text-gray-700 border-b border-[#e6ebf1]">
               <tr>
                 <th className="py-2.5 px-4 font-medium">Tên tham số</th>
                 <th className="py-2.5 px-4 font-medium">Chiều dài kí tự</th>
@@ -378,7 +378,7 @@ function Step2UploadExcel({
       {/* Download Template */}
       <div>
         <h3 className="text-sm font-semibold text-gray-900 mb-2">Tải danh sách mẫu</h3>
-        <button className="flex items-center gap-2 px-4 py-2 border border-green-500 text-green-600 rounded-lg font-medium hover:bg-green-50 transition-colors">
+        <button className="flex items-center gap-2 px-4 py-2 border border-green-500 text-green-600 rounded-[10px] font-medium hover:bg-green-50 transition-colors">
           <FileSpreadsheet className="w-5 h-5" />
           Tải file mẫu
           <Download className="w-4 h-4 ml-1" />
@@ -393,7 +393,7 @@ function Step2UploadExcel({
             type="checkbox"
             checked={checkDuplicates}
             onChange={(e) => onCheckDuplicatesChange(e.target.checked)}
-            className="w-4 h-4 mt-0.5 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            className="w-4 h-4 mt-0.5 rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
           />
           <div>
             <span className="text-sm text-gray-800">Kiểm tra số điện thoại trùng lặp trong danh sách tải lên</span>
@@ -407,7 +407,7 @@ function Step2UploadExcel({
           onDrop={handleDrop}
           onClick={() => fileInputRef.current?.click()}
           className={`
-            w-full border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center cursor-pointer transition-all
+            w-full border-2 border-dashed rounded-[10px] p-8 flex flex-col items-center justify-center cursor-pointer transition-all
             ${dragOver ? 'border-green-500 bg-green-50' : 'border-green-300 bg-green-50/30 hover:bg-green-50/50'}
             ${isUploading ? 'pointer-events-none' : ''}
           `}
@@ -449,7 +449,7 @@ function Step3VerifyData({
   return (
     <div className="space-y-4">
       {/* Status Banner */}
-      <div className={`flex items-center gap-3 p-4 rounded-lg border ${invalidCount === 0 ? 'bg-blue-50 border-blue-100' : 'bg-yellow-50 border-yellow-100'}`}>
+      <div className={`flex items-center gap-3 p-4 rounded-[10px] border ${invalidCount === 0 ? 'bg-blue-50 border-blue-100' : 'bg-yellow-50 border-yellow-100'}`}>
         {invalidCount === 0 ? (
           <CheckCircle className="w-6 h-6 text-blue-500" />
         ) : (
@@ -459,17 +459,17 @@ function Step3VerifyData({
           <h3 className={`font-medium ${invalidCount === 0 ? 'text-blue-900' : 'text-yellow-900'}`}>
             {invalidCount === 0 ? 'Đã nạp file dữ liệu thành công' : 'File dữ liệu có một số lỗi'}
           </h3>
-          <p className={`text-sm ${invalidCount === 0 ? 'text-blue-700' : 'text-yellow-700'}`}>
+          <p className={`text-sm ${invalidCount === 0 ? 'text-[#3e79f7]' : 'text-yellow-700'}`}>
             Tìm thấy {validCount} dòng dữ liệu hợp lệ{invalidCount > 0 && `, ${invalidCount} dòng lỗi`}.
           </p>
         </div>
       </div>
 
       {/* Data Table */}
-      <div className="border border-gray-200 rounded-lg overflow-hidden">
+      <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         <div className="overflow-x-auto max-h-[300px]">
           <table className="w-full text-left text-sm whitespace-nowrap">
-            <thead className="bg-gray-50 text-gray-700 border-b border-gray-200 sticky top-0">
+            <thead className="bg-gray-50 text-gray-700 border-b border-[#e6ebf1] sticky top-0">
               <tr>
                 {template.params.map((param, i) => (
                   <th key={i} className="py-2.5 px-4 font-medium capitalize">
@@ -528,7 +528,7 @@ function Step4CampaignSetup({
           value={campaignName}
           onChange={(e) => onCampaignNameChange(e.target.value)}
           placeholder="Nhập tên chiến dịch (VD: CSKH tháng 10...)"
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+          className="w-full px-4 py-3 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
         />
       </div>
 
@@ -539,8 +539,8 @@ function Step4CampaignSetup({
           {/* Send Now */}
           <label
             className={`
-              flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
-              ${sendTime === 'now' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue  -200'}
+              flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all
+              ${sendTime === 'now' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-blue  -200'}
             `}
           >
             <input
@@ -561,8 +561,8 @@ function Step4CampaignSetup({
           {/* Schedule */}
           <label
             className={`
-              flex items-start gap-3 p-4 rounded-xl border-2 cursor-pointer transition-all
-              ${sendTime === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-blue-200'}
+              flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all
+              ${sendTime === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'}
             `}
           >
             <input
@@ -585,7 +585,7 @@ function Step4CampaignSetup({
                         type="date"
                         value={scheduleDate}
                         onChange={(e) => onScheduleDateChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                     <div className="w-32">
@@ -594,7 +594,7 @@ function Step4CampaignSetup({
                         type="time"
                         value={scheduleTime}
                         onChange={(e) => onScheduleTimeChange(e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
                   </div>
@@ -733,11 +733,11 @@ export function ZbsCampaignWizardModal({
   return (
     <div className="fixed inset-0 z-[70] bg-gray-50 flex flex-col h-screen overflow-hidden">
       {/* Header - Similar to Email Marketing */}
-      <div className="flex-shrink-0 bg-white border-b border-gray-200 px-6 h-16 flex items-center justify-between shadow-sm">
+      <div className="flex-shrink-0 bg-white border-b border-[#e6ebf1] px-6 h-16 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={onClose}
-            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+            className="p-2 -ml-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
           </button>
@@ -763,7 +763,7 @@ export function ZbsCampaignWizardModal({
           <button
             onClick={handleSaveDraft}
             disabled={isSaving}
-            className="flex items-center gap-2 px-4 py-2 border border-gray-300 text-gray-700 bg-white hover:bg-gray-50 rounded-lg font-medium transition-colors shadow-sm disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 bg-white hover:bg-gray-50 rounded-[10px] font-medium transition-colors shadow-sm disabled:opacity-50"
           >
             {isSaving ? (
               <Loader2 className="w-4 h-4 animate-spin" />
@@ -775,7 +775,7 @@ export function ZbsCampaignWizardModal({
           <button
             onClick={handleFinish}
             disabled={!isComplete}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] font-medium hover:bg-[#699dff] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Send className="w-4 h-4" />
             <span>Bắt đầu gửi</span>
@@ -787,7 +787,7 @@ export function ZbsCampaignWizardModal({
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-4xl mx-auto py-8 px-6">
           {/* Progress Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-8">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] overflow-hidden mb-8">
             <div className="p-6">
               <div className="flex items-center justify-between mb-4">
                 <div>
@@ -804,7 +804,7 @@ export function ZbsCampaignWizardModal({
               {/* Progress bar */}
               <div className="w-full bg-gray-100 rounded-full h-2 overflow-hidden">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+                  className="bg-[#3e79f7] h-2 rounded-full transition-all duration-500"
                   style={{ width: `${(completed / total) * 100}%` }}
                 />
               </div>
@@ -812,7 +812,7 @@ export function ZbsCampaignWizardModal({
           </div>
 
           {/* Setup Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] overflow-hidden">
             <div className="p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-2">Thiết lập chiến dịch</h2>
               <p className="text-sm text-gray-500 mb-6">Hoàn thành các mục sau để gửi ZNS</p>
@@ -822,12 +822,12 @@ export function ZbsCampaignWizardModal({
                 {/* Step 1: Template */}
                 <button
                   onClick={() => setStep(1)}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm ${
-                    selectedTemplate ? 'border-green-200 bg-green-50' : 'border-gray-200 hover:border-blue-200'
+                  className={`w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all hover:shadow-sm ${
+                    selectedTemplate ? 'border-green-200 bg-green-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    selectedTemplate ? 'bg-green-500' : 'bg-gray-100'
+                    selectedTemplate ? 'bg-[#2dc56a]' : 'bg-gray-100'
                   }`}>
                     {selectedTemplate ? (
                       <Check className="w-5 h-5 text-white" />
@@ -851,12 +851,12 @@ export function ZbsCampaignWizardModal({
                 <button
                   onClick={() => setStep(2)}
                   disabled={!selectedTemplate}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
-                    parsedData.length > 0 ? 'border-green-200 bg-green-50' : 'border-gray-200 hover:border-blue-200'
+                  className={`w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                    parsedData.length > 0 ? 'border-green-200 bg-green-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    parsedData.length > 0 ? 'bg-green-500' : 'bg-gray-100'
+                    parsedData.length > 0 ? 'bg-[#2dc56a]' : 'bg-gray-100'
                   }`}>
                     {parsedData.length > 0 ? (
                       <Check className="w-5 h-5 text-white" />
@@ -880,12 +880,12 @@ export function ZbsCampaignWizardModal({
                 <button
                   onClick={() => setStep(3)}
                   disabled={parsedData.length === 0}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
-                    validCount > 0 ? 'border-green-200 bg-green-50' : 'border-gray-200 hover:border-blue-200'
+                  className={`w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                    validCount > 0 ? 'border-green-200 bg-green-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    validCount > 0 ? 'bg-green-500' : 'bg-gray-100'
+                    validCount > 0 ? 'bg-[#2dc56a]' : 'bg-gray-100'
                   }`}>
                     {validCount > 0 ? (
                       <Check className="w-5 h-5 text-white" />
@@ -909,12 +909,12 @@ export function ZbsCampaignWizardModal({
                 <button
                   onClick={() => setStep(4)}
                   disabled={validCount === 0}
-                  className={`w-full flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
-                    campaignName.trim() ? 'border-green-200 bg-green-50' : 'border-gray-200 hover:border-blue-200'
+                  className={`w-full flex items-center gap-4 p-4 rounded-[10px] border-2 text-left transition-all hover:shadow-sm disabled:opacity-50 disabled:cursor-not-allowed ${
+                    campaignName.trim() ? 'border-green-200 bg-green-50' : 'border-[#e6ebf1] hover:border-[#c7d9fd]'
                   }`}
                 >
                   <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                    campaignName.trim() ? 'bg-green-500' : 'bg-gray-100'
+                    campaignName.trim() ? 'bg-[#2dc56a]' : 'bg-gray-100'
                   }`}>
                     {campaignName.trim() ? (
                       <Check className="w-5 h-5 text-white" />
@@ -1033,11 +1033,11 @@ function StepModal({
     <div className="fixed inset-0 z-[80] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-black/60" onClick={onClose} />
       
-      <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden z-10 max-h-[85vh]">
+      <div className="relative w-full max-w-4xl bg-white rounded-[10px] shadow-2xl flex flex-col overflow-hidden z-10 max-h-[85vh]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0 bg-gray-50">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-semibold">
+            <div className="w-8 h-8 bg-[#3e79f7] text-white rounded-full flex items-center justify-center text-sm font-semibold">
               {step}
             </div>
             <h2 className="text-lg font-semibold text-gray-900">{steps[step - 1]}</h2>
@@ -1056,7 +1056,7 @@ function StepModal({
         <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 shrink-0">
           <button
             onClick={step === 1 ? onClose : onBack}
-            className="flex items-center gap-2 px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-lg transition-colors"
+            className="flex items-center gap-2 px-4 py-2 text-gray-700 font-medium hover:bg-gray-100 rounded-[10px] transition-colors"
           >
             <ChevronLeft className="w-4 h-4" />
             {step === 1 ? 'Hủy' : 'Quay lại'}
@@ -1065,7 +1065,7 @@ function StepModal({
           <button
             onClick={() => { onNext(); if (step === 4) onClose(); }}
             disabled={!canProceed}
-            className="flex items-center gap-2 px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-2 px-6 py-2 bg-[#3e79f7] text-white font-medium rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {step === 4 ? 'Xác nhận' : 'Tiếp tục'}
             <ChevronRight className="w-4 h-4" />

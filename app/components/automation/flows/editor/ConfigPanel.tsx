@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import {
@@ -53,7 +53,7 @@ function Select({ value, onChange, children, className = '' }: {
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="w-full appearance-none bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-8"
+        className="w-full appearance-none bg-white border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent pr-8"
       >
         {children}
       </select>
@@ -74,7 +74,7 @@ function Input({ value, onChange, placeholder, className = '' }: {
       value={value}
       onChange={e => onChange(e.target.value)}
       placeholder={placeholder}
-      className={`w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent ${className}`}
+      className={`w-full bg-white border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent ${className}`}
     />
   )
 }
@@ -82,7 +82,7 @@ function Input({ value, onChange, placeholder, className = '' }: {
 // Upload zone
 function UploadZone({ label, icon, hint }: { label: string; icon: React.ReactNode; hint?: string }) {
   return (
-    <div className="border-2 border-dashed border-gray-200 rounded-xl p-6 flex flex-col items-center justify-center gap-2 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors group">
+    <div className="border-2 border-dashed border-[#e6ebf1] rounded-[10px] p-6 flex flex-col items-center justify-center gap-2 text-center cursor-pointer hover:border-blue-300 hover:bg-blue-50 transition-colors group">
       <div className="text-gray-300 group-hover:scale-110 transition-transform duration-300 group-hover:text-blue-500">{icon}</div>
       <p className="text-sm font-medium text-gray-500 group-hover:text-blue-600">{label}</p>
       {hint && <p className="text-xs text-gray-300 group-hover:text-blue-400/70">{hint}</p>}
@@ -104,7 +104,7 @@ function NodeItemsContainer<T extends { id: string }>({
     <div className="space-y-4 pr-7 relative">
       {items.map((item, i) => (
         <div key={item.id} className="relative group/item">
-          <div className="border border-gray-200 rounded-xl bg-white overflow-hidden p-0" style={{ borderStyle: 'dotted', borderWidth: 1.5 }}>
+          <div className="border border-[#e6ebf1] rounded-[10px] bg-white overflow-hidden p-0" style={{ borderStyle: 'dotted', borderWidth: 1.5 }}>
             {renderItem(item, (patch) => onChange(items.map(it => it.id === item.id ? { ...it, ...patch } : it)))}
           </div>
           <div className="absolute top-1 -right-7 flex flex-col items-center gap-0.5 opacity-0 group-hover/item:opacity-100 transition-opacity z-10 w-6">
@@ -135,7 +135,7 @@ function NodeItemsContainer<T extends { id: string }>({
           </div>
         </div>
       ))}
-      <button onClick={() => onChange([...items, newItemFactory()])} className="w-[calc(100%+36px)] flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm font-medium text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
+      <button onClick={() => onChange([...items, newItemFactory()])} className="w-[calc(100%+36px)] flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
         <Plus size={16} />
         {addButtonText}
       </button>
@@ -159,7 +159,7 @@ function TextForm({ data, onChange, nodeIndex }: { data: TextNodeData; onChange:
           ].map(opt => (
             <label key={opt.v} className="flex items-center gap-2.5 cursor-pointer">
               <div
-                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${msgType === opt.v ? 'border-blue-500 bg-blue-500' : 'border-gray-300'}`}
+                className={`w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all ${msgType === opt.v ? 'border-blue-500 bg-blue-500' : 'border-[#e6ebf1]'}`}
                 onClick={() => setMsgType(opt.v as 'within24h' | 'outside24h')}
               >
                 {msgType === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -179,7 +179,7 @@ function TextForm({ data, onChange, nodeIndex }: { data: TextNodeData; onChange:
         addButtonText="Thêm nội dung văn bản"
         renderItem={(item, update) => (
           <div>
-            <div className="border border-gray-200 rounded-xl overflow-hidden bg-gray-50/50">
+            <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden bg-gray-50/50">
               <textarea
                 value={item.content || ''}
                 onChange={e => update({ content: e.target.value })}
@@ -215,7 +215,7 @@ function ImageForm({ data, onChange }: { data: ImageNodeData; onChange: (d: Part
         <div className="space-y-3 p-1">
           <UploadZone label="Tải lên ảnh" icon={<Image size={32} />} hint="Kích thước ảnh: Nhỏ (1.91:1) - Lớn (1:1) • Tối đa 5MB" />
           <div className="relative">
-            <textarea value={item.caption || ''} onChange={e => update({ caption: e.target.value })} placeholder="Nhập tiêu đề..." rows={2} maxLength={45} className="w-full border border-gray-200 rounded-xl px-3.5 pt-3 pb-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none bg-gray-50/50" />
+            <textarea value={item.caption || ''} onChange={e => update({ caption: e.target.value })} placeholder="Nhập tiêu đề..." rows={2} maxLength={45} className="w-full border border-[#e6ebf1] rounded-[10px] px-3.5 pt-3 pb-2 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] resize-none bg-gray-50/50" />
             <span className="absolute bottom-2 right-3 text-xs text-gray-300">{(item.caption || '').length}/45</span>
           </div>
         </div>
@@ -309,7 +309,7 @@ function ButtonsForm({ data, onChange }: { data: ButtonsNodeData; onChange: (d: 
     <div className="space-y-4">
       <div className="space-y-2">
         {data.buttons.map((btn, i) => (
-          <div key={btn.id} className="border border-gray-200 rounded-xl p-3 space-y-2 group/btn">
+          <div key={btn.id} className="border border-[#e6ebf1] rounded-[10px] p-3 space-y-2 group/btn">
             <div className="flex items-center gap-2">
               <GripVertical size={12} className="text-gray-300 shrink-0" />
               <Input value={btn.label} onChange={v => updateButton(btn.id, { label: v })} placeholder={`Nút ${i + 1}`} className="flex-1" />
@@ -326,7 +326,7 @@ function ButtonsForm({ data, onChange }: { data: ButtonsNodeData; onChange: (d: 
                 <Copy size={12} />
               </button>
               {/* Delete */}
-              <button onClick={() => removeButton(btn.id)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
+              <button onClick={() => removeButton(btn.id)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-[10px]">
                 <Trash2 size={13} />
               </button>
             </div>
@@ -338,7 +338,7 @@ function ButtonsForm({ data, onChange }: { data: ButtonsNodeData; onChange: (d: 
           </div>
         ))}
         {data.buttons.length < 3 && (
-          <button onClick={addButton} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors">
+          <button onClick={addButton} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-[#e6ebf1] rounded-[10px] text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors">
             <Plus size={16} />
             Thêm nút
           </button>
@@ -377,7 +377,7 @@ function QuickReplyForm({ data, onChange }: { data: QuickReplyNodeData; onChange
   }
   return (
     <div className="space-y-4">
-      <div className="border border-gray-200 rounded-xl overflow-hidden">
+      <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
         <textarea
           placeholder="Nhập nội dung câu hỏi..."
           rows={3}
@@ -402,12 +402,12 @@ function QuickReplyForm({ data, onChange }: { data: QuickReplyNodeData; onChange
             <button onClick={() => duplicateReply(reply.id)} className="w-6 h-6 flex items-center justify-center text-gray-400 hover:text-green-600 rounded">
               <Copy size={12} />
             </button>
-            <button onClick={() => removeReply(reply.id)} className="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
+            <button onClick={() => removeReply(reply.id)} className="w-7 h-7 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-[10px]">
               <Trash2 size={13} />
             </button>
           </div>
         ))}
-        <button onClick={addReply} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors">
+        <button onClick={addReply} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-[#e6ebf1] rounded-[10px] text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors">
           <Plus size={16} />
           Thêm câu trả lời
         </button>
@@ -420,7 +420,7 @@ function QuickReplyForm({ data, onChange }: { data: QuickReplyNodeData; onChange
 function WaitResponseForm({ data, onChange }: { data: WaitResponseNodeData; onChange: (d: Partial<WaitResponseNodeData>) => void }) {
   return (
     <div className="space-y-4">
-      <div className="border border-gray-200 rounded-xl p-3">
+      <div className="border border-[#e6ebf1] rounded-[10px] p-3">
         <p className="text-xs text-gray-500 mb-2">Thời gian chờ phản hồi</p>
         <div className="flex items-center gap-2">
           <input
@@ -428,7 +428,7 @@ function WaitResponseForm({ data, onChange }: { data: WaitResponseNodeData; onCh
             value={data.timeoutValue || 24}
             onChange={e => onChange({ timeoutValue: Number(e.target.value) })}
             min={1}
-            className="w-20 border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-20 border border-[#e6ebf1] rounded-[10px] px-2.5 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
           />
           <Select value={data.timeoutUnit || 'hours'} onChange={v => onChange({ timeoutUnit: v as any })}>
             <option value="minutes">Phút</option>
@@ -437,7 +437,7 @@ function WaitResponseForm({ data, onChange }: { data: WaitResponseNodeData; onCh
           </Select>
         </div>
       </div>
-      <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-xl">
+      <div className="flex items-start gap-2 p-3 bg-blue-50 rounded-[10px]">
         <Info size={14} className="text-blue-400 mt-0.5 shrink-0" />
         <p className="text-xs text-blue-600">Bot sẽ chờ phản hồi từ khách hàng trong thời gian cài đặt trước khi chuyển sang bước tiếp theo.</p>
       </div>
@@ -493,12 +493,12 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
   return (
     <div className="space-y-4">
       {branches.map((branch, branchIndex) => (
-        <div key={branch.id} className="border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
+        <div key={branch.id} className="border border-[#e6ebf1] rounded-[10px] bg-white overflow-hidden shadow-sm">
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-gray-100 bg-gray-50">
             <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Nhóm điều kiện #{branchIndex + 1}</span>
             <div className="flex items-center gap-1">
-              <button onClick={() => addCondition(branch.id)} className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">
+              <button onClick={() => addCondition(branch.id)} className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-[#3e79f7] font-medium px-2 py-1 rounded hover:bg-blue-50 transition-colors">
                 <Plus size={11} /> Thêm
               </button>
               {branches.length > 1 && (
@@ -518,7 +518,7 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
               ].map(opt => (
                 <label key={opt.v} className="flex items-center gap-2 cursor-pointer group/logic">
                   <div
-                    className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${branch.logic === opt.v ? 'border-blue-500 bg-blue-500' : 'border-gray-300 group-hover/logic:border-blue-300'}`}
+                    className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center transition-colors ${branch.logic === opt.v ? 'border-blue-500 bg-blue-500' : 'border-[#e6ebf1] group-hover/logic:border-blue-300'}`}
                     onClick={() => updateBranchLogic(branch.id, opt.v as 'and' | 'or')}
                   >
                     {branch.logic === opt.v && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
@@ -530,7 +530,7 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
 
             {/* Conditions list */}
             {branch.conditions.length === 0 ? (
-              <div className="border border-dashed border-gray-200 rounded-lg p-4 flex flex-col items-center gap-1">
+              <div className="border border-dashed border-[#e6ebf1] rounded-[10px] p-4 flex flex-col items-center gap-1">
                 <GitBranch size={14} className="text-gray-300" />
                 <p className="text-[11px] text-gray-400">Chưa có điều kiện</p>
               </div>
@@ -541,7 +541,7 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
                   const operators = CONDITION_OPERATORS_BY_TYPE[fDef?.type || 'string'] || []
                   return (
                     <div key={cond.id} className="flex items-start gap-1.5 group/cond">
-                      <div className="flex-1 space-y-1.5 bg-gray-50/50 p-1.5 rounded-lg border border-transparent group-hover/cond:border-gray-100 group-hover/cond:bg-gray-50 transition-colors">
+                      <div className="flex-1 space-y-1.5 bg-gray-50/50 p-1.5 rounded-[10px] border border-transparent group-hover/cond:border-gray-100 group-hover/cond:bg-gray-50 transition-colors">
                         <Select value={cond.field} onChange={v => updateCondition(branch.id, cond.id, { field: v })}>
                           {CONDITION_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
                         </Select>
@@ -552,7 +552,7 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
                           <Input className="flex-1" value={String(cond.value)} onChange={v => updateCondition(branch.id, cond.id, { value: v })} placeholder="Giá trị" />
                         </div>
                       </div>
-                      <button onClick={() => removeCondition(branch.id, cond.id)} className="w-6 h-6 mt-1 flex items-center justify-center text-red-300 hover:bg-red-50 rounded-lg shrink-0 hover:text-red-500 opacity-0 group-hover/cond:opacity-100 transition-all">
+                      <button onClick={() => removeCondition(branch.id, cond.id)} className="w-6 h-6 mt-1 flex items-center justify-center text-red-300 hover:bg-red-50 rounded-[10px] shrink-0 hover:text-red-500 opacity-0 group-hover/cond:opacity-100 transition-all">
                         <Trash2 size={12} />
                       </button>
                     </div>
@@ -563,7 +563,7 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
             
             {/* Outcome hint for this branch */}
             <div className="flex items-center gap-2 pt-2 border-t border-gray-50">
-              <div className="w-1.5 h-1.5 rounded-full bg-green-500 shrink-0" />
+              <div className="w-1.5 h-1.5 rounded-full bg-[#2dc56a] shrink-0" />
               <span className="text-[10px] text-green-600 font-semibold tracking-wide">NẾU THỎA MÃN ĐIỀU KIỆN NÀY</span>
               <span className="text-[10px] text-green-400 ml-auto italic">→ Kéo handle xanh</span>
             </div>
@@ -571,14 +571,14 @@ function ConditionForm({ data, onChange }: { data: ConditionNodeData; onChange: 
         </div>
       ))}
       
-      <button onClick={addBranch} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
+      <button onClick={addBranch} className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-[#e6ebf1] rounded-[10px] text-sm text-gray-400 hover:border-blue-300 hover:text-blue-600 transition-colors bg-gray-50">
         <Plus size={16} />
         Thêm nhóm điều kiện
       </button>
 
       <Divider />
 
-      <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-xl border border-red-100">
+      <div className="flex items-center gap-2 p-2.5 bg-red-50 rounded-[10px] border border-red-100">
         <div className="w-2.5 h-2.5 rounded-full bg-red-400 shrink-0" />
         <span className="text-[11px] text-red-600 font-semibold">Nếu không thỏa mãn bất kỳ điều kiện nào</span>
         <span className="text-[10px] text-red-500 ml-auto italic">→ Kéo handle đỏ</span>
@@ -637,12 +637,12 @@ function RandomForm({ data, onChange }: { data: RandomNodeData; onChange: (d: Pa
                 min={0} max={100}
                 value={branch.percentage}
                 onChange={e => updateBranch(branch.id, { percentage: Number(e.target.value) })}
-                className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border border-[#e6ebf1] rounded-[10px] px-2 py-1.5 text-sm text-center text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               />
             </div>
             <span className="text-xs text-gray-400">%</span>
           </div>
-          <div className="p-2.5 rounded-xl border border-gray-200 text-xs text-gray-400 italic flex items-center gap-2">
+          <div className="p-2.5 rounded-[10px] border border-[#e6ebf1] text-xs text-gray-400 italic flex items-center gap-2">
             <Info size={11} className="shrink-0" />
             <span>Kéo từ handle phía dưới node để kết nối bước tiếp theo</span>
           </div>
@@ -651,7 +651,7 @@ function RandomForm({ data, onChange }: { data: RandomNodeData; onChange: (d: Pa
 
       <button
         onClick={addBranch}
-        className="w-full flex items-center justify-center gap-2 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700 transition-colors"
+        className="w-full flex items-center justify-center gap-2 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-medium hover:bg-[#699dff] transition-colors"
       >
         <Shuffle size={15} />
         Ngẫu nhiên mới
@@ -674,7 +674,7 @@ function DelayForm({ data, onChange }: { data: DelayNodeData; onChange: (d: Part
             min={1}
             value={data.value}
             onChange={e => onChange({ value: Number(e.target.value) })}
-            className="w-20 border border-gray-200 rounded-lg px-2.5 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-20 border border-[#e6ebf1] rounded-[10px] px-2.5 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
           />
           <Select value={data.unit} onChange={v => onChange({ unit: v as any })}>
             <option value="minutes">Phút</option>
@@ -689,24 +689,24 @@ function DelayForm({ data, onChange }: { data: DelayNodeData; onChange: (d: Part
         <span className="text-sm text-gray-600">Đặt giới hạn thời gian</span>
         <button
           onClick={() => setHasWindow(h => !h)}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${hasWindow ? 'bg-blue-600' : 'bg-gray-200'}`}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${hasWindow ? 'bg-[#3e79f7]' : 'bg-gray-200'}`}
         >
           <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${hasWindow ? 'translate-x-4.5' : 'translate-x-0.5'}`} />
         </button>
       </div>
 
       {hasWindow && (
-        <div className="p-3 border border-gray-200 rounded-xl space-y-2">
+        <div className="p-3 border border-[#e6ebf1] rounded-[10px] space-y-2">
           <SectionLabel>Khung giờ gửi</SectionLabel>
           <div className="flex items-center gap-2">
-            <input type="time" defaultValue="08:00" className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none" />
+            <input type="time" defaultValue="08:00" className="border border-[#e6ebf1] rounded-[10px] px-2 py-1.5 text-sm text-gray-700 focus:outline-none" />
             <span className="text-gray-400 text-sm">đến</span>
-            <input type="time" defaultValue="22:00" className="border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none" />
+            <input type="time" defaultValue="22:00" className="border border-[#e6ebf1] rounded-[10px] px-2 py-1.5 text-sm text-gray-700 focus:outline-none" />
           </div>
         </div>
       )}
 
-      <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl">
+      <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-[10px]">
         <Info size={14} className="text-amber-500 mt-0.5 shrink-0" />
         <p className="text-xs text-amber-700">Tin nhắn sẽ được gửi sau khi hết thời gian trì hoãn. Nếu cài giới hạn thời gian, tin nhắn sẽ được gửi trong khung giờ cho phép.</p>
       </div>
@@ -748,7 +748,7 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
     <div className="space-y-4">
       {data.actions.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-8 gap-3">
-          <div className="w-14 h-14 rounded-2xl bg-gray-50 border-2 border-dashed border-gray-200 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-[10px] bg-gray-50 border-2 border-dashed border-[#e6ebf1] flex items-center justify-center">
             <Zap size={24} className="text-gray-300" />
           </div>
           <p className="text-sm font-medium text-gray-500">Bạn chưa có hành động nào</p>
@@ -759,7 +759,7 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
           {data.actions.map((action, i) => {
             const def = ACTION_TYPES.find(a => a.value === action.type)
             return (
-              <div key={i} className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-xl">
+              <div key={i} className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-200 rounded-[10px]">
                 <Zap size={15} className="text-amber-500 shrink-0" />
                 <span className="text-sm text-amber-800 font-medium flex-1">{def?.label || action.type}</span>
                 <button onClick={() => moveAction(i, -1)} disabled={i === 0} className="w-5 h-5 flex items-center justify-center text-amber-400 hover:text-amber-700 disabled:opacity-30">
@@ -771,7 +771,7 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
                 <button onClick={() => duplicateAction(i)} className="w-5 h-5 flex items-center justify-center text-amber-400 hover:text-green-600">
                   <Copy size={12} />
                 </button>
-                <button onClick={() => removeAction(i)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-lg">
+                <button onClick={() => removeAction(i)} className="w-6 h-6 flex items-center justify-center text-red-400 hover:bg-red-50 rounded-[10px]">
                   <Trash2 size={12} />
                 </button>
               </div>
@@ -784,16 +784,16 @@ function ActionForm({ data, onChange }: { data: ActionNodeData; onChange: (d: Pa
       <div className="relative">
         <button
           onClick={() => setShowPicker(p => !p)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gray-200 rounded-xl text-sm text-gray-500 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-colors font-medium"
+          className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-[#e6ebf1] rounded-[10px] text-sm text-gray-500 hover:border-amber-400 hover:text-amber-600 hover:bg-amber-50 transition-colors font-medium"
         >
           <Plus size={16} />
           Thêm hành động
         </button>
 
         {showPicker && (
-          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+          <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 overflow-hidden">
             <div className="p-2.5 border-b border-gray-100">
-              <input placeholder="Tìm kiếm..." className="w-full text-sm px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none" />
+              <input placeholder="Tìm kiếm..." className="w-full text-sm px-3 py-2 rounded-[10px] bg-gray-50 border border-[#e6ebf1] focus:outline-none" />
             </div>
             <div className="max-h-56 overflow-y-auto">
               {groups.map(group => {
@@ -832,8 +832,8 @@ function CarouselForm({ data, onChange }: { data: CarouselNodeData; onChange: (d
       renderItem={(card, update) => (
         <div className="space-y-3 p-1">
           <UploadZone label="Tải lên ảnh hoặc link URL" icon={<Image size={24} />} hint="Kích thước ảnh: 1.91:1 / Tối đa 5MB" />
-          <input value={card.title} onChange={e => update({ title: e.target.value })} placeholder="Nhập tiêu đề..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          <input value={card.description || ''} onChange={e => update({ description: e.target.value })} placeholder="Nhập mô tả..." className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input value={card.title} onChange={e => update({ title: e.target.value })} placeholder="Nhập tiêu đề..." className="w-full border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" />
+          <input value={card.description || ''} onChange={e => update({ description: e.target.value })} placeholder="Nhập mô tả..." className="w-full border border-[#e6ebf1] rounded-[10px] px-3 py-2 text-sm text-gray-700 bg-gray-50/50 focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" />
         </div>
       )}
     />
@@ -850,7 +850,7 @@ function PanelHeader({ node, nodeIndex, onClose }: { node: FlowNode; nodeIndex: 
 
   return (
     <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-      <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: bg }}>
+      <div className="w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0" style={{ background: bg }}>
         <NodeIcon type={node.type} />
       </div>
       <div className="flex-1 min-w-0">
@@ -858,7 +858,7 @@ function PanelHeader({ node, nodeIndex, onClose }: { node: FlowNode; nodeIndex: 
       </div>
       <button
         onClick={onClose}
-        className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-gray-100 text-gray-400 transition-colors"
+        className="w-7 h-7 flex items-center justify-center rounded-[10px] hover:bg-gray-100 text-gray-400 transition-colors"
       >
         <X size={16} />
       </button>
@@ -889,7 +889,7 @@ export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelet
       case 'start':
         return (
           <div className="flex flex-col items-center justify-center py-8 gap-3 text-center">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-[10px] bg-blue-50 flex items-center justify-center">
               <Play size={24} className="text-blue-600" />
             </div>
             <p className="text-sm font-semibold text-gray-700">Node bắt đầu</p>
@@ -945,7 +945,7 @@ export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelet
             </div>
             <button
               className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${
-                noteEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                noteEnabled ? 'bg-[#3e79f7]' : 'bg-gray-200'
               }`}
               onClick={() => setNoteEnabled(v => !v)}
             >
@@ -961,7 +961,7 @@ export default function ConfigPanel({ selectedNode, nodeIndex, onUpdate, onDelet
                 onChange={e => setNoteText(e.target.value)}
                 placeholder="Nhập ghi chú cho node này..."
                 rows={3}
-                className="w-full border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none bg-amber-50 border-amber-200"
+                className="w-full border border-[#e6ebf1] rounded-[10px] px-3.5 py-2.5 text-sm text-gray-700 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-200 resize-none bg-amber-50 border-amber-200"
               />
               <p className="text-[10px] text-gray-400 mt-1 flex items-center gap-1">
                 <Info size={10} /> Ghi chú chỉ hiển thị trong chế độ chỉnh sửa

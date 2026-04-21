@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useEffect } from 'react';
 import { X, Users, Filter, ChevronDown, Check, AlertCircle, Loader2 } from 'lucide-react';
@@ -76,11 +76,11 @@ export function ZbsRecipientsModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex-shrink-0 border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex-shrink-0 border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900">Chọn người nhận</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
@@ -99,12 +99,12 @@ export function ZbsRecipientsModal({
               <div className="relative">
                 <button
                   onClick={() => setShowLabels(!showLabels)}
-                  className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="w-full flex items-center justify-between px-4 py-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-700">Nhãn khách hàng</span>
                     {filter.labels.length > 0 && (
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      <span className="px-2 py-0.5 bg-blue-100 text-[#3e79f7] text-xs rounded-full">
                         {filter.labels.length} đã chọn
                       </span>
                     )}
@@ -113,7 +113,7 @@ export function ZbsRecipientsModal({
                 </button>
                 
                 {showLabels && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg max-h-48 overflow-y-auto">
                     {MOCK_CUSTOMER_LABELS.map(label => (
                       <button
                         key={label.id}
@@ -140,12 +140,12 @@ export function ZbsRecipientsModal({
               <div className="relative">
                 <button
                   onClick={() => setShowSources(!showSources)}
-                  className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="w-full flex items-center justify-between px-4 py-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-700">Nguồn khách hàng</span>
                     {filter.sources.length > 0 && (
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      <span className="px-2 py-0.5 bg-blue-100 text-[#3e79f7] text-xs rounded-full">
                         {filter.sources.length} đã chọn
                       </span>
                     )}
@@ -154,7 +154,7 @@ export function ZbsRecipientsModal({
                 </button>
                 
                 {showSources && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg max-h-48 overflow-y-auto">
                     {MOCK_CUSTOMER_SOURCES.map(source => (
                       <button
                         key={source.id}
@@ -177,12 +177,12 @@ export function ZbsRecipientsModal({
               <div className="relative">
                 <button
                   onClick={() => setShowStatuses(!showStatuses)}
-                  className="w-full flex items-center justify-between px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="w-full flex items-center justify-between px-4 py-3 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                 >
                   <div className="flex items-center gap-2">
                     <span className="text-gray-700">Trạng thái khách hàng</span>
                     {filter.statuses.length > 0 && (
-                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full">
+                      <span className="px-2 py-0.5 bg-blue-100 text-[#3e79f7] text-xs rounded-full">
                         {filter.statuses.length} đã chọn
                       </span>
                     )}
@@ -191,7 +191,7 @@ export function ZbsRecipientsModal({
                 </button>
                 
                 {showStatuses && (
-                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg max-h-48 overflow-y-auto">
                     {MOCK_CUSTOMER_STATUSES.map(status => (
                       <button
                         key={status.id}
@@ -219,7 +219,7 @@ export function ZbsRecipientsModal({
             {hasFilters && (
                <button
                  onClick={() => updateFilter({ labels: [], sources: [], statuses: [] })}
-                 className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+                 className="mt-3 text-sm text-blue-600 hover:text-[#3e79f7]"
                >
                  Xóa tất cả bộ lọc
                </button>
@@ -227,8 +227,8 @@ export function ZbsRecipientsModal({
           </div>
 
           {/* Preview section */}
-          <div className="border border-gray-200 rounded-lg overflow-hidden">
-            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200 flex items-center justify-between">
+          <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+            <div className="bg-gray-50 px-4 py-3 border-b border-[#e6ebf1] flex items-center justify-between">
               <span className="font-medium text-gray-900">Xem trước người nhận</span>
               {isLoading && <Loader2 className="w-4 h-4 text-blue-600 animate-spin" />}
             </div>
@@ -236,22 +236,22 @@ export function ZbsRecipientsModal({
             {preview ? (
               <div className="p-4">
                 <div className="grid grid-cols-3 gap-4 text-center">
-                  <div className="p-4 bg-blue-50 rounded-lg">
+                  <div className="p-4 bg-blue-50 rounded-[10px]">
                     <p className="text-2xl font-bold text-blue-600">{preview.total_customers}</p>
                     <p className="text-sm text-gray-600">Tổng khách hàng</p>
                   </div>
-                  <div className="p-4 bg-green-50 rounded-lg">
+                  <div className="p-4 bg-green-50 rounded-[10px]">
                     <p className="text-2xl font-bold text-green-600">{preview.valid_emails}</p>
                     <p className="text-sm text-gray-600">SĐT hợp lệ</p>
                   </div>
-                  <div className="p-4 bg-red-50 rounded-lg">
+                  <div className="p-4 bg-red-50 rounded-[10px]">
                     <p className="text-2xl font-bold text-red-600">{preview.invalid_emails}</p>
                     <p className="text-sm text-gray-600">SĐT không hợp lệ</p>
                   </div>
                 </div>
 
                 {preview.invalid_emails > 0 && (
-                  <div className="mt-4 flex items-start gap-2 p-3 bg-yellow-50 rounded-lg">
+                  <div className="mt-4 flex items-start gap-2 p-3 bg-yellow-50 rounded-[10px]">
                     <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="text-sm text-yellow-800">
@@ -270,7 +270,7 @@ export function ZbsRecipientsModal({
                     <p className="text-sm font-medium text-gray-700 mb-2">Ví dụ người nhận:</p>
                     <div className="space-y-2">
                       {preview.sample_recipients.slice(0, 3).map((customer, index) => (
-                        <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-lg">
+                        <div key={index} className="flex items-center gap-3 p-2 bg-gray-50 rounded-[10px]">
                           <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-sm font-medium text-gray-600">
                             {customer.name.charAt(0)}
                           </div>
@@ -299,7 +299,7 @@ export function ZbsRecipientsModal({
         </div>
 
         {/* Footer */}
-        <div className="flex-shrink-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between rounded-b-xl">
+        <div className="flex-shrink-0 bg-gray-50 border-t border-[#e6ebf1] px-6 py-4 flex items-center justify-between rounded-b-xl">
           <div className="text-sm text-gray-500">
             {preview && (
               <span>
@@ -310,14 +310,14 @@ export function ZbsRecipientsModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-[10px] transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleConfirm}
               disabled={!preview || preview.valid_emails === 0}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               Xác nhận
             </button>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import {
@@ -51,7 +51,7 @@ export default function NodePalette({ onDragStart }: NodePaletteProps) {
             placeholder="Tìm kiếm..."
             value={search}
             onChange={e => setSearch(e.target.value)}
-            className="w-full pl-8 pr-3 py-2 text-xs text-gray-600 bg-gray-50 border border-gray-200 rounded-xl placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="w-full pl-8 pr-3 py-2 text-xs text-gray-600 bg-gray-50 border border-[#e6ebf1] rounded-[10px] placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
           />
         </div>
       </div>
@@ -87,11 +87,11 @@ export default function NodePalette({ onDragStart }: NodePaletteProps) {
                         key={node.type}
                         draggable
                         onDragStart={e => onDragStart(e, node.type as NodeType)}
-                        className="group flex items-center gap-3 px-2.5 py-2.5 rounded-xl hover:bg-gray-50 cursor-grab active:cursor-grabbing transition-colors select-none"
+                        className="group flex items-center gap-3 px-2.5 py-2.5 rounded-[10px] hover:bg-gray-50 cursor-grab active:cursor-grabbing transition-colors select-none"
                         title={node.description}
                       >
                         <div
-                          className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                          className="w-8 h-8 rounded-[10px] flex items-center justify-center shrink-0"
                           style={{ background: bg }}
                         >
                           <IconComp size={15} style={{ color }} strokeWidth={2} />

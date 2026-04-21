@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React, { useState, useMemo } from 'react';
 import { X, Send, Calendar, AlertTriangle, Users } from 'lucide-react';
@@ -51,17 +51,17 @@ export function ZbsConfirmStartModal({
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center">
       <div className="fixed inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-xl shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
+      <div className="relative bg-white rounded-[10px] shadow-xl w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-[#e6ebf1] px-6 py-4 flex items-center justify-between rounded-t-xl z-10">
           <h3 className="text-lg font-semibold text-gray-900">Bắt đầu gửi chiến dịch ZBS</h3>
-          <button onClick={onClose} className="p-1 rounded-lg hover:bg-gray-100">
+          <button onClick={onClose} className="p-1 rounded-[10px] hover:bg-gray-100">
             <X className="w-5 h-5 text-gray-500" />
           </button>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Campaign summary */}
-          <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+          <div className="bg-gray-50 rounded-[10px] p-4 space-y-2">
             <div className="flex justify-between">
               <span className="text-gray-500">Chiến dịch:</span>
               <span className="font-medium text-gray-900">{campaignName}</span>
@@ -85,8 +85,8 @@ export function ZbsConfirmStartModal({
             <div className="space-y-3">
               {/* Immediate */}
               <label className={`
-                flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all
-                ${sendType === 'immediate' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}
+                flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all
+                ${sendType === 'immediate' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'}
               `}>
                 <input
                   type="radio"
@@ -107,8 +107,8 @@ export function ZbsConfirmStartModal({
 
               {/* Scheduled */}
               <label className={`
-                flex items-start gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all
-                ${sendType === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:border-gray-300'}
+                flex items-start gap-3 p-4 rounded-[10px] border-2 cursor-pointer transition-all
+                ${sendType === 'scheduled' ? 'border-blue-500 bg-blue-50' : 'border-[#e6ebf1] hover:border-[#e6ebf1]'}
               `}>
                 <input
                   type="radio"
@@ -134,7 +134,7 @@ export function ZbsConfirmStartModal({
                           value={scheduledDate}
                           onChange={(e) => setScheduledDate(e.target.value)}
                           min={minDate}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                       <div>
@@ -143,7 +143,7 @@ export function ZbsConfirmStartModal({
                           type="time"
                           value={scheduledTime}
                           onChange={(e) => setScheduledTime(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                         />
                       </div>
                     </div>
@@ -155,7 +155,7 @@ export function ZbsConfirmStartModal({
 
           {/* Validation error */}
           {sendType === 'scheduled' && scheduledDate && scheduledTime && !isValidSchedule && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+            <div className="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-[10px]">
               <AlertTriangle className="w-5 h-5" />
               <span className="text-sm">Thời gian gửi phải ít nhất 5 phút sau hiện tại</span>
             </div>
@@ -163,7 +163,7 @@ export function ZbsConfirmStartModal({
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-50 border-t border-gray-200 px-6 py-4 flex items-center justify-between rounded-b-xl">
+        <div className="sticky bottom-0 bg-gray-50 border-t border-[#e6ebf1] px-6 py-4 flex items-center justify-between rounded-b-xl">
           <p className="text-sm text-gray-500">
             {sendType === 'immediate' && 'ZNS sẽ được gửi ngay'}
             {sendType === 'scheduled' && scheduledAt && `Sẽ gửi lúc ${formatDateTime(scheduledAt)}`}
@@ -171,14 +171,14 @@ export function ZbsConfirmStartModal({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-[10px] transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleConfirm}
               disabled={!canStart || isConfirming}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             >
               {isConfirming ? (
                 <>

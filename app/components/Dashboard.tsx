@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { 
@@ -318,7 +318,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         bg: 'bg-blue-50',
         dot: 'bg-blue-500',
         text: 'text-blue-900',
-        subtext: 'text-blue-700',
+        subtext: 'text-[#3e79f7]',
         badge: 'bg-blue-100 text-blue-800'
       }
     }
@@ -336,7 +336,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         bg: 'bg-blue-50',
         iconBg: 'bg-blue-500',
         text: 'text-blue-900',
-        subtext: 'text-blue-700'
+        subtext: 'text-[#3e79f7]'
       },
       icon: (
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -352,7 +352,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       type: 'demo',
       color: {
         bg: 'bg-green-50',
-        iconBg: 'bg-green-500',
+        iconBg: 'bg-[#2dc56a]',
         text: 'text-green-900',
         subtext: 'text-green-700'
       },
@@ -387,10 +387,10 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       location: 'Zoom Meeting',
       type: 'review',
       color: {
-        bg: 'bg-indigo-50',
-        iconBg: 'bg-indigo-500',
+        bg: 'bg-[#f0f7ff]',
+        iconBg: 'bg-[#f0f7ff]0',
         text: 'text-indigo-900',
-        subtext: 'text-indigo-700'
+        subtext: 'text-[#3e79f7]'
       },
       icon: (
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -414,7 +414,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         <select
           value={selectedPeriod}
           onChange={(e) => { setSelectedPeriod(e.target.value as any); setFiltersChanged(true) }}
-          className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
         >
           <option value="today">Hôm nay</option>
           <option value="this_week">Tuần này</option>
@@ -431,14 +431,14 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
             type="date"
             value={customStartDate}
             onChange={(e) => { setCustomStartDate(e.target.value); setFiltersChanged(true) }}
-            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
           />
           <span className="text-gray-500 text-sm">đến</span>
           <input
             type="date"
             value={customEndDate}
             onChange={(e) => { setCustomEndDate(e.target.value); setFiltersChanged(true) }}
-            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
           />
         </div>
         )}
@@ -461,7 +461,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
             setAppliedEmployee(filterEmployee)
             setFiltersChanged(false)
           }}
-          className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 h-10 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow-sm"
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 h-10 px-4 py-2 bg-[#2dc56a] hover:bg-[#04d182] text-white rounded-[10px] shadow-sm"
         >
           <FileText className="w-4 h-4" />
           Áp dụng bộ lọc
@@ -471,7 +471,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       {/* Metric Cards */}
       <div className="grid grid-cols-4 gap-4">
         <div 
-          className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
           onClick={() => {
             onNavigate?.('reports')
             setTimeout(() => {
@@ -494,7 +494,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         <div 
-          className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
           onClick={() => {
             onNavigate?.('reports')
             setTimeout(() => {
@@ -517,7 +517,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         <div 
-          className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-600 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-600 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
           onClick={() => {
             onNavigate?.('reports')
             setTimeout(() => {
@@ -540,7 +540,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         <div 
-          className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
           onClick={() => onNavigate?.('tasks')}
         >
           <div className="absolute top-2 right-2">
@@ -560,10 +560,10 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       {/* Main Content Grid - Charts and Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Enhanced Revenue Chart */}
-        <div className="lg:col-span-2 bg-white p-6 rounded-lg shadow border border-gray-200">
+        <div className="lg:col-span-2 bg-white p-6 rounded-[10px] shadow border border-[#e6ebf1]">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-3">
-              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-[10px] shadow">
                 <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
@@ -580,7 +580,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
           {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-4 mb-6">
             <div 
-              className="flex flex-col justify-between rounded-lg px-5 py-4 bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg"
+              className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg"
               onClick={() => {
                 onNavigate?.('reports')
                 setTimeout(() => {
@@ -599,7 +599,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
             </div>
             
-            <div className="flex flex-col justify-between rounded-lg px-5 py-4 bg-gradient-to-br from-green-600 to-green-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
+            <div className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-green-600 to-green-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
               <div>
                 <p className="text-sm font-semibold text-white/90 mb-1">KPI hôm nay</p>
                 <p className="text-3xl font-extrabold text-white">150M</p>
@@ -610,7 +610,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
             </div>
             
-            <div className="flex flex-col justify-between rounded-lg px-5 py-4 bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
+            <div className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
               <div>
                 <p className="text-sm font-semibold text-white/90 mb-1">Tăng trưởng TB</p>
                 <p className="text-3xl font-extrabold text-white">+5.5%</p>
@@ -656,7 +656,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                     const rem = Number(remainingVal?.value || 0) * 1000000000;
                     const kpi = rev + rem;
                     return (
-                      <div className="bg-white border border-gray-200 rounded-lg shadow-lg px-4 py-3 text-sm">
+                      <div className="bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg px-4 py-3 text-sm">
                         <p className="font-semibold text-gray-800 mb-2">Ngày: {label}</p>
                         <p className="text-gray-600">Doanh thu: <span className="font-semibold text-gray-900">{rev.toLocaleString('vi-VN')} VND</span></p>
                         <p className="text-gray-600">KPI: <span className="font-semibold text-gray-900">{kpi.toLocaleString('vi-VN')} VND</span></p>
@@ -707,11 +707,11 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         {/* Important Tasks & Schedule */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Công việc quan trọng</h3>
             <button 
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium"
               onClick={() => onNavigate?.('tasks')}
             >
               Xem tất cả
@@ -739,13 +739,13 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
           </div>
 
           {/* Upcoming Schedule */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="mt-6 pt-4 border-t border-[#e6ebf1]">
             <h4 className="text-md font-semibold text-gray-900 mb-3">Lịch quan trọng</h4>
             <div className="space-y-3">
               {/* Today's Schedule - Display up to 4 */}
               {todaySchedule.slice(0, 4).map((schedule) => (
-                <div key={schedule.id} className={`flex items-center space-x-3 p-2 ${schedule.color.bg} rounded-lg`}>
-                  <div className={`w-8 h-8 ${schedule.color.iconBg} rounded-lg flex items-center justify-center`}>
+                <div key={schedule.id} className={`flex items-center space-x-3 p-2 ${schedule.color.bg} rounded-[10px]`}>
+                  <div className={`w-8 h-8 ${schedule.color.iconBg} rounded-[10px] flex items-center justify-center`}>
                     {schedule.icon}
                   </div>
                   <div className="flex-1">
@@ -762,7 +762,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       {/* Conversion Funnel and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Conversion Funnel */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <h3 className="text-lg font-semibold mb-6">Phễu chuyển đổi</h3>
           <div className="space-y-4">
             {conversionData.map((stage, index) => {
@@ -775,7 +775,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${
-                        index === 0 ? 'bg-blue-600' :
+                        index === 0 ? 'bg-[#3e79f7]' :
                         index === 1 ? 'bg-blue-500' :
                         index === 2 ? 'bg-blue-400' :
                         index === 3 ? 'bg-blue-300' :
@@ -797,7 +797,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   {/* Funnel visualization */}
                   <div className="relative mb-4">
                     <div 
-                      className={`h-12 rounded-lg shadow-sm transition-all duration-500 flex items-center justify-between px-4 ${
+                      className={`h-12 rounded-[10px] shadow-sm transition-all duration-500 flex items-center justify-between px-4 ${
                         index === 0 ? 'bg-gradient-to-r from-blue-600 to-blue-500' :
                         index === 1 ? 'bg-gradient-to-r from-blue-500 to-blue-400' :
                         index === 2 ? 'bg-gradient-to-r from-blue-400 to-blue-300' :
@@ -828,7 +828,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   </div>
                   
                   {/* Conversion rate tooltip */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-0 right-0 bg-gray-900 text-white text-xs p-3 rounded-lg shadow-lg z-10 min-w-48">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-0 right-0 bg-gray-900 text-white text-xs p-3 rounded-[10px] shadow-lg z-10 min-w-48">
                     <div className="space-y-1">
                       <div className="font-semibold">{stage.stage}</div>
                       <div className="flex justify-between">
@@ -853,7 +853,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
           </div>
           
           {/* Summary */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="mt-6 pt-4 border-t border-[#e6ebf1]">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-lg font-bold text-blue-600">
@@ -878,11 +878,11 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         {/* Lead Sources Analysis */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Nguồn Leads & Phân tích</h3>
             <button 
-              className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+              className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium"
               onClick={() => {
                 onNavigate?.('reports')
                 setTimeout(() => {
@@ -897,9 +897,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
           
           {/* Lead Sources Performance */}
           <div className="space-y-3 mb-6">
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-[10px] border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-500 rounded-lg">
+                <div className="p-2 bg-blue-500 rounded-[10px]">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
@@ -915,9 +915,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-green-50 rounded-lg border border-green-100 hover:bg-green-100 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-[10px] border border-green-100 hover:bg-green-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-green-500 rounded-lg">
+                <div className="p-2 bg-[#2dc56a] rounded-[10px]">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
                   </svg>
@@ -933,9 +933,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-lg border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer">
+            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-[10px] border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-orange-500 rounded-lg">
+                <div className="p-2 bg-orange-500 rounded-[10px]">
                   <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 15.287c-.678 2.034-2.525 3.467-4.989 3.871a6.79 6.79 0 01-5.524-1.384 6.801 6.801 0 01-2.485-4.755c-.078-1.875.611-3.683 1.901-4.989a6.79 6.79 0 014.755-2.113c1.875-.078 3.683.611 4.989 1.901a6.801 6.801 0 012.485 4.755c.156 1.094-.078 2.189-.611 3.127l-.521.587z"/>
                   </svg>
@@ -969,7 +969,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
             
             {/* Calculation Guide */}
             {showCalculationGuide && (
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="mb-4 p-4 bg-blue-50 rounded-[10px] border border-[#c7d9fd]">
                 <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -986,9 +986,9 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                         Thời gian phản hồi
                       </h6>
                       <div className="text-xs text-gray-600 space-y-1">
-                        <div className="bg-blue-50 p-2 rounded mb-2 border-l-2 border-blue-400">
+                        <div className="bg-blue-50 p-2 rounded mb-2 border-l-2 border-[#699dff]">
                           <p className="font-medium text-blue-800 mb-1">📋 Định nghĩa:</p>
-                          <p className="text-blue-700">Thời gian từ khi <strong>nhận lead</strong> cho tới khi <strong>liên hệ</strong> (gọi điện, nhắn tin, email) lần đầu tiên</p>
+                          <p className="text-[#3e79f7]">Thời gian từ khi <strong>nhận lead</strong> cho tới khi <strong>liên hệ</strong> (gọi điện, nhắn tin, email) lần đầu tiên</p>
                         </div>
                         <p><strong>Công thức:</strong></p>
                         <p>Tổng thời gian phản hồi ÷ Số leads</p>
@@ -1036,7 +1036,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
 
                     {/* Assignment Calculation */}
                     <div className="bg-white p-3 rounded border border-blue-100">
-                      <h6 className="font-medium text-blue-700 mb-2 flex items-center">
+                      <h6 className="font-medium text-[#3e79f7] mb-2 flex items-center">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                         Phân bổ leads
                       </h6>
@@ -1102,7 +1102,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
             )}
             <div className="space-y-3">
               <div 
-                className="relative flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-red-100"
+                className="relative flex items-center justify-between p-3 bg-red-50 rounded-[10px] border border-red-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-red-100"
                 onMouseEnter={() => setHoveredBottleneck('response_time')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1117,7 +1117,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'response_time' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.response_time.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.response_time.explanation}</p>
                     
@@ -1144,7 +1144,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
 
               <div 
-                className="relative flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-yellow-100"
+                className="relative flex items-center justify-between p-3 bg-yellow-50 rounded-[10px] border border-yellow-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-yellow-100"
                 onMouseEnter={() => setHoveredBottleneck('negotiation')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1159,7 +1159,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'negotiation' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.negotiation.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.negotiation.explanation}</p>
                     
@@ -1186,7 +1186,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
               </div>
 
               <div 
-                className="relative flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-blue-100"
+                className="relative flex items-center justify-between p-3 bg-blue-50 rounded-[10px] border border-[#c7d9fd] cursor-help transition-all duration-200 hover:shadow-md hover:bg-blue-100"
                 onMouseEnter={() => setHoveredBottleneck('assignment')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1201,7 +1201,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'assignment' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.assignment.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.assignment.explanation}</p>
                     
@@ -1236,11 +1236,11 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       {/* Top Performers and Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Sales Performers */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Top nhân viên kinh doanh</h3>
             <button 
-              className="text-blue-600 hover:text-blue-700 text-sm"
+              className="text-blue-600 hover:text-[#3e79f7] text-sm"
               onClick={() => {
                 onNavigate?.('reports')
                 setTimeout(() => {
@@ -1292,11 +1292,11 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
         </div>
 
         {/* Top Products */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Top sản phẩm</h3>
             <button 
-              className="text-blue-600 hover:text-blue-700 text-sm"
+              className="text-blue-600 hover:text-[#3e79f7] text-sm"
               onClick={() => {
                 onNavigate?.('reports')
                 setTimeout(() => {
@@ -1323,7 +1323,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-3">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-[10px] flex items-center justify-center text-white text-xs font-bold">
                           {product.name.charAt(0)}
                         </div>
                         <div>
@@ -1354,7 +1354,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
       {/* Custom Date Range Modal */}
       {showCustomModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-96 max-w-md mx-4">
+          <div className="bg-white rounded-[10px] shadow-2xl p-6 w-96 max-w-md mx-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-gray-900">Chọn khoảng thời gian</h3>
               <button 
@@ -1376,7 +1376,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
               
@@ -1388,7 +1388,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
               
@@ -1403,7 +1403,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                       setCustomStartDate(lastMonth.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     30 ngày qua
                   </button>
@@ -1414,7 +1414,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                       setCustomStartDate(last3Months.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     3 tháng qua
                   </button>
@@ -1425,7 +1425,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                       setCustomStartDate(startOfYear.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     Từ đầu năm
                   </button>
@@ -1436,7 +1436,7 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
                       setCustomStartDate(lastYear.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     1 năm qua
                   </button>
@@ -1447,14 +1447,14 @@ export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) 
             <div className="flex space-x-3 mt-6">
               <button
                 onClick={() => setShowCustomModal(false)}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={applyCustomPeriod}
                 disabled={!customStartDate || !customEndDate}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-[10px] hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Áp dụng
               </button>

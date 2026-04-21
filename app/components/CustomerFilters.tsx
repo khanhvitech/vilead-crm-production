@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { 
@@ -67,7 +67,7 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
       <div className="flex items-center justify-between">
         <button
           onClick={() => setShowAdvanced(!showAdvanced)}
-          className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+          className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
         >
           <Filter className="w-4 h-4" />
           <span>Bộ lọc nâng cao</span>
@@ -81,7 +81,7 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
         {getActiveFilterCount() > 0 && (
           <button
             onClick={clearFilters}
-            className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg"
+            className="flex items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-[10px]"
           >
             <X className="w-4 h-4" />
             <span>Xóa bộ lọc</span>
@@ -391,7 +391,7 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="rounded border-[#e6ebf1] text-primary-600 focus:ring-primary-500"
                   checked={filters.isAtRisk || false}
                   onChange={(e) => updateFilter('isAtRisk', e.target.checked ? true : undefined)}
                 />
@@ -401,7 +401,7 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="rounded border-[#e6ebf1] text-primary-600 focus:ring-primary-500"
                   checked={filters.needsRemarketing || false}
                   onChange={(e) => updateFilter('needsRemarketing', e.target.checked ? true : undefined)}
                 />
@@ -411,7 +411,7 @@ export default function CustomerFilters({ onFilterChange, initialFilters = {} }:
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                  className="rounded border-[#e6ebf1] text-primary-600 focus:ring-primary-500"
                   checked={filters.hasUpcomingEvents || false}
                   onChange={(e) => updateFilter('hasUpcomingEvents', e.target.checked ? true : undefined)}
                 />

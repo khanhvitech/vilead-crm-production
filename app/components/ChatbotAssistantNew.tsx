@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useRef, useEffect } from 'react'
 
@@ -359,7 +359,7 @@ const ChatbotAssistant = () => {
             9
           </div>
         </button>
-        <div className="absolute -top-16 right-0 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute -top-16 right-0 bg-gray-800 text-white px-3 py-2 rounded-[10px] text-sm whitespace-nowrap opacity-0 hover:opacity-100 transition-opacity pointer-events-none">
           <div className="font-medium">Trợ lý Vileads AI</div>
           <div className="text-xs opacity-80">9 tính năng nhanh • Click để chat!</div>
         </div>
@@ -368,7 +368,7 @@ const ChatbotAssistant = () => {
   }
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 bg-white rounded-2xl shadow-2xl border-2 border-gray-100 w-[420px] h-[650px] flex flex-col overflow-hidden">
+    <div className="fixed bottom-6 right-6 z-50 bg-white rounded-[10px] shadow-2xl border-2 border-gray-100 w-[420px] h-[650px] flex flex-col overflow-hidden">
       {/* Enhanced Header */}
       <div className="flex items-center justify-between p-4 bg-gradient-to-r from-blue-500 via-purple-600 to-blue-500 text-white relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-purple-600/20 animate-pulse"></div>
@@ -386,7 +386,7 @@ const ChatbotAssistant = () => {
         </div>
         <button
           onClick={() => setIsOpen(false)}
-          className="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all relative z-10"
+          className="text-white/80 hover:text-white hover:bg-white/20 rounded-[10px] p-2 transition-all relative z-10"
         >
           ✕
         </button>
@@ -396,7 +396,7 @@ const ChatbotAssistant = () => {
       <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50">
         {messages.map((message) => (
           <div key={message.id} className={`flex ${message.sender === 'bot' ? 'justify-start' : 'justify-end'}`}>
-            <div className={`max-w-[85%] rounded-2xl px-4 py-3 shadow-sm ${
+            <div className={`max-w-[85%] rounded-[10px] px-4 py-3 shadow-sm ${
               message.sender === 'bot' 
                 ? 'bg-white text-gray-800 border border-gray-100' 
                 : 'bg-gradient-to-r from-blue-500 to-purple-600 text-white'
@@ -405,27 +405,27 @@ const ChatbotAssistant = () => {
               
               {/* Action buttons for special message types */}
               {message.type === 'form' && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                <div className="mt-3 pt-3 border-t border-[#e6ebf1]">
+                  <button className="bg-gradient-to-r from-green-500 to-blue-500 text-white px-4 py-2 rounded-[10px] text-sm font-medium hover:shadow-lg transition-all">
                     🚀 Bắt đầu tạo
                   </button>
                 </div>
               )}
               
               {message.type === 'report' && (
-                <div className="mt-3 pt-3 border-t border-gray-200 space-y-2">
-                  <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:shadow-lg transition-all mr-2">
+                <div className="mt-3 pt-3 border-t border-[#e6ebf1] space-y-2">
+                  <button className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1.5 rounded-[10px] text-xs font-medium hover:shadow-lg transition-all mr-2">
                     📊 Tạo báo cáo
                   </button>
-                  <button className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium hover:shadow-lg transition-all">
+                  <button className="bg-gradient-to-r from-green-500 to-teal-500 text-white px-3 py-1.5 rounded-[10px] text-xs font-medium hover:shadow-lg transition-all">
                     📈 Export Excel
                   </button>
                 </div>
               )}
               
               {message.type === 'action' && (
-                <div className="mt-3 pt-3 border-t border-gray-200">
-                  <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all">
+                <div className="mt-3 pt-3 border-t border-[#e6ebf1]">
+                  <button className="bg-gradient-to-r from-orange-500 to-red-500 text-white px-4 py-2 rounded-[10px] text-sm font-medium hover:shadow-lg transition-all">
                     ⚡ Thực hiện ngay
                   </button>
                 </div>
@@ -444,7 +444,7 @@ const ChatbotAssistant = () => {
         {/* Typing Indicator */}
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-100">
+            <div className="bg-white rounded-[10px] px-4 py-3 shadow-sm border border-gray-100">
               <div className="flex items-center space-x-2">
                 <div className="flex space-x-1">
                   <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
@@ -461,7 +461,7 @@ const ChatbotAssistant = () => {
       </div>
 
       {/* Quick Actions - Collapsible */}
-      <div className="px-4 py-3 border-t border-gray-200 bg-white">
+      <div className="px-4 py-3 border-t border-[#e6ebf1] bg-white">
         {/* Toggle Button */}
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
@@ -473,7 +473,7 @@ const ChatbotAssistant = () => {
           </div>
           <button
             onClick={() => setIsQuickActionsExpanded(!isQuickActionsExpanded)}
-            className="flex items-center space-x-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-lg transition-all duration-200"
+            className="flex items-center space-x-1 px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-all duration-200"
           >
             <span className="text-xs text-gray-600">
               {isQuickActionsExpanded ? 'Thu gọn' : 'Mở rộng'}
@@ -495,7 +495,7 @@ const ChatbotAssistant = () => {
               <button
                 key={action.id}
                 onClick={() => handleQuickAction(action.action)}
-                className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-purple-50 border border-gray-200 hover:border-blue-300 rounded-lg px-2 py-2 transition-all duration-200 text-left hover:shadow-sm transform hover:scale-105"
+                className="text-xs bg-gradient-to-r from-gray-50 to-gray-100 hover:from-blue-50 hover:to-purple-50 border border-[#e6ebf1] hover:border-blue-300 rounded-[10px] px-2 py-2 transition-all duration-200 text-left hover:shadow-sm transform hover:scale-105"
               >
                 <div className="font-medium text-gray-700 text-xs leading-tight">{action.label}</div>
               </button>
@@ -508,13 +508,13 @@ const ChatbotAssistant = () => {
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleQuickAction('quick_lead')}
-              className="text-xs bg-gradient-to-r from-blue-50 to-blue-100 border border-blue-200 hover:border-blue-300 rounded-lg px-3 py-2 transition-all duration-200 text-left hover:shadow-sm"
+              className="text-xs bg-gradient-to-r from-blue-50 to-blue-100 border border-[#c7d9fd] hover:border-blue-300 rounded-[10px] px-3 py-2 transition-all duration-200 text-left hover:shadow-sm"
             >
-              <div className="font-medium text-blue-700 text-xs">📝 Tạo Lead</div>
+              <div className="font-medium text-[#3e79f7] text-xs">📝 Tạo Lead</div>
             </button>
             <button
               onClick={() => handleQuickAction('smart_contract')}
-              className="text-xs bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 hover:border-purple-300 rounded-lg px-3 py-2 transition-all duration-200 text-left hover:shadow-sm"
+              className="text-xs bg-gradient-to-r from-purple-50 to-purple-100 border border-purple-200 hover:border-purple-300 rounded-[10px] px-3 py-2 transition-all duration-200 text-left hover:shadow-sm"
             >
               <div className="font-medium text-purple-700 text-xs">📋 Hợp đồng</div>
             </button>
@@ -523,14 +523,14 @@ const ChatbotAssistant = () => {
       </div>
 
       {/* Input Area */}
-      <div className="p-4 border-t border-gray-200 bg-white">
+      <div className="p-4 border-t border-[#e6ebf1] bg-white">
         <div className="flex items-end space-x-2">
           <input
             type="text"
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Nhập tin nhắn... (VD: Tạo hợp đồng cho ABC Corp)"
-            className="flex-1 border border-gray-300 rounded-2xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+            className="flex-1 border border-[#e6ebf1] rounded-[10px] px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
             onKeyPress={(e) => {
               if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault()
@@ -542,7 +542,7 @@ const ChatbotAssistant = () => {
           <button
             onClick={handleSendMessage}
             disabled={!inputValue.trim() || isTyping}
-            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-2xl px-6 py-3 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed"
+            className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:from-gray-300 disabled:to-gray-400 text-white rounded-[10px] px-6 py-3 text-sm font-medium transition-all duration-200 shadow-sm hover:shadow-md disabled:cursor-not-allowed"
           >
             {isTyping ? '⏳' : '🚀'}
           </button>

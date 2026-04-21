@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -489,9 +489,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
     <div className="space-y-6">
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-[10px]">
               <Bot className="w-5 h-5 text-blue-600" />
             </div>
             <div className="ml-3">
@@ -501,9 +501,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center">
-            <div className="p-2 bg-red-100 rounded-lg">
+            <div className="p-2 bg-red-100 rounded-[10px]">
               <AlertCircle className="w-5 h-5 text-red-600" />
             </div>
             <div className="ml-3">
@@ -513,9 +513,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center">
-            <div className="p-2 bg-green-100 rounded-lg">
+            <div className="p-2 bg-green-100 rounded-[10px]">
               <TrendingUp className="w-5 h-5 text-green-600" />
             </div>
             <div className="ml-3">
@@ -525,9 +525,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
           </div>
         </div>
         
-        <div className="bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+        <div className="bg-white p-4 rounded-[10px] border border-[#e6ebf1] shadow-sm">
           <div className="flex items-center">
-            <div className="p-2 bg-yellow-100 rounded-lg">
+            <div className="p-2 bg-yellow-100 rounded-[10px]">
               <CheckCircle className="w-5 h-5 text-yellow-600" />
             </div>
             <div className="ml-3">
@@ -539,9 +539,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
       </div>
 
       {/* Main Content */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1]">
         {/* Header with tabs */}
-        <div className="border-b border-gray-200 px-6 py-4">
+        <div className="border-b border-[#e6ebf1] px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex space-x-6">
               <button
@@ -571,10 +571,10 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                 <button
                   onClick={handleRefreshSuggestions}
                   disabled={isRefreshing}
-                  className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  className={`flex items-center space-x-2 px-4 py-2 text-sm font-medium rounded-[10px] transition-colors ${
                     isRefreshing
                       ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-[#3e79f7] text-white hover:bg-[#699dff]'
                   }`}
                   title="Cập nhật gợi ý từ AI"
                 >
@@ -585,7 +585,7 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                 <select
                   value={priorityFilter}
                   onChange={(e) => setPriorityFilter(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="all">Tất cả độ ưu tiên</option>
                   <option value="high">Cao</option>
@@ -596,7 +596,7 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                 <select
                   value={categoryFilter}
                   onChange={(e) => setCategoryFilter(e.target.value as any)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="all">Tất cả danh mục</option>
                   <option value="opportunity">Cơ hội</option>
@@ -625,13 +625,13 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                   {filteredSuggestions.map((suggestion) => (
                     <div
                       key={suggestion.id}
-                      className={`border rounded-lg p-4 transition-all duration-200 hover:shadow-md ${
-                        suggestion.isRead ? 'bg-gray-50 border-gray-200' : 'bg-white border-blue-200 shadow-sm'
+                      className={`border rounded-[10px] p-4 transition-all duration-200 hover:shadow-md ${
+                        suggestion.isRead ? 'bg-gray-50 border-[#e6ebf1]' : 'bg-white border-[#c7d9fd] shadow-sm'
                       }`}
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-3">
-                          <div className={`p-2 rounded-lg ${
+                          <div className={`p-2 rounded-[10px] ${
                             suggestion.priority === 'high' ? 'bg-red-100' :
                             suggestion.priority === 'medium' ? 'bg-yellow-100' : 'bg-green-100'
                           }`}>
@@ -678,17 +678,17 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                         </ul>
                       </div>
                       
-                      <div className="flex items-center justify-between pt-4 border-t border-gray-200">
+                      <div className="flex items-center justify-between pt-4 border-t border-[#e6ebf1]">
                         <div className="flex space-x-3">
                           <button
                             onClick={() => handleSuggestionAction(suggestion.id, 'accept')}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors text-sm font-medium"
                           >
                             Thực hiện ngay
                           </button>
                           <button
                             onClick={() => handleSuggestionAction(suggestion.id, 'dismiss')}
-                            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                            className="bg-gray-100 text-gray-700 px-4 py-2 rounded-[10px] hover:bg-gray-200 transition-colors text-sm font-medium"
                           >
                             Bỏ qua
                           </button>
@@ -732,9 +732,9 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                       className={`flex ${msg.isUser ? 'justify-end' : 'justify-start'}`}
                     >
                       <div
-                        className={`max-w-[70%] p-4 rounded-lg ${
+                        className={`max-w-[70%] p-4 rounded-[10px] ${
                           msg.isUser
-                            ? 'bg-blue-600 text-white rounded-br-none'
+                            ? 'bg-[#3e79f7] text-white rounded-br-none'
                             : 'bg-gray-100 text-gray-900 rounded-bl-none'
                         }`}
                       >
@@ -745,7 +745,7 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                 )}
                 {isProcessing && (
                   <div className="flex justify-start">
-                    <div className="bg-gray-100 p-4 rounded-lg rounded-bl-none">
+                    <div className="bg-gray-100 p-4 rounded-[10px] rounded-bl-none">
                       <div className="flex space-x-2">
                         <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce"></div>
                         <div className="w-3 h-3 bg-gray-400 rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
@@ -764,13 +764,13 @@ export default function AISuggestionsTab({ leads, deals, onSuggestionAction }: A
                   onChange={(e) => setChatInput(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
                   placeholder="Hỏi AI về sales..."
-                  className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="flex-1 px-4 py-3 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
                   disabled={isProcessing}
                 />
                 <button
                   onClick={handleChatSend}
                   disabled={!chatInput.trim() || isProcessing}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="bg-[#3e79f7] text-white px-6 py-3 rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <Send className="w-5 h-5" />
                 </button>

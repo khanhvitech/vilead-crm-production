@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useMemo } from 'react'
 import { X, Search, Check, ChevronRight } from 'lucide-react'
@@ -23,13 +23,13 @@ function TagSelector({ selectedIds, onChange, label }: {
   return (
     <div>
       <p className="text-xs font-semibold text-gray-600 mb-2">{label} *</p>
-      <div className="flex flex-wrap gap-2 p-3 border border-gray-200 rounded-xl min-h-[44px] bg-white">
+      <div className="flex flex-wrap gap-2 p-3 border border-[#e6ebf1] rounded-[10px] min-h-[44px] bg-white">
         {MOCK_TAGS_REF.map(tag => {
           const on = selectedIds.includes(tag.id)
           return (
             <button key={tag.id} type="button" onClick={() => toggle(tag.id)}
               className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium border transition-all ${
-                on ? 'border-transparent text-white shadow-sm' : 'border-gray-200 text-gray-700 bg-white hover:border-gray-300'
+                on ? 'border-transparent text-white shadow-sm' : 'border-[#e6ebf1] text-gray-700 bg-white hover:border-[#e6ebf1]'
               }`}
               style={on ? { background: tag.color } : {}}
             >
@@ -55,14 +55,14 @@ function InlineConfig({ actionType, config, onChange }: {
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-600">Chọn Luồng tin nhắn *</p>
           <select value={(config.flow_id as string) ?? ''} onChange={e => onChange({ flow_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white">
             <option value="">-- Chọn luồng --</option>
             {published.map(f => <option key={f.id} value={f.id}>{f.name}</option>)}
           </select>
           {sel && (
-            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg">
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-[10px]">
               <span className="text-blue-500">📨</span>
-              <span className="text-xs text-blue-700 font-medium">{sel.message_count} tin nhắn</span>
+              <span className="text-xs text-[#3e79f7] font-medium">{sel.message_count} tin nhắn</span>
               <span className="ml-auto text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full font-medium">Đã xuất bản</span>
             </div>
           )}
@@ -81,7 +81,7 @@ function InlineConfig({ actionType, config, onChange }: {
             <input type="text" value={(config.title as string) ?? ''}
               onChange={e => onChange({ ...config, title: e.target.value })}
               placeholder="VD: Gọi điện tư vấn KH"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]" />
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-600 mb-1.5">Giao cho <span className='text-red-500'>*</span></p>
@@ -102,10 +102,10 @@ function InlineConfig({ actionType, config, onChange }: {
             <div className="flex items-center gap-2">
               <input type="number" min={1} value={(config.deadline_value as number) ?? 24}
                 onChange={e => onChange({ ...config, deadline_value: Number(e.target.value) })}
-                className="w-20 px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center" />
+                className="w-20 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center" />
               <select value={(config.deadline_unit as string) ?? 'hours'}
                 onChange={e => onChange({ ...config, deadline_unit: e.target.value })}
-                className="px-3 py-2 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+                className="px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white">
                 <option value="hours">giờ</option>
                 <option value="days">ngày</option>
               </select>
@@ -122,7 +122,7 @@ function InlineConfig({ actionType, config, onChange }: {
             <textarea rows={2} value={(config.content as string) ?? ''}
               onChange={e => onChange({ ...config, content: e.target.value })}
               placeholder="VD: Gọi điện hỏi thăm KH"
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" />
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] resize-none" />
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-600 mb-1.5">Nhắc cho <span className='text-red-500'>*</span></p>
@@ -147,13 +147,13 @@ function InlineConfig({ actionType, config, onChange }: {
           <div className="flex items-center gap-3">
             <input type="number" min={1} max={1440} value={dur}
               onChange={e => onChange({ duration_minutes: Number(e.target.value) })}
-              className="w-24 px-3 py-2 text-sm font-semibold border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center" />
+              className="w-24 px-3 py-2 text-sm font-semibold border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center" />
             <span className="text-sm text-gray-600">phút (1–1440)</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {[15, 30, 60, 120, 480, 1440].map(v => (
               <button key={v} type="button" onClick={() => onChange({ duration_minutes: v })}
-                className={`px-3 py-1 text-xs rounded-lg border transition-colors ${dur === v ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:border-blue-400'}`}>
+                className={`px-3 py-1 text-xs rounded-[10px] border transition-colors ${dur === v ? 'bg-[#3e79f7] text-white border-[#3e79f7]' : 'border-[#e6ebf1] text-gray-600 hover:border-[#699dff]'}`}>
                 {v >= 60 ? `${v / 60}h` : `${v}p`}
               </button>
             ))}
@@ -162,13 +162,13 @@ function InlineConfig({ actionType, config, onChange }: {
       )
     }
     case 'resume_bot':
-      return <div className="p-3.5 bg-green-50 rounded-xl"><p className="text-sm text-green-700">Bot sẽ được bật lại ngay lập tức cho khách hàng này.</p></div>
+      return <div className="p-3.5 bg-green-50 rounded-[10px]"><p className="text-sm text-green-700">Bot sẽ được bật lại ngay lập tức cho khách hàng này.</p></div>
     case 'enroll_sequence':
       return (
         <div className="space-y-2">
           <p className="text-xs font-semibold text-gray-600">Kịch bản đăng ký *</p>
           <select value={(config.sequence_id as string) ?? ''} onChange={e => onChange({ sequence_id: e.target.value })}
-            className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+            className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white">
             <option value="">-- Chọn kịch bản --</option>
             {MOCK_SEQUENCE_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
           </select>
@@ -191,7 +191,7 @@ function InlineConfig({ actionType, config, onChange }: {
           </div>
           {mode === 'other' && (
             <select value={(config.sequence_id as string) ?? ''} onChange={e => onChange({ ...config, sequence_id: e.target.value })}
-              className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white">
+              className="w-full px-3 py-2.5 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white">
               <option value="">-- Chọn kịch bản cần hủy --</option>
               {MOCK_SEQUENCE_OPTIONS.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
             </select>
@@ -243,14 +243,14 @@ export default function ActionPickerModal({ onSave, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100 shrink-0">
           <div>
             <h3 className="text-base font-bold text-gray-900">Thêm hành động</h3>
             <p className="text-xs text-gray-500 mt-0.5">Chọn loại hành động và cấu hình chi tiết</p>
           </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-gray-100 transition-colors text-gray-400">
+          <button onClick={onClose} className="p-2 rounded-[10px] hover:bg-gray-100 transition-colors text-gray-400">
             <X size={18} />
           </button>
         </div>
@@ -264,7 +264,7 @@ export default function ActionPickerModal({ onSave, onClose }: Props) {
                 <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" />
                 <input type="text" value={search} onChange={e => setSearch(e.target.value)}
                   placeholder="Tìm kiếm..."
-                  className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50" />
+                  className="w-full pl-8 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-gray-50" />
               </div>
             </div>
 
@@ -277,7 +277,7 @@ export default function ActionPickerModal({ onSave, onClose }: Props) {
                     <button key={action.type} onClick={() => { setPickedType(action.type as ActionType); setConfig({}) }}
                       className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-left transition-colors ${
                         pickedType === action.type
-                          ? 'bg-blue-50 text-blue-700'
+                          ? 'bg-blue-50 text-[#3e79f7]'
                           : 'hover:bg-gray-50 text-gray-700'
                       }`}
                     >
@@ -320,11 +320,11 @@ export default function ActionPickerModal({ onSave, onClose }: Props) {
         {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-gray-100 bg-gray-50/60 shrink-0">
           <button onClick={onClose}
-            className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-xl transition-colors">
+            className="px-5 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-200 rounded-[10px] transition-colors">
             Hủy
           </button>
           <button onClick={handleSave} disabled={!canSave}
-            className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-5 py-2 text-sm font-semibold text-white bg-[#3e79f7] hover:bg-[#699dff] disabled:opacity-50 disabled:cursor-not-allowed rounded-[10px] transition-colors shadow-sm">
             <Check size={14} />
             Xác nhận
           </button>

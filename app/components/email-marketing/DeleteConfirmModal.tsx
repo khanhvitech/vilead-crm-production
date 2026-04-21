@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { X, AlertTriangle } from 'lucide-react'
@@ -33,9 +33,9 @@ export default function DeleteConfirmModal({ open, onClose, email, onConfirm }: 
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-xl w-full max-w-md mx-4">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+        <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
           <h3 className="text-lg font-semibold text-gray-900">Xác nhận xóa</h3>
           <button 
             onClick={onClose} 
@@ -63,7 +63,7 @@ export default function DeleteConfirmModal({ open, onClose, email, onConfirm }: 
             </p>
 
             {error && (
-              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-[10px]">
                 <p className="text-sm text-red-700 flex items-center justify-center">
                   <AlertTriangle className="w-4 h-4 mr-2" />
                   {error}
@@ -74,10 +74,10 @@ export default function DeleteConfirmModal({ open, onClose, email, onConfirm }: 
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200 bg-gray-50">
+        <div className="flex items-center justify-end space-x-3 p-4 border-t border-[#e6ebf1] bg-gray-50">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-gray-700 hover:bg-gray-200 rounded-[10px] transition-colors"
             disabled={isDeleting}
           >
             Hủy
@@ -85,7 +85,7 @@ export default function DeleteConfirmModal({ open, onClose, email, onConfirm }: 
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+            className="px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
           >
             {isDeleting ? (
               <>

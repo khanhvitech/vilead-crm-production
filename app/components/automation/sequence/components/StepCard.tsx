@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { GripVertical, MoreHorizontal, Clock, Zap, Filter, Pencil, Copy, Trash2 } from 'lucide-react'
@@ -72,10 +72,10 @@ export default function StepCard({ step, index, dragging, onEdit, onDuplicate, o
 
   return (
     <div
-      className={`group relative bg-white border rounded-2xl overflow-hidden transition-all duration-200 ${
+      className={`group relative bg-white border rounded-[10px] overflow-hidden transition-all duration-200 ${
         dragging
-          ? 'border-blue-400 shadow-lg shadow-blue-100 scale-[1.01] opacity-90'
-          : 'border-gray-200 hover:border-blue-200 hover:shadow-sm'
+          ? 'border-[#699dff] shadow-lg shadow-blue-100 scale-[1.01] opacity-90'
+          : 'border-[#e6ebf1] hover:border-[#c7d9fd] hover:shadow-sm'
       }`}
     >
       {/* Main row */}
@@ -90,7 +90,7 @@ export default function StepCard({ step, index, dragging, onEdit, onDuplicate, o
         </div>
 
         {/* Step number badge */}
-        <div className="w-7 h-7 rounded-xl bg-blue-600 text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
+        <div className="w-7 h-7 rounded-[10px] bg-[#3e79f7] text-white text-xs font-bold flex items-center justify-center shrink-0 mt-0.5">
           {index + 1}
         </div>
 
@@ -131,12 +131,12 @@ export default function StepCard({ step, index, dragging, onEdit, onDuplicate, o
               <button
                 type="button"
                 onClick={() => setMenuOpen(o => !o)}
-                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
+                className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
               >
                 <MoreHorizontal size={16} />
               </button>
               {menuOpen && (
-                <div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-xl shadow-xl z-50 w-44 overflow-hidden">
+                <div className="absolute right-0 top-8 bg-white border border-[#e6ebf1] rounded-[10px] shadow-xl z-50 w-44 overflow-hidden">
                   <button
                     onClick={() => { setMenuOpen(false); onEdit() }}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"

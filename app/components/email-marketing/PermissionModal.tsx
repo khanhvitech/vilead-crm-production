@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { X, Users, User, Settings, Search, CheckCircle } from 'lucide-react'
@@ -88,22 +88,22 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
       
       {/* Modal */}
       <div className="flex min-h-full items-center justify-center p-4">
-        <div className="relative w-full max-w-lg bg-white rounded-2xl shadow-xl transform transition-all">
+        <div className="relative w-full max-w-lg bg-white rounded-[10px] shadow-xl transform transition-all">
           {/* Header */}
-          <div className="px-6 py-4 border-b border-gray-200">
+          <div className="px-6 py-4 border-b border-[#e6ebf1]">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-gray-900">
                 Phân quyền sử dụng Sender
               </h3>
               <button
                 onClick={onClose}
-                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
             {/* Sender Info */}
-            <div className="mt-3 p-3 bg-gray-50 rounded-lg">
+            <div className="mt-3 p-3 bg-gray-50 rounded-[10px]">
               <p className="text-sm font-medium text-gray-900">{sender.email}</p>
               <p className="text-xs text-gray-500 mt-0.5">{sender.sender_name}</p>
             </div>
@@ -118,10 +118,10 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
               </label>
               <div className="space-y-2">
                 {/* Chỉ mình tôi */}
-                <label className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
+                <label className={`flex items-start p-3 border rounded-[10px] cursor-pointer transition-colors ${
                   permissionType === 'me' 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:bg-gray-50'
+                    : 'border-[#e6ebf1] hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -132,7 +132,7 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                       setPermissionType('me')
                       setSelectedUserIds([])
                     }}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 mt-0.5"
+                    className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7] mt-0.5"
                   />
                   <div className="ml-3">
                     <div className="flex items-center">
@@ -144,10 +144,10 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                 </label>
 
                 {/* Toàn bộ tổ chức */}
-                <label className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
+                <label className={`flex items-start p-3 border rounded-[10px] cursor-pointer transition-colors ${
                   permissionType === 'all' 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:bg-gray-50'
+                    : 'border-[#e6ebf1] hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -158,7 +158,7 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                       setPermissionType('all')
                       setSelectedUserIds([])
                     }}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 mt-0.5"
+                    className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7] mt-0.5"
                   />
                   <div className="ml-3">
                     <div className="flex items-center">
@@ -170,10 +170,10 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                 </label>
 
                 {/* Chỉ định cụ thể */}
-                <label className={`flex items-start p-3 border rounded-lg cursor-pointer transition-colors ${
+                <label className={`flex items-start p-3 border rounded-[10px] cursor-pointer transition-colors ${
                   permissionType === 'specific' 
                     ? 'border-blue-500 bg-blue-50' 
-                    : 'border-gray-200 hover:bg-gray-50'
+                    : 'border-[#e6ebf1] hover:bg-gray-50'
                 }`}>
                   <input
                     type="radio"
@@ -181,7 +181,7 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                     value="specific"
                     checked={permissionType === 'specific'}
                     onChange={() => setPermissionType('specific')}
-                    className="w-4 h-4 text-blue-600 focus:ring-blue-500 mt-0.5"
+                    className="w-4 h-4 text-blue-600 focus:ring-[#3e79f7] mt-0.5"
                   />
                   <div className="ml-3">
                     <div className="flex items-center">
@@ -204,7 +204,7 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                   <button
                     type="button"
                     onClick={handleSelectAll}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-xs text-blue-600 hover:text-[#3e79f7] font-medium"
                   >
                     {selectedUserIds.length === MOCK_USERS.length ? 'Bỏ chọn tất cả' : 'Chọn tất cả'}
                   </button>
@@ -218,13 +218,13 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                     placeholder="Tìm kiếm nhân viên..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent text-sm"
                   />
                 </div>
 
                 {/* User List */}
-                <div className={`border rounded-lg divide-y max-h-48 overflow-y-auto ${
-                  error ? 'border-red-300' : 'border-gray-200'
+                <div className={`border rounded-[10px] divide-y max-h-48 overflow-y-auto ${
+                  error ? 'border-red-300' : 'border-[#e6ebf1]'
                 }`}>
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(user => (
@@ -236,7 +236,7 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
                           type="checkbox"
                           checked={selectedUserIds.includes(user.id)}
                           onChange={() => toggleUserSelection(user.id)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                         />
                         <div className="ml-3 flex-1 min-w-0">
                           <div className="flex items-center">
@@ -269,18 +269,18 @@ export default function PermissionModal({ open, onClose, sender, onSubmit, loadi
           </div>
 
           {/* Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-end gap-3">
+          <div className="px-6 py-4 border-t border-[#e6ebf1] flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-[10px] transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 flex items-center"
             >
               {loading && (
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">

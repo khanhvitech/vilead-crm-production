@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState } from 'react'
 import { Bot, Clock, RefreshCcw, Check, Info } from 'lucide-react'
@@ -12,7 +12,7 @@ function Toggle({ checked, onChange, disabled }: { checked: boolean; onChange: (
       type="button"
       onClick={() => !disabled && onChange(!checked)}
       disabled={disabled}
-      className={`relative inline-flex items-center h-6 rounded-full transition-colors focus:outline-none shrink-0 ${checked ? 'bg-blue-600' : 'bg-gray-200'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
+      className={`relative inline-flex items-center h-6 rounded-full transition-colors focus:outline-none shrink-0 ${checked ? 'bg-[#3e79f7]' : 'bg-gray-200'} ${disabled ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'}`}
       style={{ width: 44 }}
     >
       <span
@@ -28,7 +28,7 @@ function SectionCard({ title, description, children }: {
   title: string; description?: string; children: React.ReactNode
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden">
+    <div className="bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
       <div className="px-6 py-4 border-b border-gray-100">
         <h3 className="text-sm font-bold text-gray-900">{title}</h3>
         {description && <p className="text-xs text-gray-500 mt-0.5 leading-relaxed">{description}</p>}
@@ -53,10 +53,10 @@ function BotPreview({ settings }: { settings: BotSettings }) {
   }
 
   return (
-    <div className="flex items-start gap-2.5 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
+    <div className="flex items-start gap-2.5 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[10px] border border-blue-100">
       <Info size={16} className="text-blue-500 mt-0.5 shrink-0" />
       <div>
-        <p className="text-xs font-semibold text-blue-700 mb-1">Xem trước cấu hình:</p>
+        <p className="text-xs font-semibold text-[#3e79f7] mb-1">Xem trước cấu hình:</p>
         <p className="text-sm text-blue-800 leading-relaxed italic">"{buildText()}"</p>
       </div>
     </div>
@@ -94,7 +94,7 @@ export default function BotSettingsPage() {
       {/* Header */}
       <div className="px-6 py-5 border-b border-gray-100 shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center">
+          <div className="w-10 h-10 rounded-[10px] bg-purple-50 flex items-center justify-center">
             <Bot size={20} className="text-purple-600" />
           </div>
           <div>
@@ -138,7 +138,7 @@ export default function BotSettingsPage() {
                     min={1} max={1440}
                     value={settings.pauseDurationMinutes || ''}
                     onChange={e => handleDurationChange(e.target.value)}
-                    className={`w-24 px-3 py-2.5 text-sm font-semibold text-gray-800 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 text-center transition-colors ${durationError ? 'border-red-400 bg-red-50' : 'border-gray-200'}`}
+                    className={`w-24 px-3 py-2.5 text-sm font-semibold text-gray-800 border rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-center transition-colors ${durationError ? 'border-red-400 bg-red-50' : 'border-[#e6ebf1]'}`}
                   />
                   <span className="text-sm text-gray-600">phút</span>
                   <span className="text-xs text-gray-400">(1 – 1440 phút)</span>
@@ -153,7 +153,7 @@ export default function BotSettingsPage() {
                       key={v}
                       type="button"
                       onClick={() => { setSettings(s => ({ ...s, pauseDurationMinutes: v })); setDurationError('') }}
-                      className={`px-2.5 py-1 text-xs rounded-lg border transition-colors ${settings.pauseDurationMinutes === v ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-200 text-gray-600 hover:border-blue-400 hover:text-blue-600'}`}
+                      className={`px-2.5 py-1 text-xs rounded-[10px] border transition-colors ${settings.pauseDurationMinutes === v ? 'bg-[#3e79f7] text-white border-[#3e79f7]' : 'border-[#e6ebf1] text-gray-600 hover:border-[#699dff] hover:text-blue-600'}`}
                     >
                       {v >= 60 ? `${v / 60}h` : `${v}p`}
                     </button>
@@ -204,7 +204,7 @@ export default function BotSettingsPage() {
           <button
             onClick={handleSave}
             disabled={saving || !!durationError}
-            className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60 shadow-sm"
+            className="flex items-center gap-2 px-6 py-2.5 bg-[#3e79f7] text-white rounded-[10px] text-sm font-semibold hover:bg-[#699dff] transition-colors disabled:opacity-60 shadow-sm"
           >
             {saving ? <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : null}
             {saving ? 'Đang lưu...' : 'Lưu cài đặt'}

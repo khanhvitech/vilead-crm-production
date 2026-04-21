@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React from 'react'
 import { getProgressColor } from './utils'
@@ -26,10 +26,10 @@ export default function LimitCard({
   description,
   resetTime 
 }: LimitCardProps) {
-  const progressColor = usage ? getProgressColor(usage.percentage) : 'bg-green-500'
+  const progressColor = usage ? getProgressColor(usage.percentage) : 'bg-[#2dc56a]'
   
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
+    <div className="bg-white p-6 rounded-[10px] border border-[#e6ebf1] shadow-sm">
       <h3 className="font-medium text-gray-900 mb-4">{title}</h3>
       
       <div className="flex items-center gap-4 mb-4">
@@ -44,7 +44,7 @@ export default function LimitCard({
           }}
           min={min}
           max={max}
-          className="w-32 px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-right font-medium"
+          className="w-32 px-3 py-2.5 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent text-right font-medium"
         />
         <span className="text-gray-600">{unit}</span>
       </div>
@@ -84,7 +84,7 @@ export default function LimitCard({
           </div>
           
           {usage.percentage >= 90 && (
-            <div className="p-2 bg-red-50 rounded-lg">
+            <div className="p-2 bg-red-50 rounded-[10px]">
               <p className="text-xs text-red-600">
                 ⚠️ Bạn sắp đạt giới hạn. Hãy cân nhắc tăng giới hạn hoặc giảm số lượng gửi.
               </p>

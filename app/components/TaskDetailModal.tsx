@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -190,16 +190,16 @@ export default function TaskDetailModal({
       case 'high': return 'bg-red-100 text-red-800 border-red-200'
       case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'low': return 'bg-green-100 text-green-800 border-green-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      default: return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'bg-green-100 text-green-800 border-green-200'
-      case 'in_progress': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'pending': return 'bg-gray-100 text-gray-800 border-gray-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
+      case 'in_progress': return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
+      case 'pending': return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
+      default: return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -310,7 +310,7 @@ export default function TaskDetailModal({
   const renderOverview = () => (
     <div className="space-y-6">
       {/* Task Status & Quick Actions */}
-      <div className="bg-gray-50 rounded-lg p-4">
+      <div className="bg-gray-50 rounded-[10px] p-4">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center space-x-3">
             {getStatusIcon(task.status)}
@@ -330,7 +330,7 @@ export default function TaskDetailModal({
               {task.status === 'pending' && (
                 <button
                   onClick={() => handleStatusChange('in_progress')}
-                  className="px-3 py-1 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-1"
+                  className="px-3 py-1 bg-[#3e79f7] text-white text-sm rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-1"
                 >
                   <Play className="w-3 h-3" />
                   <span>Bắt đầu</span>
@@ -339,7 +339,7 @@ export default function TaskDetailModal({
               {task.status === 'in_progress' && (
                 <button
                   onClick={() => handleStatusChange('completed')}
-                  className="px-3 py-1 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1"
+                  className="px-3 py-1 bg-[#2dc56a] text-white text-sm rounded-[10px] hover:bg-[#04d182] transition-colors flex items-center space-x-1"
                 >
                   <CheckCircle className="w-3 h-3" />
                   <span>Hoàn tất</span>
@@ -361,7 +361,7 @@ export default function TaskDetailModal({
                 type="text"
                 value={editForm.title || ''}
                 onChange={(e) => setEditForm(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 maxLength={100}
               />
             ) : (
@@ -375,7 +375,7 @@ export default function TaskDetailModal({
               <textarea
                 value={editForm.description || ''}
                 onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                 rows={3}
                 maxLength={1000}
               />
@@ -391,7 +391,7 @@ export default function TaskDetailModal({
                 type="datetime-local"
                 value={editForm.dueDate?.slice(0, 16) || ''}
                 onChange={(e) => setEditForm(prev => ({ ...prev, dueDate: e.target.value + ':00' }))}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               />
             ) : (
               <div className={`flex items-center space-x-2 ${isOverdue ? 'text-red-600' : 'text-gray-900'}`}>
@@ -412,7 +412,7 @@ export default function TaskDetailModal({
               <select
                 value={editForm.priority || ''}
                 onChange={(e) => setEditForm(prev => ({ ...prev, priority: e.target.value as 'low' | 'medium' | 'high' }))}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               >
                 <option value="low">Thấp</option>
                 <option value="medium">Trung bình</option>
@@ -433,7 +433,7 @@ export default function TaskDetailModal({
               <select
                 value={editForm.assignedTo || ''}
                 onChange={(e) => setEditForm(prev => ({ ...prev, assignedTo: e.target.value }))}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               >
                 {employees.map(emp => (
                   <option key={emp.id} value={emp.id}>{emp.name} - {emp.role}</option>
@@ -498,12 +498,12 @@ export default function TaskDetailModal({
             <textarea
               value={editForm.internalNotes || ''}
               onChange={(e) => setEditForm(prev => ({ ...prev, internalNotes: e.target.value }))}
-              className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               rows={2}
               maxLength={500}
             />
           ) : (
-            <div className="mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-gray-900">
+            <div className="mt-1 p-3 bg-yellow-50 border border-yellow-200 rounded-[10px] text-gray-900">
               {task.internalNotes}
             </div>
           )}
@@ -518,7 +518,7 @@ export default function TaskDetailModal({
         <h3 className="text-lg font-medium text-gray-900">Nhắc nhở</h3>
         <button
           onClick={() => setShowReminderForm(true)}
-          className="bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2 text-sm"
+          className="bg-[#3e79f7] text-white px-3 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-2 text-sm"
         >
           <Plus className="w-4 h-4" />
           <span>Thêm nhắc nhở</span>
@@ -527,7 +527,7 @@ export default function TaskDetailModal({
 
       {/* Add Reminder Form */}
       {showReminderForm && (
-        <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
           <h4 className="font-medium text-gray-900 mb-3">Tạo nhắc nhở mới</h4>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -537,7 +537,7 @@ export default function TaskDetailModal({
                 type="datetime-local"
                 value={newReminder.scheduledAt}
                 onChange={(e) => setNewReminder(prev => ({ ...prev, scheduledAt: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               />
             </div>
             
@@ -546,7 +546,7 @@ export default function TaskDetailModal({
               <select
                 value={newReminder.scheduleType}
                 onChange={(e) => setNewReminder(prev => ({ ...prev, scheduleType: e.target.value as 'once' | 'recurring' }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               >
                 <option value="once">Một lần</option>
                 <option value="recurring">Lặp lại</option>
@@ -560,7 +560,7 @@ export default function TaskDetailModal({
               <select
                 value={newReminder.recurringPattern}
                 onChange={(e) => setNewReminder(prev => ({ ...prev, recurringPattern: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               >
                 <option value="">Chọn tần suất</option>
                 <option value="daily">Hàng ngày</option>
@@ -589,10 +589,10 @@ export default function TaskDetailModal({
                         : [...prev.channels, channel.value as any]
                     }))
                   }}
-                  className={`px-3 py-2 border rounded-lg flex items-center space-x-2 text-sm ${
+                  className={`px-3 py-2 border rounded-[10px] flex items-center space-x-2 text-sm ${
                     newReminder.channels.includes(channel.value as any)
-                      ? 'border-blue-500 bg-blue-50 text-blue-700'
-                      : 'border-gray-300 hover:border-gray-400'
+                      ? 'border-blue-500 bg-blue-50 text-[#3e79f7]'
+                      : 'border-[#e6ebf1] hover:border-gray-400'
                   }`}
                 >
                   <channel.icon className="w-4 h-4" />
@@ -608,7 +608,7 @@ export default function TaskDetailModal({
               value={newReminder.content}
               onChange={(e) => setNewReminder(prev => ({ ...prev, content: e.target.value }))}
               placeholder="Nhập nội dung nhắc nhở..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
               rows={3}
               maxLength={500}
             />
@@ -618,7 +618,7 @@ export default function TaskDetailModal({
             <button
               onClick={addCustomReminder}
               disabled={!newReminder.scheduledAt || !newReminder.content}
-              className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              className="bg-[#2dc56a] text-white px-4 py-2 rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
             >
               <Save className="w-4 h-4" />
               <span>Lưu nhắc nhở</span>
@@ -640,7 +640,7 @@ export default function TaskDetailModal({
           <div>
             <h4 className="font-medium text-gray-700 mb-2">Nhắc nhở hệ thống</h4>
             {task.reminders.map(reminder => (
-              <div key={reminder.id} className="bg-white border border-gray-200 rounded-lg p-3">
+              <div key={reminder.id} className="bg-white border border-[#e6ebf1] rounded-[10px] p-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-2">
                     {reminder.type === 'zalo' && <MessageSquare className="w-4 h-4 text-green-600" />}
@@ -670,7 +670,7 @@ export default function TaskDetailModal({
           <div>
             <h4 className="font-medium text-gray-700 mb-2">Nhắc nhở tùy chỉnh</h4>
             {task.customReminders.map(reminder => (
-              <div key={reminder.id} className="bg-white border border-gray-200 rounded-lg p-3">
+              <div key={reminder.id} className="bg-white border border-[#e6ebf1] rounded-[10px] p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center space-x-2">
                     <span className="font-medium">{formatDateTime(reminder.scheduledAt)}</span>
@@ -718,7 +718,7 @@ export default function TaskDetailModal({
       ) : (
         <div className="space-y-3">
           {task.history.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).map(entry => (
-            <div key={entry.id} className="bg-white border border-gray-200 rounded-lg p-4">
+            <div key={entry.id} className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
               <div className="flex items-center justify-between mb-2">
                 <div className="font-medium text-gray-900">{entry.action}</div>
                 <div className="text-sm text-gray-500">{formatDateTime(entry.createdAt)}</div>
@@ -736,9 +736,9 @@ export default function TaskDetailModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-6xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
           <div className="flex items-center space-x-3">
             <h2 className="text-xl font-semibold text-gray-900">{task.title}</h2>
             {task.isAutoCreated && (
@@ -761,7 +761,7 @@ export default function TaskDetailModal({
             ) : (
               <button
                 onClick={handleSaveEdit}
-                className="px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-1"
+                className="px-3 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors flex items-center space-x-1"
               >
                 <Save className="w-4 h-4" />
                 <span>Lưu</span>
@@ -769,7 +769,7 @@ export default function TaskDetailModal({
             )}
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
@@ -777,7 +777,7 @@ export default function TaskDetailModal({
         </div>
 
         {/* Tabs */}
-        <div className="border-b border-gray-200">
+        <div className="border-b border-[#e6ebf1]">
           <nav className="-mb-px flex space-x-8 px-6 overflow-x-auto">
             {[
               { id: 'overview', label: 'Tổng quan', icon: FileText },
@@ -790,7 +790,7 @@ export default function TaskDetailModal({
                 className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap flex items-center space-x-2 ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                 }`}
               >
                 <tab.icon className="w-4 h-4" />

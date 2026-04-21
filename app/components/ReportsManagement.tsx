@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import {
@@ -1146,7 +1146,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
     <div className="space-y-6">
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -1161,7 +1161,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -1176,7 +1176,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -1191,7 +1191,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -1213,7 +1213,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('sales')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-blue-100 rounded-lg">
+              <div className="p-3 bg-blue-100 rounded-[10px]">
                 <BarChart3 className="w-6 h-6 text-blue-600" />
               </div>
               <div>
@@ -1228,7 +1228,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('performance')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-green-100 rounded-lg">
+              <div className="p-3 bg-green-100 rounded-[10px]">
                 <Users className="w-6 h-6 text-green-600" />
               </div>
               <div>
@@ -1243,7 +1243,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('process')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-purple-100 rounded-lg">
+              <div className="p-3 bg-purple-100 rounded-[10px]">
                 <Activity className="w-6 h-6 text-purple-600" />
               </div>
               <div>
@@ -1258,7 +1258,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('sources')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-yellow-100 rounded-lg">
+              <div className="p-3 bg-yellow-100 rounded-[10px]">
                 <Zap className="w-6 h-6 text-yellow-600" />
               </div>
               <div>
@@ -1273,7 +1273,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('cancellation')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-red-100 rounded-lg">
+              <div className="p-3 bg-red-100 rounded-[10px]">
                 <AlertTriangle className="w-6 h-6 text-red-600" />
               </div>
               <div>
@@ -1288,7 +1288,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           onClick={() => setActiveTab('custom')}>
           <CardContent className="p-6">
             <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gray-100 rounded-lg">
+              <div className="p-3 bg-gray-100 rounded-[10px]">
                 <FileText className="w-6 h-6 text-gray-600" />
               </div>
               <div>
@@ -1313,7 +1313,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               { name: 'Hiệu suất Team A - Tháng 6', type: 'Hiệu suất', date: '2025-06-06', status: 'completed' },
               { name: 'Phân tích Lead Facebook', type: 'Nguồn Lead', date: '2025-06-05', status: 'processing' }
             ].map((report, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border border-[#e6ebf1] rounded-[10px]">
                 <div className="flex items-center space-x-3">
                   <FileText className="w-5 h-5 text-gray-400" />
                   <div>
@@ -1354,7 +1354,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           <select
             value={selectedDateRange}
             onChange={(e) => setSelectedDateRange(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
           >
             <option value="today">Hôm nay</option>
             <option value="this_week">Tuần này</option>
@@ -1369,14 +1369,14 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 type="date"
                 value={customDateRange.start}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, start: e.target.value })}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               />
               <span className="text-gray-500 text-sm">đến</span>
               <input
                 type="date"
                 value={customDateRange.end}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, end: e.target.value })}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               />
             </div>
           )}
@@ -1408,7 +1408,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
           return (
             <>
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1424,7 +1424,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1438,7 +1438,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1452,7 +1452,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1670,7 +1670,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               </CardDescription>
             </div>
             <Button
-              className="bg-green-600 hover:bg-green-700 text-white"
+              className="bg-[#2dc56a] hover:bg-[#04d182] text-white"
               onClick={() => {
                 // Export all displayed records to Excel
                 console.log('Exporting to Excel...')
@@ -1794,7 +1794,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       {/* Sales Detail Modal */}
       {showSalesDetailModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] w-full max-w-6xl max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">Chi tiết doanh số ngày {formatDate(selectedDate)}</h2>
               <Button variant="ghost" size="sm" onClick={() => {
@@ -1817,20 +1817,20 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                       onChange={(e) => setModalSearchTerm(e.target.value)}
                     />
                   </div>
-                  <select className="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                  <select className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white">
                     <option value="">Phòng sale</option>
                     <option value="ps">PS Phòng sale</option>
                     <option value="sale1">Phòng Sale 1</option>
                     <option value="sale2">Phòng Sale 2</option>
                   </select>
-                  <select className="border border-gray-300 rounded px-3 py-2 text-sm bg-white">
+                  <select className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white">
                     <option value="">Chọn team</option>
                     <option value="team_a">Team A</option>
                     <option value="team_b">Team B</option>
                     <option value="team_c">Team C</option>
                   </select>
                 </div>
-                <Button className="bg-green-600 hover:bg-green-700">
+                <Button className="bg-[#2dc56a] hover:bg-[#04d182]">
                   <Download className="w-4 h-4 mr-2" />
                   Xuất dữ liệu
                 </Button>
@@ -1911,7 +1911,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           <select
             value={selectedDateRange}
             onChange={(e) => setSelectedDateRange(e.target.value)}
-            className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
           >
             <option value="today">Hôm nay</option>
             <option value="this_week">Tuần này</option>
@@ -1926,14 +1926,14 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 type="date"
                 value={customDateRange.start}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, start: e.target.value })}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               />
               <span className="text-gray-500 text-sm">đến</span>
               <input
                 type="date"
                 value={customDateRange.end}
                 onChange={(e) => setCustomDateRange({ ...customDateRange, end: e.target.value })}
-                className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               />
             </div>
           )}
@@ -1958,7 +1958,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
           return (
             <>
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1970,7 +1970,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1982,7 +1982,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -1994,7 +1994,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 </div>
               </div>
 
-              <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
+              <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
                 <div className="absolute top-2 right-2">
                   <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
                 </div>
@@ -2018,7 +2018,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <CardTitle>Bảng hiệu suất Sales</CardTitle>
               <CardDescription>Chi tiết hiệu quả bán hàng của từng sales</CardDescription>
             </div>
-            <Button className="bg-green-600 hover:bg-green-700 text-white">
+            <Button className="bg-[#2dc56a] hover:bg-[#04d182] text-white">
               <Download className="w-4 h-4 mr-2" />
               Xuất Excel
             </Button>
@@ -2108,7 +2108,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       {/* Performance Detail Modal */}
       {showPerformanceDetailModal && selectedSalesForDetail && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] w-full max-w-4xl max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b">
               <h2 className="text-xl font-bold">Chi tiết hiệu suất - {selectedSalesForDetail.salesPerson}</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowPerformanceDetailModal(false)}>
@@ -2118,7 +2118,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
             <div className="p-6">
               <div className="flex justify-end mb-6">
-                <Button className="bg-green-600 hover:bg-green-700 text-white">
+                <Button className="bg-[#2dc56a] hover:bg-[#04d182] text-white">
                   <Download className="w-4 h-4 mr-2" />
                   Xuất dữ liệu
                 </Button>
@@ -2327,7 +2327,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
           <div className="flex items-center space-x-3">
             <select
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+              className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               value={processFilterPeriod}
               onChange={(e) => setProcessFilterPeriod(e.target.value)}
             >
@@ -2344,14 +2344,14 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                   type="date"
                   value={processCustomDate.start}
                   onChange={(e) => setProcessCustomDate({ ...processCustomDate, start: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
                 <span className="text-gray-500 text-sm">đến</span>
                 <input
                   type="date"
                   value={processCustomDate.end}
                   onChange={(e) => setProcessCustomDate({ ...processCustomDate, end: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
               </div>
             )}
@@ -2363,7 +2363,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               selectedEmployee={reportEmployeeFilter}
               onEmployeeChange={setReportEmployeeFilter}
             />
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-green-600 hover:bg-green-700 text-white">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-[#2dc56a] hover:bg-[#04d182] text-white">
               <Download className="w-4 h-4 mr-2" />
               Xuất Excel
             </button>
@@ -2385,9 +2385,9 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 const isBottleneck = detectBottleneck(fs)
                 return (
                   <div key={fs.id} className="relative">
-                    <div className={`flex items-center justify-between p-4 rounded-lg ${isBottleneck
+                    <div className={`flex items-center justify-between p-4 rounded-[10px] ${isBottleneck
                         ? 'border-2 border-red-500 bg-red-50'
-                        : 'border border-gray-200'
+                        : 'border border-[#e6ebf1]'
                       }`}>
                       <div className="flex items-center space-x-4">
                         <div className="text-2xl font-bold text-blue-600">{index + 1}</div>
@@ -2412,7 +2412,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                             <div className="flex-1">
                               <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
                                 <div
-                                  className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${fs.conversionRate >= 80 ? 'bg-green-500' :
+                                  className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${fs.conversionRate >= 80 ? 'bg-[#2dc56a]' :
                                       fs.conversionRate >= 60 ? 'bg-blue-500' :
                                         fs.conversionRate >= 40 ? 'bg-yellow-500' :
                                           fs.conversionRate >= 20 ? 'bg-orange-500' :
@@ -2443,7 +2443,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                                       fs.dropoffRate >= 60 ? 'bg-orange-500' :
                                         fs.dropoffRate >= 40 ? 'bg-yellow-500' :
                                           fs.dropoffRate >= 20 ? 'bg-blue-500' :
-                                            'bg-green-500'
+                                            'bg-[#2dc56a]'
                                     }`}
                                   style={{ width: `${fs.dropoffRate}%` }}
                                 ></div>
@@ -2462,7 +2462,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
             {/* Bottleneck Warning */}
             {bottlenecks.length > 0 && (
-              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="mt-6 p-4 bg-red-50 border border-red-200 rounded-[10px]">
                 <div className="flex items-start gap-3">
                   <AlertTriangle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
                   <div className="flex-1">
@@ -2554,7 +2554,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
           <div className="flex items-center space-x-3">
             <select
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+              className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               value={sourceFilterPeriod}
               onChange={(e) => setSourceFilterPeriod(e.target.value)}
             >
@@ -2571,14 +2571,14 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                   type="date"
                   value={sourceCustomDate.start}
                   onChange={(e) => setSourceCustomDate({ ...sourceCustomDate, start: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
                 <span className="text-gray-500 text-sm">đến</span>
                 <input
                   type="date"
                   value={sourceCustomDate.end}
                   onChange={(e) => setSourceCustomDate({ ...sourceCustomDate, end: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
               </div>
             )}
@@ -2590,7 +2590,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               selectedEmployee={reportEmployeeFilter}
               onEmployeeChange={setReportEmployeeFilter}
             />
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-green-600 hover:bg-green-700 text-white">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-[#2dc56a] hover:bg-[#04d182] text-white">
               <Download className="w-4 h-4 mr-2" />
               Xuất Excel
             </button>
@@ -2628,8 +2628,8 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     </div>
                     <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
                       <div
-                        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${source.quality >= 90 ? 'bg-green-500' :
-                            source.quality >= 80 ? 'bg-green-500' :
+                        className={`absolute top-0 left-0 h-full rounded-full transition-all duration-500 ${source.quality >= 90 ? 'bg-[#2dc56a]' :
+                            source.quality >= 80 ? 'bg-[#2dc56a]' :
                               source.quality >= 70 ? 'bg-yellow-500' :
                                 source.quality >= 60 ? 'bg-orange-500' :
                                   'bg-red-500'
@@ -2668,7 +2668,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
       {/* Cancellation Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -2678,7 +2678,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -2688,7 +2688,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-red-600 to-red-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -2698,7 +2698,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           </div>
         </div>
 
-        <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-gray-600 to-gray-400">
+        <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-gray-600 to-gray-400">
           <div className="absolute top-2 right-2">
             <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
@@ -2721,7 +2721,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               { reason: 'Sai hợp đồng', count: 3, percentage: 25, color: 'yellow' },
               { reason: 'Chưa thanh toán', count: 2, percentage: 17, color: 'blue' }
             ].map((item) => (
-              <div key={item.reason} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div key={item.reason} className="flex items-center justify-between p-4 border border-[#e6ebf1] rounded-[10px]">
                 <div className="flex items-center space-x-3">
                   <div className={`w-3 h-3 rounded-full bg-${item.color}-500`}></div>
                   <span className="font-medium">{item.reason}</span>
@@ -2944,7 +2944,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
 
           <div className="flex items-center space-x-3">
             <select
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+              className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
               value={customerFilterPeriod}
               onChange={(e) => setCustomerFilterPeriod(e.target.value)}
             >
@@ -2961,14 +2961,14 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                   type="date"
                   value={customerCustomDate.start}
                   onChange={(e) => setCustomerCustomDate({ ...customerCustomDate, start: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
                 <span className="text-gray-500 text-sm">đến</span>
                 <input
                   type="date"
                   value={customerCustomDate.end}
                   onChange={(e) => setCustomerCustomDate({ ...customerCustomDate, end: e.target.value })}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white"
+                  className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white"
                 />
               </div>
             )}
@@ -2980,7 +2980,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               selectedEmployee={reportEmployeeFilter}
               onEmployeeChange={setReportEmployeeFilter}
             />
-            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-green-600 hover:bg-green-700 text-white">
+            <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-[#2dc56a] hover:bg-[#04d182] text-white">
               <Download className="w-4 h-4 mr-2" />
               Xuất Excel
             </button>
@@ -2999,7 +2999,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
           }
           return (
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
+          <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-blue-600 to-blue-400">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -3009,7 +3009,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
+          <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-purple-600 to-purple-400">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -3019,7 +3019,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-indigo-600 to-indigo-400">
+          <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-indigo-600 to-indigo-400">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -3029,7 +3029,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
+          <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-green-600 to-green-400">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -3039,7 +3039,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             </div>
           </div>
 
-          <div className="flex flex-col justify-between rounded-lg px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
+          <div className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl bg-gradient-to-br from-orange-600 to-orange-400">
             <div className="absolute top-2 right-2">
               <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
             </div>
@@ -3062,7 +3062,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             <CardContent>
               {/* Top metrics */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-green-50 rounded-lg p-4">
+                <div className="bg-green-50 rounded-[10px] p-4">
                   <p className="text-3xl font-bold text-green-600">39%</p>
                   <p className="text-sm text-gray-600 mt-1">Tỷ lệ quay lại</p>
                   <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
@@ -3070,7 +3070,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     +5.2%
                   </p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-4">
+                <div className="bg-blue-50 rounded-[10px] p-4">
                   <p className="text-3xl font-bold text-blue-600">2.3</p>
                   <p className="text-sm text-gray-600 mt-1">Tần suất mua TB</p>
                   <p className="text-xs text-blue-600 mt-1 flex items-center gap-1">
@@ -3114,7 +3114,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     <span className="text-sm text-gray-500">(8%)</span>
                   </div>
                   <div className="relative h-6 bg-gray-200 rounded-full overflow-hidden">
-                    <div className="absolute top-0 left-0 h-full bg-green-500 rounded-full flex items-center justify-end pr-2" style={{ width: '8%' }}>
+                    <div className="absolute top-0 left-0 h-full bg-[#2dc56a] rounded-full flex items-center justify-end pr-2" style={{ width: '8%' }}>
                       <span className="text-xs font-semibold text-white">39</span>
                     </div>
                   </div>
@@ -3131,13 +3131,13 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             <CardContent>
               {/* New vs Returning stats */}
               <div className="grid grid-cols-2 gap-4 mb-6">
-                <div className="bg-green-50 rounded-lg p-6 text-center">
+                <div className="bg-green-50 rounded-[10px] p-6 text-center">
                   <Users className="w-8 h-8 text-green-600 mx-auto mb-2" />
                   <p className="text-4xl font-bold text-green-600 mb-2">45</p>
                   <p className="text-sm text-gray-600 mb-1">Khách hàng mới</p>
                   <p className="text-xs text-green-600">+15% vs tháng trước</p>
                 </div>
-                <div className="bg-blue-50 rounded-lg p-6 text-center">
+                <div className="bg-blue-50 rounded-[10px] p-6 text-center">
                   <RefreshCw className="w-8 h-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-4xl font-bold text-blue-600 mb-2">82</p>
                   <p className="text-sm text-gray-600 mb-1">KH quay lại</p>
@@ -3149,7 +3149,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <div className="space-y-3">
                 <p className="font-semibold text-gray-900">Tỷ lệ doanh thu</p>
                 <div className="relative h-12 bg-gray-200 rounded-full overflow-hidden flex">
-                  <div className="h-full bg-green-500 flex items-center justify-center text-white font-semibold" style={{ width: '35%' }}>
+                  <div className="h-full bg-[#2dc56a] flex items-center justify-center text-white font-semibold" style={{ width: '35%' }}>
                     KH mới 35%
                   </div>
                   <div className="h-full bg-blue-500 flex items-center justify-center text-white font-semibold" style={{ width: '65%' }}>
@@ -3179,7 +3179,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-gray-200">
+                  <tr className="border-b border-[#e6ebf1]">
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">STT</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Khách hàng</th>
                     <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Phân khúc</th>
@@ -3234,9 +3234,9 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
         {/* Order Details Modal */}
         {isOrderModalOpen && selectedCustomer && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div className="bg-white rounded-[10px] shadow-xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
               {/* Modal Header */}
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
                 <h2 className="text-xl font-bold text-gray-900">
                   Chi tiết hiệu suất - {selectedCustomer.name}
                 </h2>
@@ -3252,7 +3252,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
                 {/* Export Button */}
                 <div className="flex justify-end mb-4">
-                  <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-green-600 hover:bg-green-700 text-white">
+                  <button className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-300 ease-omi-ease focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(62,121,247,0.2)] focus-visible:ring-offset-0 disabled:pointer-events-none disabled:opacity-50 border border-[#3e79f7] rounded-[10px] hover:border-[#699dff] active:bg-[#2a59d1] active:border-[#2a59d1] h-10 px-4 py-[8.5px] bg-[#2dc56a] hover:bg-[#04d182] text-white">
                     <Download className="w-4 h-4 mr-2" />
                     Xuất dữ liệu
                   </button>
@@ -3262,7 +3262,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 border-b border-gray-200">
+                      <tr className="bg-gray-50 border-b border-[#e6ebf1]">
                         <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">STT</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Mã đơn hàng</th>
                         <th className="text-left py-3 px-4 text-sm font-semibold text-gray-600">Sản phẩm</th>
@@ -3282,7 +3282,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                       ))}
                     </tbody>
                     <tfoot>
-                      <tr className="bg-gray-50 border-t-2 border-gray-300">
+                      <tr className="bg-gray-50 border-t-2 border-[#e6ebf1]">
                         <td colSpan={4} className="py-3 px-4 text-right font-semibold text-gray-900">
                           Tổng doanh số:
                         </td>
@@ -3351,7 +3351,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 lastRun: '2025-06-08'
               }
             ].map((report, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div key={index} className="flex items-center justify-between p-4 border border-[#e6ebf1] rounded-[10px]">
                 <div className="flex-1">
                   <div className="flex items-center space-x-3">
                     <FileText className="w-5 h-5 text-gray-400" />
@@ -3453,7 +3453,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <select
                 value={selectedPlatform}
                 onChange={(e) => setSelectedPlatform(e.target.value as any)}
-                className="border border-gray-300 rounded px-3 py-1 text-sm"
+                className="border border-[#e6ebf1] rounded px-3 py-1 text-sm"
               >
                 <option value="all">Tất cả</option>
                 <option value="zalo">Zalo</option>
@@ -3467,7 +3467,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <select
                 value={selectedDateRange}
                 onChange={(e) => setSelectedDateRange(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-1 text-sm"
+                className="border border-[#e6ebf1] rounded px-3 py-1 text-sm"
               >
                 <option value="today">Hôm nay</option>
                 <option value="yesterday">Hôm qua</option>
@@ -3600,7 +3600,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <select
                 value={comparisonPeriod1}
                 onChange={(e) => setComparisonPeriod1(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-1 text-sm"
+                className="border border-[#e6ebf1] rounded px-3 py-1 text-sm"
               >
                 <option value="this_month">Tháng này</option>
                 <option value="last_month">Tháng trước</option>
@@ -3616,7 +3616,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               <select
                 value={comparisonPeriod2}
                 onChange={(e) => setComparisonPeriod2(e.target.value)}
-                className="border border-gray-300 rounded px-3 py-1 text-sm"
+                className="border border-[#e6ebf1] rounded px-3 py-1 text-sm"
               >
                 <option value="last_month">Tháng trước</option>
                 <option value="last_quarter">Quý trước</option>
@@ -3793,7 +3793,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                                 </div>
                                 <div className="w-20 bg-gray-200 rounded-full h-2">
                                   <div
-                                    className={`h-2 rounded-full transition-all duration-300 ${kpi.achievement >= 100 ? 'bg-green-500' :
+                                    className={`h-2 rounded-full transition-all duration-300 ${kpi.achievement >= 100 ? 'bg-[#2dc56a]' :
                                         kpi.achievement >= 80 ? 'bg-yellow-500' : 'bg-red-500'
                                       }`}
                                     style={{ width: `${Math.min(kpi.achievement, 100)}%` }}
@@ -3834,7 +3834,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                           </div>
                           <div className="space-y-3">
                             {kpi.history.map((record) => (
-                              <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                              <div key={record.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                                 <div className="space-y-1">
                                   <div className="flex items-center space-x-2">
                                     <span className="font-medium">
@@ -3931,7 +3931,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                                 <div className="flex items-center space-x-2">
                                   <div className="w-20 bg-gray-200 rounded-full h-2">
                                     <div
-                                      className={`h-2 rounded-full ${avgAchievement >= 100 ? 'bg-green-500' :
+                                      className={`h-2 rounded-full ${avgAchievement >= 100 ? 'bg-[#2dc56a]' :
                                           avgAchievement >= 80 ? 'bg-yellow-500' : 'bg-red-500'
                                         }`}
                                       style={{ width: `${Math.min(avgAchievement, 100)}%` }}
@@ -4006,7 +4006,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       {/* Modals */}
       {showCreateModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Tạo báo cáo mới</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowCreateModal(false)}>
@@ -4027,7 +4027,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     { type: 'customer', name: 'Khách hàng', icon: Users, color: 'indigo' },
                     { type: 'source', name: 'Nguồn Lead', icon: Zap, color: 'yellow' }
                   ].map(reportType => (
-                    <div key={reportType.type} className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-300 cursor-pointer transition-colors">
+                    <div key={reportType.type} className="border-2 border-[#e6ebf1] rounded-[10px] p-4 hover:border-blue-300 cursor-pointer transition-colors">
                       <div className="flex items-center space-x-3">
                         <div className={`p-2 bg-${reportType.color}-100 rounded`}>
                           <reportType.icon className={`w-5 h-5 text-${reportType.color}-600`} />
@@ -4072,7 +4072,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Sản phẩm</label>
-                    <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                    <select className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm">
                       <option value="">Tất cả sản phẩm</option>
                       <option value="product1">Sản phẩm A</option>
                       <option value="product2">Sản phẩm B</option>
@@ -4080,7 +4080,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                   </div>
                   <div>
                     <label className="block text-xs text-gray-500 mb-1">Nhân viên</label>
-                    <select className="w-full border border-gray-300 rounded px-3 py-2 text-sm">
+                    <select className="w-full border border-[#e6ebf1] rounded px-3 py-2 text-sm">
                       <option value="">Tất cả nhân viên</option>
                       <option value="emp1">Nguyễn Văn An</option>
                       <option value="emp2">Trần Thị Bình</option>
@@ -4097,7 +4097,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     <input type="checkbox" className="rounded" />
                     <span className="text-sm">Gửi báo cáo tự động</span>
                   </label>
-                  <select className="border border-gray-300 rounded px-3 py-1 text-sm">
+                  <select className="border border-[#e6ebf1] rounded px-3 py-1 text-sm">
                     <option value="daily">Hàng ngày</option>
                     <option value="weekly">Hàng tuần</option>
                     <option value="monthly">Hàng tháng</option>
@@ -4122,7 +4122,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       {/* Export Modal */}
       {showExportModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <div className="bg-white rounded-[10px] p-6 w-full max-w-md">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold">Xuất báo cáo</h2>
               <Button variant="ghost" size="sm" onClick={() => setShowExportModal(false)}>
@@ -4179,7 +4179,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       {/* KPI Detail Modal */}
       {selectedKPI && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center space-x-3">
                 <h2 className="text-xl font-semibold">{selectedKPI.name}</h2>
@@ -4239,7 +4239,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-4">
                         <div
-                          className={`h-4 rounded-full transition-all duration-300 ${selectedKPI.achievement >= 100 ? 'bg-green-500' :
+                          className={`h-4 rounded-full transition-all duration-300 ${selectedKPI.achievement >= 100 ? 'bg-[#2dc56a]' :
                               selectedKPI.achievement >= 80 ? 'bg-yellow-500' : 'bg-red-500'
                             }`}
                           style={{ width: `${Math.min(selectedKPI.achievement, 100)}%` }}
@@ -4267,7 +4267,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
                     <h3 className="font-medium mb-3">Lịch sử cập nhật</h3>
                     <div className="space-y-3 max-h-64 overflow-y-auto">
                       {selectedKPI.history.map((record) => (
-                        <div key={record.id} className="p-3 bg-gray-50 rounded-lg">
+                        <div key={record.id} className="p-3 bg-gray-50 rounded-[10px]">
                           <div className="flex items-center justify-between mb-2">
                             <span className="font-medium">
                               {selectedKPI.unit === 'VND' ? formatCurrency(record.value) :
@@ -4321,7 +4321,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
+      <div className="border-b border-[#e6ebf1]">
         <nav className="flex space-x-8">
           {[
             { id: 'overview', name: 'Tổng quan', icon: <BarChart3 className="w-4 h-4" /> },
@@ -4338,7 +4338,7 @@ export default function ReportsManagement({ onNavigate }: { onNavigate?: (view: 
               onClick={() => setActiveTab(tab.id)}
               className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${activeTab === tab.id
                   ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                 }`}
             >
               <span className={activeTab === tab.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>

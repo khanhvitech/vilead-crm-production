@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useCallback, useMemo } from 'react'
 import { X, Users, Calendar, History } from 'lucide-react'
@@ -211,11 +211,11 @@ export function ChatShiftPermissionModal({
       <DialogContent className="max-w-5xl max-h-[90vh] p-0 gap-0">
         <div className="flex flex-col h-full max-h-[85vh]">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
             <div className="flex items-center gap-3">
               <div className={cn(
-                'w-10 h-10 rounded-lg flex items-center justify-center text-white text-sm font-bold',
-                accountType === 'facebook' ? 'bg-blue-600' :
+                'w-10 h-10 rounded-[10px] flex items-center justify-center text-white text-sm font-bold',
+                accountType === 'facebook' ? 'bg-[#3e79f7]' :
                 accountType === 'zalo-oa' ? 'bg-purple-600' :
                 'bg-blue-500'
               )}>
@@ -228,7 +228,7 @@ export function ChatShiftPermissionModal({
                     'px-2 py-0.5 rounded text-xs font-medium',
                     accountType === 'facebook' ? 'bg-blue-100 text-blue-800' :
                     accountType === 'zalo-oa' ? 'bg-purple-100 text-purple-800' :
-                    'bg-blue-100 text-blue-700'
+                    'bg-blue-100 text-[#3e79f7]'
                   )}>
                     {accountType === 'facebook' ? 'Facebook' :
                      accountType === 'zalo-oa' ? 'Zalo OA' :
@@ -239,14 +239,14 @@ export function ChatShiftPermissionModal({
             </div>
             <button
               onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              className="p-2 hover:bg-gray-100 rounded-[10px] transition-colors"
             >
               <X className="w-5 h-5 text-gray-500" />
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex items-center gap-1 px-4 py-2 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center gap-1 px-4 py-2 border-b border-[#e6ebf1] bg-gray-50">
             {tabs.map(tab => {
               const Icon = tab.icon
               return (
@@ -254,9 +254,9 @@ export function ChatShiftPermissionModal({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    'flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors',
+                    'flex items-center gap-2 px-4 py-2 rounded-[10px] text-sm font-medium transition-colors',
                     activeTab === tab.id
-                      ? 'bg-white text-[#3e79f7] shadow-sm border border-gray-200'
+                      ? 'bg-white text-[#3e79f7] shadow-sm border border-[#e6ebf1]'
                       : 'text-gray-600 hover:bg-white/50'
                   )}
                 >
@@ -295,7 +295,7 @@ export function ChatShiftPermissionModal({
             {activeTab === 'history' && (
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-[#1a3353]">Lịch sử thay đổi</h3>
-                <div className="border border-gray-200 rounded-lg overflow-hidden">
+                <div className="border border-[#e6ebf1] rounded-[10px] overflow-hidden">
                   <table className="w-full">
                     <thead className="bg-[#fafafb]">
                       <tr>
@@ -350,16 +350,16 @@ export function ChatShiftPermissionModal({
           </div>
 
           {/* Footer */}
-          <div className="flex items-center justify-end gap-3 p-4 border-t border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1] bg-gray-50">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
             >
               Đóng
             </button>
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-lg hover:bg-[#2e69e7] transition-colors"
+              className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#2e69e7] transition-colors"
             >
               Lưu thay đổi
             </button>

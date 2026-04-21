@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import React from 'react';
 import { Filter, ArrowRight, Info } from 'lucide-react';
@@ -19,7 +19,7 @@ const STAGE_COLORS: Record<string, string> = {
 export function EmailFunnelChart({ funnel, loading = false }: EmailFunnelChartProps) {
   if (loading) {
     return (
-      <div className="bg-white rounded-lg border p-6 animate-pulse">
+      <div className="bg-white rounded-[10px] border p-6 animate-pulse">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-5 h-5 bg-gray-200 rounded" />
           <div className="h-6 bg-gray-200 rounded w-36" />
@@ -39,7 +39,7 @@ export function EmailFunnelChart({ funnel, loading = false }: EmailFunnelChartPr
 
   if (!funnel || funnel.stages.length === 0) {
     return (
-      <div className="bg-white rounded-lg border p-6">
+      <div className="bg-white rounded-[10px] border p-6">
         <div className="flex items-center gap-2 mb-6">
           <Filter className="h-5 w-5 text-blue-500" />
           <h3 className="text-lg font-semibold text-gray-900">Phễu chuyển đổi</h3>
@@ -54,7 +54,7 @@ export function EmailFunnelChart({ funnel, loading = false }: EmailFunnelChartPr
   const maxValue = funnel.stages[0]?.count || 1;
 
   return (
-    <div className="bg-white rounded-lg border p-6">
+    <div className="bg-white rounded-[10px] border p-6">
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
@@ -63,7 +63,7 @@ export function EmailFunnelChart({ funnel, loading = false }: EmailFunnelChartPr
         </div>
         <div className="group relative">
           <Info className="h-4 w-4 text-gray-400 cursor-help" />
-          <div className="invisible group-hover:visible absolute right-0 top-6 bg-gray-900 text-white text-xs rounded-lg p-3 w-64 z-10">
+          <div className="invisible group-hover:visible absolute right-0 top-6 bg-gray-900 text-white text-xs rounded-[10px] p-3 w-64 z-10">
             Phễu hiển thị hành trình của email từ lúc gửi đến khi người nhận click vào liên kết
           </div>
         </div>
@@ -111,14 +111,14 @@ export function EmailFunnelChart({ funnel, loading = false }: EmailFunnelChartPr
               {/* Conversion arrow between stages */}
               {index < funnel.stages.length - 1 && (
                 <div className="flex items-center ml-28 my-2 text-gray-400">
-                  <div className="flex-1 border-t border-dashed border-gray-300" />
+                  <div className="flex-1 border-t border-dashed border-[#e6ebf1]" />
                   <div className="px-2 flex items-center gap-1 text-xs">
                     <ArrowRight className="h-3 w-3" />
                     <span className="text-gray-500">
                       {((funnel.stages[index + 1].count / stage.count) * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <div className="flex-1 border-t border-dashed border-gray-300" />
+                  <div className="flex-1 border-t border-dashed border-[#e6ebf1]" />
                 </div>
               )}
             </div>
