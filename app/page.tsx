@@ -15,6 +15,9 @@ import SettingsManagement from './components/SettingsManagement'
 import ChatManagement from './components/ChatManagement'
 import MarketingCampaigns from './components/MarketingCampaigns'
 import AutomationManagement from './components/automation/AutomationManagement'
+import MktSectionPage from '@/src/modules/mkt/pages/MktSectionPage'
+import { mapAppRoleToMktRole } from '@/src/modules/mkt/utils/roleMapping'
+import { MOCK_USERS } from '@/src/modules/mkt/mocks/mock-users'
 
 import ChatbotAssistant from './components/ChatbotAssistantNew'
 // import VileadsChatbot from './components/VileadsChatbot'
@@ -22,9 +25,12 @@ import ChatbotAssistant from './components/ChatbotAssistantNew'
 export default function Home() {
   const [currentView, setCurrentView] = useState('dashboard') // Đổi về dashboard làm mặc định
   const [userRole, setUserRole] = useState('admin') // Theo dõi vai trò người dùng
+  const [viewParams, setViewParams] = useState<any>({}) // Params cho các view
 
-  const handleViewChange = (view: string) => {
+  const handleViewChange = (view: string, params?: any) => {
     setCurrentView(view)
+    if (params) setViewParams(params)
+    else setViewParams({})
   }
 
   const handleRoleChange = (role: string) => {
@@ -36,6 +42,23 @@ export default function Home() {
   }
 
   const renderContent = () => {
+    if (currentView === 'mkt-group' || currentView.startsWith('mkt-')) {
+      const mappedMktRole = mapAppRoleToMktRole(userRole)
+      const mktUser =
+        MOCK_USERS.find(u => u.role === mappedMktRole) ||
+        MOCK_USERS.find(u => u.role === 'employee') ||
+        MOCK_USERS[0]
+
+      return (
+        <MktSectionPage
+          currentUser={mktUser}
+          currentView={currentView}
+          viewParams={viewParams}
+          onNavigate={handleViewChange}
+        />
+      )
+    }
+
     switch (currentView) {
       case 'dashboard':
         // Hiển thị dashboard phù hợp với vai trò
