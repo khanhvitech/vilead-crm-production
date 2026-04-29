@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react'
 import CreateTaskModalSimple from './CreateTaskModalSimple'
 import TaskDetailModal from './TaskDetailModal'
 import CreateEventModalSimple from './CreateEventModalSimple'
+import TaskImportModal from './TaskImportModal'
 import { 
   Plus, 
   Search, 
@@ -247,6 +248,7 @@ export default function TaskManagement() {
   const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showCreateEventModal, setShowCreateEventModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedEventDate, setSelectedEventDate] = useState<Date | null>(null)
 
@@ -1166,12 +1168,19 @@ export default function TaskManagement() {
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Tổng quan & Báo cáo Công việc</h2>
           
           <div className="flex flex-wrap gap-2">
-          <button 
+          <button
             onClick={() => setShowCreateModal(true)}
             className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo công việc</span>
+          </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Import Excel</span>
           </button>
           <button className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors text-sm">
             <Download className="w-4 h-4" />
@@ -2528,12 +2537,19 @@ export default function TaskManagement() {
                 </>
               )}
               
-              <button 
+              <button
                 onClick={() => setShowCreateModal(true)}
                 className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span>Tạo công việc mới</span>
+              </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Import Excel</span>
               </button>
             </div>
           </div>
@@ -3421,6 +3437,33 @@ export default function TaskManagement() {
         onSave={handleCreateEvent}
         selectedDate={selectedEventDate}
         employees={employees}
+      />
+
+      <TaskImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={(importedTasks) => {
+          importedTasks.forEach((taskData: any) => {
+            const newTask = {
+              ...taskData,
+              id: `task-import-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              status: 'pending' as const,
+              progress: 0,
+              tags: [],
+              internalNotes: taskData.internalNotes || '',
+              progressNotes: [],
+              isAutoCreated: false,
+              reminders: [],
+              customReminders: [],
+              createdAt: new Date().toISOString(),
+              createdBy: 'Import',
+              updatedAt: new Date().toISOString(),
+              history: [],
+            }
+            setTasks(prev => [...prev, newTask])
+          })
+        }}
+        existingTasks={tasks.map(t => ({ title: t.title, dueDate: t.dueDate.split('T')[0] }))}
       />
     </div>
   )

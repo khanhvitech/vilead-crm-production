@@ -58,6 +58,7 @@ import { SalesTable } from './sales/components/SalesTable'
 import type { Lead as LeadType, ColumnVisibility } from './sales/types/lead.types'
 import CustomerDetailModal from './CustomerDetailModal'
 import CreateOrderModal from './CreateOrderModal'
+import LeadImportModal from './LeadImportModal'
 
 interface Lead {
   id: number
@@ -5630,220 +5631,23 @@ export default function SalesManagement() {
       )}
 
       {/* Import Excel Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-[10px] shadow-xl max-w-lg w-full mx-4">
-            <div className="px-6 py-4 border-b border-[#e6ebf1]">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-semibold text-gray-900">Import Leads từ Excel</h3>
-                <button
-                  onClick={() => {
-                    setShowImportModal(false)
-                    setImportFile(null)
-                    setImportError(null)
-                    setImportSuccess(null)
-                    setImportProgress(0)
-                    setImportAutoAssign(false)
-                    setImportPreviewData([])
-                    setShowImportPreview(false)
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 space-y-4">
-              {/* Download Template */}
-              <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4">
-                <div className="flex items-start gap-3">
-                  <Download className="w-5 h-5 text-blue-600 mt-0.5" />
-                  <div className="flex-1">
-                    <h4 className="font-medium text-blue-900 mb-1">Tải template Excel</h4>
-                    <p className="text-sm text-[#3e79f7] mb-3">
-                      Tải file mẫu để đảm bảo định dạng đúng cho việc import leads
-                    </p>
-                    <button
-                      onClick={downloadTemplate}
-                      className="text-sm bg-[#3e79f7] text-white px-3 py-1.5 rounded hover:bg-[#699dff] transition-colors"
-                    >
-                      Tải template
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* File Selection */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chọn file Excel (.xlsx, .xls, .csv)
-                </label>
-                <input
-                  type="file"
-                  accept=".xlsx,.xls,.csv"
-                  onChange={handleFileSelect}
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-[#3e79f7] hover:file:bg-blue-100"
-                />
-                {importFile && (
-                  <div className="mt-2 space-y-2">
-                    <p className="text-sm text-gray-600">
-                      Đã chọn: {importFile.name}
-                    </p>
-                    {importPreviewData.length > 0 && (
-                      <button
-                        onClick={() => setShowImportPreview(!showImportPreview)}
-                        className="text-sm bg-[#3e79f7] text-white px-3 py-1.5 rounded hover:bg-[#699dff] transition-colors flex items-center gap-2"
-                      >
-                        <Eye className="w-4 h-4" />
-                        {showImportPreview ? 'Ẩn dữ liệu' : 'Xem dữ liệu'}
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Data Preview */}
-              {showImportPreview && importPreviewData.length > 0 && (
-                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
-                  <h5 className="font-medium text-gray-900 mb-3 flex items-center gap-2">
-                    <Eye className="w-4 h-4" />
-                    Preview dữ liệu ({importPreviewData.length} dòng đầu)
-                  </h5>
-                  <div className="overflow-x-auto">
-                    <table className="min-w-full text-xs">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          {Object.keys(importPreviewData[0] || {}).map(header => (
-                            <th key={header} className="px-2 py-1 text-left font-medium text-gray-700 border">
-                              {header}
-                            </th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {importPreviewData.map((row, index) => (
-                          <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                            {Object.values(row).map((value: any, cellIndex) => (
-                              <td key={cellIndex} className="px-2 py-1 border text-gray-600">
-                                {value || '-'}
-                              </td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="mt-3 text-xs text-gray-600">
-                    💡 <strong>Lưu ý:</strong> Đảm bảo các cột trong file Excel khớp với template để import thành công.
-                  </div>
-                </div>
-              )}
-
-              {/* Auto Assignment Option */}
-              <div className="bg-purple-50 border border-purple-200 rounded-[10px] p-4">
-                <div className="flex items-start gap-3">
-                  <input
-                    type="checkbox"
-                    id="importAutoAssign"
-                    checked={importAutoAssign}
-                    onChange={(e) => setImportAutoAssign(e.target.checked)}
-                    className="mt-1 w-4 h-4 text-purple-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-purple-500 focus:ring-2"
-                  />
-                  <div className="flex-1">
-                    <label htmlFor="importAutoAssign" className="font-medium text-purple-900 cursor-pointer">
-                      Phân công tự động sau khi import
-                    </label>
-                    <p className="text-sm text-purple-700 mt-1">
-                      Leads sẽ được phân công tự động cho sales team theo chiến lược đã chọn ({autoAssignStrategy === 'round_robin' ? 'Luân phiên' :
-                        autoAssignStrategy === 'workload_based' ? 'Theo khối lượng công việc' :
-                          autoAssignStrategy === 'territory_based' ? 'Theo vùng địa lý' :
-                            autoAssignStrategy === 'source_based' ? 'Theo nguồn lead' :
-                              autoAssignStrategy === 'shift_based' ? 'Theo ca làm việc' : 'Luân phiên'})
-                    </p>
-                    <p className="text-sm text-orange-600 mt-2 bg-orange-50 px-2 py-1 rounded">
-                      💡 <strong>Lưu ý:</strong> Nếu không chọn, tất cả leads sẽ được phân công mặc định cho người thực hiện import
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {importProgress > 0 && (
-                <div>
-                  <div className="flex justify-between text-sm text-gray-600 mb-1">
-                    <span>Đang import...</span>
-                    <span>{importProgress}%</span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div
-                      className="bg-[#3e79f7] h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${importProgress}%` }}
-                    ></div>
-                  </div>
-                </div>
-              )}
-
-              {/* Error Message */}
-              {importError && (
-                <div className="bg-red-50 border border-red-200 rounded-[10px] p-3">
-                  <div className="flex items-center gap-2 text-red-700">
-                    <AlertCircle className="w-4 h-4" />
-                    <span className="text-sm">{importError}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Success Message */}
-              {importSuccess && (
-                <div className="bg-green-50 border border-green-200 rounded-[10px] p-3">
-                  <div className="flex items-center gap-2 text-green-700">
-                    <CheckCircle className="w-4 h-4" />
-                    <span className="text-sm">{importSuccess}</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Instructions */}
-              <div className="bg-gray-50 rounded-[10px] p-4">
-                <h4 className="font-medium text-gray-900 mb-2">Hướng dẫn import:</h4>
-                <ul className="text-sm text-gray-600 space-y-1">
-                  <li>• File phải có các cột: Tên, Số điện thoại, Email, Công ty</li>
-                  <li>• Định dạng file hỗ trợ: .xlsx, .xls, .csv</li>
-                  <li>• Dòng đầu tiên là tiêu đề cột</li>
-                  <li>• Email phải có định dạng hợp lệ</li>
-                  <li>• Số điện thoại phải từ 8-15 ký tự</li>
-                </ul>
-              </div>
-            </div>
-
-            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end gap-3">
-              <button
-                onClick={() => {
-                  setShowImportModal(false)
-                  setImportFile(null)
-                  setImportError(null)
-                  setImportSuccess(null)
-                  setImportProgress(0)
-                  setImportAutoAssign(false)
-                  setImportPreviewData([])
-                  setShowImportPreview(false)
-                }}
-                className="px-4 py-2 text-gray-700 bg-gray-100 rounded-[10px] hover:bg-gray-200 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={handleImportExcel}
-                disabled={!importFile || importProgress > 0}
-                className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {importProgress > 0 ? 'Đang import...' : 'Import'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <LeadImportModal
+        isOpen={showImportModal}
+        onClose={() => {
+          setShowImportModal(false)
+          setImportFile(null)
+          setImportError(null)
+          setImportSuccess(null)
+          setImportProgress(0)
+          setImportAutoAssign(false)
+          setImportPreviewData([])
+          setShowImportPreview(false)
+        }}
+        onImport={(importedLeads) => {
+          setLeads(prev => [...prev, ...importedLeads])
+        }}
+        existingLeads={leads.map(l => ({ name: l.name, phone: l.phone }))}
+      />
 
       {/* Edit Lead Modal */}
       {showEditLeadModal && editingLead && (

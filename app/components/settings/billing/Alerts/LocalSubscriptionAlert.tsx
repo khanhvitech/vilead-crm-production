@@ -4,7 +4,7 @@ import React from 'react'
 import { AlertTriangle, Clock } from 'lucide-react'
 
 interface LocalSubscriptionAlertProps {
-  status: 'active' | 'expiring_7d' | 'exceed_users' | 'pending_approval' | 'pending_downgrade';
+  status: 'active' | 'expiring_7d' | 'exceed_users' | 'pending_payment' | 'pending_approval' | 'pending_downgrade';
   daysLeft: number;
   onRenew: () => void;
 }

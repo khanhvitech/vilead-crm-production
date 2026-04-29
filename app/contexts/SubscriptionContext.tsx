@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from 'react'
 
-export type SubscriptionStatus = 'active' | 'expiring_7d' | 'exceed_users' | 'pending_approval' | 'pending_downgrade';
+export type SubscriptionStatus = 'active' | 'expiring_7d' | 'exceed_users' | 'pending_payment' | 'pending_approval' | 'pending_downgrade';
 
 export type PaymentActionType = 'upgrade' | 'downgrade' | 'renew' | null;
 

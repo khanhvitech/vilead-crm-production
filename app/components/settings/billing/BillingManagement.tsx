@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import React, { useState } from 'react';
-import { CreditCard, CheckCircle2, AlertTriangle, Download, Receipt, Settings2 } from 'lucide-react';
+import { CreditCard, CheckCircle2, AlertTriangle, Download, Receipt, Settings2, Globe, Loader2 } from 'lucide-react';
 import { useSubscription, SubscriptionStatus } from '@/app/contexts/SubscriptionContext';
 
 import { LocalSubscriptionAlert } from './Alerts/LocalSubscriptionAlert';
@@ -27,18 +27,51 @@ const mockOrders = [
 ];
 
 export const BillingManagement: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'current_plan' | 'order_history'>('current_plan');
-  
-  const { 
-    status, setStatus, 
-    usersCount, setUsersCount, 
+  const [activeTab, setActiveTab] = useState<'current_plan' | 'order_history' | 'domain_config'>('current_plan');
+
+  const {
+    status, setStatus,
+    usersCount, setUsersCount,
     maxUsers, setMaxUsers,
     isPaymentModalOpen, setPaymentModalOpen,
-    paymentActionType, setPaymentActionType 
+    paymentActionType, setPaymentActionType
   } = useSubscription();
 
   // Modals state
   const [isRenewModalOpen, setRenewModalOpen] = useState(false);
+
+  // Domain config state
+  const [domainInput, setDomainInput] = useState('');
+  const [domainStatus, setDomainStatus] = useState<'idle' | 'invalid' | 'duplicate' | 'subdomain_only' | 'dns_not_found' | 'dns_propagating' | 'ssl_error' | 'success'>('idle');
+  const [domainLoading, setDomainLoading] = useState(false);
+  const [activeDomain, setActiveDomain] = useState('');
+
+  const handleDomainSubmit = () => {
+    const val = domainInput.trim().toLowerCase();
+    if (!val) return;
+
+    const parts = val.split('.');
+    if (parts.length < 2 || parts.some(p => !p) || !/^[a-z0-9.-]+$/.test(val)) {
+      setDomainStatus('invalid');
+      return;
+    }
+    if (parts.length === 2) {
+      setDomainStatus('subdomain_only');
+      return;
+    }
+    if (val === 'used.example.com') {
+      setDomainStatus('duplicate');
+      return;
+    }
+
+    setDomainLoading(true);
+    setDomainStatus('dns_propagating');
+    setTimeout(() => {
+      setDomainLoading(false);
+      setDomainStatus('success');
+      setActiveDomain(val);
+    }, 2000);
+  };
 
   const getPricingBase = (plan: string) => {
     switch (plan) {
@@ -87,6 +120,16 @@ export const BillingManagement: React.FC = () => {
             }`}
           >
             GÓI DỊCH VỤ HIỆN TẠI
+          </button>
+                    <button
+            onClick={() => setActiveTab('domain_config')}
+            className={`px-8 py-4 text-[14px] font-bold border-b-[2px] transition-colors ${
+              activeTab === 'domain_config'
+                ? 'border-[#3e79f7] text-[#3e79f7]'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            CẤU HÌNH DOMAIN
           </button>
           <button
             onClick={() => setActiveTab('order_history')}
@@ -343,6 +386,93 @@ export const BillingManagement: React.FC = () => {
                 </table>
               </div>
             </div>
+            </div>
+          )}
+          {activeTab === 'domain_config' && (
+            <div className="p-6">
+              <div className="bg-white rounded-[10px] p-6 shadow-[0_2px_12px_rgba(0,0,0,0.03)] border border-gray-100 max-w-2xl">
+                <div className="flex items-center gap-3 mb-2">
+                  <Globe className="w-5 h-5 text-[#3e79f7]" />
+                  <h3 className="text-lg font-bold text-[#111827]">Tên miền tùy chỉnh</h3>
+                </div>
+                <p className="text-sm text-gray-500 mb-6">Kết nối tên miền riêng để truy cập hệ thống CRM qua địa chỉ của bạn.</p>
+
+                {activeDomain && domainStatus === 'success' && (
+                  <div className="mb-6 bg-green-50 border border-green-200 rounded-[10px] p-4 flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-bold text-green-800">Domain đang hoạt động</p>
+                      <p className="text-sm text-green-700 font-medium mt-0.5">{activeDomain}</p>
+                    </div>
+                    <span className="px-3 py-1 bg-green-100 text-green-700 text-[10px] font-bold rounded-full uppercase tracking-wider">Active</span>
+                  </div>
+                )}
+
+                <div className="flex gap-3">
+                  <input
+                    type="text"
+                    value={domainInput}
+                    onChange={(e) => { setDomainInput(e.target.value); setDomainStatus('idle'); }}
+                    placeholder="app.tencongty.com"
+                    className="flex-1 px-4 py-2.5 border border-[#e6ebf1] rounded-[10px] text-sm font-medium text-gray-900 focus:outline-none focus:border-[#3e79f7] focus:ring-1 focus:ring-[#3e79f7] placeholder:text-gray-400"
+                  />
+                  <button
+                    onClick={handleDomainSubmit}
+                    disabled={domainLoading || !domainInput.trim()}
+                    className="px-6 py-2.5 bg-[#3e79f7] hover:bg-[#3264d0] text-white font-bold text-sm rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shrink-0"
+                  >
+                    {domainLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {domainLoading ? 'Đang kiểm tra...' : 'Cập nhật'}
+                  </button>
+                </div>
+
+                {/* Status Messages */}
+                {domainStatus !== 'idle' && (
+                  <div className={`mt-4 rounded-[10px] p-4 text-sm font-medium flex items-start gap-2.5 ${
+                    domainStatus === 'success' ? 'bg-green-50 border border-green-200 text-green-800' :
+                    domainStatus === 'dns_propagating' ? 'bg-blue-50 border border-blue-200 text-blue-800' :
+                    domainStatus === 'subdomain_only' || domainStatus === 'dns_not_found' ? 'bg-yellow-50 border border-yellow-200 text-yellow-800' :
+                    'bg-red-50 border border-red-200 text-red-800'
+                  }`}>
+                    {domainStatus === 'success' && <CheckCircle2 className="w-4 h-4 text-green-600 shrink-0 mt-0.5" />}
+                    {domainStatus === 'dns_propagating' && <Loader2 className="w-4 h-4 text-blue-600 shrink-0 mt-0.5 animate-spin" />}
+                    {(domainStatus === 'subdomain_only' || domainStatus === 'dns_not_found') && <AlertTriangle className="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" />}
+                    {(domainStatus === 'invalid' || domainStatus === 'duplicate' || domainStatus === 'ssl_error') && <AlertTriangle className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />}
+                    <span>
+                      {domainStatus === 'invalid' && 'Tên miền không hợp lệ. Vui lòng nhập dạng subdomain, ví dụ: app.tencongty.com'}
+                      {domainStatus === 'duplicate' && 'Tên miền này đã được kết nối với một website khác.'}
+                      {domainStatus === 'subdomain_only' && 'Hiện tại hệ thống chỉ hỗ trợ subdomain, ví dụ: app.tencongty.com'}
+                      {domainStatus === 'dns_not_found' && 'Tên miền chưa trỏ về hệ thống. Vui lòng kiểm tra lại bản ghi CNAME.'}
+                      {domainStatus === 'dns_propagating' && 'DNS có thể mất vài phút để cập nhật. Hệ thống sẽ tự kiểm tra lại.'}
+                      {domainStatus === 'ssl_error' && 'Không thể cấp SSL cho tên miền này. Vui lòng kiểm tra DNS hoặc thử lại sau.'}
+                      {domainStatus === 'success' && 'Tên miền đã được kích hoạt thành công.'}
+                    </span>
+                  </div>
+                )}
+
+                {/* CNAME Instructions */}
+                <div className="mt-6 bg-gray-50 rounded-[10px] p-4 border border-[#e6ebf1]">
+                  <h4 className="text-sm font-bold text-gray-700 mb-2">Hướng dẫn cấu hình DNS</h4>
+                  <p className="text-xs text-gray-500 mb-3">Thêm bản ghi CNAME tại nhà cung cấp tên miền của bạn:</p>
+                  <div className="bg-white rounded-lg border border-[#e6ebf1] overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead className="bg-gray-50 border-b border-[#e6ebf1]">
+                        <tr>
+                          <th className="px-4 py-2 text-left font-bold text-gray-500 uppercase">Loại</th>
+                          <th className="px-4 py-2 text-left font-bold text-gray-500 uppercase">Host</th>
+                          <th className="px-4 py-2 text-left font-bold text-gray-500 uppercase">Trỏ đến</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td className="px-4 py-2.5 font-bold text-gray-800">CNAME</td>
+                          <td className="px-4 py-2.5 text-gray-600 font-medium">app (hoặc subdomain bạn chọn)</td>
+                          <td className="px-4 py-2.5 text-[#3e79f7] font-bold select-all">proxy.vilead.vn</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>

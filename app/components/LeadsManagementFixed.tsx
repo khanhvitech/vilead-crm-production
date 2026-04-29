@@ -1,7 +1,8 @@
 ﻿'use client'
 
 import { useState, useMemo, useEffect } from 'react'
-import { Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Edit, Trash2, X, Download, CheckSquare, Square, Users, Tag, Send, UserPlus } from 'lucide-react'
+import { Plus, Search, Filter, MoreVertical, Phone, Mail, Eye, Edit, Trash2, X, Download, Upload, CheckSquare, Square, Users, Tag, Send, UserPlus } from 'lucide-react'
+import LeadImportModal from './LeadImportModal'
 
 interface Lead {
   id: number
@@ -33,6 +34,7 @@ export default function LeadsManagement() {
   const [selectedLead, setSelectedLead] = useState<Lead | null>(null)
   const [selectedLeadIds, setSelectedLeadIds] = useState<number[]>([])
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [showBulkActionModal, setShowBulkActionModal] = useState(false)
   const [bulkActionType, setBulkActionType] = useState('')
   const [bulkActionData, setBulkActionData] = useState('')
@@ -47,7 +49,7 @@ export default function LeadsManagement() {
     console.log('Selected leads changed:', selectedLeadIds)
   }, [selectedLeadIds])
   
-  const [leads] = useState<Lead[]>([
+  const [leads, setLeads] = useState<Lead[]>([
     {
       id: 1,
       name: 'Nguyễn Văn A',
@@ -566,6 +568,13 @@ export default function LeadsManagement() {
           <button className="btn-primary flex items-center space-x-2">
             <Plus className="w-4 h-4" />
             <span>Thêm Lead mới</span>
+          </button>
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Import Excel</span>
           </button>
         </div>
       </div>      {/* Stats Cards */}
@@ -1203,6 +1212,15 @@ export default function LeadsManagement() {
           </div>
         </div>
       )}
+
+      <LeadImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={(importedLeads) => {
+          setLeads(prev => [...prev, ...importedLeads])
+        }}
+        existingLeads={leads.map(l => ({ name: l.name, phone: l.phone }))}
+      />
     </div>
   )
 }
