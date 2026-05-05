@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useRef, useState } from 'react'
 import { 
   Target, 
   TrendingUp, 
@@ -49,6 +49,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from '@/components/ui/dropdown-menu'
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 
 interface KPITarget {
   id: number
@@ -106,6 +107,27 @@ interface KPITask {
   createdBy: string
 }
 
+interface EmployeeDirectoryItem {
+  name: string
+  teamId: string
+  teamName: string
+  departmentId: string
+  departmentName: string
+}
+
+interface IndividualFilterState {
+  selectedDepartment: string
+  selectedTeam: string
+  selectedCategory: string
+  selectedStatus: string
+  selectedMonthYear: string
+}
+
+interface IndividualGroupedRow {
+  employee: EmployeeDirectoryItem
+  kpis: KPITarget[]
+}
+
 export default function KPIManagement() {
   const [activeTab, setActiveTab] = useState<'overview' | 'targets' | 'reports' | 'settings'>('targets')
   const [activeTargetTab, setActiveTargetTab] = useState<'individual' | 'team' | 'department' | 'company'>('individual')
@@ -142,6 +164,31 @@ export default function KPIManagement() {
   // Month/year states for Company tab filters
   const [filterMonth, setFilterMonth] = useState<number>(new Date().getMonth() + 1)
   const [filterYear, setFilterYear] = useState<number>(new Date().getFullYear())
+  const [selectedDepartment, setSelectedDepartment] = useState('all')
+  const [selectedTeam, setSelectedTeam] = useState('all')
+  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [selectedStatus, setSelectedStatus] = useState('all')
+  const [selectedMonthYear, setSelectedMonthYear] = useState('')
+  const [isIndividualMonthPickerOpen, setIsIndividualMonthPickerOpen] = useState(false)
+  const [individualMonthPickerYear, setIndividualMonthPickerYear] = useState<number>(new Date().getFullYear())
+  const [teamFilterDepartment, setTeamFilterDepartment] = useState('all')
+  const [teamFilterTeam, setTeamFilterTeam] = useState('all')
+  const [teamFilterCategory, setTeamFilterCategory] = useState('all')
+  const [teamFilterStatus, setTeamFilterStatus] = useState('all')
+  const [teamFilterMonthYear, setTeamFilterMonthYear] = useState('')
+  const [isTeamMonthPickerOpen, setIsTeamMonthPickerOpen] = useState(false)
+  const [teamMonthPickerYear, setTeamMonthPickerYear] = useState<number>(new Date().getFullYear())
+  const [departmentFilterDepartment, setDepartmentFilterDepartment] = useState('all')
+  const [departmentFilterCategory, setDepartmentFilterCategory] = useState('all')
+  const [departmentFilterStatus, setDepartmentFilterStatus] = useState('all')
+  const [departmentFilterMonthYear, setDepartmentFilterMonthYear] = useState('')
+  const [isDepartmentMonthPickerOpen, setIsDepartmentMonthPickerOpen] = useState(false)
+  const [departmentMonthPickerYear, setDepartmentMonthPickerYear] = useState<number>(new Date().getFullYear())
+  const [companyFilterCategory, setCompanyFilterCategory] = useState('all')
+  const [companyFilterStatus, setCompanyFilterStatus] = useState('all')
+  const [companyFilterMonthYear, setCompanyFilterMonthYear] = useState('')
+  const [isCompanyMonthPickerOpen, setIsCompanyMonthPickerOpen] = useState(false)
+  const [companyMonthPickerYear, setCompanyMonthPickerYear] = useState<number>(new Date().getFullYear())
   // Emoji picker and mention states for comments
   const [showEmojiPicker, setShowEmojiPicker] = useState(false)
   const [showMentionDropdown, setShowMentionDropdown] = useState(false)
@@ -2043,6 +2090,405 @@ export default function KPIManagement() {
     setEndDateFilter('')
   }
 
+  const resetIndividualFilters = () => {
+    setSelectedDepartment('all')
+    setSelectedTeam('all')
+    setSelectedCategory('all')
+    setSelectedStatus('all')
+    setSelectedMonthYear('')
+    setIndividualMonthPickerYear(new Date().getFullYear())
+    setIsIndividualMonthPickerOpen(false)
+  }
+
+  const resetTeamFilters = () => {
+    setTeamFilterDepartment('all')
+    setTeamFilterTeam('all')
+    setTeamFilterCategory('all')
+    setTeamFilterStatus('all')
+    setTeamFilterMonthYear('')
+    setTeamMonthPickerYear(new Date().getFullYear())
+    setIsTeamMonthPickerOpen(false)
+  }
+
+  const resetDepartmentFilters = () => {
+    setDepartmentFilterDepartment('all')
+    setDepartmentFilterCategory('all')
+    setDepartmentFilterStatus('all')
+    setDepartmentFilterMonthYear('')
+    setDepartmentMonthPickerYear(new Date().getFullYear())
+    setIsDepartmentMonthPickerOpen(false)
+  }
+
+  const resetCompanyFilters = () => {
+    setCompanyFilterCategory('all')
+    setCompanyFilterStatus('all')
+    setCompanyFilterMonthYear('')
+    setCompanyMonthPickerYear(new Date().getFullYear())
+    setIsCompanyMonthPickerOpen(false)
+  }
+
+  const getCategoryLabel = (category: KPITarget['category']) => {
+    switch (category) {
+      case 'revenue': return 'Doanh thu'
+      case 'leads': return 'Leads'
+      case 'conversion': return 'Chuyển đổi'
+      case 'tasks': return 'Công việc'
+      default: return 'Tùy chỉnh'
+    }
+  }
+
+  const getCompactKpiName = (category: KPITarget['category']) => getCategoryLabel(category)
+
+  const getStatusLabel = (status: KPITarget['status']) => {
+    switch (status) {
+      case 'not_started': return 'Chưa bắt đầu'
+      case 'active': return 'Đang hoạt động'
+      case 'paused': return 'Tạm dừng'
+      case 'completed': return 'Hoàn thành'
+      case 'overdue': return 'Quá hạn'
+      default: return status
+    }
+  }
+
+  const getStatusBadgeClassName = (status: KPITarget['status']) => {
+    switch (status) {
+      case 'not_started': return 'bg-gray-100 text-gray-800'
+      case 'active': return 'bg-green-100 text-green-800'
+      case 'paused': return 'bg-yellow-100 text-yellow-800'
+      case 'completed': return 'bg-blue-100 text-blue-800'
+      case 'overdue': return 'bg-red-100 text-red-800'
+      default: return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const formatMonthYearLabel = (monthYear: string) => {
+    if (!monthYear) return 'Chọn tháng/năm'
+
+    const [year, month] = monthYear.split('-')
+    return `${month}/${year}`
+  }
+
+  const formatNumber = (value: number, maximumFractionDigits = 0) => {
+    return new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: maximumFractionDigits > 0 ? 1 : 0,
+      maximumFractionDigits
+    }).format(value)
+  }
+
+  const monthPickerLabels = [
+    'Jan', 'Feb', 'Mar',
+    'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep',
+    'Oct', 'Nov', 'Dec'
+  ]
+
+  const renderMonthYearPicker = ({
+    value,
+    isOpen,
+    onOpenChange,
+    pickerYear,
+    setPickerYear,
+    onSelect
+  }: {
+    value: string
+    isOpen: boolean
+    onOpenChange: (open: boolean) => void
+    pickerYear: number
+    setPickerYear: React.Dispatch<React.SetStateAction<number>>
+    onSelect: (nextValue: string) => void
+  }) => (
+    <Popover open={isOpen} onOpenChange={onOpenChange}>
+      <PopoverTrigger asChild>
+        <button
+          type="button"
+          className="min-w-[180px] px-4 py-2 border border-[#e6ebf1] rounded-[10px] bg-white hover:border-[#699dff] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] flex items-center justify-between gap-3 text-left"
+        >
+          <span className={value ? 'text-gray-900' : 'text-gray-500'}>
+            {formatMonthYearLabel(value)}
+          </span>
+          <Calendar className="w-4 h-4 text-gray-400" />
+        </button>
+      </PopoverTrigger>
+      <PopoverContent align="start" className="w-[280px] p-3">
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <button
+              type="button"
+              onClick={() => setPickerYear((prev) => prev - 1)}
+              className="p-1 rounded hover:bg-gray-100"
+            >
+              <ChevronRight className="w-4 h-4 rotate-180 text-gray-500" />
+            </button>
+            <span className="text-sm font-semibold text-gray-900">{pickerYear}</span>
+            <button
+              type="button"
+              onClick={() => setPickerYear((prev) => prev + 1)}
+              className="p-1 rounded hover:bg-gray-100"
+            >
+              <ChevronRight className="w-4 h-4 text-gray-500" />
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {monthPickerLabels.map((label, index) => {
+              const monthValue = index + 1
+              const optionValue = `${pickerYear}-${String(monthValue).padStart(2, '0')}`
+              const isSelected = value === optionValue
+
+              return (
+                <button
+                  key={optionValue}
+                  type="button"
+                  onClick={() => {
+                    onSelect(optionValue)
+                    onOpenChange(false)
+                  }}
+                  className={`px-3 py-2 rounded-md text-sm transition-colors ${
+                    isSelected
+                      ? 'bg-[#3e79f7] text-white'
+                      : 'text-gray-700 hover:bg-[#f0f7ff] hover:text-[#3e79f7]'
+                  }`}
+                >
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+
+  const isKPIInMonthYear = (kpi: KPITarget, monthYear: string) => {
+    if (!monthYear) return true
+
+    const [year, month] = monthYear.split('-').map(Number)
+    const monthStart = new Date(year, month - 1, 1, 0, 0, 0, 0)
+    const monthEnd = new Date(year, month, 0, 23, 59, 59, 999)
+    const kpiStart = new Date(`${kpi.startDate}T00:00:00`)
+    const kpiEnd = new Date(`${kpi.endDate}T23:59:59`)
+
+    return kpiStart <= monthEnd && kpiEnd >= monthStart
+  }
+
+  const individualFilters: IndividualFilterState = {
+    selectedDepartment,
+    selectedTeam,
+    selectedCategory,
+    selectedStatus,
+    selectedMonthYear
+  }
+
+  const employeeDirectory: EmployeeDirectoryItem[] = organizationStructure.individuals.map((employeeName) => {
+    const team = organizationStructure.teams.find((item) => item.members.includes(employeeName))
+    const department = team
+      ? organizationStructure.departments.find((item) => item.id === team.department)
+      : undefined
+
+    return {
+      name: employeeName,
+      teamId: team?.id ?? '',
+      teamName: team?.name ?? 'Chưa phân nhóm',
+      departmentId: department?.id ?? '',
+      departmentName: department?.name ?? 'Chưa phân phòng ban'
+    }
+  })
+
+  const teamDirectory = organizationStructure.teams.map((team) => {
+    const department = organizationStructure.departments.find((item) => item.id === team.department)
+
+    return {
+      id: team.id,
+      name: team.name,
+      departmentId: team.department,
+      departmentName: department?.name ?? 'Chưa phân phòng ban'
+    }
+  })
+
+  const departmentDirectory = organizationStructure.departments.map((department) => ({
+    id: department.id,
+    name: department.name
+  }))
+
+  const matchesKPILevelFilters = (
+    kpi: KPITarget,
+    category: string,
+    status: string,
+    monthYear: string
+  ) => {
+    if (category !== 'all' && kpi.category !== category) return false
+    if (status !== 'all' && kpi.status !== status) return false
+
+    return isKPIInMonthYear(kpi, monthYear)
+  }
+
+  const calculateKpiSummary = (kpis: KPITarget[]) => {
+    const conversionItems = kpis.filter((kpi) => kpi.category === 'conversion')
+
+    return {
+      revenue: kpis
+        .filter((kpi) => kpi.category === 'revenue')
+        .reduce((sum, kpi) => sum + kpi.currentValue, 0),
+      leads: kpis
+        .filter((kpi) => kpi.category === 'leads')
+        .reduce((sum, kpi) => sum + kpi.currentValue, 0),
+      tasks: kpis
+        .filter((kpi) => kpi.category === 'tasks')
+        .reduce((sum, kpi) => sum + kpi.currentValue, 0),
+      avgConversion: conversionItems.length
+        ? conversionItems.reduce((sum, kpi) => sum + kpi.currentValue, 0) / conversionItems.length
+        : 0
+    }
+  }
+
+  const availableTeamsForIndividualFilter =
+    individualFilters.selectedDepartment === 'all'
+      ? organizationStructure.teams
+      : organizationStructure.teams.filter((team) => team.department === individualFilters.selectedDepartment)
+
+  const availableTeamsForTeamFilter =
+    teamFilterDepartment === 'all'
+      ? organizationStructure.teams
+      : organizationStructure.teams.filter((team) => team.department === teamFilterDepartment)
+
+  const individualRows: IndividualGroupedRow[] = employeeDirectory
+    .filter((employee) => {
+      if (
+        individualFilters.selectedDepartment !== 'all' &&
+        employee.departmentId !== individualFilters.selectedDepartment
+      ) {
+        return false
+      }
+
+      if (individualFilters.selectedTeam !== 'all' && employee.teamId !== individualFilters.selectedTeam) {
+        return false
+      }
+
+      return true
+    })
+    .map((employee) => ({
+      employee,
+      kpis: kpiTargets.filter((kpi) => {
+        if (kpi.assignmentLevel !== 'individual') return false
+        if (kpi.assignedTo[0] !== employee.name) return false
+        if (individualFilters.selectedCategory !== 'all' && kpi.category !== individualFilters.selectedCategory) {
+          return false
+        }
+        if (individualFilters.selectedStatus !== 'all' && kpi.status !== individualFilters.selectedStatus) {
+          return false
+        }
+
+        return isKPIInMonthYear(kpi, individualFilters.selectedMonthYear)
+      })
+    }))
+
+  const individualFilteredKPIs = individualRows.flatMap((row) => row.kpis)
+  const visibleEmployeeNames = individualRows.map((row) => row.employee.name)
+  const areAllVisibleEmployeesExpanded =
+    visibleEmployeeNames.length > 0 &&
+    visibleEmployeeNames.every((employeeName) => expandedEmployees.includes(employeeName))
+  const individualSummary = calculateKpiSummary(individualFilteredKPIs)
+
+  const filteredTeamKPIs = kpiTargets.filter((kpi) => {
+    if (kpi.assignmentLevel !== 'team') return false
+    if (!matchesKPILevelFilters(kpi, teamFilterCategory, teamFilterStatus, teamFilterMonthYear)) return false
+
+    const team = teamDirectory.find((item) => item.name === kpi.assignedTo[0])
+    if (teamFilterDepartment !== 'all' && team?.departmentId !== teamFilterDepartment) return false
+    if (teamFilterTeam !== 'all' && team?.id !== teamFilterTeam) return false
+
+    return true
+  })
+
+  const filteredDepartmentKPIs = kpiTargets.filter((kpi) => {
+    if (kpi.assignmentLevel !== 'department') return false
+    if (!matchesKPILevelFilters(kpi, departmentFilterCategory, departmentFilterStatus, departmentFilterMonthYear)) return false
+
+    const department = departmentDirectory.find((item) => item.name === kpi.assignedTo[0])
+    if (departmentFilterDepartment !== 'all' && department?.id !== departmentFilterDepartment) return false
+
+    return true
+  })
+
+  const filteredCompanyKPIs = kpiTargets.filter((kpi) => {
+    if (kpi.assignmentLevel !== 'company') return false
+
+    return matchesKPILevelFilters(kpi, companyFilterCategory, companyFilterStatus, companyFilterMonthYear)
+  })
+
+  const teamSummary = calculateKpiSummary(filteredTeamKPIs)
+  const departmentSummary = calculateKpiSummary(filteredDepartmentKPIs)
+
+  const teamRows = filteredTeamKPIs.reduce((acc: Record<string, KPITarget[]>, kpi) => {
+    const teamName = kpi.assignedTo[0] || 'Không xác định'
+    if (!acc[teamName]) acc[teamName] = []
+    acc[teamName].push(kpi)
+    return acc
+  }, {})
+
+  const departmentRows = filteredDepartmentKPIs.reduce((acc: Record<string, KPITarget[]>, kpi) => {
+    const departmentName = kpi.assignedTo[0] || 'Không xác định'
+    if (!acc[departmentName]) acc[departmentName] = []
+    acc[departmentName].push(kpi)
+    return acc
+  }, {})
+
+  const getDescendantIndividualKPIs = (parentKPI: KPITarget): KPITarget[] => {
+    if (parentKPI.assignmentLevel === 'individual') {
+      return [parentKPI]
+    }
+
+    const childKPIs = kpiTargets.filter((kpi) => parentKPI.childKPIs?.includes(kpi.id))
+    if (childKPIs.length === 0) return []
+
+    return childKPIs.flatMap((childKPI) => getDescendantIndividualKPIs(childKPI))
+  }
+
+  const detailEmployeeKPIs =
+    selectedKPIForDetail && selectedKPIForDetail.assignmentLevel !== 'individual'
+      ? Array.from(
+          new Map(
+            getDescendantIndividualKPIs(selectedKPIForDetail).map((kpi) => [kpi.id, kpi])
+          ).values()
+        )
+      : []
+
+  const visibleTeamNames = Object.keys(teamRows)
+  const areAllVisibleTeamsExpanded =
+    visibleTeamNames.length > 0 &&
+    visibleTeamNames.every((teamName) => expandedTeams.includes(teamName))
+
+  const toggleVisibleTeamsExpansion = () => {
+    if (areAllVisibleTeamsExpanded) {
+      setExpandedTeams((prev) => prev.filter((teamName) => !visibleTeamNames.includes(teamName)))
+      return
+    }
+
+    setExpandedTeams((prev) => Array.from(new Set([...prev, ...visibleTeamNames])))
+  }
+
+  const visibleDepartmentNames = Object.keys(departmentRows)
+  const areAllVisibleDepartmentsExpanded =
+    visibleDepartmentNames.length > 0 &&
+    visibleDepartmentNames.every((departmentName) => expandedDepartments.includes(departmentName))
+
+  const toggleVisibleDepartmentsExpansion = () => {
+    if (areAllVisibleDepartmentsExpanded) {
+      setExpandedDepartments((prev) => prev.filter((departmentName) => !visibleDepartmentNames.includes(departmentName)))
+      return
+    }
+
+    setExpandedDepartments((prev) => Array.from(new Set([...prev, ...visibleDepartmentNames])))
+  }
+
+  const toggleVisibleEmployeesExpansion = () => {
+    if (areAllVisibleEmployeesExpanded) {
+      setExpandedEmployees((prev) => prev.filter((employeeName) => !visibleEmployeeNames.includes(employeeName)))
+      return
+    }
+
+    setExpandedEmployees((prev) => Array.from(new Set([...prev, ...visibleEmployeeNames])))
+  }
+
   // Calculate overview metrics
   const overviewMetrics = {
     totalKPIs: kpiTargets.length,
@@ -2320,7 +2766,6 @@ export default function KPIManagement() {
                       </div>
                       <div>
                         <h4 className="font-medium text-gray-900">{kpi.name}</h4>
-                        <p className="text-sm text-gray-600">{formatPeriod(kpi.period)}</p>
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
@@ -2389,76 +2834,42 @@ export default function KPIManagement() {
                 {/* Filters for Company */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-64">
-                      <div className="relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm KPI công ty..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
-                        />
-                      </div>
-                    </div>
-                    
                     <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      value={companyFilterCategory}
+                      onChange={(e) => setCompanyFilterCategory(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
-                      <option value="all">Tất cả danh mục</option>
+                      <option value="all">Tất cả loại KPI</option>
                       <option value="revenue">Doanh thu</option>
                       <option value="leads">Leads</option>
                       <option value="conversion">Chuyển đổi</option>
                       <option value="tasks">Công việc</option>
-                      <option value="custom">Tùy chỉnh</option>
                     </select>
 
                     <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      value={companyFilterStatus}
+                      onChange={(e) => setCompanyFilterStatus(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
+                      <option value="not_started">Chưa bắt đầu</option>
                       <option value="active">Đang hoạt động</option>
                       <option value="paused">Tạm dừng</option>
                       <option value="completed">Hoàn thành</option>
                       <option value="overdue">Quá hạn</option>
                     </select>
 
-                    <select
-                      value={filterMonth}
-                      onChange={(e) => setFilterMonth(Number(e.target.value))}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    >
-                      <option value={0}>Chọn tháng</option>
-                      <option value={1}>Tháng 1</option>
-                      <option value={2}>Tháng 2</option>
-                      <option value={3}>Tháng 3</option>
-                      <option value={4}>Tháng 4</option>
-                      <option value={5}>Tháng 5</option>
-                      <option value={6}>Tháng 6</option>
-                      <option value={7}>Tháng 7</option>
-                      <option value={8}>Tháng 8</option>
-                      <option value={9}>Tháng 9</option>
-                      <option value={10}>Tháng 10</option>
-                      <option value={11}>Tháng 11</option>
-                      <option value={12}>Tháng 12</option>
-                    </select>
-
-                    <select
-                      value={filterYear}
-                      onChange={(e) => setFilterYear(Number(e.target.value))}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    >
-                      {[2024, 2025, 2026, 2027, 2028, 2029, 2030].map(year => (
-                        <option key={year} value={year}>Năm {year}</option>
-                      ))}
-                    </select>
+                    {renderMonthYearPicker({
+                      value: companyFilterMonthYear,
+                      isOpen: isCompanyMonthPickerOpen,
+                      onOpenChange: setIsCompanyMonthPickerOpen,
+                      pickerYear: companyMonthPickerYear,
+                      setPickerYear: setCompanyMonthPickerYear,
+                      onSelect: setCompanyFilterMonthYear
+                    })}
 
                     <button
-                      onClick={resetFilters}
+                      onClick={resetCompanyFilters}
                       className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
@@ -2501,20 +2912,14 @@ export default function KPIManagement() {
                 </div>
 
                 <div className="overflow-x-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                  <table className="min-w-[1120px] w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          CÔNG TY / KPI
-                        </th>
-                        {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Giao cho
-                        </th> */}
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Thời gian KPI
+                          STT
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ngày hiện tại
+                          Công ty
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Mục tiêu
@@ -2529,54 +2934,38 @@ export default function KPIManagement() {
                           Trạng thái
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Thời hạn
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Thao tác
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
-                      {getFilteredKPIsByLevel('company').length === 0 ? (
+                      {filteredCompanyKPIs.length === 0 ? (
                         <tr>
-                          <td colSpan={9} className="px-6 py-12 text-center">
+                          <td colSpan={8} className="px-6 py-12 text-center">
                             <div className="text-gray-500">
-                              <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                              <Building className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                               <p className="text-lg font-medium mb-2">Không tìm thấy KPI công ty</p>
-                              <p className="text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+                              <p className="text-sm">Thử điều chỉnh lại bộ lọc với tháng hoặc trạng thái khác</p>
                             </div>
                           </td>
                         </tr>
                       ) : (
-                        getFilteredKPIsByLevel('company').map(kpi => (
+                        filteredCompanyKPIs.map((kpi, index) => (
                         <tr key={kpi.id} className="hover:bg-gray-50">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                            {index + 1}
+                          </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <div className="flex items-center">
                               <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                 {getCategoryIcon(kpi.category)}
                               </div>
                               <div>
-                                <div className="text-sm font-medium text-gray-900">{kpi.name}</div>
-                                <div className="text-sm text-gray-500">{formatPeriod(kpi.period)}</div>
+                                <div className="text-sm font-medium text-gray-900">{getCompactKpiName(kpi.category)}</div>
                               </div>
-                            </div>
-                          </td>
-                          {/* <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex flex-wrap gap-1">
-                              {kpi.assignedTo.map((target, index) => (
-                                <span key={index} className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded-full">
-                                  {target}
-                                </span>
-                              ))}
-                            </div>
-                          </td> */}
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div>
-                              <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
-                              <div className="text-xs text-gray-500">{formatPeriod(kpi.period)}</div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            <div>
-                              <div className="font-medium" suppressHydrationWarning>{new Date().toLocaleDateString('vi-VN')}</div>
-                              <div className="text-xs text-gray-500" suppressHydrationWarning>{new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -2603,18 +2992,14 @@ export default function KPIManagement() {
                             </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                              kpi.status === 'not_started' ? 'bg-gray-100 text-gray-800' :
-                              kpi.status === 'active' ? 'bg-green-100 text-green-800' :
-                              kpi.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                              kpi.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {kpi.status === 'not_started' ? 'Chưa bắt đầu' :
-                               kpi.status === 'active' ? 'Đang hoạt động' :
-                               kpi.status === 'paused' ? 'Tạm dừng' :
-                               kpi.status === 'completed' ? 'Hoàn thành' : 'Quá hạn'}
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClassName(kpi.status)}`}>
+                              {getStatusLabel(kpi.status)}
                             </span>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <div>
+                              <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
+                            </div>
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                             <DropdownMenu>
@@ -2666,84 +3051,82 @@ export default function KPIManagement() {
                 {/* Filters for Department */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-64">
-                      <div className="relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm KPI phòng ban..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
-                        />
-                      </div>
-                    </div>
-                    
                     <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      value={departmentFilterDepartment}
+                      onChange={(e) => setDepartmentFilterDepartment(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
-                      <option value="all">Tất cả danh mục</option>
+                      <option value="all">Chọn phòng ban</option>
+                      {organizationStructure.departments.map((department) => (
+                        <option key={department.id} value={department.id}>
+                          {department.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={departmentFilterCategory}
+                      onChange={(e) => setDepartmentFilterCategory(e.target.value)}
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="all">Tất cả loại KPI</option>
                       <option value="revenue">Doanh thu</option>
                       <option value="leads">Leads</option>
                       <option value="conversion">Chuyển đổi</option>
                       <option value="tasks">Công việc</option>
-                      <option value="custom">Tùy chỉnh</option>
                     </select>
 
                     <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      value={departmentFilterStatus}
+                      onChange={(e) => setDepartmentFilterStatus(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
+                      <option value="not_started">Chưa bắt đầu</option>
                       <option value="active">Đang hoạt động</option>
                       <option value="paused">Tạm dừng</option>
                       <option value="completed">Hoàn thành</option>
                       <option value="overdue">Quá hạn</option>
                     </select>
 
-                    <input
-                      type="date"
-                      placeholder="Từ ngày"
-                      value={startDateFilter}
-                      onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
-
-                    <input
-                      type="date"
-                      placeholder="Đến ngày"
-                      value={endDateFilter}
-                      onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
+                    {renderMonthYearPicker({
+                      value: departmentFilterMonthYear,
+                      isOpen: isDepartmentMonthPickerOpen,
+                      onOpenChange: setIsDepartmentMonthPickerOpen,
+                      pickerYear: departmentMonthPickerYear,
+                      setPickerYear: setDepartmentMonthPickerYear,
+                      onSelect: setDepartmentFilterMonthYear
+                    })}
 
                     <button
-                      onClick={resetFilters}
+                      onClick={resetDepartmentFilters}
                       className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={toggleVisibleDepartmentsExpansion}
+                      disabled={visibleDepartmentNames.length === 0}
+                      className="px-4 py-2 text-[#3e79f7] bg-white border border-[#d7e3ff] rounded-[10px] hover:bg-[#f5f9ff] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {areAllVisibleDepartmentsExpanded ? 'Thu gọn' : 'Hiển thị tất cả'}
+                    </button>
                   </div>
                 </div>
 
                 {/* Grouped by Department View */}
-                <div className="border rounded-[10px] overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <div className="border rounded-[10px] overflow-x-auto">
+                  <table className="min-w-[1080px] w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Phòng ban / KPI
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                          STT
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Thời gian KPI
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ngày hiện tại
+                          Phòng ban
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Mục tiêu
@@ -2758,39 +3141,33 @@ export default function KPIManagement() {
                           Trạng thái
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Thời hạn
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Thao tác
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {(() => {
-                        const filteredKPIs = getFilteredKPIsByLevel('department')
-                        // Group by department
-                        const kpisByDepartment = filteredKPIs.reduce((acc: Record<string, typeof filteredKPIs>, kpi) => {
-                          const deptName = kpi.assignedTo[0] || 'Không xác định'
-                          if (!acc[deptName]) acc[deptName] = []
-                          acc[deptName].push(kpi)
-                          return acc
-                        }, {})
-                        
-                        const departmentNames = Object.keys(kpisByDepartment)
+                        const departmentNames = Object.keys(departmentRows)
                         
                         if (departmentNames.length === 0) {
                           return (
                             <tr>
-                              <td colSpan={9} className="px-6 py-12 text-center">
+                              <td colSpan={8} className="px-6 py-12 text-center">
                                 <div className="text-gray-500">
-                                  <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                  <Building className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                                   <p className="text-lg font-medium mb-2">Không tìm thấy KPI phòng ban</p>
-                                  <p className="text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+                                  <p className="text-sm">Thử điều chỉnh lại bộ lọc với tháng hoặc trạng thái khác</p>
                                 </div>
                               </td>
                             </tr>
                           )
                         }
                         
-                        return departmentNames.map((deptName) => {
-                          const deptKPIs = kpisByDepartment[deptName]
+                        return departmentNames.map((deptName, index) => {
+                          const deptKPIs = departmentRows[deptName]
                           const isExpanded = expandedDepartments.includes(deptName)
                           
                           return (
@@ -2807,9 +3184,12 @@ export default function KPIManagement() {
                                 }}
                               >
                                 <td className="px-6 py-3">
-                                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-sm font-medium text-gray-900 min-w-[1rem]">{index + 1}</span>
+                                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  </div>
                                 </td>
-                                <td className="px-6 py-3" colSpan={8}>
+                                <td className="px-6 py-3">
                                   <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
                                       <Building className="w-4 h-4 text-purple-600" />
@@ -2818,6 +3198,12 @@ export default function KPIManagement() {
                                     <span className="text-sm text-gray-500">({deptKPIs.length} KPI)</span>
                                   </div>
                                 </td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
                               </tr>
                               
                               {/* Department KPIs */}
@@ -2837,22 +3223,9 @@ export default function KPIManagement() {
                                             setShowDetailModal(true)
                                           }}
                                         >
-                                          {kpi.name}
+                                          {getCompactKpiName(kpi.category)}
                                         </button>
-                                        <div className="text-sm text-gray-500">{formatPeriod(kpi.period)}</div>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
-                                      <div className="text-xs text-gray-500">{formatPeriod(kpi.period)}</div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium">{new Date().toLocaleDateString('vi-VN')}</div>
-                                      <div className="text-xs text-gray-500">{new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -2879,18 +3252,14 @@ export default function KPIManagement() {
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                      kpi.status === 'not_started' ? 'bg-gray-100 text-gray-800' :
-                                      kpi.status === 'active' ? 'bg-green-100 text-green-800' :
-                                      kpi.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                                      kpi.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
-                                      {kpi.status === 'not_started' ? 'Chưa bắt đầu' :
-                                       kpi.status === 'active' ? 'Đang hoạt động' :
-                                       kpi.status === 'paused' ? 'Tạm dừng' :
-                                       kpi.status === 'completed' ? 'Hoàn thành' : 'Quá hạn'}
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClassName(kpi.status)}`}>
+                                      {getStatusLabel(kpi.status)}
                                     </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <div>
+                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
+                                    </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
@@ -2934,6 +3303,41 @@ export default function KPIManagement() {
                         })
                       })()}
                     </tbody>
+                    <tfoot className="bg-gray-50 border-t border-gray-200">
+                      <tr>
+                        <td colSpan={2} className="px-6 py-4 text-sm font-semibold text-gray-900">
+                          Tổng theo bộ lọc
+                        </td>
+                        <td colSpan={6} className="px-6 py-4">
+                          <div className="flex flex-wrap gap-3">
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng doanh thu</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatValue(departmentSummary.revenue, 'VND')}
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng leads</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(departmentSummary.leads)} leads
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng công việc</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(departmentSummary.tasks)} công việc
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Trung bình chuyển đổi</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(departmentSummary.avgConversion, 1)}%
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -2947,84 +3351,110 @@ export default function KPIManagement() {
                 {/* Filters for Team */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-64">
-                      <div className="relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm KPI team..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
-                        />
-                      </div>
-                    </div>
-                    
                     <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      value={teamFilterDepartment}
+                      onChange={(e) => {
+                        const nextDepartment = e.target.value
+                        const isCurrentTeamValid =
+                          teamFilterTeam === 'all' ||
+                          organizationStructure.teams.some(
+                            (team) =>
+                              team.id === teamFilterTeam &&
+                              (nextDepartment === 'all' || team.department === nextDepartment)
+                          )
+
+                        setTeamFilterDepartment(nextDepartment)
+
+                        if (!isCurrentTeamValid) {
+                          setTeamFilterTeam('all')
+                        }
+                      }}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
-                      <option value="all">Tất cả danh mục</option>
+                      <option value="all">Chọn phòng ban</option>
+                      {organizationStructure.departments.map((department) => (
+                        <option key={department.id} value={department.id}>
+                          {department.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={teamFilterTeam}
+                      onChange={(e) => setTeamFilterTeam(e.target.value)}
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="all">Chọn nhóm</option>
+                      {availableTeamsForTeamFilter.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={teamFilterCategory}
+                      onChange={(e) => setTeamFilterCategory(e.target.value)}
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="all">Tất cả loại KPI</option>
                       <option value="revenue">Doanh thu</option>
                       <option value="leads">Leads</option>
                       <option value="conversion">Chuyển đổi</option>
                       <option value="tasks">Công việc</option>
-                      <option value="custom">Tùy chỉnh</option>
                     </select>
 
                     <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      value={teamFilterStatus}
+                      onChange={(e) => setTeamFilterStatus(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
+                      <option value="not_started">Chưa bắt đầu</option>
                       <option value="active">Đang hoạt động</option>
                       <option value="paused">Tạm dừng</option>
                       <option value="completed">Hoàn thành</option>
                       <option value="overdue">Quá hạn</option>
                     </select>
 
-                    <input
-                      type="date"
-                      placeholder="Từ ngày"
-                      value={startDateFilter}
-                      onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
-
-                    <input
-                      type="date"
-                      placeholder="Đến ngày"
-                      value={endDateFilter}
-                      onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
+                    {renderMonthYearPicker({
+                      value: teamFilterMonthYear,
+                      isOpen: isTeamMonthPickerOpen,
+                      onOpenChange: setIsTeamMonthPickerOpen,
+                      pickerYear: teamMonthPickerYear,
+                      setPickerYear: setTeamMonthPickerYear,
+                      onSelect: setTeamFilterMonthYear
+                    })}
 
                     <button
-                      onClick={resetFilters}
+                      onClick={resetTeamFilters}
                       className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
                     </button>
+
+                    <button
+                      type="button"
+                      onClick={toggleVisibleTeamsExpansion}
+                      disabled={visibleTeamNames.length === 0}
+                      className="px-4 py-2 text-[#3e79f7] bg-white border border-[#d7e3ff] rounded-[10px] hover:bg-[#f5f9ff] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {areAllVisibleTeamsExpanded ? 'Thu gọn' : 'Hiển thị tất cả'}
+                    </button>
                   </div>
                 </div>
 
                 {/* Grouped by Team View */}
-                <div className="border rounded-[10px] overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <div className="border rounded-[10px] overflow-x-auto">
+                  <table className="min-w-[1180px] w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Team / KPI
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                          STT
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Thời gian KPI
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ngày hiện tại
+                          Nhóm
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Mục tiêu
@@ -3039,40 +3469,38 @@ export default function KPIManagement() {
                           Trạng thái
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Thời hạn
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phòng ban
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Thao tác
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {(() => {
-                        const filteredKPIs = getFilteredKPIsByLevel('team')
-                        // Group by team
-                        const kpisByTeam = filteredKPIs.reduce((acc: Record<string, typeof filteredKPIs>, kpi) => {
-                          const teamName = kpi.assignedTo[0] || 'Không xác định'
-                          if (!acc[teamName]) acc[teamName] = []
-                          acc[teamName].push(kpi)
-                          return acc
-                        }, {})
-                        
-                        const teamNames = Object.keys(kpisByTeam)
+                        const teamNames = Object.keys(teamRows)
                         
                         if (teamNames.length === 0) {
                           return (
                             <tr>
                               <td colSpan={9} className="px-6 py-12 text-center">
                                 <div className="text-gray-500">
-                                  <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                                   <p className="text-lg font-medium mb-2">Không tìm thấy KPI team</p>
-                                  <p className="text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+                                  <p className="text-sm">Thử điều chỉnh lại bộ lọc với phòng ban, nhóm hoặc tháng khác</p>
                                 </div>
                               </td>
                             </tr>
                           )
                         }
                         
-                        return teamNames.map((teamName) => {
-                          const teamKPIs = kpisByTeam[teamName]
+                        return teamNames.map((teamName, index) => {
+                          const teamKPIs = teamRows[teamName]
                           const isExpanded = expandedTeams.includes(teamName)
+                          const teamInfo = teamDirectory.find((item) => item.name === teamName)
                           
                           return (
                             <React.Fragment key={teamName}>
@@ -3088,9 +3516,12 @@ export default function KPIManagement() {
                                 }}
                               >
                                 <td className="px-6 py-3">
-                                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-sm font-medium text-gray-900 min-w-[1rem]">{index + 1}</span>
+                                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  </div>
                                 </td>
-                                <td className="px-6 py-3" colSpan={8}>
+                                <td className="px-6 py-3">
                                   <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
                                       <Users className="w-4 h-4 text-blue-600" />
@@ -3099,6 +3530,13 @@ export default function KPIManagement() {
                                     <span className="text-sm text-gray-500">({teamKPIs.length} KPI)</span>
                                   </div>
                                 </td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3 text-sm text-gray-900">{teamInfo?.departmentName ?? 'Chưa phân phòng ban'}</td>
+                                <td className="px-6 py-3"></td>
                               </tr>
                               
                               {/* Team KPIs */}
@@ -3118,22 +3556,9 @@ export default function KPIManagement() {
                                             setShowDetailModal(true)
                                           }}
                                         >
-                                          {kpi.name}
+                                          {getCompactKpiName(kpi.category)}
                                         </button>
-                                        <div className="text-sm text-gray-500">{formatPeriod(kpi.period)}</div>
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
-                                      <div className="text-xs text-gray-500">{formatPeriod(kpi.period)}</div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium" suppressHydrationWarning>{new Date().toLocaleDateString('vi-VN')}</div>
-                                      <div className="text-xs text-gray-500" suppressHydrationWarning>{new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -3160,18 +3585,17 @@ export default function KPIManagement() {
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                      kpi.status === 'not_started' ? 'bg-gray-100 text-gray-800' :
-                                      kpi.status === 'active' ? 'bg-green-100 text-green-800' :
-                                      kpi.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                                      kpi.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
-                                      {kpi.status === 'not_started' ? 'Chưa bắt đầu' :
-                                       kpi.status === 'active' ? 'Đang hoạt động' :
-                                       kpi.status === 'paused' ? 'Tạm dừng' :
-                                       kpi.status === 'completed' ? 'Hoàn thành' : 'Quá hạn'}
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClassName(kpi.status)}`}>
+                                      {getStatusLabel(kpi.status)}
                                     </span>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <div>
+                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    {teamInfo?.departmentName ?? 'Chưa phân phòng ban'}
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
@@ -3215,6 +3639,41 @@ export default function KPIManagement() {
                         })
                       })()}
                     </tbody>
+                    <tfoot className="bg-gray-50 border-t border-gray-200">
+                      <tr>
+                        <td colSpan={2} className="px-6 py-4 text-sm font-semibold text-gray-900">
+                          Tổng theo bộ lọc
+                        </td>
+                        <td colSpan={7} className="px-6 py-4">
+                          <div className="flex flex-wrap gap-3">
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng doanh thu</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatValue(teamSummary.revenue, 'VND')}
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng leads</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(teamSummary.leads)} leads
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng công việc</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(teamSummary.tasks)} công việc
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Trung bình chuyển đổi</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(teamSummary.avgConversion, 1)}%
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -3228,66 +3687,154 @@ export default function KPIManagement() {
                 {/* Filters for Individual */}
                 <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
                   <div className="flex flex-wrap items-center gap-4">
-                    <div className="flex-1 min-w-64">
-                      <div className="relative">
-                        <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                        <input
-                          type="text"
-                          placeholder="Tìm kiếm KPI cá nhân..."
-                          value={searchTerm}
-                          onChange={(e) => setSearchTerm(e.target.value)}
-                          className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
-                        />
-                      </div>
-                    </div>
-                    
                     <select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
+                      value={selectedDepartment}
+                      onChange={(e) => {
+                        const nextDepartment = e.target.value
+                        const isCurrentTeamValid =
+                          selectedTeam === 'all' ||
+                          organizationStructure.teams.some(
+                            (team) =>
+                              team.id === selectedTeam &&
+                              (nextDepartment === 'all' || team.department === nextDepartment)
+                          )
+
+                        setSelectedDepartment(nextDepartment)
+
+                        if (!isCurrentTeamValid) {
+                          setSelectedTeam('all')
+                        }
+                      }}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
-                      <option value="all">Tất cả danh mục</option>
+                      <option value="all">Chọn phòng ban</option>
+                      {organizationStructure.departments.map((department) => (
+                        <option key={department.id} value={department.id}>
+                          {department.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedTeam}
+                      onChange={(e) => setSelectedTeam(e.target.value)}
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="all">Chọn nhóm</option>
+                      {availableTeamsForIndividualFilter.map((team) => (
+                        <option key={team.id} value={team.id}>
+                          {team.name}
+                        </option>
+                      ))}
+                    </select>
+
+                    <select
+                      value={selectedCategory}
+                      onChange={(e) => setSelectedCategory(e.target.value)}
+                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="all">Tất cả loại KPI</option>
                       <option value="revenue">Doanh thu</option>
                       <option value="leads">Leads</option>
                       <option value="conversion">Chuyển đổi</option>
                       <option value="tasks">Công việc</option>
-                      <option value="custom">Tùy chỉnh</option>
                     </select>
 
                     <select
-                      value={statusFilter}
-                      onChange={(e) => setStatusFilter(e.target.value)}
+                      value={selectedStatus}
+                      onChange={(e) => setSelectedStatus(e.target.value)}
                       className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="all">Tất cả trạng thái</option>
+                      <option value="not_started">Chưa bắt đầu</option>
                       <option value="active">Đang hoạt động</option>
                       <option value="paused">Tạm dừng</option>
                       <option value="completed">Hoàn thành</option>
                       <option value="overdue">Quá hạn</option>
                     </select>
 
-                    <input
-                      type="date"
-                      placeholder="Từ ngày"
-                      value={startDateFilter}
-                      onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
+                    <Popover open={isIndividualMonthPickerOpen} onOpenChange={setIsIndividualMonthPickerOpen}>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className="min-w-[180px] px-4 py-2 border border-[#e6ebf1] rounded-[10px] bg-white hover:border-[#699dff] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] flex items-center justify-between gap-3 text-left"
+                        >
+                          <span className={selectedMonthYear ? 'text-gray-900' : 'text-gray-500'}>
+                            {formatMonthYearLabel(selectedMonthYear)}
+                          </span>
+                          <Calendar className="w-4 h-4 text-gray-400" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-[280px] p-3">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <button
+                              type="button"
+                              onClick={() => setIndividualMonthPickerYear((prev) => prev - 1)}
+                              className="p-1 rounded hover:bg-gray-100"
+                            >
+                              <ChevronRight className="w-4 h-4 rotate-180 text-gray-500" />
+                            </button>
+                            <span className="text-sm font-semibold text-gray-900">
+                              {individualMonthPickerYear}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => setIndividualMonthPickerYear((prev) => prev + 1)}
+                              className="p-1 rounded hover:bg-gray-100"
+                            >
+                              <ChevronRight className="w-4 h-4 text-gray-500" />
+                            </button>
+                          </div>
+                          <div className="grid grid-cols-3 gap-2">
+                            {[
+                              'Jan', 'Feb', 'Mar',
+                              'Apr', 'May', 'Jun',
+                              'Jul', 'Aug', 'Sep',
+                              'Oct', 'Nov', 'Dec'
+                            ].map((label, index) => {
+                              const monthValue = index + 1
+                              const optionValue = `${individualMonthPickerYear}-${String(monthValue).padStart(2, '0')}`
+                              const isSelected = selectedMonthYear === optionValue
 
-                    <input
-                      type="date"
-                      placeholder="Đến ngày"
-                      value={endDateFilter}
-                      onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7]"
-                    />
+                              return (
+                                <button
+                                  key={optionValue}
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedMonthYear(optionValue)
+                                    setIsIndividualMonthPickerOpen(false)
+                                  }}
+                                  className={`px-3 py-2 rounded-md text-sm transition-colors ${
+                                    isSelected
+                                      ? 'bg-[#3e79f7] text-white'
+                                      : 'text-gray-700 hover:bg-[#f0f7ff] hover:text-[#3e79f7]'
+                                  }`}
+                                >
+                                  {label}
+                                </button>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      </PopoverContent>
+                    </Popover>
 
                     <button
-                      onClick={resetFilters}
+                      onClick={resetIndividualFilters}
                       className="px-4 py-2 text-gray-600 bg-gray-100 rounded-[10px] hover:bg-gray-200 flex items-center space-x-2"
                     >
                       <X className="w-4 h-4" />
                       <span>Xóa bộ lọc</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={toggleVisibleEmployeesExpansion}
+                      disabled={visibleEmployeeNames.length === 0}
+                      className="px-4 py-2 text-[#3e79f7] bg-white border border-[#d7e3ff] rounded-[10px] hover:bg-[#f5f9ff] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {areAllVisibleEmployeesExpanded ? 'Thu gọn' : 'Hiển thị tất cả'}
                     </button>
 
                     {<button
@@ -3300,19 +3847,15 @@ export default function KPIManagement() {
                   </div>
                 </div>
                 {/* Grouped by Employee View */}
-                <div className="border rounded-[10px] overflow-hidden">
-                  <table className="min-w-full divide-y divide-gray-200">
+                <div className="border rounded-[10px] overflow-x-auto">
+                  <table className="min-w-[1280px] w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50">
                       <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-8"></th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Nhân viên / KPI
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-12">
+                          STT
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Thời gian KPI
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Ngày hiện tại
+                          Nhân viên
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Mục tiêu
@@ -3327,39 +3870,38 @@ export default function KPIManagement() {
                           Trạng thái
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Thời hạn
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Nhóm
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                          Phòng ban
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Thao tác
                         </th>
                       </tr>
                     </thead>
                     <tbody className="bg-white divide-y divide-gray-200">
                       {(() => {
-                        const filteredKPIs = getFilteredKPIsByLevel('individual')
-                        // Group by employee
-                        const kpisByEmployee = filteredKPIs.reduce((acc: Record<string, typeof filteredKPIs>, kpi) => {
-                          const employeeName = kpi.assignedTo[0] || 'Không xác định'
-                          if (!acc[employeeName]) acc[employeeName] = []
-                          acc[employeeName].push(kpi)
-                          return acc
-                        }, {})
-                        
-                        const employeeNames = Object.keys(kpisByEmployee)
-                        
-                        if (employeeNames.length === 0) {
+                        if (individualRows.length === 0) {
                           return (
                             <tr>
-                              <td colSpan={9} className="px-6 py-12 text-center">
+                              <td colSpan={10} className="px-6 py-12 text-center">
                                 <div className="text-gray-500">
-                                  <Search className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                                  <p className="text-lg font-medium mb-2">Không tìm thấy KPI cá nhân</p>
-                                  <p className="text-sm">Thử điều chỉnh bộ lọc hoặc tìm kiếm với từ khóa khác</p>
+                                  <Users className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+                                  <p className="text-lg font-medium mb-2">Không tìm thấy nhân viên phù hợp</p>
+                                  <p className="text-sm">Thử điều chỉnh lại bộ lọc phòng ban hoặc nhóm</p>
                                 </div>
                               </td>
                             </tr>
                           )
                         }
-                        
-                        return employeeNames.map((employeeName) => {
-                          const employeeKPIs = kpisByEmployee[employeeName]
+
+                        return individualRows.map((row, index) => {
+                          const employeeName = row.employee.name
+                          const employeeKPIs = row.kpis
                           const isExpanded = expandedEmployees.includes(employeeName)
                           
                           return (
@@ -3376,52 +3918,53 @@ export default function KPIManagement() {
                                 }}
                               >
                                 <td className="px-6 py-3">
-                                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  <div className="flex items-center gap-3">
+                                    <span className="text-sm font-medium text-gray-900 min-w-[1rem]">{index + 1}</span>
+                                    <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isExpanded ? '' : '-rotate-90'}`} />
+                                  </div>
                                 </td>
-                                <td className="px-6 py-3" colSpan={8}>
+                                <td className="px-6 py-3">
                                   <div className="flex items-center space-x-3">
                                     <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
                                       <User className="w-4 h-4 text-orange-600" />
                                     </div>
-                                    <span className="font-semibold text-gray-900">{employeeName}</span>
-                                    <span className="text-sm text-gray-500">({employeeKPIs.length} KPI)</span>
+                                    <div>
+                                      <div className="font-semibold text-gray-900">{employeeName}</div>
+                                      <div className="text-sm text-gray-500">{employeeKPIs.length} KPI</div>
+                                    </div>
                                   </div>
                                 </td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3"></td>
+                                <td className="px-6 py-3 text-sm text-gray-900">{row.employee.teamName}</td>
+                                <td className="px-6 py-3 text-sm text-gray-900">{row.employee.departmentName}</td>
+                                <td className="px-6 py-3"></td>
                               </tr>
-                              
-                              {/* Employee KPIs */}
+
+                              {isExpanded && employeeKPIs.length === 0 && (
+                                <tr className="bg-white">
+                                  <td className="px-6 py-4"></td>
+                                  <td className="px-6 py-4"></td>
+                                  <td colSpan={8} className="px-6 py-4 text-sm text-gray-500 italic">
+                                    Chưa có KPI trong phạm vi lọc này
+                                  </td>
+                                </tr>
+                              )}
+
                               {isExpanded && employeeKPIs.map(kpi => (
                                 <tr key={kpi.id} className="hover:bg-gray-50">
                                   <td className="px-6 py-4"></td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <div className="flex items-center pl-4">
+                                    <div className="flex items-center">
                                       <div className={`p-2 rounded-[10px] ${getCategoryColor(kpi.category)} mr-3`}>
                                         {getCategoryIcon(kpi.category)}
                                       </div>
-                                      <div>
-                                        <button 
-                                          className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline text-left"
-                                          onClick={() => {
-                                            setSelectedKPIForDetail(kpi)
-                                            setShowDetailModal(true)
-                                          }}
-                                        >
-                                          {kpi.name}
-                                        </button>
-                                        <div className="text-sm text-gray-500">{formatPeriod(kpi.period)}</div>
+                                      <div className="text-sm font-medium text-gray-900">
+                                        {getCategoryLabel(kpi.category)}
                                       </div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
-                                      <div className="text-xs text-gray-500">{formatPeriod(kpi.period)}</div>
-                                    </div>
-                                  </td>
-                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                    <div>
-                                      <div className="font-medium" suppressHydrationWarning>{new Date().toLocaleDateString('vi-VN')}</div>
-                                      <div className="text-xs text-gray-500" suppressHydrationWarning>{new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</div>
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
@@ -3448,19 +3991,17 @@ export default function KPIManagement() {
                                     </div>
                                   </td>
                                   <td className="px-6 py-4 whitespace-nowrap">
-                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                      kpi.status === 'not_started' ? 'bg-gray-100 text-gray-800' :
-                                      kpi.status === 'active' ? 'bg-green-100 text-green-800' :
-                                      kpi.status === 'paused' ? 'bg-yellow-100 text-yellow-800' :
-                                      kpi.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                                      'bg-red-100 text-red-800'
-                                    }`}>
-                                      {kpi.status === 'not_started' ? 'Chưa bắt đầu' :
-                                       kpi.status === 'active' ? 'Đang hoạt động' :
-                                       kpi.status === 'paused' ? 'Tạm dừng' :
-                                       kpi.status === 'completed' ? 'Hoàn thành' : 'Quá hạn'}
+                                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadgeClassName(kpi.status)}`}>
+                                      {getStatusLabel(kpi.status)}
                                     </span>
                                   </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                    <div>
+                                      <div className="font-medium">{kpi.startDate} - {kpi.endDate}</div>
+                                    </div>
+                                  </td>
+                                  <td className="px-6 py-4"></td>
+                                  <td className="px-6 py-4"></td>
                                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <DropdownMenu>
                                       <DropdownMenuTrigger asChild>
@@ -3502,6 +4043,41 @@ export default function KPIManagement() {
                         })
                       })()}
                     </tbody>
+                    <tfoot className="bg-gray-50 border-t border-gray-200">
+                      <tr>
+                        <td colSpan={2} className="px-6 py-4 text-sm font-semibold text-gray-900">
+                          Tổng theo bộ lọc
+                        </td>
+                        <td colSpan={8} className="px-6 py-4">
+                          <div className="flex flex-wrap gap-3">
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng doanh thu</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatValue(individualSummary.revenue, 'VND')}
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng leads</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(individualSummary.leads)} leads
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Tổng công việc</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(individualSummary.tasks)} công việc
+                              </div>
+                            </div>
+                            <div className="rounded-[10px] bg-white border border-[#e6ebf1] px-4 py-3">
+                              <div className="text-xs uppercase tracking-wider text-gray-500">Trung bình chuyển đổi</div>
+                              <div className="text-sm font-semibold text-gray-900">
+                                {formatNumber(individualSummary.avgConversion, 1)}%
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    </tfoot>
                   </table>
                 </div>
               </div>
@@ -4279,172 +4855,67 @@ export default function KPIManagement() {
               {/* KPI con - Tree List with Hierarchy */}
               <div className="mb-6">
                 <div className="border rounded-[10px] overflow-hidden max-h-[400px] overflow-y-auto">
-                  {selectedKPIForDetail.childKPIs && selectedKPIForDetail.childKPIs.length > 0 ? (
-                    <div>
-                      {/* Render hierarchical KPI tree */}
-                      {(() => {
-                        // Get direct children - Phòng ban level
-                        const deptKPIs = kpiTargets.filter(k => selectedKPIForDetail.childKPIs?.includes(k.id))
-                        
-                        return deptKPIs.map((deptKPI) => {
-                          const isDeptExpanded = expandedDetailKPIs.includes(deptKPI.id)
-                          const teamKPIs = kpiTargets.filter(k => deptKPI.childKPIs?.includes(k.id))
-                          
-                          return (
-                            <div key={deptKPI.id} className="border-b last:border-b-0">
-                              {/* Phòng ban Row */}
-                              <div 
-                                className="flex items-center p-3 hover:bg-gray-50 cursor-pointer"
-                                onClick={() => {
-                                  setExpandedDetailKPIs(prev => 
-                                    prev.includes(deptKPI.id) 
-                                      ? prev.filter(id => id !== deptKPI.id) 
-                                      : [...prev, deptKPI.id]
-                                  )
-                                }}
-                              >
-                                <div className="flex items-center flex-1">
-                                  {teamKPIs.length > 0 && (
-                                    <ChevronDown className={`w-4 h-4 text-gray-400 mr-2 transition-transform ${isDeptExpanded ? '' : '-rotate-90'}`} />
-                                  )}
-                                  {teamKPIs.length === 0 && <div className="w-6" />}
-                                  <span 
-                                    className="text-sm text-blue-600 hover:underline cursor-pointer font-medium"
-                                    onClick={(e) => {
-                                      e.stopPropagation()
-                                      setSelectedKPIForDetail(deptKPI)
-                                    }}
+                  {selectedKPIForDetail.assignmentLevel !== 'individual' ? (
+                    <div className="overflow-x-auto">
+                      <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">STT</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Nhân viên</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Liên kết</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">KPI</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Hiện tại</th>
+                            <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Tiến độ</th>
+                          </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                          {detailEmployeeKPIs.length === 0 ? (
+                            <tr>
+                              <td colSpan={6} className="px-4 py-8 text-center text-sm text-gray-500">
+                                Chưa có KPI nhân viên trong phạm vi mục tiêu này
+                              </td>
+                            </tr>
+                          ) : (
+                            detailEmployeeKPIs.map((employeeKPI, index) => (
+                              <tr key={employeeKPI.id} className="hover:bg-gray-50">
+                                <td className="px-4 py-3 text-sm font-medium text-gray-900">{index + 1}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">{employeeKPI.assignedTo[0]}</td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  <button
+                                    className="text-blue-600 hover:text-blue-800 hover:underline text-left"
+                                    onClick={() => setSelectedKPIForDetail(employeeKPI)}
                                   >
-                                    {deptKPI.assignedTo[0]} » {deptKPI.name}: {deptKPI.targetValue} ({deptKPI.unit})
-                                  </span>
-                                </div>
-                                <div className="flex items-center space-x-4">
-                                  <div className="flex items-center space-x-2">
-                                    <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                                      <User className="w-4 h-4 text-gray-500" />
-                                    </div>
-                                    <span className="text-sm text-gray-600">{deptKPI.assignedTo[0]}</span>
-                                  </div>
-                                  <span className="text-xs text-gray-500 w-28">Oct 01 - Dec 31 2025</span>
-                                  <div className="flex items-center space-x-2 w-24">
-                                    <span className="text-sm font-medium text-gray-900">{deptKPI.progressPercentage.toFixed(2)}%</span>
-                                    <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                                      <div 
-                                        className={`h-1.5 rounded-full ${deptKPI.progressPercentage >= 50 ? 'bg-blue-500' : 'bg-red-500'}`}
-                                        style={{ width: `${Math.min(deptKPI.progressPercentage, 100)}%` }}
+                                    {employeeKPI.name}
+                                  </button>
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {formatValue(employeeKPI.targetValue, employeeKPI.unit)}
+                                </td>
+                                <td className="px-4 py-3 text-sm text-gray-900">
+                                  {formatValue(employeeKPI.currentValue, employeeKPI.unit)}
+                                </td>
+                                <td className="px-4 py-3">
+                                  <div className="flex items-center gap-3">
+                                    <div className="flex-1 bg-gray-200 rounded-full h-2">
+                                      <div
+                                        className={`h-2 rounded-full ${
+                                          employeeKPI.progressPercentage >= 100 ? 'bg-[#2dc56a]' :
+                                          employeeKPI.progressPercentage >= 80 ? 'bg-blue-500' :
+                                          employeeKPI.progressPercentage >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                                        }`}
+                                        style={{ width: `${Math.min(employeeKPI.progressPercentage, 100)}%` }}
                                       />
                                     </div>
+                                    <span className="text-xs font-medium text-gray-900 min-w-[3rem]">
+                                      {employeeKPI.progressPercentage.toFixed(1)}%
+                                    </span>
                                   </div>
-                                </div>
-                              </div>
-                              
-                              {/* Team Level - Nhóm */}
-                              {isDeptExpanded && teamKPIs.map((teamKPI) => {
-                                const isTeamExpanded = expandedDetailKPIs.includes(teamKPI.id)
-                                const indKPIs = kpiTargets.filter(k => teamKPI.childKPIs?.includes(k.id))
-                                
-                                return (
-                                  <div key={teamKPI.id}>
-                                    {/* Team Row */}
-                                    <div 
-                                      className="flex items-center p-3 pl-8 hover:bg-gray-50 cursor-pointer border-t border-gray-100"
-                                      onClick={() => {
-                                        setExpandedDetailKPIs(prev => 
-                                          prev.includes(teamKPI.id) 
-                                            ? prev.filter(id => id !== teamKPI.id) 
-                                            : [...prev, teamKPI.id]
-                                        )
-                                      }}
-                                    >
-                                      <div className="flex items-center flex-1">
-                                        {indKPIs.length > 0 && (
-                                          <ChevronDown className={`w-4 h-4 text-gray-400 mr-2 transition-transform ${isTeamExpanded ? '' : '-rotate-90'}`} />
-                                        )}
-                                        {indKPIs.length === 0 && <div className="w-6" />}
-                                        <span 
-                                          className="text-sm text-blue-600 hover:underline cursor-pointer"
-                                          onClick={(e) => {
-                                            e.stopPropagation()
-                                            setSelectedKPIForDetail(teamKPI)
-                                          }}
-                                        >
-                                          {teamKPI.assignedTo[0]} » {teamKPI.name}: {teamKPI.targetValue} ({teamKPI.unit})
-                                        </span>
-                                      </div>
-                                      <div className="flex items-center space-x-4">
-                                        <div className="flex items-center space-x-2">
-                                          <div className="w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center overflow-hidden">
-                                            <User className="w-4 h-4 text-gray-500" />
-                                          </div>
-                                          <span className="text-sm text-gray-600">{teamKPI.assignedTo[0]}</span>
-                                        </div>
-                                        <span className="text-xs text-gray-500 w-28">Oct 01 - Dec 31 2025</span>
-                                        <div className="flex items-center space-x-2 w-24">
-                                          <span className="text-sm font-medium text-gray-900">{teamKPI.progressPercentage.toFixed(2)}%</span>
-                                          <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                                            <div 
-                                              className={`h-1.5 rounded-full ${teamKPI.progressPercentage >= 50 ? 'bg-blue-500' : 'bg-red-500'}`}
-                                              style={{ width: `${Math.min(teamKPI.progressPercentage, 100)}%` }}
-                                            />
-                                          </div>
-                                        </div>
-                                      </div>
-                                    </div>
-                                    
-                                    {/* Individual Level - Cá nhân */}
-                                    {isTeamExpanded && indKPIs.map((indKPI) => (
-                                      <div key={indKPI.id} className="flex items-center p-3 pl-16 hover:bg-gray-50 border-t border-gray-100">
-                                        <div className="flex items-center flex-1">
-                                          <div className="w-6" />
-                                          <div className="flex items-center space-x-2">
-                                            <CheckCircle className="w-4 h-4 text-green-500" />
-                                            <span 
-                                              className="text-sm text-blue-600 hover:underline cursor-pointer"
-                                              onClick={(e) => {
-                                                e.stopPropagation()
-                                                setSelectedKPIForDetail(indKPI)
-                                              }}
-                                            >
-                                              {indKPI.assignedTo[0]} » {indKPI.name}: {indKPI.targetValue} ({indKPI.unit})
-                                            </span>
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center space-x-4">
-                                          <div className="flex items-center space-x-2">
-                                            <div className="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center overflow-hidden">
-                                              <span className="text-xs font-medium text-orange-600">{indKPI.assignedTo[0]?.charAt(0)}</span>
-                                            </div>
-                                            <span className="text-sm text-gray-600">{indKPI.assignedTo[0]}</span>
-                                          </div>
-                                          <span className="text-xs text-gray-500 w-28">Oct 01 - Dec 31 2025</span>
-                                          <div className="flex items-center space-x-2 w-24">
-                                            <span className="text-sm font-medium text-gray-900">{indKPI.progressPercentage.toFixed(2)}%</span>
-                                            <div className="w-12 bg-gray-200 rounded-full h-1.5">
-                                              <div 
-                                                className={`h-1.5 rounded-full ${indKPI.progressPercentage >= 50 ? 'bg-blue-500' : 'bg-red-500'}`}
-                                                style={{ width: `${Math.min(indKPI.progressPercentage, 100)}%` }}
-                                              />
-                                            </div>
-                                          </div>
-                                          <div className="relative group">
-                                            <span className="text-xs px-2 py-1 bg-gray-100 text-gray-600 rounded cursor-pointer">
-                                              {indKPI.currentValue}/{indKPI.targetValue} ({indKPI.unit})
-                                            </span>
-                                            <div className="hidden group-hover:block absolute right-0 top-6 z-10 bg-white border shadow-lg rounded-[10px] p-2 text-xs whitespace-nowrap">
-                                              {indKPI.currentValue}/{indKPI.targetValue} ({indKPI.unit})<br/>
-                                              {indKPI.progressPercentage.toFixed(2)}%
-                                            </div>
-                                          </div>
-                                        </div>
-                                      </div>
-                                    ))}
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )
-                        })
-                      })()}
+                                </td>
+                              </tr>
+                            ))
+                          )}
+                        </tbody>
+                      </table>
                     </div>
                   ) : (
                     /* Task Table for Individual KPI */

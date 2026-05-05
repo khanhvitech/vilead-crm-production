@@ -195,6 +195,33 @@ const convertOrderCustomerToCustomer = (customer: Customer, orders: Order[]) => 
   const totalSpent = customerOrders.reduce((sum, o) => sum + o.total, 0)
   const successfulOrders = customerOrders.filter(o => o.status === 'completed').length
   const lastOrder = customerOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+
+  const mapOrderStatus = (status: Order['status']) => {
+    switch (status) {
+      case 'completed': return 'completed' as const
+      case 'cancelled':
+      case 'refunded':
+        return 'cancelled' as const
+      case 'confirmed':
+      case 'processing':
+        return 'confirmed' as const
+      case 'draft':
+      case 'pending':
+      default:
+        return 'pending' as const
+    }
+  }
+
+  const mapPaymentMethod = (paymentMethod: Order['paymentMethod']) => {
+    switch (paymentMethod) {
+      case 'cash': return 'Tiền mặt'
+      case 'transfer': return 'Chuyển khoản'
+      case 'card': return 'Thẻ'
+      case 'installment': return 'Trả góp'
+      case 'momo': return 'MoMo'
+      default: return paymentMethod
+    }
+  }
   
   return {
     id: customer.id,
@@ -209,6 +236,72 @@ const convertOrderCustomerToCustomer = (customer: Customer, orders: Order[]) => 
     totalOrders: customerOrders.length,
     totalSpent: totalSpent,
     lastOrderDate: lastOrder ? new Date(lastOrder.createdAt).toLocaleDateString('vi-VN') : undefined,
+    orders: customerOrders.map((order) => {
+      const items = Array.isArray(order.items)
+        ? order.items.map((item, index) => ({
+            id: Number(item.id) || index + 1,
+            productName: item.product?.name || `Sản phẩm ${index + 1}`,
+            productPackage: item.variant?.name || '1',
+            quantity: item.quantity || 1,
+            price: item.unitPrice || 0,
+            total: item.totalPrice || 0,
+            paymentStatus: (order.paymentStatus === 'paid'
+              ? 'paid'
+              : order.paymentStatus === 'partial'
+                ? 'partial'
+                : 'unpaid') as 'paid' | 'partial' | 'unpaid'
+          }))
+        : []
+      const subtotal = order.subtotal || items.reduce((sum, item) => sum + item.total, 0)
+      const discount = order.discount || 0
+      const vat = order.tax || Math.round(subtotal * 0.1)
+      const paid = typeof order.totalPaid === 'number'
+        ? order.totalPaid
+        : order.paymentStatus === 'paid'
+          ? order.total
+          : 0
+      const debt = typeof order.remainingDebt === 'number'
+        ? order.remainingDebt
+        : Math.max(order.total - paid, 0)
+
+      return {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: customer.name,
+        products: items.map((item) => item.productName).join(', ') || '-',
+        total: order.total,
+        paymentCount: order.paymentMode === 'installment' ? order.installments?.length || 0 : paid > 0 ? 1 : 0,
+        paid,
+        debt,
+        paymentMethod: mapPaymentMethod(order.paymentMethod),
+        status: mapOrderStatus(order.status),
+        createdAt: order.createdAt,
+        dueDate: order.deadline,
+        label: order.tags?.[0],
+        subtotal,
+        discount,
+        vat,
+        items,
+        invoices: Array.isArray(order.invoices)
+          ? order.invoices.map((invoice, index) => ({
+              id: invoice.id?.toString() || `invoice-${order.id}-${index + 1}`,
+              fileName: invoice.number || `invoice-${index + 1}`,
+              fileSize: 0,
+              fileType: invoice.fileType === 'image' ? 'image/png' : invoice.fileType === 'pdf' ? 'application/pdf' : 'text/plain',
+              uploadedAt: invoice.date || order.updatedAt || order.createdAt,
+              thumbnailUrl: ''
+            }))
+          : [],
+        notes: Array.isArray(order.notes)
+          ? order.notes.map((note) => ({
+              id: note.id?.toString() || `note-${order.id}`,
+              content: note.content || '',
+              createdAt: note.createdAt || order.createdAt,
+              createdBy: note.createdBy || 'System'
+            }))
+          : []
+      }
+    }),
     source: 'website',
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
@@ -3138,10 +3231,6 @@ Trân trọng,
           isOpen={true}
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          onUpdate={(orderId, updates) => {
-            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o))
-            setSelectedOrder(null)
-          }}
         />
       )}
 

@@ -30,8 +30,22 @@ import {
   MessageSquarePlus,
   Settings,
   CreditCard,
-  BellRing
+  BellRing,
+  Image as ImageIcon,
+  Paperclip
 } from 'lucide-react'
+import {
+  InvoiceViewerDialog,
+  OrderDetailDialog,
+  getInvoicePreview,
+  getOrderInvoices,
+  getOrderNotes,
+  isImageInvoice,
+  type SharedOrderDetailData,
+  type SharedOrderInvoice,
+  type SharedOrderItem,
+  type SharedOrderNote
+} from './SharedOrderDetailDialog'
 
 // ==================== INTERFACES ====================
 
@@ -58,44 +72,17 @@ interface CustomerNote {
   attachments: NoteAttachment[]
 }
 
-interface OrderItem {
-  id: number
-  productName: string
-  productPackage: string
-  quantity: number
-  price: number
-  total: number
-  paymentStatus: 'paid' | 'unpaid' | 'partial'
-}
+type OrderItem = SharedOrderItem
+type OrderInvoice = SharedOrderInvoice
+type OrderNote = SharedOrderNote
 
-interface OrderInvoice {
-  id: string
-  fileName: string
-  fileSize: number
-  fileType: string
-  uploadedAt: string
-  thumbnailUrl?: string
-}
-
-interface CustomerOrder {
+interface CustomerOrder extends SharedOrderDetailData {
   id: number
-  orderNumber: string
   customerName?: string
   products: string
-  total: number
   paymentCount?: number
-  paid: number
-  debt: number
-  paymentMethod: string
   status: 'pending' | 'confirmed' | 'completed' | 'cancelled'
   createdAt: string
-  dueDate?: string
-  label?: string
-  items?: OrderItem[]
-  discount?: number
-  vat?: number
-  subtotal?: number
-  invoices?: OrderInvoice[]
 }
 
 interface CustomerTask {
@@ -163,7 +150,6 @@ interface CustomerDetailModalProps {
   onClose: () => void
   customer: Customer | null
   onUpdate?: (customerId: number, updates: Partial<Customer>) => void
-  onOpenOrderDetail?: (order: CustomerOrder) => void
   onCreateOrder?: (customer: Customer) => void
 }
 
@@ -545,497 +531,6 @@ function CustomerInfoDetailDialog({ isOpen, onClose, customer }: CustomerInfoDet
         </div>
       </div>
     </div>
-  )
-}
-
-// Order Note Interface for Order Detail
-interface OrderNote {
-  id: string
-  content: string
-  createdAt: string
-  createdBy: string
-}
-
-// Order Detail Dialog Component with Tabs
-interface OrderDetailDialogProps {
-  isOpen: boolean
-  onClose: () => void
-  order: CustomerOrder | null
-}
-
-function OrderDetailDialog({ isOpen, onClose, order }: OrderDetailDialogProps) {
-  const [activeTab, setActiveTab] = useState<'info' | 'invoices' | 'notes'>('info')
-  const [invoiceActionMenu, setInvoiceActionMenu] = useState<string | null>(null)
-  const [noteActionMenu, setNoteActionMenu] = useState<string | null>(null)
-  const [showEditInvoice, setShowEditInvoice] = useState(false)
-  const [showDeleteInvoice, setShowDeleteInvoice] = useState(false)
-  const [showEditNote, setShowEditNote] = useState(false)
-  const [showDeleteNote, setShowDeleteNote] = useState(false)
-  const [selectedInvoice, setSelectedInvoice] = useState<OrderInvoice | null>(null)
-  const [selectedNote, setSelectedNote] = useState<OrderNote | null>(null)
-
-  if (!isOpen || !order) return null
-
-  const formatCurrency = (amount: number) => amount.toLocaleString('vi-VN') + ' đ'
-
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B'
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB'
-    return (bytes / (1024 * 1024)).toFixed(2) + ' MB'
-  }
-
-  const getPaymentStatusColor = (status: string) => {
-    switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800'
-      case 'unpaid': return 'bg-red-100 text-red-800'
-      case 'partial': return 'bg-yellow-100 text-yellow-800'
-      default: return 'bg-gray-100 text-gray-800'
-    }
-  }
-
-  const getPaymentStatusText = (status: string) => {
-    switch (status) {
-      case 'paid': return 'Đã thanh toán'
-      case 'unpaid': return 'Chưa thanh toán'
-      case 'partial': return 'Thanh toán 1 phần'
-      default: return status
-    }
-  }
-
-  // Mock order items for demonstration
-  const orderItems: OrderItem[] = order.items || [
-    { id: 1, productName: 'NETCore', productPackage: '1', quantity: 1, price: 10000, total: 10000, paymentStatus: 'paid' },
-    { id: 2, productName: 'HRMCort', productPackage: '2', quantity: 1, price: 20000, total: 40000, paymentStatus: 'partial' },
-  ]
-
-  // Mock invoices for demonstration
-  const mockInvoices: OrderInvoice[] = order.invoices || [
-    { id: '1', fileName: '028d0cad-e7b5-4e85-94bc-92a0003a71c2.png', fileSize: 1240000, fileType: 'image/png', uploadedAt: '2026-02-26T00:53:00', thumbnailUrl: '' },
-    { id: '2', fileName: '81686d2f-77ae-478b-8165-76fbf9269dc3.png', fileSize: 997070, fileType: 'image/png', uploadedAt: '2026-02-26T00:53:00', thumbnailUrl: '' },
-    { id: '3', fileName: '490a618f-5499-49dd-b1cd-424e1efdf759.png', fileSize: 1130000, fileType: 'image/png', uploadedAt: '2026-02-26T00:53:00', thumbnailUrl: '' },
-  ]
-
-  // Mock notes for demonstration
-  const mockNotes: OrderNote[] = [
-    { id: '1', content: 'Khách hàng yêu cầu giao hàng vào buổi sáng', createdAt: '2026-02-20T10:30:00', createdBy: 'Nguyễn Văn A' },
-    { id: '2', content: 'Đã liên hệ xác nhận đơn hàng', createdAt: '2026-02-21T14:00:00', createdBy: 'Trần Thị B' },
-  ]
-
-  const subtotal = order.subtotal || orderItems.reduce((sum, item) => sum + item.total, 0)
-  const discount = order.discount || 350000
-  const vat = order.vat || Math.round(subtotal * 0.1)
-  const grandTotal = subtotal - discount + vat
-
-  const tabs = [
-    { id: 'info', label: 'Thông tin', icon: <Info className="w-4 h-4" /> },
-    { id: 'invoices', label: 'Hóa đơn', icon: <Receipt className="w-4 h-4" /> },
-    { id: 'notes', label: 'Ghi chú', icon: <FileText className="w-4 h-4" /> },
-  ]
-
-  // Tab: Thông tin
-  const renderInfoTab = () => (
-    <div className="space-y-4">
-      {/* Products Table */}
-      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
-        <table className="w-full">
-          <thead className="bg-[#fafafb]">
-            <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tên SP</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Gói SP</th>
-              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Số lượng</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Giá</th>
-              <th className="px-3 py-2 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tổng tiền</th>
-              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Trạng thái TT</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {orderItems.map((item) => (
-              <tr key={item.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900">{item.productName}</td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-700">{item.productPackage}</td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-700 text-center">{item.quantity}</td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900 text-right">{formatCurrency(item.price)}</td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-blue-600 text-right font-medium">{formatCurrency(item.total)}</td>
-                <td className="px-3 py-2 text-center">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getPaymentStatusColor(item.paymentStatus)}`}>
-                    {getPaymentStatusText(item.paymentStatus)}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pricing Summary */}
-      <div className="border-t border-[#e6ebf1] pt-4 space-y-2">
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Tạm tính:</span>
-          <span className="text-sm text-gray-900 text-right">{formatCurrency(subtotal)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-green-600">Giảm giá:</span>
-          <span className="text-sm text-green-600 text-right">-{formatCurrency(discount)}</span>
-        </div>
-        <div className="flex justify-between items-center">
-          <span className="text-sm text-gray-600">Thuế VAT:</span>
-          <span className="text-sm text-gray-900 text-right">{formatCurrency(vat)}</span>
-        </div>
-        <div className="flex justify-between items-center pt-2 border-t border-[#e6ebf1]">
-          <span className="text-base font-semibold text-gray-900">Tổng cộng:</span>
-          <span className="text-lg font-bold text-blue-600">{formatCurrency(grandTotal)}</span>
-        </div>
-      </div>
-    </div>
-  )
-
-  // Tab: Hóa đơn
-  const renderInvoicesTab = () => (
-    <div className="space-y-4">
-      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
-        <table className="w-full">
-          <thead className="bg-[#fafafb]">
-            <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1] w-16">Ảnh</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tên file</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Ngày tạo</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Kích thước</th>
-              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase w-20">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {mockInvoices.map((invoice) => (
-              <tr key={invoice.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-[#e6ebf1]">
-                  <div className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center overflow-hidden">
-                    {invoice.fileType.startsWith('image/') ? (
-                      invoice.thumbnailUrl ? (
-                        <img src={invoice.thumbnailUrl} alt={invoice.fileName} className="w-full h-full object-cover" />
-                      ) : (
-                        <span className="text-lg">🖼️</span>
-                      )
-                    ) : (
-                      <FileText className="w-5 h-5 text-gray-500" />
-                    )}
-                  </div>
-                </td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1]">
-                  <span className="text-sm text-blue-600 hover:underline cursor-pointer">{invoice.fileName}</span>
-                </td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
-                  {new Date(invoice.uploadedAt).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })} - {new Date(invoice.uploadedAt).toLocaleDateString('vi-VN')}
-                </td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
-                  {formatFileSize(invoice.fileSize)}
-                </td>
-                <td className="px-3 py-2 text-center relative">
-                  <button
-                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                    onClick={() => setInvoiceActionMenu(invoiceActionMenu === invoice.id ? null : invoice.id)}
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                  {invoiceActionMenu === invoice.id && (
-                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
-                      <button
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        onClick={() => {
-                          setSelectedInvoice(invoice)
-                          setShowEditInvoice(true)
-                          setInvoiceActionMenu(null)
-                        }}
-                      >
-                        <Edit className="w-4 h-4 text-blue-500" />
-                        Sửa
-                      </button>
-                      <button
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                        onClick={() => {
-                          setSelectedInvoice(invoice)
-                          setShowDeleteInvoice(true)
-                          setInvoiceActionMenu(null)
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Xóa
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {mockInvoices.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          Chưa có hóa đơn nào
-        </div>
-      )}
-    </div>
-  )
-
-  // Tab: Ghi chú
-  const renderNotesTab = () => (
-    <div className="space-y-4">
-      <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
-        <table className="w-full">
-          <thead className="bg-[#fafafb]">
-            <tr>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Nội dung</th>
-              <th className="px-3 py-2 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1] w-40">Ngày tạo</th>
-              <th className="px-3 py-2 text-center text-xs font-semibold text-gray-600 uppercase w-20">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {mockNotes.map((note) => (
-              <tr key={note.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-900">
-                  {note.content}
-                </td>
-                <td className="px-3 py-2 border-r border-[#e6ebf1] text-sm text-gray-600">
-                  {new Date(note.createdAt).toLocaleDateString('vi-VN')}
-                </td>
-                <td className="px-3 py-2 text-center relative">
-                  <button
-                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                    onClick={() => setNoteActionMenu(noteActionMenu === note.id ? null : note.id)}
-                  >
-                    <MoreVertical className="w-4 h-4" />
-                  </button>
-                  {noteActionMenu === note.id && (
-                    <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
-                      <button
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        onClick={() => {
-                          setSelectedNote(note)
-                          setShowEditNote(true)
-                          setNoteActionMenu(null)
-                        }}
-                      >
-                        <Edit className="w-4 h-4 text-blue-500" />
-                        Sửa
-                      </button>
-                      <button
-                        className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                        onClick={() => {
-                          setSelectedNote(note)
-                          setShowDeleteNote(true)
-                          setNoteActionMenu(null)
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Xóa
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      {mockNotes.length === 0 && (
-        <div className="text-center py-8 text-gray-500">
-          Chưa có ghi chú nào
-        </div>
-      )}
-    </div>
-  )
-
-  return (
-    <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
-        <div className="bg-white rounded-[10px] w-full max-w-3xl mx-4 shadow-2xl max-h-[90vh] flex flex-col">
-          {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
-            <div className="flex items-center gap-2">
-              <Info className="w-5 h-5 text-blue-500" />
-              <h3 className="font-semibold text-gray-900">Chi tiết đơn hàng - {order.orderNumber}</h3>
-            </div>
-            <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          {/* Tabs Navigation */}
-          <div className="border-b border-[#e6ebf1] px-4">
-            <nav className="flex space-x-6">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as 'info' | 'invoices' | 'notes')}
-                  className={`flex items-center gap-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
-                    }`}
-                >
-                  {tab.icon}
-                  <span>{tab.label}</span>
-                </button>
-              ))}
-            </nav>
-          </div>
-
-          {/* Content */}
-          <div className="p-4 overflow-y-auto flex-1">
-            {activeTab === 'info' && renderInfoTab()}
-            {activeTab === 'invoices' && renderInvoicesTab()}
-            {activeTab === 'notes' && renderNotesTab()}
-          </div>
-
-          {/* Footer */}
-          <div className="flex justify-end gap-2 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
-            <button
-              onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-[10px]"
-            >
-              Đóng
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Edit Invoice Dialog */}
-      {showEditInvoice && selectedInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
-          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
-              <h3 className="text-lg font-semibold text-gray-900">Sửa hóa đơn</h3>
-              <button onClick={() => setShowEditInvoice(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4 space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  File hiện tại: <span className="text-blue-600">{selectedInvoice.fileName}</span>
-                </label>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Chọn file mới
-                </label>
-                <input
-                  type="file"
-                  accept="image/*,.pdf"
-                  className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-[10px] file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-[#3e79f7] hover:file:bg-blue-100"
-                />
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
-              <button
-                onClick={() => setShowEditInvoice(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => setShowEditInvoice(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
-              >
-                Lưu thay đổi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Invoice Confirmation */}
-      {showDeleteInvoice && selectedInvoice && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
-          <div className="bg-white rounded-[10px] w-full max-w-sm mx-4 shadow-xl">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Xác nhận xóa</h3>
-              <p className="text-sm text-gray-600">
-                Bạn có chắc chắn muốn xóa hóa đơn &quot;{selectedInvoice.fileName}&quot;? Hành động này không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
-              <button
-                onClick={() => setShowDeleteInvoice(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => setShowDeleteInvoice(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#ff6b72] rounded-[10px] hover:bg-[#d9505c]"
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Edit Note Dialog */}
-      {showEditNote && selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
-          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-xl">
-            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
-              <h3 className="text-lg font-semibold text-gray-900">Sửa ghi chú</h3>
-              <button onClick={() => setShowEditNote(false)} className="text-gray-400 hover:text-gray-600">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            <div className="p-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nội dung ghi chú <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                defaultValue={selectedNote.content}
-                rows={4}
-                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none"
-                placeholder="Nhập nội dung ghi chú..."
-              />
-            </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
-              <button
-                onClick={() => setShowEditNote(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => setShowEditNote(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
-              >
-                Lưu thay đổi
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Delete Note Confirmation */}
-      {showDeleteNote && selectedNote && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[70]">
-          <div className="bg-white rounded-[10px] w-full max-w-sm mx-4 shadow-xl">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Xác nhận xóa</h3>
-              <p className="text-sm text-gray-600">
-                Bạn có chắc chắn muốn xóa ghi chú này? Hành động này không thể hoàn tác.
-              </p>
-            </div>
-            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1]">
-              <button
-                onClick={() => setShowDeleteNote(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
-              >
-                Hủy
-              </button>
-              <button
-                onClick={() => setShowDeleteNote(false)}
-                className="px-4 py-2 text-sm font-medium text-white bg-[#ff6b72] rounded-[10px] hover:bg-[#d9505c]"
-              >
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </>
   )
 }
 
@@ -1541,7 +1036,6 @@ export default function CustomerDetailModal({
   onClose,
   customer,
   onUpdate,
-  onOpenOrderDetail,
   onCreateOrder
 }: CustomerDetailModalProps) {
   const [activeTab, setActiveTab] = useState<'orders' | 'notes' | 'tasks' | 'history'>('orders')
@@ -1560,6 +1054,9 @@ export default function CustomerDetailModal({
   const [showAddOrderNote, setShowAddOrderNote] = useState(false)
   const [showAttachInvoice, setShowAttachInvoice] = useState(false)
   const [orderActionMenuOpen, setOrderActionMenuOpen] = useState<number | null>(null)
+  const [showInvoiceViewer, setShowInvoiceViewer] = useState(false)
+  const [invoiceViewerIndex, setInvoiceViewerIndex] = useState(0)
+  const [viewerInvoices, setViewerInvoices] = useState<OrderInvoice[]>([])
 
   // History filters
   const [historyDateFrom, setHistoryDateFrom] = useState('')
@@ -1570,9 +1067,92 @@ export default function CustomerDetailModal({
 
   // Mock data for demonstration
   const defaultOrders: CustomerOrder[] = [
-    { id: 1, orderNumber: 'DH001', customerName: customer.name, products: 'Sản phẩm A, Sản phẩm B', total: 5000000, paymentCount: 2, paid: 3000000, debt: 2000000, paymentMethod: 'Chuyển khoản', status: 'pending', createdAt: '2026-02-20', dueDate: '2026-03-20', label: 'Chờ xử lý' },
-    { id: 2, orderNumber: 'DH002', customerName: customer.name, products: 'Sản phẩm C', total: 2000000, paymentCount: 1, paid: 2000000, debt: 0, paymentMethod: 'Tiền mặt', status: 'completed', createdAt: '2026-02-15', dueDate: '2026-02-28', label: 'Hoàn thành' },
-    { id: 3, orderNumber: 'DH003', customerName: customer.name, products: 'Sản phẩm D, E, F', total: 8000000, paymentCount: 3, paid: 4000000, debt: 4000000, paymentMethod: 'Trả góp', status: 'confirmed', createdAt: '2026-02-10', dueDate: '2026-04-10', label: 'Đã xác nhận' },
+    {
+      id: 1,
+      orderNumber: 'DH001',
+      customerName: customer.name,
+      products: 'Sản phẩm A, Sản phẩm B',
+      total: 5000000,
+      paymentCount: 2,
+      paid: 3000000,
+      debt: 2000000,
+      paymentMethod: 'Chuyển khoản',
+      status: 'pending',
+      createdAt: '2026-02-20',
+      dueDate: '2026-03-20',
+      label: 'Chờ xử lý',
+      subtotal: 5450000,
+      discount: 500000,
+      vat: 50000,
+      items: [
+        { id: 1, productName: 'NETCore', productPackage: '1', quantity: 1, price: 2500000, total: 2500000, paymentStatus: 'partial' },
+        { id: 2, productName: 'HRMCort', productPackage: '2', quantity: 1, price: 2950000, total: 2950000, paymentStatus: 'partial' },
+      ],
+      invoices: [
+        { id: 'inv-1', fileName: 'hoa-don-1.png', fileSize: 1240000, fileType: 'image/png', uploadedAt: '2026-02-26T00:53:00', thumbnailUrl: '' },
+        { id: 'inv-2', fileName: 'hoa-don-2.png', fileSize: 997070, fileType: 'image/png', uploadedAt: '2026-02-25T10:20:00', thumbnailUrl: '' },
+        { id: 'inv-3', fileName: 'xac-nhan-cong-no.pdf', fileSize: 880000, fileType: 'application/pdf', uploadedAt: '2026-02-24T14:05:00' },
+      ],
+      notes: [
+        { id: 'note-1', content: 'Khách cần xuất hóa đơn trước 10h sáng và gửi bản mềm qua Zalo.', createdAt: '2026-02-26T08:15:00', createdBy: 'Nguyễn Văn A' },
+        { id: 'note-2', content: 'Đã gọi xác nhận số liệu công nợ, khách hẹn thanh toán phần còn lại vào cuối tuần.', createdAt: '2026-02-25T15:30:00', createdBy: 'Trần Thị B' },
+      ]
+    },
+    {
+      id: 2,
+      orderNumber: 'DH002',
+      customerName: customer.name,
+      products: 'Sản phẩm C',
+      total: 2000000,
+      paymentCount: 1,
+      paid: 2000000,
+      debt: 0,
+      paymentMethod: 'Tiền mặt',
+      status: 'completed',
+      createdAt: '2026-02-15',
+      dueDate: '2026-02-28',
+      label: 'Hoàn thành',
+      subtotal: 1800000,
+      discount: 0,
+      vat: 200000,
+      items: [
+        { id: 1, productName: 'Sản phẩm C', productPackage: 'Basic', quantity: 1, price: 1800000, total: 1800000, paymentStatus: 'paid' },
+      ],
+      invoices: [
+        { id: 'inv-4', fileName: 'hoa-don-hoan-thanh.png', fileSize: 1130000, fileType: 'image/png', uploadedAt: '2026-02-22T09:40:00', thumbnailUrl: '' },
+      ],
+      notes: [
+        { id: 'note-3', content: 'Khách thanh toán đủ tiền mặt khi nhận hàng.', createdAt: '2026-02-22T10:00:00', createdBy: 'Lê Thu Hà' },
+      ]
+    },
+    {
+      id: 3,
+      orderNumber: 'DH003',
+      customerName: customer.name,
+      products: 'Sản phẩm D, E, F',
+      total: 8000000,
+      paymentCount: 3,
+      paid: 4000000,
+      debt: 4000000,
+      paymentMethod: 'Trả góp',
+      status: 'confirmed',
+      createdAt: '2026-02-10',
+      dueDate: '2026-04-10',
+      label: 'Đã xác nhận',
+      subtotal: 7600000,
+      discount: 200000,
+      vat: 600000,
+      items: [
+        { id: 1, productName: 'Sản phẩm D', productPackage: 'Premium', quantity: 1, price: 3000000, total: 3000000, paymentStatus: 'partial' },
+        { id: 2, productName: 'Sản phẩm E', productPackage: 'Standard', quantity: 1, price: 2200000, total: 2200000, paymentStatus: 'partial' },
+        { id: 3, productName: 'Sản phẩm F', productPackage: 'Addon', quantity: 1, price: 2400000, total: 2400000, paymentStatus: 'partial' },
+      ],
+      invoices: [],
+      notes: [
+        { id: 'note-4', content: 'Khách yêu cầu tách tiến độ nghiệm thu theo 3 giai đoạn, cần theo dõi sát kỳ thanh toán tiếp theo.', createdAt: '2026-02-18T16:45:00', createdBy: 'Phạm Quỳnh' },
+        { id: 'note-5', content: 'Đã gửi lịch thanh toán trả góp qua email.', createdAt: '2026-02-12T09:10:00', createdBy: 'Phạm Quỳnh' },
+      ]
+    },
   ]
   const mockOrders: CustomerOrder[] = Array.isArray(customer.orders) && customer.orders.length > 0 ? customer.orders : defaultOrders
 
@@ -1743,6 +1323,24 @@ export default function CustomerDetailModal({
     setShowOrderDetail(true)
   }
 
+  const openOrderInvoiceViewer = (order: CustomerOrder) => {
+    const imageInvoices = getOrderInvoices(order).filter(isImageInvoice)
+    if (imageInvoices.length === 0) return
+
+    setViewerInvoices(imageInvoices)
+    setInvoiceViewerIndex(0)
+    setShowInvoiceViewer(true)
+  }
+
+  const getOrderNotesTooltip = (order: CustomerOrder) => {
+    const notes = getOrderNotes(order)
+    if (notes.length === 0) return 'Chưa có ghi chú'
+
+    return notes
+      .map((note, index) => `${index + 1}. ${note.content} (${note.createdBy} - ${formatDateTime(note.createdAt)})`)
+      .join('\n')
+  }
+
   const renderOrdersTab = () => (
     <div className="space-y-4">
       {/* Header with Add Order Button */}
@@ -1763,111 +1361,148 @@ export default function CustomerDetailModal({
 
       {/* Orders Table */}
       <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
-        <table className="w-full">
+        <table className="w-full min-w-[1520px]">
           <thead className="bg-[#fafafb]">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Mã đơn</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Khách hàng</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Sản phẩm</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Tổng tiền</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Số lần TT</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Thực tế</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Dư nợ</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Trạng thái</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Thanh toán</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Thời hạn</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase border-r border-[#e6ebf1]">Nhãn</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase w-16">Thao tác</th>
+              <th className="px-3 py-3 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[56px]">STT</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[110px]">Mã đơn</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[170px]">Khách hàng</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[220px]">Sản phẩm</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[130px]">Tổng tiền</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[140px]">Đã thanh toán</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[120px]">Dư nợ</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[130px]">Trạng thái</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[140px]">Thanh toán</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[120px]">Thời hạn</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[110px]">Hóa đơn</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[260px]">Ghi chú</th>
+              <th className="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase whitespace-nowrap border-r border-[#e6ebf1] min-w-[90px]">Thao tác</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
-            {mockOrders.map((order) => (
-              <tr key={order.id} className="hover:bg-[#f0f7ff]">
-                <td className="px-4 py-3 border-r border-[#e6ebf1]">
-                  <button
-                    className="text-blue-600 hover:text-blue-800 font-medium hover:underline"
-                    onClick={() => handleOpenOrderDetail(order)}
-                  >
-                    {order.orderNumber}
-                  </button>
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 max-w-[150px] truncate" title={order.customerName || customer.name}>
-                  {order.customerName || customer.name}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 max-w-[180px] truncate" title={order.products}>
-                  {order.products}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-blue-600 text-right font-medium">
-                  {formatCurrency(order.total)}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 text-center">
-                  {order.paymentCount || 0}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-green-600 text-right">
-                  {formatCurrency(order.paid)}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-red-600 text-right">
-                  {formatCurrency(order.debt)}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1]">
-                  <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
-                    {getStatusText(order.status)}
-                  </span>
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700">
-                  {order.paymentMethod}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-500">
-                  {order.dueDate ? formatDate(order.dueDate) : '-'}
-                </td>
-                <td className="px-4 py-3 border-r border-[#e6ebf1]">
-                  {order.label ? (
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${order.label === 'Hoàn thành' ? 'bg-green-100 text-green-700' :
-                      order.label === 'Đã xác nhận' ? 'bg-blue-100 text-[#3e79f7]' :
-                        order.label === 'Chờ xử lý' ? 'bg-yellow-100 text-yellow-700' :
-                          'bg-gray-100 text-gray-700'
-                      }`}>
-                      {order.label}
-                    </span>
-                  ) : '-'}
-                </td>
-                <td className="px-4 py-3 text-center relative">
-                  <button
-                    className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
-                    onClick={() => setOrderActionMenuOpen(orderActionMenuOpen === order.id ? null : order.id)}
-                  >
-                    <Settings className="w-4 h-4" />
-                  </button>
-                  {/* Action Menu Dropdown */}
-                  {orderActionMenuOpen === order.id && (
-                    <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
-                      {/* THÔNG TIN section */}
-                      <div className="px-3 py-1.5 text-xs text-left font-semibold text-gray-500 uppercase tracking-wide">Thông tin</div>
-                      <button
-                        className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                        onClick={() => {
-                          handleOpenOrderDetail(order)
-                          setOrderActionMenuOpen(null)
-                        }}
-                      >
-                        <Eye className="w-4 h-4 text-blue-500" />
-                        Xem chi tiết
-                      </button>
+            {mockOrders.map((order, index) => {
+              const previewInvoice = getInvoicePreview(order)
+              const invoiceCount = getOrderInvoices(order).length
+              const imageInvoiceCount = getOrderInvoices(order).filter(isImageInvoice).length
+              const latestNote = getOrderNotes(order)[0]
 
-                      {/* THAO TÁC NHANH section */}
-                      <div className="border-t border-gray-100 mt-1 pt-1">
-                        <div className="px-3 py-1 text-xs text-left font-semibold text-gray-500 uppercase tracking-wide">Thao tác nhanh</div>
+              return (
+                <tr key={order.id} className="hover:bg-[#f0f7ff]">
+                  <td className="px-3 py-3 border-r border-[#e6ebf1] text-sm text-center text-gray-600">
+                    {index + 1}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1]">
+                    <button
+                      className="text-blue-600 hover:text-blue-800 font-medium hover:underline whitespace-nowrap"
+                      onClick={() => handleOpenOrderDetail(order)}
+                    >
+                      {order.orderNumber}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 max-w-[170px] truncate" title={order.customerName || customer.name}>
+                    {order.customerName || customer.name}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 max-w-[220px] truncate" title={order.products}>
+                    {order.products}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-blue-600 text-right font-medium whitespace-nowrap">
+                    {formatCurrency(order.total)}
+                  </td>
+                  {/* <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 text-center">
+                    {order.paymentCount || 0}
+                  </td> */}
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-green-600 text-right whitespace-nowrap">
+                    {formatCurrency(order.paid)}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-red-600 text-right whitespace-nowrap">
+                    {formatCurrency(order.debt)}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1]">
+                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
+                      {getStatusText(order.status)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-700 whitespace-nowrap">
+                    {order.paymentMethod}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] text-sm text-gray-500 whitespace-nowrap">
+                    {order.dueDate ? formatDate(order.dueDate) : '-'}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1]">
+                    {previewInvoice ? (
+                      <button
+                        type="button"
+                        onClick={() => openOrderInvoiceViewer(order)}
+                        disabled={imageInvoiceCount === 0}
+                        className="relative group disabled:cursor-default"
+                        title={invoiceCount > 0 ? `${invoiceCount} hóa đơn` : 'Chưa có hóa đơn'}
+                      >
+                        <div className={`w-16 h-16 rounded-[12px] overflow-hidden border ${imageInvoiceCount > 0 ? 'border-[#d8e6ff] group-hover:border-[#3e79f7] bg-[#eef4ff]' : 'border-[#e6ebf1] bg-gray-100'} flex items-center justify-center`}>
+                          {previewInvoice.thumbnailUrl && isImageInvoice(previewInvoice) ? (
+                            <img src={previewInvoice.thumbnailUrl} alt={previewInvoice.fileName} className="w-full h-full object-cover" />
+                          ) : isImageInvoice(previewInvoice) ? (
+                            <ImageIcon className="w-6 h-6 text-[#3e79f7]" />
+                          ) : (
+                            <Paperclip className="w-5 h-5 text-gray-500" />
+                          )}
+                        </div>
+                        <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-[#3e79f7] text-white text-[11px] font-semibold flex items-center justify-center shadow">
+                          {invoiceCount}
+                        </span>
+                      </button>
+                    ) : (
+                      <span className="text-sm text-gray-400">Chưa có</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 border-r border-[#e6ebf1] max-w-[260px]">
+                    {latestNote ? (
+                      <p
+                        className="text-sm text-gray-700 truncate"
+                        title={getOrderNotesTooltip(order)}
+                      >
+                        {latestNote.content}
+                      </p>
+                    ) : (
+                      <span className="text-sm text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-center relative">
+                    <button
+                      className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors"
+                      onClick={() => setOrderActionMenuOpen(orderActionMenuOpen === order.id ? null : order.id)}
+                    >
+                      <Settings className="w-4 h-4" />
+                    </button>
+                    {/* Action Menu Dropdown */}
+                    {orderActionMenuOpen === order.id && (
+                      <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-50">
+                        {/* THÔNG TIN section */}
+                        <div className="px-3 py-1.5 text-xs text-left font-semibold text-gray-500 uppercase tracking-wide">Thông tin</div>
                         <button
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                           onClick={() => {
-                            setSelectedOrder(order)
+                            handleOpenOrderDetail(order)
                             setOrderActionMenuOpen(null)
-                            alert('Chức năng thanh toán đơn hàng - Đang phát triển')
                           }}
                         >
-                          <CreditCard className="w-4 h-4 text-green-500" />
-                          Thanh toán đơn hàng
+                          <Eye className="w-4 h-4 text-blue-500" />
+                          Xem chi tiết
                         </button>
+
+                        {/* THAO TÁC NHANH section */}
+                        <div className="border-t border-gray-100 mt-1 pt-1">
+                          <div className="px-3 py-1 text-xs text-left font-semibold text-gray-500 uppercase tracking-wide">Thao tác nhanh</div>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setOrderActionMenuOpen(null)
+                              alert('Chức năng thanh toán đơn hàng - Đang phát triển')
+                            }}
+                          >
+                            <CreditCard className="w-4 h-4 text-green-500" />
+                            Thanh toán đơn hàng
+                          </button>
                         <button
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                           onClick={() => {
@@ -1901,50 +1536,50 @@ export default function CustomerDetailModal({
                           <MessageSquarePlus className="w-4 h-4 text-blue-500" />
                           Thêm ghi chú
                         </button>
-                      </div>
+                        </div>
 
-                      {/* THAO TÁC NGUY HIỂM section */}
-                      <div className="border-t border-gray-100 mt-1 pt-1">
-                        <div className="px-3 py-1.5 text-xs text-left font-semibold text-red-400 uppercase tracking-wide">Thao tác nguy hiểm</div>
-                        <button
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                          onClick={() => {
-                            setSelectedOrder(order)
-                            setShowRefundDialog(true)
-                            setOrderActionMenuOpen(null)
-                          }}
-                        >
-                          <RefreshCw className="w-4 h-4 text-red-500" />
-                          Hoàn tiền
-                        </button>
-                        {/* <button
-                          className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
-                          onClick={() => {
-                            setOrderActionMenuOpen(null)
-                            if (confirm('Bạn có chắc chắn muốn xóa đơn hàng ' + order.orderNumber + '?')) {
-                              console.log('Delete order:', order.id)
-                              // In real app, call API to delete order
-                            }
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4 text-red-500" />
-                          Xóa đơn hàng
-                        </button> */}
+                        {/* THAO TÁC NGUY HIỂM section */}
+                        <div className="border-t border-gray-100 mt-1 pt-1">
+                          <div className="px-3 py-1.5 text-xs text-left font-semibold text-red-400 uppercase tracking-wide">Thao tác nguy hiểm</div>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setShowRefundDialog(true)
+                              setOrderActionMenuOpen(null)
+                            }}
+                          >
+                            <RefreshCw className="w-4 h-4 text-red-500" />
+                            Hoàn tiền
+                          </button>
+                          {/* <button
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2"
+                            onClick={() => {
+                              setOrderActionMenuOpen(null)
+                              if (confirm('Bạn có chắc chắn muốn xóa đơn hàng ' + order.orderNumber + '?')) {
+                                console.log('Delete order:', order.id)
+                                // In real app, call API to delete order
+                              }
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4 text-red-500" />
+                            Xóa đơn hàng
+                          </button> */}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+                    )}
+                  </td>
+                </tr>
+            )})}
           </tbody>
           {/* Summary Stats Row - aligned with table columns */}
           {mockOrders.length > 0 && (
             <tfoot>
               <tr className="bg-gray-50 border-t-2 border-[#e6ebf1]">
+                {/* STT column */}
+                <td className="px-3 py-3 border-r border-[#e6ebf1]"></td>
                 {/* Mã đơn column */}
                 <td className="px-4 py-3 border-r border-[#e6ebf1]">
-                  <div className="text-xs text-gray-500 mb-0.5">Tổng số bản ghi: </div>
-                  <div className="font-semibold text-gray-900">{mockOrders.length}</div>
                 </td>
                 {/* Khách hàng column */}
                 <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
@@ -1955,8 +1590,6 @@ export default function CustomerDetailModal({
                   <div className="text-xs text-gray-500 mb-0.5">Tổng tiền</div>
                   <div className="font-semibold text-blue-600">{formatCurrency(totalOrderAmount)}</div>
                 </td>
-                {/* Số lần TT column */}
-                <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
                 {/* Thực tế (Đã TT) column */}
                 <td className="px-4 py-3 border-r border-[#e6ebf1] text-right whitespace-nowrap">
                   <div className="text-xs text-gray-500 mb-0.5">Đã TT</div>
@@ -1973,10 +1606,12 @@ export default function CustomerDetailModal({
                 <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
                 {/* Thời hạn column */}
                 <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
-                {/* Nhãn column */}
+                {/* Hóa đơn column */}
+                <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
+                {/* Ghi chú column */}
                 <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
                 {/* Thao tác column */}
-                <td className="px-4 py-3"></td>
+                <td className="px-4 py-3 border-r border-[#e6ebf1]"></td>
               </tr>
             </tfoot>
           )}
@@ -2489,6 +2124,13 @@ export default function CustomerDetailModal({
           console.log('Attach invoice:', orderId, files)
           // In real app, call API to upload invoices
         }}
+      />
+
+      <InvoiceViewerDialog
+        isOpen={showInvoiceViewer}
+        onClose={() => setShowInvoiceViewer(false)}
+        invoices={viewerInvoices}
+        initialIndex={invoiceViewerIndex}
       />
     </>
   )
