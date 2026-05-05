@@ -2429,18 +2429,6 @@ Trân trọng,
                           </button>
                           <button 
                             onClick={() => {
-                              // Open file picker directly
-                              setOrderForAction(order)
-                              setOpenActionMenu(null)
-                              setTimeout(() => fileInputRef.current?.click(), 0)
-                            }}
-                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
-                          >
-                            <Receipt className="w-4 h-4 text-gray-500" />
-                            <span>Gắn hóa đơn</span>
-                          </button>
-                          <button 
-                            onClick={() => {
                               setOrderForAction(order)
                               setShowAddNoteDialog(true)
                               setOpenActionMenu(null)
@@ -2466,17 +2454,6 @@ Trân trọng,
                           >
                             <RefreshCw className="w-4 h-4 text-red-500" />
                             <span>Hoàn tiền</span>
-                          </button>
-                          <button 
-                            onClick={() => {
-                              handleCancelOrder(order)
-                              setOpenActionMenu(null)
-                            }}
-                            disabled={order.status === 'cancelled' || order.status === 'completed'}
-                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                            <span>Xóa đơn hàng</span>
                           </button>
                         </div>
                       )}

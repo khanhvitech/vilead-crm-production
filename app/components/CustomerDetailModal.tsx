@@ -1518,17 +1518,6 @@ export default function CustomerDetailModal({
                           className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                           onClick={() => {
                             setSelectedOrder(order)
-                            setShowAttachInvoice(true)
-                            setOrderActionMenuOpen(null)
-                          }}
-                        >
-                          <Receipt className="w-4 h-4 text-purple-500" />
-                          Gắn hóa đơn
-                        </button>
-                        <button
-                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                          onClick={() => {
-                            setSelectedOrder(order)
                             setShowAddOrderNote(true)
                             setOrderActionMenuOpen(null)
                           }}

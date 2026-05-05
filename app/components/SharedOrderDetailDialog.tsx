@@ -282,12 +282,6 @@ export function OrderDetailDialog({ isOpen, onClose, order }: OrderDetailDialogP
                   </span>
                 </div>
               </div>
-              {order.label && (
-                <div className="rounded-[12px] border border-[#e6ebf1] bg-white p-3">
-                  <p className="text-xs uppercase tracking-wide text-gray-500">Nhãn</p>
-                  <p className="mt-1 text-sm font-medium text-gray-900">{order.label}</p>
-                </div>
-              )}
               <div className="rounded-[12px] border border-[#e6ebf1] bg-white p-3">
                 <p className="text-xs uppercase tracking-wide text-gray-500">Thanh toán</p>
                 <p className="mt-1 text-sm font-medium text-gray-900">{order.paymentMethod}</p>
@@ -303,8 +297,11 @@ export function OrderDetailDialog({ isOpen, onClose, order }: OrderDetailDialogP
                 <p className="mt-1 text-sm font-semibold text-blue-600">{formatCurrency(order.total)}</p>
               </div>
               <div className="rounded-[12px] border border-[#e6ebf1] bg-white p-3">
-                <p className="text-xs uppercase tracking-wide text-gray-500">Đã TT / Dư nợ</p>
+                <p className="text-xs uppercase tracking-wide text-gray-500">Đã thanh toán</p>
                 <p className="mt-1 text-sm font-medium text-green-600">{formatCurrency(order.paid)}</p>
+              </div>
+                            <div className="rounded-[12px] border border-[#e6ebf1] bg-white p-3">
+                <p className="text-xs uppercase tracking-wide text-gray-500">Dư nợ</p>
                 <p className="text-sm font-medium text-red-600">{formatCurrency(order.debt)}</p>
               </div>
             </div>
