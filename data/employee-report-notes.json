@@ -1,0 +1,17 @@
+[
+  {
+    "employeeId": "emp_01",
+    "content": "https://docs.google.com/spreadsheets/d/1v-oB3WPSDs5XFIeBoIkXH5XT8Dv7AyHIxri6u9ZPies/edit?gid=1833660593#gid=1833660593",
+    "scopeType": "this_month",
+    "scopeStart": "2026-04-30",
+    "scopeEnd": "2026-05-31",
+    "createdById": "admin_001",
+    "createdByName": "Nguyễn Văn Anh",
+    "id": "emp-note-1777947428935-yqudt3",
+    "links": [
+      "https://docs.google.com/spreadsheets/d/1v-oB3WPSDs5XFIeBoIkXH5XT8Dv7AyHIxri6u9ZPies/edit?gid=1833660593#gid=1833660593"
+    ],
+    "createdAt": "2026-05-05T02:17:08.935Z",
+    "updatedAt": "2026-05-05T02:17:08.935Z"
+  }
+]
