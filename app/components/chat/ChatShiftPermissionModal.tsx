@@ -33,7 +33,7 @@ interface ChatShiftPermissionModalProps {
   onClose: () => void
   accountId: string
   accountName: string
-  accountType?: 'zalo-personal' | 'zalo-oa' | 'facebook'
+  accountType?: 'zalo-personal' | 'zalo-oa' | 'facebook' | 'tiktok'
   defaultTab?: 'permission' | 'shift' | 'history'
 }
 
@@ -216,10 +216,11 @@ export function ChatShiftPermissionModal({
               <div className={cn(
                 'w-10 h-10 rounded-[10px] flex items-center justify-center text-white text-sm font-bold',
                 accountType === 'facebook' ? 'bg-[#3e79f7]' :
+                accountType === 'tiktok' ? 'bg-black' :
                 accountType === 'zalo-oa' ? 'bg-purple-600' :
                 'bg-blue-500'
               )}>
-                {accountName.substring(0, 1).toUpperCase()}
+                {accountType === 'tiktok' ? 'TT' : accountName.substring(0, 1).toUpperCase()}
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-gray-900">{accountName}</h2>
@@ -227,10 +228,12 @@ export function ChatShiftPermissionModal({
                   <span className={cn(
                     'px-2 py-0.5 rounded text-xs font-medium',
                     accountType === 'facebook' ? 'bg-blue-100 text-blue-800' :
+                    accountType === 'tiktok' ? 'bg-black text-white' :
                     accountType === 'zalo-oa' ? 'bg-purple-100 text-purple-800' :
                     'bg-blue-100 text-[#3e79f7]'
                   )}>
                     {accountType === 'facebook' ? 'Facebook' :
+                     accountType === 'tiktok' ? 'TikTok Business' :
                      accountType === 'zalo-oa' ? 'Zalo OA' :
                      'Zalo cá nhân'}
                   </span>

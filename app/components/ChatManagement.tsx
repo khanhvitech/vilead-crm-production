@@ -98,6 +98,9 @@ import { TagManagementModal, ChatTag, PRESET_COLORS, SolidTagIcon } from './chat
 
 // ===== TYPE DEFINITIONS =====
 
+type Platform = 'zalo-personal' | 'zalo-oa' | 'facebook' | 'tiktok'
+type ConnectionStatus = 'connected' | 'disconnected' | 'action_required' | 'token_expiring'
+
 interface ZaloMessage {
   id: string
   conversationId: string
@@ -169,7 +172,7 @@ interface GroupMember {
 
 interface ConversationConnection {
   customerId: string
-  platform: 'zalo-personal' | 'zalo-oa' | 'facebook'
+  platform: Platform
   accountId: string
   accountName: string
   connectedAt: string
@@ -179,6 +182,7 @@ interface CustomerConnectionCount {
   'zalo-personal': number
   'zalo-oa': number
   'facebook': number
+  'tiktok': number
   total: number
 }
 
@@ -208,12 +212,16 @@ interface ZaloConversation {
   assignedTo?: string
   tags: string[]
   priority: 'low' | 'medium' | 'high' | 'urgent'
-  channel: 'zalo' | 'facebook'
+  channel: 'zalo' | 'facebook' | 'tiktok'
   conversationType: 'individual' | 'group'
   members?: GroupMember[]
   memberCount?: number
   accountId?: string
-  platform?: 'zalo-personal' | 'zalo-oa' | 'facebook'
+  platform?: Platform
+  responseWindowExpiresAt?: string
+  lastCustomerMessageAt?: string
+  outboundMessageCount?: number
+  marketSupportsImage?: boolean
 }
 
 interface Reminder {
@@ -243,6 +251,11 @@ const vietnameseNamesZaloOA = [
 const vietnameseNamesFacebook = [
   'Ngô Thanh Tùng', 'Đinh Hồng Nhung', 'Lý Văn Thành', 'Dương Thị Thảo',
   'Cao Minh Đức', 'Hồ Thanh Bình', 'Trịnh Thị Hoa'
+]
+
+const vietnameseNamesTikTok = [
+  'Mai Quỳnh Creator', 'Phúc Trần Shop', 'Linh Beauty Official', 'Hana Boutique',
+  'Minh Decor Studio', 'VietHome Living', 'Jin Store VN'
 ]
 
 const companies = [
@@ -318,8 +331,108 @@ interface ZaloAccount {
   name: string
   avatar?: string
   unreadCount: number
-  type: 'personal' | 'oa'
-  platform: 'zalo-personal' | 'zalo-oa' | 'facebook'
+  type: 'personal' | 'oa' | 'business'
+  platform: Platform
+  marketSupportsImage?: boolean
+}
+
+const PLATFORM_META: Record<Platform, {
+  shortLabel: string
+  connectionLabel: string
+  panelLabel: string
+  badgeClassName: string
+  bubbleClassName: string
+  iconClassName: string
+  allowsGroups: boolean
+  supportsFileUpload: boolean
+  hasResponseWindow: boolean
+  hasMessageQuota: boolean
+}> = {
+  'zalo-personal': {
+    shortLabel: 'ZL',
+    connectionLabel: 'Zalo cá nhân',
+    panelLabel: 'Zalo',
+    badgeClassName: 'bg-blue-100 text-blue-800',
+    bubbleClassName: 'bg-blue-500 hover:bg-[#3e79f7]',
+    iconClassName: 'bg-[#3e79f7]',
+    allowsGroups: true,
+    supportsFileUpload: true,
+    hasResponseWindow: false,
+    hasMessageQuota: false
+  },
+  'zalo-oa': {
+    shortLabel: 'OA',
+    connectionLabel: 'Zalo OA',
+    panelLabel: 'Zalo',
+    badgeClassName: 'bg-purple-100 text-purple-800',
+    bubbleClassName: 'bg-blue-500 hover:bg-[#3e79f7]',
+    iconClassName: 'bg-blue-500',
+    allowsGroups: false,
+    supportsFileUpload: true,
+    hasResponseWindow: false,
+    hasMessageQuota: false
+  },
+  facebook: {
+    shortLabel: 'FB',
+    connectionLabel: 'Facebook Fanpage',
+    panelLabel: 'Facebook',
+    badgeClassName: 'bg-[#3e79f7] text-white',
+    bubbleClassName: 'bg-[#3e79f7] hover:bg-[#699dff]',
+    iconClassName: 'bg-[#3e79f7]',
+    allowsGroups: false,
+    supportsFileUpload: true,
+    hasResponseWindow: false,
+    hasMessageQuota: false
+  },
+  tiktok: {
+    shortLabel: 'TT',
+    connectionLabel: 'TikTok Business',
+    panelLabel: 'TikTok',
+    badgeClassName: 'bg-black text-white',
+    bubbleClassName: 'bg-black hover:bg-gray-800',
+    iconClassName: 'bg-black',
+    allowsGroups: false,
+    supportsFileUpload: false,
+    hasResponseWindow: true,
+    hasMessageQuota: true
+  }
+}
+
+const CONNECTION_STATUS_META: Record<ConnectionStatus, {
+  label: string
+  badgeClassName: string
+  dotClassName: string
+  actionLabel: string
+  actionClassName: string
+}> = {
+  connected: {
+    label: 'Đã kết nối',
+    badgeClassName: 'bg-green-100 text-green-800',
+    dotClassName: 'bg-[#2dc56a]',
+    actionLabel: 'Ngắt kết nối',
+    actionClassName: 'bg-orange-500 hover:bg-orange-600 text-white'
+  },
+  disconnected: {
+    label: 'Mất kết nối',
+    badgeClassName: 'bg-red-100 text-red-800',
+    dotClassName: 'bg-red-500',
+    actionLabel: 'Kết nối lại',
+    actionClassName: 'bg-[#2dc56a] hover:bg-[#04d182] text-white'
+  },
+  action_required: {
+    label: 'Cần xử lý',
+    badgeClassName: 'bg-orange-100 text-orange-800',
+    dotClassName: 'bg-orange-500',
+    actionLabel: 'Kết nối lại',
+    actionClassName: 'bg-orange-500 hover:bg-orange-600 text-white'
+  },
+  token_expiring: {
+    label: 'Token sắp hết',
+    badgeClassName: 'bg-yellow-100 text-yellow-800',
+    dotClassName: 'bg-yellow-500',
+    actionLabel: 'Ngắt kết nối',
+    actionClassName: 'bg-orange-500 hover:bg-orange-600 text-white'
+  }
 }
 
 const connectedZaloAccounts: ZaloAccount[] = [
@@ -336,6 +449,10 @@ const connectedZaloAccounts: ZaloAccount[] = [
   { id: 'fb-1', name: 'Fanpage Vilead CRM Solutions', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=VileadFanpage', unreadCount: 5, type: 'personal', platform: 'facebook' },
   { id: 'fb-2', name: 'Fanpage Tech Solutions Vietnam', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=TechSolutionsVN', unreadCount: 7, type: 'personal', platform: 'facebook' },
   { id: 'fb-3', name: 'Fanpage Marketing Agency Pro', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=MarketingPro', unreadCount: 2, type: 'personal', platform: 'facebook' },
+  // TikTok Business accounts
+  { id: 'tt-1', name: 'TikTok Vilead Business', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=TikTokVilead', unreadCount: 4, type: 'business', platform: 'tiktok', marketSupportsImage: true },
+  { id: 'tt-2', name: 'TikTok Beauty House', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=BeautyHouse', unreadCount: 3, type: 'business', platform: 'tiktok', marketSupportsImage: false },
+  { id: 'tt-3', name: 'TikTok Home Decor VN', avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=HomeDecorVN', unreadCount: 1, type: 'business', platform: 'tiktok', marketSupportsImage: true },
 ]
 
 // Demo shared files data
@@ -455,6 +572,7 @@ function generateDemoContacts(names: string[], platform: string): ZaloContact[] 
 const demoContactsZaloPersonal = generateDemoContacts(vietnameseNamesZaloPersonal, 'zalo-personal')
 const demoContactsZaloOA = generateDemoContacts(vietnameseNamesZaloOA, 'zalo-oa')
 const demoContactsFacebook = generateDemoContacts(vietnameseNamesFacebook, 'facebook')
+const demoContactsTikTok = generateDemoContacts(vietnameseNamesTikTok, 'tiktok')
 
 // Use Zalo Personal contacts as default for backwards compatibility
 const demoContacts = demoContactsZaloPersonal
@@ -464,7 +582,7 @@ function generateDemoMessages(contactId: string): ZaloMessage[] {
   const messages: ZaloMessage[] = []
   
   // Find contact across all platforms
-  const allContacts = [...demoContactsZaloPersonal, ...demoContactsZaloOA, ...demoContactsFacebook]
+  const allContacts = [...demoContactsZaloPersonal, ...demoContactsZaloOA, ...demoContactsFacebook, ...demoContactsTikTok]
   const contact = allContacts.find(c => c.id === contactId)
 
   for (let i = 0; i < messageCount; i++) {
@@ -502,6 +620,19 @@ demoContactsZaloOA.forEach((contact) => {
 demoContactsFacebook.forEach((contact) => {
   demoMessages[contact.id] = generateDemoMessages(contact.id)
 })
+demoContactsTikTok.forEach((contact) => {
+  demoMessages[contact.id] = generateDemoMessages(contact.id)
+})
+
+function createTikTokResponseWindow(index: number) {
+  const presets = [
+    { remainingMs: 36 * 60 * 60 * 1000 + 20 * 60 * 1000, outboundCount: 3, marketSupportsImage: true },
+    { remainingMs: 105 * 60 * 1000, outboundCount: 8, marketSupportsImage: false },
+    { remainingMs: 45 * 60 * 1000, outboundCount: 10, marketSupportsImage: true },
+    { remainingMs: 0, outboundCount: 2, marketSupportsImage: true },
+  ]
+  return presets[index % presets.length]
+}
 
 function generateDemoConversations(): ZaloConversation[] {
   const allConversations: ZaloConversation[] = []
@@ -599,6 +730,43 @@ function generateDemoConversations(): ZaloConversation[] {
       })
     })
   })
+
+  // Generate TikTok Business conversations (individual only)
+  const tiktokAccounts = connectedZaloAccounts.filter(acc => acc.platform === 'tiktok')
+  tiktokAccounts.forEach((account, accountIndex) => {
+    demoContactsTikTok.slice(0, 3).forEach((contact, index) => {
+      const contactIndex = accountIndex * 3 + index
+      const messages = demoMessages[contact.id] || []
+      const lastMessage = messages.length > 0 ? messages[messages.length - 1] : null
+      const { remainingMs, outboundCount, marketSupportsImage } = createTikTokResponseWindow(contactIndex)
+      const now = Date.now()
+      const lastCustomerMessageAt = new Date(Date.now() - ((48 * 60 * 60 * 1000) - remainingMs)).toISOString()
+      const lastMessageAt = new Date(Date.now() - Math.max(5, contactIndex + 1) * 60 * 1000).toISOString()
+
+      allConversations.push({
+        id: `${account.id}-conv-${contact.id}`,
+        contactId: contact.id,
+        contact,
+        lastMessage,
+        lastMessageAt,
+        unreadCount: contactIndex < 3 ? Math.floor(Math.random() * 5) + 1 : 0,
+        status: 'active',
+        assignedTo: contactIndex % 2 === 0 ? 'Tư vấn viên TikTok' : undefined,
+        tags: contact.tags,
+        priority: ['medium', 'high', 'urgent'][contactIndex % 3] as any,
+        channel: 'tiktok',
+        conversationType: 'individual',
+        members: undefined,
+        memberCount: undefined,
+        accountId: account.id,
+        platform: 'tiktok',
+        responseWindowExpiresAt: new Date(now + remainingMs).toISOString(),
+        lastCustomerMessageAt,
+        outboundMessageCount: outboundCount,
+        marketSupportsImage: account.marketSupportsImage ?? marketSupportsImage
+      })
+    })
+  })
   
   return allConversations
 }
@@ -656,6 +824,76 @@ function formatDate(timestamp: string): string {
   } else {
     return date.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric', year: 'numeric' })
   }
+}
+
+function getPlatformLabel(platform: Platform) {
+  return PLATFORM_META[platform].connectionLabel
+}
+
+function getPlatformShortLabel(platform: Platform) {
+  return PLATFORM_META[platform].shortLabel
+}
+
+function getTikTokWindowInfo(conversation?: ZaloConversation | null, nowMs = Date.now()) {
+  if (!conversation || conversation.platform !== 'tiktok' || !conversation.responseWindowExpiresAt) {
+    return null
+  }
+
+  const remainingMs = Math.max(0, new Date(conversation.responseWindowExpiresAt).getTime() - nowMs)
+  const remainingMinutes = Math.floor(remainingMs / (1000 * 60))
+  const hours = Math.floor(remainingMinutes / 60)
+  const minutes = remainingMinutes % 60
+
+  if (remainingMinutes <= 0) {
+    return {
+      remainingMs,
+      state: 'expired' as const,
+      badgeLabel: 'Hết hạn',
+      headerLabel: 'Cửa sổ phản hồi đã hết hạn. Chờ khách hàng nhắn lại.',
+      badgeClassName: 'bg-gray-100 text-gray-500',
+      headerClassName: 'bg-red-600 text-white border-red-700'
+    }
+  }
+
+  const compactLabel = hours > 0 ? `${hours}h ${minutes}m` : `${minutes}m`
+  if (remainingMs < 60 * 60 * 1000) {
+    return {
+      remainingMs,
+      state: 'critical' as const,
+      badgeLabel: compactLabel,
+      headerLabel: `Cửa sổ phản hồi: Còn ${hours > 0 ? `${hours} giờ ` : ''}${minutes} phút`,
+      badgeClassName: 'bg-red-100 text-red-700',
+      headerClassName: 'bg-red-50 text-red-700 border-red-200'
+    }
+  }
+
+  if (remainingMs <= 2 * 60 * 60 * 1000) {
+    return {
+      remainingMs,
+      state: 'warning' as const,
+      badgeLabel: compactLabel,
+      headerLabel: `Cửa sổ phản hồi: Còn ${hours} giờ ${minutes} phút`,
+      badgeClassName: 'bg-orange-100 text-orange-700',
+      headerClassName: 'bg-yellow-50 text-orange-700 border-yellow-200'
+    }
+  }
+
+  return {
+    remainingMs,
+    state: 'safe' as const,
+    badgeLabel: compactLabel,
+    headerLabel: `Cửa sổ phản hồi: Còn ${hours} giờ ${minutes} phút`,
+    badgeClassName: 'bg-green-100 text-green-700',
+    headerClassName: 'bg-green-50 text-green-700 border-green-200'
+  }
+}
+
+function getTikTokQuotaInfo(conversation?: ZaloConversation | null) {
+  if (!conversation || conversation.platform !== 'tiktok') return null
+  const count = conversation.outboundMessageCount ?? 0
+  if (count >= 10) return { count, className: 'text-red-600', tooltip: 'Đã đạt giới hạn tin nhắn. Chờ khách hàng phản hồi để tiếp tục.' }
+  if (count >= 8) return { count, className: 'text-orange-600', tooltip: 'Sắp đạt giới hạn 10 tin nhắn outbound của TikTok.' }
+  return { count, className: 'text-green-600', tooltip: 'Bộ đếm outbound của TikTok sẽ reset khi khách hàng nhắn mới.' }
 }
 
 // Format tin nhắn gửi đi: "Gửi lúc 15:35 Hôm qua bởi Nguyễn Thị Nhi"
@@ -776,7 +1014,7 @@ export default function ChatManagement() {
   const [filterUnread, setFilterUnread] = useState(false)
   const [activeTab, setActiveTab] = useState<'all' | 'unread' | 'contacts'>('all')
   const [contactTab, setContactTab] = useState<'friends' | 'groups' | 'strangers'>('friends')
-  const [selectedChannel, setSelectedChannel] = useState<'zalo-personal' | 'zalo-oa' | 'facebook'>('zalo-personal')
+  const [selectedChannel, setSelectedChannel] = useState<Platform>('zalo-personal')
   const [chatTags, setChatTags] = useState<ChatTag[]>(demoChatTags)
   const [selectedTagFilters, setSelectedTagFilters] = useState<string[]>([])
   const [showTagManagementModal, setShowTagManagementModal] = useState(false)
@@ -804,10 +1042,24 @@ export default function ChatManagement() {
     content: '',
     notes: ''
   })
-  const [connectionPlatformFilter, setConnectionPlatformFilter] = useState<'all' | 'zalo-personal' | 'zalo-oa' | 'facebook'>('all')
+  const [connectionPlatformFilter, setConnectionPlatformFilter] = useState<'all' | Platform>('all')
   const [connectedAccounts, setConnectedAccounts] = useState<ZaloAccount[]>(connectedZaloAccounts)
-  const [accountConnectionStatus, setAccountConnectionStatus] = useState<Map<string, boolean>>(
-    new Map(connectedZaloAccounts.map(acc => [acc.id, true]))
+  const [accountConnectionStatus, setAccountConnectionStatus] = useState<Map<string, ConnectionStatus>>(
+    new Map([
+      ['zp-1', 'connected'],
+      ['zp-2', 'connected'],
+      ['zp-3', 'connected'],
+      ['zp-4', 'disconnected'],
+      ['oa-1', 'connected'],
+      ['oa-2', 'connected'],
+      ['oa-3', 'connected'],
+      ['fb-1', 'connected'],
+      ['fb-2', 'connected'],
+      ['fb-3', 'disconnected'],
+      ['tt-1', 'connected'],
+      ['tt-2', 'action_required'],
+      ['tt-3', 'token_expiring'],
+    ])
   )
   const [memberSearchTerm, setMemberSearchTerm] = useState('')
   const [showDeleteAccountModal, setShowDeleteAccountModal] = useState(false)
@@ -820,10 +1072,11 @@ export default function ChatManagement() {
   
   // Integration modal states
   const [showIntegrationModal, setShowIntegrationModal] = useState(false)
-  const [selectedIntegrationType, setSelectedIntegrationType] = useState<'zalo-personal' | 'zalo-oa' | 'facebook' | ''>('')
+  const [selectedIntegrationType, setSelectedIntegrationType] = useState<Platform | ''>('')
   const [showQRModal, setShowQRModal] = useState(false)
   const [showOALinkModal, setShowOALinkModal] = useState(false)
   const [showFacebookModal, setShowFacebookModal] = useState(false)
+  const [showTikTokModal, setShowTikTokModal] = useState(false)
   const [qrCheckStatus, setQRCheckStatus] = useState<'pending' | 'checking' | 'success' | 'error'>('pending')
   const [qrCheckInterval, setQRCheckInterval] = useState<NodeJS.Timeout | null>(null)
   const [connectedCustomers, setConnectedCustomers] = useState<Set<string>>(new Set())
@@ -837,6 +1090,7 @@ export default function ChatManagement() {
   const [showShiftPermissionModal, setShowShiftPermissionModal] = useState(false)
   const [selectedAccountForShift, setSelectedAccountForShift] = useState<ZaloAccount | null>(null)
   const [defaultShiftTab, setDefaultShiftTab] = useState<'permission' | 'shift' | 'history'>('permission')
+  const [clockTick, setClockTick] = useState(Date.now())
   
   // Quick Action Modal States
   const [selectedLeadForQuickAction, setSelectedLeadForQuickAction] = useState<CRMCustomer | null>(null)
@@ -881,6 +1135,22 @@ export default function ChatManagement() {
     { id: 'sales-dashboard', name: 'Sales Dashboard Pro', category: 'Sản phẩm', price: 400000, description: 'Dashboard bán hàng chuyên nghiệp' },
     { id: 'mobile-app', name: 'Mobile App License', category: 'Sản phẩm', price: 300000, description: 'Giấy phép sử dụng ứng dụng di động' }
   ]
+
+  const selectedConversationWindow = useMemo(
+    () => getTikTokWindowInfo(selectedConversation, clockTick),
+    [selectedConversation, clockTick]
+  )
+  const selectedConversationQuota = useMemo(
+    () => getTikTokQuotaInfo(selectedConversation),
+    [selectedConversation]
+  )
+  const isTikTokConversation = selectedConversation?.platform === 'tiktok'
+  const isTikTokWindowExpired = selectedConversationWindow?.state === 'expired'
+  const hasReachedTikTokQuota = (selectedConversationQuota?.count ?? 0) >= 10
+  const canSendInSelectedConversation = Boolean(selectedConversation) && (!isTikTokConversation || (!isTikTokWindowExpired && !hasReachedTikTokQuota))
+  const canSendImagesInSelectedConversation = !isTikTokConversation || Boolean(selectedConversation?.marketSupportsImage)
+  const canUploadFilesInSelectedConversation = !isTikTokConversation
+  const canDeleteMessageForMe = selectedChannel !== 'zalo-oa' && selectedChannel !== 'tiktok'
   const quickOrderAvailablePackages: {[key: string]: {id: string, name: string, price: number, description: string}[]} = {
     'crm-basic': [
       { id: 'basic-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
@@ -1021,7 +1291,7 @@ export default function ChatManagement() {
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Check if a customer already has a connection in the same platform
-  const checkExistingConnectionInSamePlatform = (customerId: string, platform: 'zalo-personal' | 'zalo-oa' | 'facebook'): boolean => {
+  const checkExistingConnectionInSamePlatform = (customerId: string, platform: Platform): boolean => {
     const connections = Array.from(conversationCustomerMap.values())
     return connections.some(connection => 
       connection.customerId === customerId && connection.platform === platform
@@ -1032,10 +1302,18 @@ export default function ChatManagement() {
   const toggleAccountConnection = (accountId: string) => {
     setAccountConnectionStatus(prev => {
       const newMap = new Map(prev)
-      newMap.set(accountId, !prev.get(accountId))
+      const currentStatus = prev.get(accountId) || 'connected'
+      newMap.set(accountId, currentStatus === 'connected' || currentStatus === 'token_expiring' ? 'disconnected' : 'connected')
       return newMap
     })
   }
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      setClockTick(Date.now())
+    }, 30000)
+    return () => window.clearInterval(interval)
+  }, [])
 
   // Auto-scroll to bottom when messages change
   useEffect(() => {
@@ -1043,6 +1321,24 @@ export default function ChatManagement() {
       messageScrollRef.current.scrollTop = messageScrollRef.current.scrollHeight
     }
   }, [messages])
+
+  useEffect(() => {
+    const handleOpenConnectionModal = (event: Event) => {
+      const detail = (event as CustomEvent<{ platform?: Platform }>).detail
+      if (detail?.platform) {
+        setConnectionPlatformFilter(detail.platform)
+      }
+      setShowConnectionModal(true)
+    }
+    window.addEventListener('open-omnichat-connections', handleOpenConnectionModal as EventListener)
+    return () => window.removeEventListener('open-omnichat-connections', handleOpenConnectionModal as EventListener)
+  }, [])
+
+  useEffect(() => {
+    if (selectedConversation?.platform === 'tiktok' && (fileTypeFilter === 'file' || fileTypeFilter === 'video')) {
+      setFileTypeFilter('all')
+    }
+  }, [selectedConversation?.platform, fileTypeFilter])
 
   // Close account dropdown when clicking outside
   useEffect(() => {
@@ -1091,13 +1387,20 @@ export default function ChatManagement() {
 
   // Send message
   const handleSendMessage = () => {
-    if (!messageInput.trim() || !selectedConversation) return
+    if (!selectedConversation || (!messageInput.trim() && selectedImages.length === 0 && selectedFiles.length === 0)) return
+    if (selectedConversation.platform === 'tiktok' && (!canSendInSelectedConversation || !canSendImagesInSelectedConversation && selectedImages.length > 0)) {
+      return
+    }
+
+    const generatedContent = messageInput.trim()
+      || (selectedImages.length > 0 ? `Da gui ${selectedImages.length} hinh anh` : '')
+      || (selectedFiles.length > 0 ? `Da gui ${selectedFiles.length} tep tin` : '')
 
     const newMessage: ZaloMessage = {
       id: `msg-${Date.now()}`,
       conversationId: selectedConversation.id,
-      content: messageInput,
-      messageType: 'text',
+      content: generatedContent,
+      messageType: selectedImages.length > 0 ? 'image' : selectedFiles.length > 0 ? 'file' : 'text',
       direction: 'outgoing',
       timestamp: new Date().toISOString(),
       sender: { id: 'agent-1', name: 'Tư vấn viên', type: 'agent' },
@@ -1114,13 +1417,24 @@ export default function ChatManagement() {
     setShowQuickReplies(false)
     setReplyingToMessage(null)
     setForwardingMessage(null)
+    clearAttachments()
 
     // Update conversation last message
-    setConversations(conversations.map(c =>
+    const updatedConversations = conversations.map(c =>
       c.id === selectedConversation.id
-        ? { ...c, lastMessage: newMessage, lastMessageAt: newMessage.timestamp }
+        ? {
+            ...c,
+            lastMessage: newMessage,
+            lastMessageAt: newMessage.timestamp,
+            outboundMessageCount: c.platform === 'tiktok' ? Math.min(10, (c.outboundMessageCount ?? 0) + 1) : c.outboundMessageCount
+          }
         : c
-    ))
+    )
+    setConversations(updatedConversations)
+    const updatedConversation = updatedConversations.find(c => c.id === selectedConversation.id) || null
+    if (updatedConversation) {
+      setSelectedConversation(updatedConversation)
+    }
   }
 
   // Message action handlers
@@ -1156,6 +1470,7 @@ export default function ChatManagement() {
   }
 
   const handleDeleteMessageForMe = (messageId: string) => {
+    if (!canDeleteMessageForMe) return
     // In real app, this would mark the message as deleted for current user
     setMessages(prev => prev.filter(m => m.id !== messageId))
   }
@@ -1391,6 +1706,7 @@ export default function ChatManagement() {
 
   // Bulk delete messages
   const handleBulkDelete = () => {
+    if (!canDeleteMessageForMe) return
     setMessages(prev => prev.filter(m => !selectedMessageIds.includes(m.id)))
     cancelSelectMode()
   }
@@ -1446,6 +1762,7 @@ export default function ChatManagement() {
 
   // Handle image selection
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canSendImagesInSelectedConversation) return
     const files = e.target.files
     if (files) {
       const newImages = Array.from(files)
@@ -1468,6 +1785,7 @@ export default function ChatManagement() {
 
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!canUploadFilesInSelectedConversation) return
     const files = e.target.files
     if (files) {
       const newFiles = Array.from(files)
@@ -1504,9 +1822,10 @@ export default function ChatManagement() {
 
   // Filter conversations
   const filteredConversations = conversations.filter(conv => {
-    const matchesSearch = conv.contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          conv.contact.phone?.includes(searchTerm) ||
-                          conv.lastMessage?.content.toLowerCase().includes(searchTerm.toLowerCase())
+    const effectiveSearchTerm = (searchQuery || searchTerm).toLowerCase()
+    const matchesSearch = conv.contact.name.toLowerCase().includes(effectiveSearchTerm) ||
+                          conv.contact.phone?.includes(searchQuery || searchTerm) ||
+                          conv.lastMessage?.content.toLowerCase().includes(effectiveSearchTerm)
     const matchesUnread = !filterUnread || conv.unreadCount > 0
     
     // Filter by selected account and platform
@@ -1515,7 +1834,7 @@ export default function ChatManagement() {
     
     // Zalo OA and Facebook only show individual conversations (no groups)
     // Zalo Personal can show both individual and group conversations
-    const matchesChannel = (selectedChannel === 'zalo-oa' || selectedChannel === 'facebook')
+    const matchesChannel = (selectedChannel === 'zalo-oa' || selectedChannel === 'facebook' || selectedChannel === 'tiktok')
       ? conv.conversationType === 'individual'
       : true
       
@@ -1526,6 +1845,13 @@ export default function ChatManagement() {
       ));
     
     return matchesSearch && matchesUnread && matchesChannel && matchesAccount && matchesPlatform && matchesTags
+  }).sort((a, b) => {
+    const aWindow = getTikTokWindowInfo(a, clockTick)
+    const bWindow = getTikTokWindowInfo(b, clockTick)
+    const aUrgent = a.platform === 'tiktok' && aWindow && (aWindow.state === 'warning' || aWindow.state === 'critical') ? 1 : 0
+    const bUrgent = b.platform === 'tiktok' && bWindow && (bWindow.state === 'warning' || bWindow.state === 'critical') ? 1 : 0
+    if (aUrgent !== bUrgent) return bUrgent - aUrgent
+    return new Date(b.lastMessageAt).getTime() - new Date(a.lastMessageAt).getTime()
   })
 
   const unreadCount = conversations.reduce((sum, conv) => sum + conv.unreadCount, 0)
@@ -1632,75 +1958,33 @@ export default function ChatManagement() {
               <>
             {/* Channel Icons */}
             <div className="flex gap-2 mb-3">
-              <button 
-                onClick={() => {
-                  setSelectedChannel('zalo-personal')
-                  const firstAccount = connectedAccounts.find(a => a.platform === 'zalo-personal')
-                  if (firstAccount) setSelectedAccount(firstAccount)
-                }}
-                className={cn(
-                  "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
-                  selectedChannel === 'zalo-personal' 
-                    ? "bg-[#3e79f7] ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-blue-500 hover:bg-[#3e79f7]"
-                )}
-              >
-                <span className="text-white font-semibold text-xs">ZL</span>
-                {(() => {
-                  const count = connectedAccounts.filter(a => a.platform === 'zalo-personal').reduce((sum, a) => sum + a.unreadCount, 0)
-                  return count > 0 ? (
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {count > 99 ? '99+' : count}
-                    </div>
-                  ) : null
-                })()}
-              </button>
-              <button 
-                onClick={() => {
-                  setSelectedChannel('zalo-oa')
-                  const firstAccount = connectedAccounts.find(a => a.platform === 'zalo-oa')
-                  if (firstAccount) setSelectedAccount(firstAccount)
-                }}
-                className={cn(
-                  "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
-                  selectedChannel === 'zalo-oa' 
-                    ? "bg-[#3e79f7] ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-blue-500 hover:bg-[#3e79f7]"
-                )}
-              >
-                <span className="text-white font-semibold text-xs">OA</span>
-                {(() => {
-                  const count = connectedAccounts.filter(a => a.platform === 'zalo-oa').reduce((sum, a) => sum + a.unreadCount, 0)
-                  return count > 0 ? (
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {count > 99 ? '99+' : count}
-                    </div>
-                  ) : null
-                })()}
-              </button>
-              <button 
-                onClick={() => {
-                  setSelectedChannel('facebook')
-                  const firstAccount = connectedAccounts.find(a => a.platform === 'facebook')
-                  if (firstAccount) setSelectedAccount(firstAccount)
-                }}
-                className={cn(
-                  "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
-                  selectedChannel === 'facebook' 
-                    ? "bg-[#699dff] ring-2 ring-blue-300 ring-offset-1" 
-                    : "bg-[#3e79f7] hover:bg-[#699dff]"
-                )}
-              >
-                <span className="text-white font-semibold text-xs">FB</span>
-                {(() => {
-                  const count = connectedAccounts.filter(a => a.platform === 'facebook').reduce((sum, a) => sum + a.unreadCount, 0)
-                  return count > 0 ? (
-                    <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {count > 99 ? '99+' : count}
-                    </div>
-                  ) : null
-                })()}
-              </button>
+              {(['zalo-personal', 'zalo-oa', 'facebook', 'tiktok'] as Platform[]).map((platform) => {
+                const meta = PLATFORM_META[platform]
+                const count = connectedAccounts.filter(a => a.platform === platform).reduce((sum, a) => sum + a.unreadCount, 0)
+                return (
+                  <button
+                    key={platform}
+                    onClick={() => {
+                      setSelectedChannel(platform)
+                      const firstAccount = connectedAccounts.find(a => a.platform === platform)
+                      if (firstAccount) setSelectedAccount(firstAccount)
+                    }}
+                    title={meta.connectionLabel}
+                    className={cn(
+                      "relative flex items-center justify-center w-10 h-10 rounded-full transition-colors",
+                      meta.bubbleClassName,
+                      selectedChannel === platform && "ring-2 ring-blue-300 ring-offset-1"
+                    )}
+                  >
+                    <span className="text-white font-semibold text-xs">{meta.shortLabel}</span>
+                    {count > 0 && (
+                      <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {count > 99 ? '99+' : count}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
             </div>
 
             {/* Account Selector Dropdown */}
@@ -1710,12 +1994,12 @@ export default function ChatManagement() {
                 className="w-full flex items-center justify-between px-3 py-2 border border-[#e6ebf1] rounded-md bg-white hover:bg-gray-50 transition-colors h-9"
               >
                 <div className="flex items-center gap-2">
-                  <Avatar className="w-6 h-6">
-                    <AvatarImage src={selectedAccount.avatar} />
-                    <AvatarFallback className="bg-blue-500 text-white text-[10px]">
-                      {selectedAccount.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
+                          <Avatar className="w-6 h-6">
+                            <AvatarImage src={selectedAccount.avatar} />
+                            <AvatarFallback className={cn("text-white text-[10px]", PLATFORM_META[selectedAccount.platform].iconClassName)}>
+                              {getPlatformShortLabel(selectedAccount.platform)}
+                            </AvatarFallback>
+                          </Avatar>
                   <span className="text-sm text-gray-900 truncate max-w-[180px]">
                     {selectedAccount.name}
                   </span>
@@ -1754,8 +2038,8 @@ export default function ChatManagement() {
                       <div className="flex items-center gap-2">
                         <Avatar className="w-6 h-6">
                           <AvatarImage src={account.avatar} />
-                          <AvatarFallback className="bg-blue-500 text-white text-[10px]">
-                            {account.name.substring(0, 2).toUpperCase()}
+                          <AvatarFallback className={cn("text-white text-[10px]", PLATFORM_META[account.platform].iconClassName)}>
+                            {getPlatformShortLabel(account.platform)}
                           </AvatarFallback>
                         </Avatar>
                         <span className="text-sm text-gray-900 truncate max-w-[120px]">
@@ -1813,7 +2097,7 @@ export default function ChatManagement() {
                 >
                   Chưa đọc
                 </Button>
-                {selectedChannel !== 'facebook' && (
+                {(selectedChannel === 'zalo-personal' || selectedChannel === 'zalo-oa') && (
                   <Button
                     variant={activeTab === 'contacts' ? 'default' : 'ghost'}
                     size="sm"
@@ -2150,6 +2434,7 @@ export default function ChatManagement() {
                 // Check if this conversation is synced with CRM
                 const isSyncedWithCRM = syncedCustomers.has(conversation.id) || 
                                        conversationCustomerMap.has(conversation.id)
+                const responseWindow = getTikTokWindowInfo(conversation, clockTick)
                 
                 return (
                 <div
@@ -2171,6 +2456,12 @@ export default function ChatManagement() {
                       {conversation.contact.isActive && (
                         <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2dc56a] border-2 border-white rounded-full"></div>
                       )}
+                      <div className={cn(
+                        "absolute -bottom-1 -left-1 min-w-[22px] h-5 px-1 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold text-white",
+                        PLATFORM_META[conversation.platform || 'zalo-personal'].iconClassName
+                      )}>
+                        {getPlatformShortLabel(conversation.platform || 'zalo-personal')}
+                      </div>
                       {isSyncedWithCRM && (
                         <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center border-2 border-white">
                           <Link className="w-3 h-3 text-white" />
@@ -2196,6 +2487,14 @@ export default function ChatManagement() {
                           {formatConversationTime(conversation.lastMessageAt)}
                         </span>
                       </div>
+
+                      {responseWindow && (
+                        <div className="mb-1">
+                          <span className={cn("inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium", responseWindow.badgeClassName)}>
+                            {responseWindow.state === 'safe' ? '⏱' : responseWindow.state === 'warning' ? '⚠' : responseWindow.state === 'critical' ? '🔴' : '⏰'} {responseWindow.badgeLabel}
+                          </span>
+                        </div>
+                      )}
 
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center text-xs text-gray-600 truncate flex-1 max-w-[200px]">
@@ -2484,6 +2783,25 @@ export default function ChatManagement() {
                 </div>
               </div>
 
+              {selectedConversationWindow && (
+                <div className={cn("mx-4 mt-3 rounded-[10px] border px-4 py-3 flex items-center justify-between gap-4", selectedConversationWindow.headerClassName)}>
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Clock className="w-4 h-4" />
+                    <span>{selectedConversationWindow.headerLabel}</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {selectedConversationQuota && (
+                      <span className={cn("text-sm font-semibold", selectedConversationQuota.className)} title={selectedConversationQuota.tooltip}>
+                        Đã gửi: {selectedConversationQuota.count}/10 tin
+                      </span>
+                    )}
+                    <span className="text-xs opacity-80" title="TikTok chỉ cho phép phản hồi trong 48h kể từ tin nhắn cuối của khách. Tự động reset khi khách nhắn lại.">
+                      [?]
+                    </span>
+                  </div>
+                </div>
+              )}
+
               {/* Pinned Messages Panel */}
               {pinnedMessages.size > 0 && (
                 <div className="bg-yellow-50 border-b border-yellow-200">
@@ -2695,7 +3013,7 @@ export default function ChatManagement() {
                                           <Bell className="w-4 h-4 mr-2" />
                                           Tạo nhắc hẹn
                                         </DropdownMenuItem>
-                                        {selectedChannel !== 'zalo-oa' && (
+                                        {canDeleteMessageForMe && (
                                           <DropdownMenuItem onClick={() => handleDeleteMessageForMe(message.id)} className="text-red-600">
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Xóa tin nhắn phía tôi
@@ -2790,7 +3108,7 @@ export default function ChatManagement() {
                                           <Bell className="w-4 h-4 mr-2" />
                                           Tạo nhắc hẹn
                                         </DropdownMenuItem>
-                                        {selectedChannel !== 'zalo-oa' && (
+                                        {canDeleteMessageForMe && (
                                           <DropdownMenuItem onClick={() => handleDeleteMessageForMe(message.id)} className="text-red-600">
                                             <Trash2 className="w-4 h-4 mr-2" />
                                             Xóa tin nhắn phía tôi
@@ -2886,7 +3204,7 @@ export default function ChatManagement() {
                         size="sm"
                         onClick={handleBulkDelete}
                         disabled={selectedMessageIds.length === 0}
-                        className="h-8 text-xs text-red-600 hover:text-red-700"
+                        className={cn("h-8 text-xs text-red-600 hover:text-red-700", !canDeleteMessageForMe && "hidden")}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Xóa
@@ -3007,7 +3325,7 @@ export default function ChatManagement() {
                       isInputExpanded ? "flex-1 min-h-0" : "min-h-[100px] max-h-[200px]"
                     )}>
                       <Textarea
-                        placeholder="Nhập tin nhắn..."
+                        placeholder={isTikTokWindowExpired ? 'Chờ khách hàng nhắn lại để tiếp tục hội thoại...' : 'Nhập tin nhắn...'}
                         value={messageInput}
                         onChange={(e) => setMessageInput(e.target.value)}
                         onKeyDown={handleKeyPress}
@@ -3015,6 +3333,7 @@ export default function ChatManagement() {
                           "w-full resize-none border-0 focus-visible:ring-0 text-sm p-3",
                           isInputExpanded ? "h-full min-h-full" : "min-h-[100px]"
                         )}
+                        disabled={!canSendInSelectedConversation}
                         rows={isInputExpanded ? 15 : 4}
                       />
                     </div>
@@ -3028,10 +3347,12 @@ export default function ChatManagement() {
                           size="sm"
                           className={cn(
                             "h-8 w-8 p-0 hover:bg-gray-50",
-                            selectedImages.length > 0 && "bg-blue-50 text-blue-600"
+                            selectedImages.length > 0 && "bg-blue-50 text-blue-600",
+                            !canSendImagesInSelectedConversation && "opacity-50 cursor-not-allowed"
                           )}
-                          title="Gửi hình ảnh"
-                          onClick={() => imageInputRef.current?.click()}
+                          title={canSendImagesInSelectedConversation ? "Gửi hình ảnh" : "Gửi ảnh không khả dụng tại khu vực này."}
+                          onClick={() => canSendImagesInSelectedConversation && imageInputRef.current?.click()}
+                          disabled={!canSendInSelectedConversation}
                         >
                           <ImageIcon className={cn(
                             "w-4 h-4",
@@ -3039,23 +3360,26 @@ export default function ChatManagement() {
                           )} />
                         </Button>
 
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className={cn(
-                            "h-8 w-8 p-0 hover:bg-gray-50",
-                            selectedFiles.length > 0 && "bg-blue-50 text-blue-600"
-                          )}
-                          title="Tải lên tệp"
-                          onClick={() => fileInputRef.current?.click()}
-                        >
-                          <svg className={cn(
-                            "w-4 h-4",
-                            selectedFiles.length > 0 ? "text-blue-600" : "text-gray-600"
-                          )} fill="currentColor" viewBox="64 64 896 896">
-                            <path d="M400 317.7h73.9V656c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V317.7H624c6.7 0 10.4-7.7 6.3-12.9L518.3 163a8 8 0 00-12.6 0l-112 141.7c-4.1 5.3-.4 13 6.3 13zM878 626h-60c-4.4 0-8 3.6-8 8v154H214V634c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v198c0 17.7 14.3 32 32 32h684c17.7 0 32-14.3 32-32V634c0-4.4-3.6-8-8-8z" />
-                          </svg>
-                        </Button>
+                        {canUploadFilesInSelectedConversation && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className={cn(
+                              "h-8 w-8 p-0 hover:bg-gray-50",
+                              selectedFiles.length > 0 && "bg-blue-50 text-blue-600"
+                            )}
+                            title="Tải lên tệp"
+                            onClick={() => fileInputRef.current?.click()}
+                            disabled={!canSendInSelectedConversation}
+                          >
+                            <svg className={cn(
+                              "w-4 h-4",
+                              selectedFiles.length > 0 ? "text-blue-600" : "text-gray-600"
+                            )} fill="currentColor" viewBox="64 64 896 896">
+                              <path d="M400 317.7h73.9V656c0 4.4 3.6 8 8 8h60c4.4 0 8-3.6 8-8V317.7H624c6.7 0 10.4-7.7 6.3-12.9L518.3 163a8 8 0 00-12.6 0l-112 141.7c-4.1 5.3-.4 13 6.3 13zM878 626h-60c-4.4 0-8 3.6-8 8v154H214V634c0-4.4-3.6-8-8-8h-60c-4.4 0-8 3.6-8 8v198c0 17.7 14.3 32 32 32h684c17.7 0 32-14.3 32-32V634c0-4.4-3.6-8-8-8z" />
+                            </svg>
+                          </Button>
+                        )}
 
                         <Button
                           variant="ghost"
@@ -3084,6 +3408,7 @@ export default function ChatManagement() {
                           className="h-8 w-8 p-0 hover:bg-gray-50"
                           title="Tạo nhắc hẹn"
                           onClick={() => handleCreateReminder()}
+                          disabled={!canSendInSelectedConversation}
                         >
                           <Bell className="w-4 h-4 text-gray-600" />
                         </Button>
@@ -3107,9 +3432,9 @@ export default function ChatManagement() {
 
                         <Button
                           onClick={handleSendMessage}
-                          disabled={!messageInput.trim() && selectedImages.length === 0 && selectedFiles.length === 0}
+                          disabled={(!messageInput.trim() && selectedImages.length === 0 && selectedFiles.length === 0) || !canSendInSelectedConversation}
                           className="h-8 px-3 bg-blue-500 hover:bg-[#3e79f7] text-white text-xs rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          title="Gửi tin nhắn"
+                          title={!canSendInSelectedConversation ? (isTikTokWindowExpired ? 'Cửa sổ phản hồi TikTok đã hết hạn.' : 'Đã đạt giới hạn 10 tin nhắn outbound.') : 'Gửi tin nhắn'}
                         >
                           <Send className="w-4 h-4 mr-1" />
                           Gửi
@@ -3146,7 +3471,7 @@ export default function ChatManagement() {
                     : "border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]"
                 )}
               >
-                {selectedChannel === 'facebook' ? 'Facebook' : 'Zalo'}
+                {PLATFORM_META[selectedChannel].panelLabel}
               </button>
               {/* Only show Community tab for Zalo Personal groups */}
               {selectedConversation.conversationType === 'group' && selectedChannel === 'zalo-personal' ? (
@@ -3476,6 +3801,12 @@ export default function ChatManagement() {
                                         {connectionCount['facebook']} Facebook
                                       </span>
                                     )}
+                                    {connectionCount['tiktok'] > 0 && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gray-100 text-gray-800 text-xs font-medium">
+                                        <span className="w-5 h-5 bg-black rounded-full flex items-center justify-center text-white text-[10px] font-bold">TT</span>
+                                        {connectionCount['tiktok']} TikTok
+                                      </span>
+                                    )}
                                   </div>
                                 )}
                               </div>
@@ -3686,10 +4017,12 @@ export default function ChatManagement() {
                                                   <span className={cn(
                                                     "w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] font-bold flex-shrink-0",
                                                     conn.platform === 'zalo-personal' ? "bg-[#3e79f7]" :
-                                                    conn.platform === 'zalo-oa' ? "bg-blue-500" : "bg-[#3e79f7]"
+                                                    conn.platform === 'zalo-oa' ? "bg-blue-500" :
+                                                    conn.platform === 'tiktok' ? "bg-black" : "bg-[#3e79f7]"
                                                   )}>
                                                     {conn.platform === 'zalo-personal' ? 'ZL' : 
-                                                     conn.platform === 'zalo-oa' ? 'OA' : 'FB'}
+                                                     conn.platform === 'zalo-oa' ? 'OA' :
+                                                     conn.platform === 'tiktok' ? 'TT' : 'FB'}
                                                   </span>
                                                   <span className="flex-1 truncate">{conn.accountName}</span>
                                                   <X className="w-3 h-3 text-red-600 flex-shrink-0" />
@@ -3772,7 +4105,21 @@ export default function ChatManagement() {
                             <Search className="w-4 h-4 text-gray-400" />
                           </div>
                         </div>
-                        <Button variant="outline" size="sm" className="text-xs h-8 px-3" onClick={() => setShowCreateLeadModal(true)}>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          className="text-xs h-8 px-3"
+                          onClick={() => {
+                            setLeadFormData(prev => ({
+                              ...prev,
+                              name: selectedConversation.contact.name,
+                              phone: selectedConversation.contact.phone || '',
+                              email: selectedConversation.contact.email || '',
+                              source: selectedChannel === 'tiktok' ? 'tiktok' : prev.source
+                            }))
+                            setShowCreateLeadModal(true)
+                          }}
+                        >
                           Thêm mới
                         </Button>
                       </div>
@@ -3904,6 +4251,11 @@ export default function ChatManagement() {
                                                     {customerConnCount['facebook']}FB
                                                   </span>
                                                 )}
+                                                {customerConnCount['tiktok'] > 0 && (
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-800 font-medium">
+                                                    {customerConnCount['tiktok']}TT
+                                                  </span>
+                                                )}
                                               </div>
                                             )}
                                             <DropdownMenu>
@@ -3992,8 +4344,7 @@ export default function ChatManagement() {
                                         )
                                       } else if (hasConnectionInCurrentPlatform) {
                                         // Customer already has a connection in the same platform - show "Already Connected" state
-                                        const platformName = selectedChannel === 'zalo-personal' ? 'Zalo' :
-                                                            selectedChannel === 'zalo-oa' ? 'Zalo OA' : 'Facebook'
+                                        const platformName = PLATFORM_META[selectedChannel].panelLabel
                                         return (
                                           <div className="flex flex-col items-end gap-2 flex-shrink-0">
                                             {customerConnCount && (
@@ -4011,6 +4362,11 @@ export default function ChatManagement() {
                                                 {customerConnCount['facebook'] > 0 && (
                                                   <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-medium">
                                                     {customerConnCount['facebook']}FB
+                                                  </span>
+                                                )}
+                                                {customerConnCount['tiktok'] > 0 && (
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-medium">
+                                                    {customerConnCount['tiktok']}TT
                                                   </span>
                                                 )}
                                               </div>
@@ -4084,6 +4440,11 @@ export default function ChatManagement() {
                                                     {customerConnCount['facebook']}FB
                                                   </span>
                                                 )}
+                                                {customerConnCount['tiktok'] > 0 && (
+                                                  <span className="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-700 font-medium">
+                                                    {customerConnCount['tiktok']}TT
+                                                  </span>
+                                                )}
                                               </div>
                                             )}
                                             <Button 
@@ -4113,6 +4474,7 @@ export default function ChatManagement() {
                                                     'zalo-personal': 0,
                                                     'zalo-oa': 0,
                                                     'facebook': 0,
+                                                    'tiktok': 0,
                                                     total: 0
                                                   }
                                                   const updated = {
@@ -4159,6 +4521,7 @@ export default function ChatManagement() {
                                                   'zalo-personal': selectedChannel === 'zalo-personal' ? 1 : 0,
                                                   'zalo-oa': selectedChannel === 'zalo-oa' ? 1 : 0,
                                                   'facebook': selectedChannel === 'facebook' ? 1 : 0,
+                                                  'tiktok': selectedChannel === 'tiktok' ? 1 : 0,
                                                   total: 1
                                                 })
                                                 return newMap
@@ -4398,7 +4761,9 @@ export default function ChatManagement() {
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-600 w-20 flex-shrink-0">Loại file:</span>
                     <div className="flex gap-2 flex-wrap">
-                      {(['all', 'file', 'image', 'video'] as const).map((type) => (
+                      {((selectedConversation?.platform === 'tiktok'
+                        ? ['all', 'image']
+                        : ['all', 'file', 'image', 'video']) as Array<'all' | 'file' | 'image' | 'video'>).map((type) => (
                         <button
                           key={type}
                           onClick={() => setFileTypeFilter(type)}
@@ -4639,6 +5004,7 @@ export default function ChatManagement() {
                     <option value="zalo-personal">Zalo cá nhân</option>
                     <option value="zalo-oa">Zalo OA</option>
                     <option value="facebook">Facebook</option>
+                    <option value="tiktok">TikTok Business</option>
                   </select>
                 </div>
                 <Button 
@@ -4662,63 +5028,63 @@ export default function ChatManagement() {
                         <div className="flex items-start gap-3 flex-1">
                           <Avatar className="w-12 h-12">
                             <AvatarImage src={account.avatar} />
-                            <AvatarFallback className="bg-blue-500 text-white">
-                              {account.name.substring(0, 2).toUpperCase()}
+                            <AvatarFallback className={cn("text-white", PLATFORM_META[account.platform].iconClassName)}>
+                              {getPlatformShortLabel(account.platform)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-1">
                               <h3 className="font-semibold text-gray-900">{account.name}</h3>
-                              <Badge className={cn(
-                                "text-xs",
-                                account.platform === 'zalo-personal' ? "bg-blue-100 text-blue-800" :
-                                account.platform === 'zalo-oa' ? "bg-purple-100 text-purple-800" :
-                                "bg-[#3e79f7] text-white"
-                              )}>
-                                {account.platform === 'zalo-personal' ? 'Zalo cá nhân' :
-                                 account.platform === 'zalo-oa' ? 'Zalo OA' :
-                                 'Facebook'}
+                              <Badge className={cn("text-xs", PLATFORM_META[account.platform].badgeClassName)}>
+                                {getPlatformLabel(account.platform)}
                               </Badge>
                             </div>
                             <div className="text-sm text-gray-500 space-y-1">
                               <div>• ID: {account.id}853684866249512254</div>
+                              {account.platform === 'tiktok' && (
+                                <div className="text-xs text-gray-500">
+                                  {account.marketSupportsImage ? '• Hỗ trợ gửi ảnh tại thị trường này' : '• Gửi ảnh không khả dụng tại thị trường này'}
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-3">
                           {/* Row 1: Badge */}
                           <div className="flex items-center gap-2">
-                            {accountConnectionStatus.get(account.id) ? (
-                              <Badge className="bg-green-100 text-green-800 flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-full bg-[#2dc56a]"></div>
-                                Đã kết nối
-                              </Badge>
-                            ) : (
-                              <Badge className="bg-red-100 text-red-800 flex items-center gap-1">
-                                <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                                Mất kết nối
-                              </Badge>
-                            )}
+                            {(() => {
+                              const status = accountConnectionStatus.get(account.id) || 'connected'
+                              const statusMeta = CONNECTION_STATUS_META[status]
+                              return (
+                                <Badge className={cn("flex items-center gap-1", statusMeta.badgeClassName)}>
+                                  <div className={cn("w-2 h-2 rounded-full", statusMeta.dotClassName)}></div>
+                                  {statusMeta.label}
+                                </Badge>
+                              )
+                            })()}
                           </div>
+                          {account.platform === 'tiktok' && (accountConnectionStatus.get(account.id) === 'action_required' || accountConnectionStatus.get(account.id) === 'token_expiring') && (
+                            <div className="max-w-[220px] text-xs rounded-md px-3 py-2 bg-orange-50 text-orange-700 border border-orange-200">
+                              {accountConnectionStatus.get(account.id) === 'action_required'
+                                ? 'Phiên đăng nhập hết hạn. Vui lòng kết nối lại.'
+                                : 'Token sắp hết hạn. Hệ thống sẽ tự làm mới.'}
+                            </div>
+                          )}
                           {/* Row 2: Disconnect & Delete buttons */}
                           <div className="flex items-center gap-2">
-                            {accountConnectionStatus.get(account.id) ? (
-                              <Button
-                                size="sm"
-                                onClick={() => toggleAccountConnection(account.id)}
-                                className="bg-orange-500 hover:bg-orange-600 text-white text-xs h-8 px-3 border-0 rounded-md"
-                              >
-                                Ngắt kết nối
-                              </Button>
-                            ) : (
-                              <Button
-                                size="sm"
-                                onClick={() => toggleAccountConnection(account.id)}
-                                className="bg-[#2dc56a] hover:bg-[#2dc56a] text-white text-xs h-8 px-3 border-0 rounded-md"
-                              >
-                                Kết nối
-                              </Button>
-                            )}
+                            {(() => {
+                              const status = accountConnectionStatus.get(account.id) || 'connected'
+                              const statusMeta = CONNECTION_STATUS_META[status]
+                              return (
+                                <Button
+                                  size="sm"
+                                  onClick={() => toggleAccountConnection(account.id)}
+                                  className={cn("text-xs h-8 px-3 border-0 rounded-md", statusMeta.actionClassName)}
+                                >
+                                  {statusMeta.actionLabel}
+                                </Button>
+                              )
+                            })()}
                             <Button
                               size="sm"
                               className="bg-red-500 hover:bg-[#ff6b72] text-white h-8 w-8 p-0 border-0 rounded-md"
@@ -4797,7 +5163,7 @@ export default function ChatManagement() {
               <Label>Loại kết nối</Label>
               <Select
                 value={selectedIntegrationType}
-                onValueChange={(value) => setSelectedIntegrationType(value as 'zalo-personal' | 'zalo-oa' | 'facebook' | '')}
+                onValueChange={(value) => setSelectedIntegrationType(value as Platform | '')}
               >
                 <SelectTrigger className="mt-2">
                   <SelectValue placeholder="Chọn loại kết nối" />
@@ -4821,6 +5187,12 @@ export default function ChatManagement() {
                       Kết nối Facebook Fanpage
                     </div>
                   </SelectItem>
+                  <SelectItem value="tiktok">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex w-4 justify-center text-xs font-bold">TT</span>
+                      Kết nối TikTok Business
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -4838,6 +5210,14 @@ export default function ChatManagement() {
                 <p className="text-sm text-yellow-800">
                   <AlertTriangle className="w-4 h-4 inline mr-1" />
                   Yêu cầu gói <strong>OA Nâng cao</strong> hoặc <strong>OA Premium</strong>
+                </p>
+              </div>
+            )}
+
+            {selectedIntegrationType === 'tiktok' && (
+              <div className="bg-gray-50 border border-gray-200 rounded p-3">
+                <p className="text-sm text-gray-800">
+                  Yêu cầu tài khoản <strong>TikTok Business Account</strong>. Không khả dụng tại US, EU, UK.
                 </p>
               </div>
             )}
@@ -4869,6 +5249,9 @@ export default function ChatManagement() {
                 } else if (selectedIntegrationType === 'facebook') {
                   setShowIntegrationModal(false)
                   setShowFacebookModal(true)
+                } else if (selectedIntegrationType === 'tiktok') {
+                  setShowIntegrationModal(false)
+                  setShowTikTokModal(true)
                 }
               }}
               disabled={!selectedIntegrationType}
@@ -5083,6 +5466,48 @@ export default function ChatManagement() {
             >
               <Facebook className="w-5 h-5 mr-2" />
               Kết nối tài khoản Facebook
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal: Kết nối TikTok Business */}
+      <Dialog open={showTikTokModal} onOpenChange={setShowTikTokModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl text-center">
+              Kết nối Vilead CRM
+            </DialogTitle>
+            <DialogDescription className="text-center">
+              với TikTok Business
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-6 px-6 py-4">
+            <div className="flex items-center justify-center gap-6">
+              <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center">
+                <span className="text-2xl font-bold text-blue-600">V</span>
+              </div>
+
+              <RefreshCw className="w-6 h-6 text-gray-400" />
+
+              <div className="w-16 h-16 bg-black rounded-full flex items-center justify-center">
+                <span className="text-white text-lg font-semibold">TT</span>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 border border-gray-200 rounded-[10px] p-4 text-center text-sm text-gray-700">
+              TikTok chỉ cho phép tích hợp với tài khoản <strong>TikTok Business Account</strong>. Một số khu vực như US, EU, UK hiện không khả dụng.
+            </div>
+
+            <Button
+              className="w-full h-12 text-base bg-black hover:bg-gray-800"
+              onClick={() => {
+                window.open('https://business.tiktok.com/', '_blank', 'noopener,noreferrer')
+                setShowTikTokModal(false)
+              }}
+            >
+              Tiếp tục với TikTok Business
             </Button>
           </div>
         </DialogContent>
@@ -5383,9 +5808,11 @@ export default function ChatManagement() {
                       className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       value={leadFormData.source}
                       onChange={(e) => setLeadFormData({...leadFormData, source: e.target.value})}
+                      disabled={selectedChannel === 'tiktok'}
                     >
                       <option value="website">Website</option>
                       <option value="facebook">Facebook</option>
+                      <option value="tiktok">TikTok</option>
                       <option value="google">Google Ads</option>
                       <option value="referral">Giới thiệu</option>
                       <option value="cold-call">Cold Call</option>
@@ -5523,7 +5950,7 @@ export default function ChatManagement() {
                   <div><strong>Tên:</strong> {leadFormData.name || 'Chưa nhập'}</div>
                   <div><strong>Email:</strong> {leadFormData.email || 'Chưa nhập'}</div>
                   <div><strong>SĐT:</strong> {leadFormData.phone || 'Chưa nhập'}</div>
-                  <div><strong>Nguồn:</strong> {leadFormData.source === 'website' ? 'Website' : leadFormData.source === 'facebook' ? 'Facebook' : leadFormData.source === 'google' ? 'Google Ads' : leadFormData.source}</div>
+                  <div><strong>Nguồn:</strong> {leadFormData.source === 'website' ? 'Website' : leadFormData.source === 'facebook' ? 'Facebook' : leadFormData.source === 'tiktok' ? 'TikTok' : leadFormData.source === 'google' ? 'Google Ads' : leadFormData.source}</div>
                   <div><strong>Phân công cho:</strong> {leadFormData.assignTo || 'Minh Expert (người tạo)'}</div>
                 </div>
               </div>
@@ -5540,7 +5967,7 @@ export default function ChatManagement() {
                     name: '',
                     phone: '',
                     email: '',
-                    source: 'website',
+                    source: selectedChannel === 'tiktok' ? 'tiktok' : 'website',
                     province: 'hanoi',
                     assignTo: '',
                     product: '',
@@ -5564,7 +5991,8 @@ export default function ChatManagement() {
                     avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${leadFormData.name}`,
                     status: 'lead' as const,
                     source: leadFormData.source === 'website' ? 'Website' : 
-                            leadFormData.source === 'facebook' ? 'Facebook' : 
+                            leadFormData.source === 'facebook' ? 'Facebook' :
+                            leadFormData.source === 'tiktok' ? 'TikTok' :
                             leadFormData.source === 'google' ? 'Google Ads' : 
                             leadFormData.source.charAt(0).toUpperCase() + leadFormData.source.slice(1),
                     tags: ['Lead mới'],
@@ -5603,6 +6031,7 @@ export default function ChatManagement() {
                         'zalo-personal': 0,
                         'zalo-oa': 0,
                         'facebook': 0,
+                        'tiktok': 0,
                         total: 0
                       }
                       const updated = {
@@ -5622,7 +6051,7 @@ export default function ChatManagement() {
                     name: '',
                     phone: '',
                     email: '',
-                    source: 'website',
+                    source: selectedChannel === 'tiktok' ? 'tiktok' : 'website',
                     province: 'hanoi',
                     assignTo: '',
                     product: '',

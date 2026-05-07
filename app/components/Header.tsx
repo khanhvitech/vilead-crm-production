@@ -215,12 +215,43 @@ const notifications = [
     message: "Đơn hàng mới từ khách hàng VIP",
     time: "6 giờ trước",
     read: true,
+  },
+  {
+    id: 16,
+    type: "important",
+    category: "system",
+    title: "TikTok sắp hết cửa sổ phản hồi",
+    message: "Hội thoại Linh Beauty Official sắp hết cửa sổ phản hồi (còn khoảng 2 giờ).",
+    time: "20 phút trước",
+    read: false,
+  },
+  {
+    id: 17,
+    type: "urgent",
+    category: "system",
+    title: "Kênh TikTok mất kết nối",
+    message: "Kênh TikTok Beauty House mất kết nối. Vui lòng kiểm tra và kết nối lại.",
+    time: "10 phút trước",
+    read: false,
+    actionLabel: "Xử lý ngay",
+    actionType: "open_tiktok_connections"
+  },
+  {
+    id: 18,
+    type: "urgent",
+    category: "system",
+    title: "Phiên TikTok đã hết hạn",
+    message: "Refresh token TikTok đã hết hạn. Cần kết nối lại để tiếp tục nhận tin nhắn.",
+    time: "5 phút trước",
+    read: false,
+    actionLabel: "Xử lý ngay",
+    actionType: "open_tiktok_connections"
   }
 ]
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [unreadCount, setUnreadCount] = useState(4)
+  const [unreadCount, setUnreadCount] = useState(notifications.filter(notification => !notification.read).length)
   const [updateUnreadCount, setUpdateUnreadCount] = useState(systemUpdates.length)
   const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
@@ -378,6 +409,14 @@ export default function Header() {
     setUnreadCount(newUnreadCount)
   }
 
+  const handleNotificationAction = (actionType?: string) => {
+    if (actionType === 'open_tiktok_connections') {
+      window.dispatchEvent(new CustomEvent('open-omnichat-connections', {
+        detail: { platform: 'tiktok' }
+      }))
+    }
+  }
+
   // Filter notifications for modal popup
   // Filter notifications for modal popup
   const getFilteredNotificationsForModal = () => {
@@ -387,7 +426,7 @@ export default function Header() {
     if (notificationTypeFilter !== 'all') {
       filtered = filtered.filter(notification => {
         // If filtering by category (leads, customer, tasks, orders, kpi)
-        if (['leads', 'customer', 'tasks', 'orders', 'kpi'].includes(notificationTypeFilter)) {
+        if (['leads', 'customer', 'tasks', 'orders', 'kpi', 'system'].includes(notificationTypeFilter)) {
           return notification.category === notificationTypeFilter
         }
         // If filtering by priority (urgent, important, normal)
@@ -817,6 +856,7 @@ export default function Header() {
                                       {notification.category === 'kpi' && 'KPI'}
                                       {notification.category === 'calendar' && 'Lịch hẹn'}
                                       {notification.category === 'quote' && 'Báo giá'}
+                                      {notification.category === 'system' && 'Hệ thống'}
                                     </span>
                                     <span className="text-gray-400 mx-1">•</span>
                                     <span className="text-gray-900">{notification.title}</span>
@@ -824,6 +864,18 @@ export default function Header() {
                                   <p className="text-xs text-gray-600 mt-1 line-clamp-1">
                                     {notification.message}
                                   </p>
+                                  {'actionLabel' in notification && notification.actionLabel && (
+                                    <button
+                                      className="mt-2 inline-flex items-center rounded-md bg-gray-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-black"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleNotificationClick(notification.id)
+                                        handleNotificationAction(notification.actionType)
+                                      }}
+                                    >
+                                      {notification.actionLabel}
+                                    </button>
+                                  )}
                                   <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
                                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -2297,6 +2349,7 @@ export default function Header() {
                           notification.category === 'orders' ? 'bg-blue-100 text-blue-800' :
                           notification.category === 'kpi' ? 'bg-red-100 text-red-800' :
                           notification.category === 'tasks' ? 'bg-orange-100 text-orange-800' :
+                          notification.category === 'system' ? 'bg-gray-900 text-white' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {notification.category === 'leads' ? '📈 Leads' :
@@ -2304,6 +2357,7 @@ export default function Header() {
                            notification.category === 'orders' ? '� Đơn hàng' :
                            notification.category === 'kpi' ? '📊 KPI' :
                            notification.category === 'tasks' ? '�📋 Công việc' :
+                           notification.category === 'system' ? 'TT TikTok/System' :
                            '📋 Khác'}
                         </span>
                         {!notification.read && (
@@ -2521,7 +2575,8 @@ export default function Header() {
                                    notification.category === 'customer' ? 'Khách hàng' :
                                    notification.category === 'orders' ? 'Đơn hàng' :
                                    notification.category === 'kpi' ? 'KPI' :
-                                   notification.category === 'tasks' ? 'Công việc' : 'Khác'}
+                                   notification.category === 'tasks' ? 'Công việc' :
+                                   notification.category === 'system' ? 'Hệ thống' : 'Khác'}
                                 </span>
                                 <span className="text-gray-400 mx-1">•</span>
                                 <span className="text-gray-900">{notification.title}</span>
