@@ -223,6 +223,9 @@ interface SalesStage {
   product?: string
   isActive: boolean
   isFixed?: boolean  // Giai đoạn cố định không được xóa
+  slaHours?: string
+  allowAllTransitions?: boolean
+  allowedTransitionStageIds?: string[]
   autoTransition: {
     enabled: boolean
     days: number
@@ -7593,15 +7596,14 @@ export default function SettingsManagement() {
   // PipelineManagement Component (Quản lý Quy trình bán hàng)
   // ============================================================
   const PipelineManagement = () => {
-    // Mock products available for pipeline assignment
-    const availableProducts = [
-      { id: 'p1', name: 'CRM Pro', categoryNames: ['Phần mềm', 'Dịch vụ'], pipelineId: 2 },
-      { id: 'p2', name: 'Phần mềm kế toán', categoryNames: ['Phần mềm'], pipelineId: null },
-      { id: 'p3', name: 'Máy chủ Dell R740', categoryNames: ['Phần cứng'], pipelineId: null },
-      { id: 'p4', name: 'Gói tư vấn ERP', categoryNames: ['Dịch vụ'], pipelineId: 3 },
-      { id: 'p5', name: 'Gói bảo trì hệ thống', categoryNames: ['Dịch vụ', 'Combo'], pipelineId: null },
-      { id: 'p6', name: 'Combo Server + Phần mềm', categoryNames: ['Phần cứng', 'Combo'], pipelineId: null },
-    ]
+    type AvailableProduct = {
+      id: string
+      name: string
+      categoryNames: string[]
+      pipelineId: number | null
+      leadCount: number
+      orderCount: number
+    }
 
     type Pipeline = {
       id: number
@@ -7609,227 +7611,581 @@ export default function SettingsManagement() {
       description: string
       productIds: string[]
       isDefault: boolean
+      isActive: boolean
+      archivedAt?: string
+      archivedBy?: string
+      archiveReason?: string
+      leadCount?: number
+      orderCount?: number
       stages: typeof sampleSalesStages
     }
 
+    const availableProducts: AvailableProduct[] = [
+      { id: 'p1', name: 'CRM Pro', categoryNames: ['Phần mềm', 'Dịch vụ'], pipelineId: 2, leadCount: 8, orderCount: 3 },
+      { id: 'p2', name: 'Phần mềm kế toán', categoryNames: ['Phần mềm'], pipelineId: null, leadCount: 0, orderCount: 0 },
+      { id: 'p3', name: 'Máy chủ Dell R740', categoryNames: ['Phần cứng'], pipelineId: null, leadCount: 0, orderCount: 0 },
+      { id: 'p4', name: 'Gói tư vấn ERP', categoryNames: ['Dịch vụ'], pipelineId: 3, leadCount: 5, orderCount: 2 },
+      { id: 'p5', name: 'Gói bảo trì hệ thống', categoryNames: ['Dịch vụ', 'Combo'], pipelineId: null, leadCount: 2, orderCount: 1 },
+      { id: 'p6', name: 'Combo Server + Phần mềm', categoryNames: ['Phần cứng', 'Combo'], pipelineId: null, leadCount: 0, orderCount: 0 },
+    ]
+
+    const createStageFormState = () => ({
+      name: '',
+      color: '#3B82F6',
+      description: '',
+      slaHours: '',
+      allowAllTransitions: true,
+      allowedTransitionStageIds: [] as string[],
+    })
+
     const defaultStagesForNew: typeof sampleSalesStages = [
       { id: 'new', name: 'Lead mới', description: 'Lead mới tiếp nhận', color: '#3B82F6', order: 1, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 1, nextStage: 'contacted' } },
-      { id: 'contacted', name: 'Đang tư vấn', description: 'Đang tư vấn khách hàng', color: '#F59E0B', order: 2, isActive: true, isFixed: false, autoTransition: { enabled: false, days: 3, nextStage: 'qualified' } },
+      { id: 'contacted', name: 'Đang tư vấn', description: 'Đang tư vấn khách hàng', color: '#F59E0B', order: 2, isActive: true, isFixed: false, autoTransition: { enabled: false, days: 3, nextStage: 'qualified' }, slaHours: '', allowAllTransitions: true, allowedTransitionStageIds: [] },
       { id: 'payment_pending', name: 'Chờ thanh toán', description: 'Đang chờ thanh toán', color: '#F97316', order: 3, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 7, nextStage: 'converted' } },
       { id: 'converted', name: 'Thành công', description: 'Đã chuyển đổi thành công', color: '#10B981', order: 4, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 0, nextStage: '' } },
       { id: 'lost', name: 'Thất bại', description: 'Không thành công', color: '#EF4444', order: 5, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 0, nextStage: '' } },
     ]
 
     const [pipelines, setPipelines] = useState<Pipeline[]>([
-      { id: 1, name: 'Quy trình mặc định', description: 'Quy trình bán hàng chung áp dụng cho tất cả sản phẩm', productIds: [], isDefault: true, stages: sampleSalesStages },
-      { id: 2, name: 'Quy trình Phần mềm', description: 'Quy trình dành cho sản phẩm phần mềm', productIds: ['p1'], isDefault: false, stages: [
+      { id: 1, name: 'Quy trình mặc định', description: 'Quy trình bán hàng chung áp dụng cho tất cả sản phẩm', productIds: [], isDefault: true, isActive: true, leadCount: 0, orderCount: 0, stages: sampleSalesStages },
+      { id: 2, name: 'Quy trình Phần mềm', description: 'Quy trình dành cho sản phẩm phần mềm', productIds: ['p1'], isDefault: false, isActive: true, leadCount: 12, orderCount: 5, stages: [
         { id: 'new', name: 'Lead mới', description: '', color: '#3B82F6', order: 1, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 1, nextStage: 'demo' } },
-        { id: 'demo', name: 'Demo sản phẩm', description: 'Trình bày demo cho khách hàng', color: '#8B5CF6', order: 2, isActive: true, isFixed: false, autoTransition: { enabled: false, days: 3, nextStage: 'proposal' } },
-        { id: 'proposal', name: 'Gửi báo giá', description: 'Đã gửi báo giá chi tiết', color: '#F59E0B', order: 3, isActive: true, isFixed: false, autoTransition: { enabled: false, days: 5, nextStage: 'negotiation' } },
-        { id: 'negotiation', name: 'Đàm phán hợp đồng', description: 'Đang đàm phán hợp đồng', color: '#EC4899', order: 4, isActive: true, isFixed: false, autoTransition: { enabled: false, days: 0, nextStage: 'payment_pending' } },
+        { id: 'demo', name: 'Demo sản phẩm', description: 'Trình bày demo cho khách hàng', color: '#8B5CF6', order: 2, isActive: true, isFixed: false, slaHours: '72', allowAllTransitions: true, allowedTransitionStageIds: [], autoTransition: { enabled: false, days: 3, nextStage: 'proposal' } },
+        { id: 'proposal', name: 'Gửi báo giá', description: 'Đã gửi báo giá chi tiết', color: '#F59E0B', order: 3, isActive: true, isFixed: false, slaHours: '48', allowAllTransitions: false, allowedTransitionStageIds: ['negotiation'], autoTransition: { enabled: false, days: 5, nextStage: 'negotiation' } },
+        { id: 'negotiation', name: 'Đàm phán hợp đồng', description: 'Đang đàm phán hợp đồng', color: '#EC4899', order: 4, isActive: true, isFixed: false, slaHours: '', allowAllTransitions: true, allowedTransitionStageIds: [], autoTransition: { enabled: false, days: 0, nextStage: 'payment_pending' } },
         { id: 'payment_pending', name: 'Chờ thanh toán', description: 'Chờ thanh toán và ký hợp đồng', color: '#F97316', order: 5, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 7, nextStage: 'converted' } },
         { id: 'converted', name: 'Triển khai', description: 'Đã thanh toán, chuyển sang triển khai', color: '#10B981', order: 6, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 0, nextStage: '' } },
         { id: 'lost', name: 'Thất bại', description: 'Không thành công', color: '#EF4444', order: 7, isActive: true, isFixed: true, autoTransition: { enabled: false, days: 0, nextStage: '' } },
       ] },
-      { id: 3, name: 'Quy trình Dịch vụ', description: 'Quy trình dành cho dịch vụ tư vấn', productIds: ['p4'], isDefault: false, stages: defaultStagesForNew },
+      { id: 3, name: 'Quy trình Dịch vụ', description: 'Quy trình dành cho dịch vụ tư vấn', productIds: ['p4'], isDefault: false, isActive: true, leadCount: 8, orderCount: 2, stages: defaultStagesForNew },
     ])
 
     const [selectedPipelineId, setSelectedPipelineId] = useState<number>(1)
+    const [showArchivedSection, setShowArchivedSection] = useState(false)
     const [showAddPipelineModal, setShowAddPipelineModal] = useState(false)
     const [showEditPipelineModal, setShowEditPipelineModal] = useState(false)
-    const [showDeletePipelineConfirm, setShowDeletePipelineConfirm] = useState(false)
-    const [pipelineToDelete, setPipelineToDelete] = useState<number | null>(null)
-    const [showPipelineDropdown, setShowPipelineDropdown] = useState<number | null>(null)
+    const [archiveTargetPipelineId, setArchiveTargetPipelineId] = useState<number | null>(null)
+    const [restoreTargetPipelineId, setRestoreTargetPipelineId] = useState<number | null>(null)
+    const [blockedArchivePipelineId, setBlockedArchivePipelineId] = useState<number | null>(null)
     const [pipelineForm, setPipelineForm] = useState({ name: '', description: '', productIds: [] as string[] })
     const [pipelineProductSearch, setPipelineProductSearch] = useState('')
     const [pipelineFormError, setPipelineFormError] = useState('')
+    const [archiveReason, setArchiveReason] = useState('')
+    const [archiveReasonError, setArchiveReasonError] = useState('')
+    const [originalPipelineProductIds, setOriginalPipelineProductIds] = useState<string[]>([])
     const [showAddStageModal_PL, setShowAddStageModal_PL] = useState(false)
     const [showEditStageModal_PL, setShowEditStageModal_PL] = useState(false)
     const [editingStage_PL, setEditingStage_PL] = useState<typeof sampleSalesStages[0] | null>(null)
-    const [stageForm_PL, setStageForm_PL] = useState({ name: '', color: '#3B82F6', description: '' })
+    const [stageForm_PL, setStageForm_PL] = useState(createStageFormState())
     const [draggedStageId_PL, setDraggedStageId_PL] = useState<string | null>(null)
 
-    const selectedPipeline = pipelines.find(p => p.id === selectedPipelineId) || pipelines[0]
-    // Get all product IDs taken by other pipelines
-    const getProductPipelineMap = () => {
-      const map: Record<string, number> = {}
-      pipelines.forEach(p => {
-        p.productIds.forEach(pid => { map[pid] = p.id })
-      })
-      return map
-    }
     const stageColorOptions = ['#3B82F6', '#F59E0B', '#8B5CF6', '#10B981', '#EC4899', '#EF4444', '#F97316', '#6366F1', '#14B8A6']
+    const selectedPipeline = pipelines.find(p => p.id === selectedPipelineId) || pipelines[0]
+    const defaultPipeline = pipelines.find(p => p.isDefault) || pipelines[0]
+    const activePipelineBase = pipelines.filter(p => p.isActive)
+    const activePipelines = [...activePipelineBase.filter(p => p.isDefault), ...activePipelineBase.filter(p => !p.isDefault)]
+    const archivedPipelines = pipelines.filter(p => !p.isActive)
+    const activePipelineCount = activePipelines.length
+    const isSelectedPipelineArchived = !selectedPipeline.isActive
+
+    const productPipelineMap = pipelines.reduce<Record<string, number>>((acc, pipeline) => {
+      pipeline.productIds.forEach(productId => {
+        acc[productId] = pipeline.id
+      })
+      return acc
+    }, {})
+
+    const getFilteredProducts = () => availableProducts.filter(product =>
+      product.name.toLowerCase().includes(pipelineProductSearch.toLowerCase()) ||
+      product.categoryNames.some(category => category.toLowerCase().includes(pipelineProductSearch.toLowerCase()))
+    )
+
+    const getCustomTransitionCandidates = (excludeStageId?: string) =>
+      selectedPipeline.stages.filter(stage => !stage.isFixed && stage.id !== excludeStageId)
+
+    const resetPipelineForm = () => {
+      setPipelineForm({ name: '', description: '', productIds: [] })
+      setPipelineProductSearch('')
+      setPipelineFormError('')
+      setOriginalPipelineProductIds([])
+    }
+
+    const resetArchiveDialog = () => {
+      setArchiveTargetPipelineId(null)
+      setArchiveReason('')
+      setArchiveReasonError('')
+    }
+
+    const resetStageForm_PL = () => {
+      setStageForm_PL(createStageFormState())
+      setEditingStage_PL(null)
+    }
+
+    const requestArchivePipeline = (pipeline: Pipeline) => {
+      setSelectedPipelineId(pipeline.id)
+      if (pipeline.isDefault || !pipeline.isActive) return
+      if (activePipelineCount <= 1) {
+        setBlockedArchivePipelineId(pipeline.id)
+        return
+      }
+      setArchiveTargetPipelineId(pipeline.id)
+      setArchiveReason('')
+      setArchiveReasonError('')
+    }
+
+    const requestRestorePipeline = (pipeline: Pipeline) => {
+      setSelectedPipelineId(pipeline.id)
+      setRestoreTargetPipelineId(pipeline.id)
+    }
+
+    const openEditModal = (pipeline: Pipeline) => {
+      setSelectedPipelineId(pipeline.id)
+      setPipelineForm({ name: pipeline.name, description: pipeline.description, productIds: [...pipeline.productIds] })
+      setOriginalPipelineProductIds([...pipeline.productIds])
+      setPipelineProductSearch('')
+      setPipelineFormError('')
+      setShowEditPipelineModal(true)
+    }
+
+    const updatePipelineStages = (newStages: typeof sampleSalesStages) => {
+      setPipelines(prev => prev.map(pipeline =>
+        pipeline.id === selectedPipelineId ? { ...pipeline, stages: newStages } : pipeline
+      ))
+    }
 
     const handleAddPipeline = () => {
-      if (!pipelineForm.name.trim()) { setPipelineFormError('Vui lòng nhập tên quy trình'); return }
+      if (!pipelineForm.name.trim()) {
+        setPipelineFormError('Vui lòng nhập tên quy trình')
+        return
+      }
+
+      const selectedProductIds = pipelineForm.productIds
       const newPipeline: Pipeline = {
         id: Math.max(...pipelines.map(p => p.id)) + 1,
         name: pipelineForm.name.trim(),
         description: pipelineForm.description.trim(),
-        productIds: pipelineForm.productIds,
+        productIds: selectedProductIds,
         isDefault: false,
-        stages: defaultStagesForNew
+        isActive: true,
+        leadCount: 0,
+        orderCount: 0,
+        stages: defaultStagesForNew,
       }
-      setPipelines(prev => [...prev, newPipeline])
+
+      setPipelines(prev => [
+        ...prev.map(pipeline => ({
+          ...pipeline,
+          productIds: pipeline.productIds.filter(productId => !selectedProductIds.includes(productId)),
+        })),
+        newPipeline,
+      ])
       setSelectedPipelineId(newPipeline.id)
       setShowAddPipelineModal(false)
-      setPipelineForm({ name: '', description: '', productIds: [] })
-      setPipelineProductSearch('')
-      setPipelineFormError('')
+      resetPipelineForm()
     }
 
     const handleEditPipeline = () => {
-      if (!pipelineForm.name.trim()) { setPipelineFormError('Vui lòng nhập tên quy trình'); return }
-      setPipelines(prev => prev.map(p =>
-        p.id === selectedPipelineId
-          ? { ...p, name: pipelineForm.name.trim(), description: pipelineForm.description.trim(), productIds: pipelineForm.productIds }
-          : p
-      ))
-      setShowEditPipelineModal(false)
-      setPipelineProductSearch('')
-      setPipelineFormError('')
-    }
-
-    const handleDeletePipeline = () => {
-      if (pipelineToDelete) {
-        setPipelines(prev => prev.filter(p => p.id !== pipelineToDelete))
-        if (selectedPipelineId === pipelineToDelete) setSelectedPipelineId(1)
-        setShowDeletePipelineConfirm(false)
-        setPipelineToDelete(null)
+      if (!pipelineForm.name.trim()) {
+        setPipelineFormError('Vui lòng nhập tên quy trình')
+        return
       }
+
+      const selectedProductIds = pipelineForm.productIds
+
+      setPipelines(prev => prev.map(pipeline => {
+        if (pipeline.id === selectedPipelineId) {
+          return {
+            ...pipeline,
+            name: pipelineForm.name.trim(),
+            description: pipelineForm.description.trim(),
+            productIds: selectedProductIds,
+          }
+        }
+
+        return {
+          ...pipeline,
+          productIds: pipeline.productIds.filter(productId => !selectedProductIds.includes(productId)),
+        }
+      }))
+
+      setShowEditPipelineModal(false)
+      resetPipelineForm()
     }
 
-    const openEditModal = () => {
-      const p = selectedPipeline
-      setPipelineForm({ name: p.name, description: p.description, productIds: p.productIds || [] })
-      setPipelineProductSearch('')
-      setPipelineFormError('')
-      setShowEditPipelineModal(true)
-      setShowPipelineDropdown(null)
+    const handleArchivePipeline = () => {
+      const targetPipeline = pipelines.find(p => p.id === archiveTargetPipelineId)
+      const trimmedReason = archiveReason.trim()
+
+      if (!targetPipeline || targetPipeline.isDefault || !targetPipeline.isActive) {
+        resetArchiveDialog()
+        return
+      }
+
+      if (activePipelineCount <= 1) {
+        resetArchiveDialog()
+        setBlockedArchivePipelineId(targetPipeline.id)
+        return
+      }
+
+      if (!trimmedReason) {
+        setArchiveReasonError('Vui lòng nhập lý do lưu trữ')
+        return
+      }
+
+      if (trimmedReason.length > 500) {
+        setArchiveReasonError('Lý do lưu trữ tối đa 500 ký tự')
+        return
+      }
+
+      const movedProductIds = [...targetPipeline.productIds]
+      const archivedAt = new Date().toLocaleString('vi-VN')
+
+      setPipelines(prev => prev.map(pipeline => {
+        if (pipeline.id === defaultPipeline.id) {
+          return {
+            ...pipeline,
+            productIds: [...new Set([...pipeline.productIds, ...movedProductIds])],
+          }
+        }
+
+        if (pipeline.id === targetPipeline.id) {
+          return {
+            ...pipeline,
+            productIds: [],
+            isActive: false,
+            archivedAt,
+            archivedBy: 'Admin hệ thống',
+            archiveReason: trimmedReason,
+          }
+        }
+
+        return pipeline
+      }))
+
+      setSelectedPipelineId(targetPipeline.id)
+      setShowArchivedSection(true)
+      resetArchiveDialog()
     }
 
-    const updatePipelineStages = (newStages: typeof sampleSalesStages) => {
-      setPipelines(prev => prev.map(p => p.id === selectedPipelineId ? { ...p, stages: newStages } : p))
+    const handleRestorePipeline = () => {
+      const targetPipeline = pipelines.find(p => p.id === restoreTargetPipelineId)
+      if (!targetPipeline) return
+
+      setPipelines(prev => prev.map(pipeline =>
+        pipeline.id === targetPipeline.id
+          ? {
+              ...pipeline,
+              isActive: true,
+              archivedAt: undefined,
+              archivedBy: undefined,
+              archiveReason: undefined,
+            }
+          : pipeline
+      ))
+
+      setSelectedPipelineId(targetPipeline.id)
+      setRestoreTargetPipelineId(null)
     }
 
     const handleAddStagePL = () => {
-      if (!stageForm_PL.name.trim()) return
+      if (isSelectedPipelineArchived || !stageForm_PL.name.trim()) return
+
+      const transitionCandidateIds = getCustomTransitionCandidates().map(stage => stage.id)
       const stages = selectedPipeline.stages
       const newStage: typeof sampleSalesStages[0] = {
         id: `stage_${Date.now()}`,
         name: stageForm_PL.name.trim(),
-        description: stageForm_PL.description,
+        description: stageForm_PL.description.trim(),
         color: stageForm_PL.color,
-        order: stages.length > 0 ? Math.max(...stages.map(s => s.order)) + 1 : 1,
+        order: stages.length > 0 ? Math.max(...stages.map(stage => stage.order)) + 1 : 1,
         isActive: true,
         isFixed: false,
-        autoTransition: { enabled: false, days: 0, nextStage: '' }
+        slaHours: stageForm_PL.slaHours.trim(),
+        allowAllTransitions: stageForm_PL.allowAllTransitions,
+        allowedTransitionStageIds: stageForm_PL.allowAllTransitions
+          ? []
+          : stageForm_PL.allowedTransitionStageIds.filter(stageId => transitionCandidateIds.includes(stageId)),
+        autoTransition: { enabled: false, days: 0, nextStage: '' },
       }
+
       updatePipelineStages([...stages, newStage])
       setShowAddStageModal_PL(false)
-      setStageForm_PL({ name: '', color: '#3B82F6', description: '' })
+      resetStageForm_PL()
     }
 
     const handleEditStagePL = () => {
-      if (!editingStage_PL || !stageForm_PL.name.trim()) return
-      updatePipelineStages(selectedPipeline.stages.map(s =>
-        s.id === editingStage_PL.id ? { ...s, name: stageForm_PL.name.trim(), color: stageForm_PL.color, description: stageForm_PL.description } : s
-      ))
+      if (isSelectedPipelineArchived || !editingStage_PL || !stageForm_PL.name.trim()) return
+
+      const transitionCandidateIds = getCustomTransitionCandidates(editingStage_PL.id).map(stage => stage.id)
+
+      updatePipelineStages(selectedPipeline.stages.map(stage => {
+        if (stage.id !== editingStage_PL.id) return stage
+
+        if (editingStage_PL.isFixed) {
+          return {
+            ...stage,
+            name: stageForm_PL.name.trim(),
+            color: stageForm_PL.color,
+            description: stageForm_PL.description.trim(),
+          }
+        }
+
+        return {
+          ...stage,
+          name: stageForm_PL.name.trim(),
+          color: stageForm_PL.color,
+          description: stageForm_PL.description.trim(),
+          slaHours: stageForm_PL.slaHours.trim(),
+          allowAllTransitions: stageForm_PL.allowAllTransitions,
+          allowedTransitionStageIds: stageForm_PL.allowAllTransitions
+            ? []
+            : stageForm_PL.allowedTransitionStageIds.filter(stageId => transitionCandidateIds.includes(stageId)),
+        }
+      }))
+
       setShowEditStageModal_PL(false)
-      setEditingStage_PL(null)
+      resetStageForm_PL()
     }
 
     const handleDeleteStagePL = (stageId: string) => {
-      const stage = selectedPipeline.stages.find(s => s.id === stageId)
+      if (isSelectedPipelineArchived) return
+      const stage = selectedPipeline.stages.find(item => item.id === stageId)
       if (!stage || stage.isFixed) return
-      updatePipelineStages(selectedPipeline.stages.filter(s => s.id !== stageId))
+      updatePipelineStages(selectedPipeline.stages.filter(item => item.id !== stageId))
     }
 
     const handleDragStartPL = (e: React.DragEvent, stageId: string) => {
+      if (isSelectedPipelineArchived) {
+        e.preventDefault()
+        return
+      }
+
+      const stage = selectedPipeline.stages.find(item => item.id === stageId)
+      if (stage?.isFixed) return
+
       setDraggedStageId_PL(stageId)
       e.dataTransfer.effectAllowed = 'move'
     }
 
     const handleDragOverPL = (e: React.DragEvent, stageId: string) => {
+      if (isSelectedPipelineArchived) return
+
       e.preventDefault()
       if (draggedStageId_PL && draggedStageId_PL !== stageId) {
         const stages = [...selectedPipeline.stages].sort((a, b) => a.order - b.order)
-        const draggedIdx = stages.findIndex(s => s.id === draggedStageId_PL)
-        const targetIdx = stages.findIndex(s => s.id === stageId)
+        const draggedIdx = stages.findIndex(stage => stage.id === draggedStageId_PL)
+        const targetIdx = stages.findIndex(stage => stage.id === stageId)
         if (draggedIdx === -1 || targetIdx === -1) return
         if (stages[draggedIdx].isFixed || stages[targetIdx].isFixed) return
+
         const reordered = [...stages]
         const [removed] = reordered.splice(draggedIdx, 1)
         reordered.splice(targetIdx, 0, removed)
-        updatePipelineStages(reordered.map((s, i) => ({ ...s, order: i + 1 })))
+        updatePipelineStages(reordered.map((stage, index) => ({ ...stage, order: index + 1 })))
       }
     }
 
-    const handleDropPL = (e: React.DragEvent) => { e.preventDefault() }
-    const handleDragEndPL = () => { setDraggedStageId_PL(null) }
+    const handleDropPL = (e: React.DragEvent) => {
+      if (isSelectedPipelineArchived) return
+      e.preventDefault()
+    }
+
+    const handleDragEndPL = () => {
+      setDraggedStageId_PL(null)
+    }
+
+    const transferredProducts = availableProducts.filter(product =>
+      pipelineForm.productIds.includes(product.id) &&
+      productPipelineMap[product.id] &&
+      productPipelineMap[product.id] !== selectedPipelineId
+    )
+
+    const removedHistoricalProducts = availableProducts.filter(product =>
+      originalPipelineProductIds.includes(product.id) &&
+      !pipelineForm.productIds.includes(product.id) &&
+      ((product.leadCount ?? 0) > 0 || (product.orderCount ?? 0) > 0)
+    )
+
+    const renderTransitionSection = (excludeStageId?: string) => {
+      const transitionCandidates = getCustomTransitionCandidates(excludeStageId)
+
+      return (
+        <div className="space-y-3">
+          <div>
+            <Label className="text-sm font-medium">Cho phép chuyển đến</Label>
+            <div className="mt-2 flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={stageForm_PL.allowAllTransitions}
+                onChange={(e) => setStageForm_PL(prev => ({
+                  ...prev,
+                  allowAllTransitions: e.target.checked,
+                  allowedTransitionStageIds: e.target.checked ? [] : prev.allowedTransitionStageIds,
+                }))}
+                className="h-4 w-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
+              />
+              <span className="text-sm text-[#1a3353]">Tất cả giai đoạn</span>
+            </div>
+          </div>
+
+          <div className="border-t border-[#e6ebf1] pt-3 space-y-2">
+            {transitionCandidates.length > 0 ? transitionCandidates.map(stage => (
+              <label key={stage.id} className={`flex items-center gap-2 ${stageForm_PL.allowAllTransitions ? 'opacity-60' : ''}`}>
+                <input
+                  type="checkbox"
+                  checked={stageForm_PL.allowAllTransitions || stageForm_PL.allowedTransitionStageIds.includes(stage.id)}
+                  disabled={stageForm_PL.allowAllTransitions}
+                  onChange={(e) => setStageForm_PL(prev => ({
+                    ...prev,
+                    allowedTransitionStageIds: e.target.checked
+                      ? [...prev.allowedTransitionStageIds, stage.id]
+                      : prev.allowedTransitionStageIds.filter(id => id !== stage.id),
+                  }))}
+                  className="h-4 w-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
+                />
+                <span className="text-sm text-[#455560]">{stage.name}</span>
+              </label>
+            )) : (
+              <p className="text-sm text-[#455560]">Chưa có giai đoạn tuỳ chỉnh nào để cấu hình.</p>
+            )}
+          </div>
+        </div>
+      )
+    }
 
     return (
       <div className="flex gap-6" style={{ minHeight: '500px' }}>
-        {/* Left Sidebar - Pipeline List */}
-        <div className="w-56 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
-          <div className="p-2">
-            {pipelines.map((pipeline) => (
-              <div
-                key={pipeline.id}
-                className={`relative flex items-center justify-between px-3 py-2 rounded-md cursor-pointer transition-colors mb-1 ${
-                  selectedPipelineId === pipeline.id
-                    ? 'bg-[#3e79f7] text-white'
-                    : 'text-[#455560] hover:bg-gray-100'
-                }`}
-                onClick={() => { setSelectedPipelineId(pipeline.id); setShowPipelineDropdown(null) }}
-              >
-                <div className="flex items-center gap-2 overflow-hidden">
-                  <GitBranch className="w-4 h-4 flex-shrink-0" />
-                  <span className="text-sm font-medium truncate">{pipeline.name}</span>
-                </div>
-                {selectedPipelineId === pipeline.id && (
-                  <div className="relative flex-shrink-0">
-                    <MoreHorizontal
-                      className="w-4 h-4 cursor-pointer hover:opacity-80"
-                      onClick={(e) => { e.stopPropagation(); setShowPipelineDropdown(showPipelineDropdown === pipeline.id ? null : pipeline.id) }}
-                    />
-                    {showPipelineDropdown === pipeline.id && (
-                      <div className="absolute right-0 top-6 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg py-1 z-20 min-w-[130px]">
-                        <div
-                          className="flex items-center gap-2 px-3 py-2 text-[#455560] hover:bg-gray-100 cursor-pointer text-sm"
-                          onClick={(e) => { e.stopPropagation(); openEditModal() }}
+        <div className="w-64 flex-shrink-0 bg-white border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+          <div className="p-3 space-y-3">
+            <div>
+              <p className="px-2 pb-2 text-xs font-semibold uppercase tracking-wide text-[#455560]">Quy trình đang hoạt động</p>
+              <div className="space-y-1">
+                {activePipelines.map(pipeline => (
+                  <div
+                    key={pipeline.id}
+                    className={`flex items-center justify-between rounded-[10px] px-3 py-2 transition-colors ${
+                      selectedPipelineId === pipeline.id
+                        ? 'bg-[#3e79f7] text-white'
+                        : 'text-[#455560] hover:bg-[#f8f9fa]'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                      onClick={() => setSelectedPipelineId(pipeline.id)}
+                    >
+                      <GitBranch className="w-4 h-4 flex-shrink-0" />
+                      <span className="truncate text-sm font-medium">{pipeline.name}</span>
+                    </button>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <button
+                          type="button"
+                          className={`ml-2 rounded p-1 transition-colors ${
+                            selectedPipelineId === pipeline.id ? 'hover:bg-white/10' : 'hover:bg-[#eef3fb]'
+                          }`}
                         >
-                          <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
-                          <span>Chỉnh sửa</span>
-                        </div>
+                          <MoreHorizontal className="w-4 h-4" />
+                        </button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => openEditModal(pipeline)}>Chỉnh sửa quy trình</DropdownMenuItem>
                         {!pipeline.isDefault && (
-                          <div
-                            className="flex items-center gap-2 px-3 py-2 text-red-500 hover:bg-red-50 cursor-pointer text-sm"
-                            onClick={(e) => { e.stopPropagation(); setPipelineToDelete(pipeline.id); setShowDeletePipelineConfirm(true); setShowPipelineDropdown(null) }}
+                          <DropdownMenuItem
+                            className="text-amber-600"
+                            onClick={() => requestArchivePipeline(pipeline)}
                           >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Xóa</span>
-                          </div>
+                            Lưu trữ
+                          </DropdownMenuItem>
                         )}
-                      </div>
-                    )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                   </div>
-                )}
+                ))}
               </div>
-            ))}
-            <div
-              className="flex items-center gap-2 px-3 py-2 mt-2 text-[#455560] hover:text-[#3e79f7] cursor-pointer transition-colors"
-              onClick={() => { setShowAddPipelineModal(true); setPipelineForm({ name: '', description: '', productIds: [] }); setPipelineProductSearch(''); setPipelineFormError('') }}
+              
+            <button
+              type="button"
+              className="flex w-full items-center gap-2 rounded-[10px] px-3 py-2 text-[#455560] transition-colors hover:bg-[#f8f9fa] hover:text-[#3e79f7]"
+              onClick={() => {
+                resetPipelineForm()
+                setShowAddPipelineModal(true)
+              }}
             >
               <Plus className="w-4 h-4" />
               <span className="text-sm">Thêm quy trình</span>
+            </button>
+            </div>
+
+            <div className="border-t border-[#eef2f7] pt-3">
+              <button
+                type="button"
+                className="flex w-full items-center justify-between rounded-[10px] px-2 py-1.5 text-left text-xs font-semibold uppercase tracking-wide text-[#455560] hover:bg-[#f8f9fa]"
+                onClick={() => setShowArchivedSection(prev => !prev)}
+              >
+                <span>Quy trình lưu trữ</span>
+                {showArchivedSection ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+              </button>
+
+              {showArchivedSection && (
+                <div className="mt-2 space-y-1">
+                  {archivedPipelines.length > 0 ? archivedPipelines.map(pipeline => (
+                    <div
+                      key={pipeline.id}
+                      className={`flex items-center justify-between rounded-[10px] px-3 py-2 transition-colors ${
+                        selectedPipelineId === pipeline.id
+                          ? 'bg-[#eef3fb] text-[#1a3353]'
+                          : 'bg-gray-50/70 text-[#455560] hover:bg-gray-100'
+                      }`}
+                      style={{ opacity: 0.85 }}
+                    >
+                      <button
+                        type="button"
+                        className="flex min-w-0 flex-1 items-center gap-2 text-left"
+                        onClick={() => setSelectedPipelineId(pipeline.id)}
+                      >
+                        <GitBranch className="w-4 h-4 flex-shrink-0" />
+                        <span className="truncate text-sm font-medium">{pipeline.name}</span>
+                      </button>
+                      <div className="ml-2 flex items-center gap-1">
+                        <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Lưu trữ</Badge>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button type="button" className="rounded p-1 transition-colors hover:bg-white">
+                              <MoreHorizontal className="w-4 h-4" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setSelectedPipelineId(pipeline.id)}>Xem chi tiết</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => requestRestorePipeline(pipeline)}>Khôi phục</DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
+                  )) : (
+                    <p className="px-3 py-2 text-sm text-[#455560]">Chưa có quy trình lưu trữ.</p>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Right Content - Pipeline Detail (Stages) */}
         <div className="flex-1 flex flex-col">
-          {/* Pipeline info header */}
+          {isSelectedPipelineArchived && (
+            <div className="mb-4 rounded-[10px] border border-[#e6ebf1] bg-gray-50 p-4">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <p className="text-sm text-[#455560]">
+                  Quy trình này đã được lưu trữ vào {selectedPipeline.archivedAt || '--'} bởi {selectedPipeline.archivedBy || 'Admin hệ thống'}.
+                  {selectedPipeline.archiveReason ? ` Lý do: ${selectedPipeline.archiveReason}.` : ''}
+                </p>
+                <Button size="sm" onClick={() => requestRestorePipeline(selectedPipeline)}>
+                  Khôi phục quy trình
+                </Button>
+              </div>
+            </div>
+          )}
+
           <div className="flex items-start justify-between mb-4">
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-[#1a3353]">{selectedPipeline.name}</h2>
@@ -7844,23 +8200,31 @@ export default function SettingsManagement() {
                 ) : (
                   <span className="inline-flex items-center gap-1 text-xs text-[#455560] bg-gray-100 px-2 py-0.5 rounded-full">
                     <Package className="w-3 h-3" />
-                    {selectedPipeline.productIds.length > 0 
-                      ? `${selectedPipeline.productIds.length} sản phẩm` 
-                      : 'Chưa gán sản phẩm'}
+                    {selectedPipeline.productIds.length > 0 ? `${selectedPipeline.productIds.length} sản phẩm` : 'Chưa gán sản phẩm'}
                   </span>
+                )}
+                {!selectedPipeline.isActive && (
+                  <Badge className="bg-gray-100 text-gray-600 hover:bg-gray-100">Lưu trữ</Badge>
                 )}
               </div>
             </div>
-            <Button size="sm" onClick={() => { setStageForm_PL({ name: '', color: '#3B82F6', description: '' }); setShowAddStageModal_PL(true) }}>
+            <Button
+              size="sm"
+              disabled={isSelectedPipelineArchived}
+              onClick={() => {
+                if (isSelectedPipelineArchived) return
+                resetStageForm_PL()
+                setShowAddStageModal_PL(true)
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Thêm giai đoạn
             </Button>
           </div>
 
-          {/* Stages list */}
           <Card>
-            <CardContent className="space-y-2 pt-4">
-              {selectedPipeline.stages.sort((a, b) => a.order - b.order).map((stage) => (
+            <CardContent className={`space-y-2 pt-4 ${isSelectedPipelineArchived ? 'opacity-60' : ''}`}>
+              {[...selectedPipeline.stages].sort((a, b) => a.order - b.order).map(stage => (
                 <div
                   key={stage.id}
                   className={`flex items-center justify-between p-3 border rounded-[10px] transition-all ${
@@ -7869,8 +8233,8 @@ export default function SettingsManagement() {
                       : draggedStageId_PL === stage.id
                         ? 'bg-blue-50 border-blue-300 opacity-50'
                         : 'bg-white border-[#e6ebf1] hover:bg-gray-50'
-                  }`}
-                  draggable={!stage.isFixed}
+                  } ${isSelectedPipelineArchived ? 'cursor-default' : ''}`}
+                  draggable={!stage.isFixed && !isSelectedPipelineArchived}
                   onDragStart={(e) => handleDragStartPL(e, stage.id)}
                   onDragOver={(e) => handleDragOverPL(e, stage.id)}
                   onDrop={handleDropPL}
@@ -7878,7 +8242,7 @@ export default function SettingsManagement() {
                 >
                   <div className="flex items-center space-x-3">
                     {!stage.isFixed ? (
-                      <div className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600">
+                      <div className={`text-gray-400 hover:text-gray-600 ${isSelectedPipelineArchived ? 'cursor-not-allowed' : 'cursor-grab active:cursor-grabbing'}`}>
                         <GripVertical className="w-5 h-5" />
                       </div>
                     ) : (
@@ -7897,16 +8261,31 @@ export default function SettingsManagement() {
                   <div className="flex items-center space-x-2">
                     <Badge variant="outline" className="text-xs min-w-[32px] justify-center">{stage.order}</Badge>
                     <Button
-                      variant="ghost" size="sm"
-                      onClick={() => { setEditingStage_PL(stage); setStageForm_PL({ name: stage.name, color: stage.color, description: stage.description }); setShowEditStageModal_PL(true) }}
+                      variant="ghost"
+                      size="sm"
+                      disabled={isSelectedPipelineArchived}
+                      onClick={() => {
+                        if (isSelectedPipelineArchived) return
+                        setEditingStage_PL(stage)
+                        setStageForm_PL({
+                          name: stage.name,
+                          color: stage.color,
+                          description: stage.description,
+                          slaHours: stage.slaHours || '',
+                          allowAllTransitions: stage.allowAllTransitions ?? true,
+                          allowedTransitionStageIds: stage.allowedTransitionStageIds || [],
+                        })
+                        setShowEditStageModal_PL(true)
+                      }}
                       title="Chỉnh sửa"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor"/></svg>
                     </Button>
                     <Button
-                      variant="outline" size="sm"
-                      disabled={stage.isFixed}
-                      className={stage.isFixed ? 'cursor-not-allowed opacity-50' : 'text-red-600 hover:text-red-700'}
+                      variant="outline"
+                      size="sm"
+                      disabled={stage.isFixed || isSelectedPipelineArchived}
+                      className={stage.isFixed || isSelectedPipelineArchived ? 'cursor-not-allowed opacity-50' : 'text-red-600 hover:text-red-700'}
                       title={stage.isFixed ? 'Giai đoạn cố định không thể xóa' : 'Xóa giai đoạn'}
                       onClick={() => !stage.isFixed && handleDeleteStagePL(stage.id)}
                     >
@@ -7925,8 +8304,10 @@ export default function SettingsManagement() {
           </Card>
         </div>
 
-        {/* Modal: Thêm quy trình */}
-        <Dialog open={showAddPipelineModal} onOpenChange={setShowAddPipelineModal}>
+        <Dialog open={showAddPipelineModal} onOpenChange={(open) => {
+          setShowAddPipelineModal(open)
+          if (!open) resetPipelineForm()
+        }}>
           <DialogContent className="max-w-lg p-0">
             <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
               <DialogTitle className="text-lg font-semibold text-[#1a3353]">Thêm quy trình mới</DialogTitle>
@@ -7944,15 +8325,14 @@ export default function SettingsManagement() {
               </div>
               <div>
                 <Label className="text-sm font-medium">Sản phẩm áp dụng</Label>
-                {/* Selected products chips */}
                 {pipelineForm.productIds.length > 0 && (
                   <div className="flex flex-wrap gap-1.5 mt-1.5 mb-2">
-                    {pipelineForm.productIds.map(pid => {
-                      const prod = availableProducts.find(p => p.id === pid)
-                      return prod ? (
-                        <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
-                          {prod.name}
-                          <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== pid) }))} className="hover:text-blue-900">
+                    {pipelineForm.productIds.map(productId => {
+                      const product = availableProducts.find(item => item.id === productId)
+                      return product ? (
+                        <span key={productId} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
+                          {product.name}
+                          <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== productId) }))} className="hover:text-blue-900">
                             <X className="w-3 h-3" />
                           </button>
                         </span>
@@ -7960,42 +8340,158 @@ export default function SettingsManagement() {
                     })}
                   </div>
                 )}
-                {/* Search input */}
                 <div className="relative mt-1.5">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                  <Input 
-                    placeholder="Tìm kiếm sản phẩm..." 
-                    className="pl-9" 
-                    value={pipelineProductSearch} 
-                    onChange={(e) => setPipelineProductSearch(e.target.value)} 
+                  <Input
+                    placeholder="Tìm kiếm sản phẩm..."
+                    className="pl-9"
+                    value={pipelineProductSearch}
+                    onChange={(e) => setPipelineProductSearch(e.target.value)}
                   />
                 </div>
-                {/* Product list */}
                 <div className="mt-2 border border-[#e6ebf1] rounded-[10px] max-h-[180px] overflow-y-auto">
-                  {(() => {
-                    const productPipelineMap = getProductPipelineMap()
-                    const filtered = availableProducts.filter(p => 
-                      p.name.toLowerCase().includes(pipelineProductSearch.toLowerCase()) ||
-                      p.categoryNames.some(c => c.toLowerCase().includes(pipelineProductSearch.toLowerCase()))
+                  {getFilteredProducts().length > 0 ? getFilteredProducts().map(product => {
+                    const assignedPipelineId = productPipelineMap[product.id]
+                    const isSelected = pipelineForm.productIds.includes(product.id)
+                    const isAssignedToOtherPipeline = !!assignedPipelineId && !isSelected
+                    const assignedPipelineName = isAssignedToOtherPipeline ? pipelines.find(pipeline => pipeline.id === assignedPipelineId)?.name : null
+
+                    return (
+                      <label
+                        key={product.id}
+                        className="flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 cursor-pointer transition-colors hover:bg-blue-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const newIds = e.target.checked
+                              ? [...pipelineForm.productIds, product.id]
+                              : pipelineForm.productIds.filter(id => id !== product.id)
+                            setPipelineForm(prev => ({ ...prev, productIds: newIds }))
+                          }}
+                          className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900 truncate">{product.name}</span>
+                            {isAssignedToOtherPipeline && assignedPipelineName && (
+                              <Badge className="text-[10px] bg-orange-100 text-orange-700 hover:bg-orange-100 px-1.5 py-0 flex-shrink-0">
+                                {assignedPipelineName}
+                              </Badge>
+                            )}
+                            {!assignedPipelineId && (
+                              <Badge className="text-[10px] bg-emerald-100 text-emerald-700 hover:bg-emerald-100 px-1.5 py-0 flex-shrink-0">
+                                Chưa gắn QT
+                              </Badge>
+                            )}
+                          </div>
+                          <div className="flex gap-1 mt-0.5">
+                            {product.categoryNames.map((category, index) => (
+                              <span key={index} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{category}</span>
+                            ))}
+                          </div>
+                        </div>
+                      </label>
                     )
-                    return filtered.length > 0 ? filtered.map(product => {
+                  }) : (
+                    <div className="py-6 text-center text-sm text-gray-400">Không tìm thấy sản phẩm</div>
+                  )}
+                </div>
+                <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  Một sản phẩm chỉ thuộc một quy trình bán hàng
+                </p>
+                {transferredProducts.length > 0 && (
+                  <div className="rounded-[10px] border-l-4 border-amber-400 bg-[#FFF8E1] p-3 text-sm text-amber-800">
+                    <div className="flex gap-2">
+                      <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                      <p>
+                        Các sản phẩm {transferredProducts.map(product => product.name).join(', ')} đang thuộc quy trình khác.
+                        Khi lưu, hệ thống sẽ chuyển chúng sang quy trình mới này.
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setShowAddPipelineModal(false)}>Hủy</Button>
+              <Button onClick={handleAddPipeline}>Thêm quy trình</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showEditPipelineModal} onOpenChange={(open) => {
+          setShowEditPipelineModal(open)
+          if (!open) resetPipelineForm()
+        }}>
+          <DialogContent className="max-w-lg p-0">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
+              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Chỉnh sửa quy trình</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 px-6 py-4">
+              <div>
+                <Label htmlFor="pl-edit-name" className="text-sm font-medium">Tên quy trình <span className="text-red-500">*</span></Label>
+                <Input id="pl-edit-name" placeholder="Nhập tên quy trình" className="mt-1.5" value={pipelineForm.name} onChange={(e) => setPipelineForm(prev => ({ ...prev, name: e.target.value }))} />
+                <div className="mt-2 text-sm">
+                  <span className="text-[#455560]">Trạng thái: </span>
+                  {selectedPipeline.isActive ? (
+                    <span className="font-medium text-emerald-600">● Active</span>
+                  ) : (
+                    <span className="font-medium text-gray-500">● Lưu trữ</span>
+                  )}
+                </div>
+                {pipelineFormError && <p className="text-xs text-red-500 mt-1">{pipelineFormError}</p>}
+              </div>
+              <div>
+                <Label htmlFor="pl-edit-desc" className="text-sm font-medium">Mô tả</Label>
+                <Textarea id="pl-edit-desc" placeholder="Mô tả quy trình này..." className="mt-1.5 min-h-[80px] resize-none" value={pipelineForm.description} onChange={(e) => setPipelineForm(prev => ({ ...prev, description: e.target.value }))} />
+              </div>
+              {!selectedPipeline.isDefault && (
+                <div>
+                  <Label className="text-sm font-medium">Sản phẩm áp dụng</Label>
+                  {pipelineForm.productIds.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mt-1.5 mb-2">
+                      {pipelineForm.productIds.map(productId => {
+                        const product = availableProducts.find(item => item.id === productId)
+                        return product ? (
+                          <span key={productId} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
+                            {product.name}
+                            <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== productId) }))} className="hover:text-blue-900">
+                              <X className="w-3 h-3" />
+                            </button>
+                          </span>
+                        ) : null
+                      })}
+                    </div>
+                  )}
+                  <div className="relative mt-1.5">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                    <Input
+                      placeholder="Tìm kiếm sản phẩm..."
+                      className="pl-9"
+                      value={pipelineProductSearch}
+                      onChange={(e) => setPipelineProductSearch(e.target.value)}
+                    />
+                  </div>
+                  <div className="mt-2 border border-[#e6ebf1] rounded-[10px] max-h-[180px] overflow-y-auto">
+                    {getFilteredProducts().length > 0 ? getFilteredProducts().map(product => {
                       const assignedPipelineId = productPipelineMap[product.id]
-                      const isInOtherPipeline = assignedPipelineId && !pipelineForm.productIds.includes(product.id)
-                      const assignedPipelineName = isInOtherPipeline ? pipelines.find(p => p.id === assignedPipelineId)?.name : null
                       const isSelected = pipelineForm.productIds.includes(product.id)
+                      const isOwnedByCurrentPipeline = assignedPipelineId === selectedPipelineId
+                      const isAssignedToOtherPipeline = !!assignedPipelineId && assignedPipelineId !== selectedPipelineId
+                      const assignedPipelineName = isAssignedToOtherPipeline ? pipelines.find(pipeline => pipeline.id === assignedPipelineId)?.name : null
+
                       return (
-                        <label 
-                          key={product.id} 
-                          className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 transition-colors ${
-                            isInOtherPipeline ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:bg-blue-50'
-                          }`}
+                        <label
+                          key={product.id}
+                          className="flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 cursor-pointer transition-colors hover:bg-blue-50"
                         >
-                          <input 
+                          <input
                             type="checkbox"
                             checked={isSelected}
-                            disabled={!!isInOtherPipeline}
                             onChange={(e) => {
-                              if (isInOtherPipeline) return
                               const newIds = e.target.checked
                                 ? [...pipelineForm.productIds, product.id]
                                 : pipelineForm.productIds.filter(id => id !== product.id)
@@ -8006,13 +8502,20 @@ export default function SettingsManagement() {
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-medium text-gray-900 truncate">{product.name}</span>
-                              {isInOtherPipeline && assignedPipelineName && (
-                                <Badge className="text-[10px] bg-orange-100 text-orange-700 hover:bg-orange-100 px-1.5 py-0 flex-shrink-0">{assignedPipelineName}</Badge>
+                              {!isOwnedByCurrentPipeline && isAssignedToOtherPipeline && assignedPipelineName && (
+                                <Badge className="bg-[#FFF8E1] text-amber-800 hover:bg-[#FFF8E1]">
+                                  QT: {assignedPipelineName}
+                                </Badge>
+                              )}
+                              {!isOwnedByCurrentPipeline && !assignedPipelineId && (
+                                <Badge className="bg-[#E8F5E9] text-emerald-700 hover:bg-[#E8F5E9]">
+                                  Chưa gắn QT
+                                </Badge>
                               )}
                             </div>
                             <div className="flex gap-1 mt-0.5">
-                              {product.categoryNames.map((cat, i) => (
-                                <span key={i} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{cat}</span>
+                              {product.categoryNames.map((category, index) => (
+                                <span key={index} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{category}</span>
                               ))}
                             </div>
                           </div>
@@ -8020,153 +8523,141 @@ export default function SettingsManagement() {
                       )
                     }) : (
                       <div className="py-6 text-center text-sm text-gray-400">Không tìm thấy sản phẩm</div>
-                    )
-                  })()}
-                </div>
-                <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
-                  <AlertTriangle className="w-3 h-3" />
-                  Một sản phẩm chỉ thuộc một quy trình bán hàng
-                </p>
-              </div>
-            </div>
-            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setShowAddPipelineModal(false)}>Hủy</Button>
-              <Button onClick={handleAddPipeline}>Thêm quy trình</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+                    )}
+                  </div>
 
-        {/* Modal: Sửa quy trình */}
-        <Dialog open={showEditPipelineModal} onOpenChange={setShowEditPipelineModal}>
-          <DialogContent className="max-w-lg p-0">
-            <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
-              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Chỉnh sửa quy trình</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 px-6 py-4">
-              <div>
-                <Label htmlFor="pl-edit-name" className="text-sm font-medium">Tên quy trình <span className="text-red-500">*</span></Label>
-                <Input id="pl-edit-name" placeholder="Nhập tên quy trình" className="mt-1.5" value={pipelineForm.name} onChange={(e) => setPipelineForm(prev => ({ ...prev, name: e.target.value }))} />
-                {pipelineFormError && <p className="text-xs text-red-500 mt-1">{pipelineFormError}</p>}
-              </div>
-              <div>
-                <Label htmlFor="pl-edit-desc" className="text-sm font-medium">Mô tả</Label>
-                <Textarea id="pl-edit-desc" placeholder="Mô tả quy trình này..." className="mt-1.5 min-h-[80px] resize-none" value={pipelineForm.description} onChange={(e) => setPipelineForm(prev => ({ ...prev, description: e.target.value }))} />
-              </div>
-              {!selectedPipeline.isDefault && (
-                <div>
-                  <Label className="text-sm font-medium">Sản phẩm áp dụng</Label>
-                  {/* Selected products chips */}
-                  {pipelineForm.productIds.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5 mt-1.5 mb-2">
-                      {pipelineForm.productIds.map(pid => {
-                        const prod = availableProducts.find(p => p.id === pid)
-                        return prod ? (
-                          <span key={pid} className="inline-flex items-center gap-1 text-xs bg-blue-50 text-[#3e79f7] px-2 py-1 rounded-full">
-                            {prod.name}
-                            <button onClick={() => setPipelineForm(prev => ({ ...prev, productIds: prev.productIds.filter(id => id !== pid) }))} className="hover:text-blue-900">
-                              <X className="w-3 h-3" />
-                            </button>
-                          </span>
-                        ) : null
-                      })}
+                  {transferredProducts.length > 0 && (
+                    <div className="mt-3 rounded-[10px] border-l-4 border-amber-400 bg-[#FFF8E1] p-3 text-sm text-amber-800">
+                      <div className="flex gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                        <p>
+                          Các sản phẩm {transferredProducts.map(product => product.name).join(', ')} đang thuộc quy trình khác.
+                          Khi lưu thay đổi, hệ thống sẽ chuyển chúng sang quy trình này.
+                        </p>
+                      </div>
                     </div>
                   )}
-                  {/* Search input */}
-                  <div className="relative mt-1.5">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                    <Input 
-                      placeholder="Tìm kiếm sản phẩm..." 
-                      className="pl-9" 
-                      value={pipelineProductSearch} 
-                      onChange={(e) => setPipelineProductSearch(e.target.value)} 
-                    />
-                  </div>
-                  {/* Product list */}
-                  <div className="mt-2 border border-[#e6ebf1] rounded-[10px] max-h-[180px] overflow-y-auto">
-                    {(() => {
-                      const productPipelineMap = getProductPipelineMap()
-                      const filtered = availableProducts.filter(p => 
-                        p.name.toLowerCase().includes(pipelineProductSearch.toLowerCase()) ||
-                        p.categoryNames.some(c => c.toLowerCase().includes(pipelineProductSearch.toLowerCase()))
-                      )
-                      return filtered.length > 0 ? filtered.map(product => {
-                        const assignedPipelineId = productPipelineMap[product.id]
-                        const isInCurrentPipeline = pipelineForm.productIds.includes(product.id)
-                        const isInOtherPipeline = assignedPipelineId && assignedPipelineId !== selectedPipelineId && !isInCurrentPipeline
-                        const assignedPipelineName = isInOtherPipeline ? pipelines.find(p => p.id === assignedPipelineId)?.name : null
-                        const isSelected = isInCurrentPipeline
-                        return (
-                          <label 
-                            key={product.id} 
-                            className={`flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 transition-colors ${
-                              isInOtherPipeline ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'cursor-pointer hover:bg-blue-50'
-                            }`}
-                          >
-                            <input 
-                              type="checkbox"
-                              checked={isSelected}
-                              disabled={!!isInOtherPipeline}
-                              onChange={(e) => {
-                                if (isInOtherPipeline) return
-                                const newIds = e.target.checked
-                                  ? [...pipelineForm.productIds, product.id]
-                                  : pipelineForm.productIds.filter(id => id !== product.id)
-                                setPipelineForm(prev => ({ ...prev, productIds: newIds }))
-                              }}
-                              className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
-                            />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm font-medium text-gray-900 truncate">{product.name}</span>
-                                {isInOtherPipeline && assignedPipelineName && (
-                                  <Badge className="text-[10px] bg-orange-100 text-orange-700 hover:bg-orange-100 px-1.5 py-0 flex-shrink-0">{assignedPipelineName}</Badge>
-                                )}
-                              </div>
-                              <div className="flex gap-1 mt-0.5">
-                                {product.categoryNames.map((cat, i) => (
-                                  <span key={i} className="text-[10px] text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded">{cat}</span>
-                                ))}
-                              </div>
-                            </div>
-                          </label>
-                        )
-                      }) : (
-                        <div className="py-6 text-center text-sm text-gray-400">Không tìm thấy sản phẩm</div>
-                      )
-                    })()}
-                  </div>
-                  <p className="text-xs text-amber-600 mt-1.5 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Một sản phẩm chỉ thuộc một quy trình bán hàng
-                  </p>
+
+                  {removedHistoricalProducts.length > 0 && (
+                    <div className="mt-3 rounded-[10px] border-l-4 border-amber-400 bg-[#FFF8E1] p-3 text-sm text-amber-800">
+                      <div className="flex gap-2">
+                        <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                        <p>
+                          Các sản phẩm {removedHistoricalProducts.map(product => product.name).join(', ')} đang có dữ liệu Lead/Đơn trong quy trình này.
+                          Khi bỏ chọn, dữ liệu lịch sử vẫn giữ nguyên nhưng sản phẩm sẽ không còn gắn với quy trình sau khi lưu.
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
-              <Button variant="outline" onClick={() => setShowEditPipelineModal(false)}>Hủy</Button>
-              <Button onClick={handleEditPipeline}>Lưu thay đổi</Button>
+            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] sm:justify-between">
+              <div className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800">
+                {/* {!selectedPipeline.isDefault && selectedPipeline.isActive && (
+                  <Button
+                    variant="outline"
+                    className="border-amber-300 text-amber-700 hover:bg-amber-50 hover:text-amber-800"
+                    onClick={() => {
+                      setShowEditPipelineModal(false)
+                      requestArchivePipeline(selectedPipeline)
+                    }}
+                  >
+                    Lưu trữ quy trình
+                  </Button>
+                )} */}
+              </div>
+              <div className="flex gap-2 ">
+                <Button variant="outline" onClick={() => setShowEditPipelineModal(false)}>Hủy</Button>
+                <Button onClick={handleEditPipeline}>Lưu thay đổi</Button>
+              </div>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal: Xác nhận xóa quy trình */}
-        <Dialog open={showDeletePipelineConfirm} onOpenChange={setShowDeletePipelineConfirm}>
+        <Dialog open={!!blockedArchivePipelineId} onOpenChange={(open) => !open && setBlockedArchivePipelineId(null)}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Xác nhận xóa</DialogTitle>
+              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Không thể lưu trữ</DialogTitle>
             </DialogHeader>
-            <div className="py-4 px-6">
-              <p className="text-sm text-gray-600">Bạn có chắc chắn muốn xóa quy trình <strong>{pipelines.find(p => p.id === pipelineToDelete)?.name}</strong>? Hành động này không thể hoàn tác.</p>
-            </div>
-            <DialogFooter className="gap-2">
-              <Button variant="outline" onClick={() => setShowDeletePipelineConfirm(false)}>Hủy</Button>
-              <Button variant="destructive" onClick={handleDeletePipeline}>Xóa</Button>
+            <p className="px-1 text-sm text-[#455560]">Hệ thống cần ít nhất 1 quy trình hoạt động.</p>
+            <DialogFooter>
+              <Button onClick={() => setBlockedArchivePipelineId(null)}>Đã hiểu</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
 
-        {/* Modal: Thêm giai đoạn */}
-        <Dialog open={showAddStageModal_PL} onOpenChange={setShowAddStageModal_PL}>
+        <Dialog open={!!archiveTargetPipelineId} onOpenChange={(open) => !open && resetArchiveDialog()}>
+          <DialogContent className="max-w-lg p-0">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
+              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Lưu trữ quy trình</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 px-6 py-4">
+              <p className="text-sm text-[#455560]">
+                Quy trình &quot;{pipelines.find(pipeline => pipeline.id === archiveTargetPipelineId)?.name}&quot; sẽ được chuyển sang trạng thái lưu trữ.
+              </p>
+              <p className="text-sm text-[#455560]">
+                Hiện có {pipelines.find(pipeline => pipeline.id === archiveTargetPipelineId)?.leadCount || 0} Lead, {pipelines.find(pipeline => pipeline.id === archiveTargetPipelineId)?.orderCount || 0} Đơn và {pipelines.find(pipeline => pipeline.id === archiveTargetPipelineId)?.productIds.length || 0} sản phẩm đang gắn với quy trình này.
+              </p>
+              <ul className="space-y-2 text-sm text-[#455560]">
+                <li>• Lead/Đơn cũ giữ nguyên, báo cáo không thay đổi</li>
+                <li>• Không tạo Lead/Đơn mới trong quy trình này</li>
+                <li>• Sản phẩm gắn quy trình này sẽ chuyển về Quy trình mặc định</li>
+                <li>• Admin vẫn xem được dữ liệu lịch sử</li>
+              </ul>
+              <div>
+                <Label className="text-sm font-medium">Lý do lưu trữ <span className="text-red-500">*</span></Label>
+                <Textarea
+                  className="mt-1.5 min-h-[100px] resize-none"
+                  placeholder="Nhập lý do lưu trữ quy trình..."
+                  value={archiveReason}
+                  onChange={(e) => {
+                    setArchiveReason(e.target.value)
+                    if (archiveReasonError) setArchiveReasonError('')
+                  }}
+                />
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs text-red-500">{archiveReasonError}</span>
+                  <span className="text-xs text-[#455560]">{archiveReason.length}/500</span>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => resetArchiveDialog()}>Hủy</Button>
+              <Button className="bg-amber-500 text-white hover:bg-amber-600" onClick={handleArchivePipeline}>
+                Xác nhận lưu trữ
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={!!restoreTargetPipelineId} onOpenChange={(open) => !open && setRestoreTargetPipelineId(null)}>
+          <DialogContent className="max-w-lg p-0">
+            <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
+              <DialogTitle className="text-lg font-semibold text-[#1a3353]">Khôi phục quy trình</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 px-6 py-4">
+              <p className="text-sm text-[#455560]">
+                Bạn có muốn khôi phục quy trình &quot;{pipelines.find(pipeline => pipeline.id === restoreTargetPipelineId)?.name}&quot;?
+              </p>
+              <div className="space-y-2 text-sm text-[#455560]">
+                <p className="font-medium text-[#1a3353]">Lưu ý:</p>
+                <p>• Quy trình sẽ chuyển về trạng thái Active</p>
+                <p>• Sản phẩm và nhân viên KHÔNG tự gắn lại — bạn cần cấu hình lại thủ công</p>
+                <p>• Lead/Đơn cũ vẫn thuộc quy trình này</p>
+              </div>
+            </div>
+            <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
+              <Button variant="outline" onClick={() => setRestoreTargetPipelineId(null)}>Hủy</Button>
+              <Button onClick={handleRestorePipeline}>Xác nhận khôi phục</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={showAddStageModal_PL} onOpenChange={(open) => {
+          setShowAddStageModal_PL(open)
+          if (!open) resetStageForm_PL()
+        }}>
           <DialogContent className="max-w-md p-0">
             <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
               <DialogTitle className="text-lg font-semibold text-[#1a3353]">Thêm giai đoạn</DialogTitle>
@@ -8179,8 +8670,8 @@ export default function SettingsManagement() {
               <div>
                 <Label className="text-sm font-medium">Màu sắc</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
-                  {stageColorOptions.map(c => (
-                    <button key={c} type="button" className={`w-7 h-7 rounded-full border-2 transition-all ${stageForm_PL.color === c ? 'border-gray-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }} onClick={() => setStageForm_PL(prev => ({ ...prev, color: c }))} />
+                  {stageColorOptions.map(color => (
+                    <button key={color} type="button" className={`w-7 h-7 rounded-full border-2 transition-all ${stageForm_PL.color === color ? 'border-gray-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: color }} onClick={() => setStageForm_PL(prev => ({ ...prev, color }))} />
                   ))}
                 </div>
               </div>
@@ -8188,6 +8679,19 @@ export default function SettingsManagement() {
                 <Label className="text-sm font-medium">Mô tả</Label>
                 <Textarea placeholder="Mô tả giai đoạn..." className="mt-1.5 min-h-[60px] resize-none" value={stageForm_PL.description} onChange={(e) => setStageForm_PL(prev => ({ ...prev, description: e.target.value }))} />
               </div>
+              <div>
+                <Label className="text-sm font-medium">SLA (giờ)</Label>
+                <Input
+                  type="number"
+                  min={0}
+                  placeholder="VD: 72"
+                  className="mt-1.5"
+                  value={stageForm_PL.slaHours}
+                  onChange={(e) => setStageForm_PL(prev => ({ ...prev, slaHours: e.target.value }))}
+                />
+                <p className="mt-1 text-xs text-[#455560]">VD: 72 = 3 ngày làm việc. Để trống nếu không giới hạn.</p>
+              </div>
+              {renderTransitionSection()}
             </div>
             <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setShowAddStageModal_PL(false)}>Hủy</Button>
@@ -8196,8 +8700,10 @@ export default function SettingsManagement() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal: Sửa giai đoạn */}
-        <Dialog open={showEditStageModal_PL} onOpenChange={setShowEditStageModal_PL}>
+        <Dialog open={showEditStageModal_PL} onOpenChange={(open) => {
+          setShowEditStageModal_PL(open)
+          if (!open) resetStageForm_PL()
+        }}>
           <DialogContent className="max-w-md p-0">
             <DialogHeader className="px-6 pt-6 pb-4 border-b border-[#e6ebf1]">
               <DialogTitle className="text-lg font-semibold text-[#1a3353]">Chỉnh sửa giai đoạn</DialogTitle>
@@ -8210,8 +8716,8 @@ export default function SettingsManagement() {
               <div>
                 <Label className="text-sm font-medium">Màu sắc</Label>
                 <div className="flex flex-wrap gap-2 mt-1.5">
-                  {stageColorOptions.map(c => (
-                    <button key={c} type="button" className={`w-7 h-7 rounded-full border-2 transition-all ${stageForm_PL.color === c ? 'border-gray-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: c }} onClick={() => setStageForm_PL(prev => ({ ...prev, color: c }))} />
+                  {stageColorOptions.map(color => (
+                    <button key={color} type="button" className={`w-7 h-7 rounded-full border-2 transition-all ${stageForm_PL.color === color ? 'border-gray-900 scale-110' : 'border-transparent'}`} style={{ backgroundColor: color }} onClick={() => setStageForm_PL(prev => ({ ...prev, color }))} />
                   ))}
                 </div>
               </div>
@@ -8219,6 +8725,23 @@ export default function SettingsManagement() {
                 <Label className="text-sm font-medium">Mô tả</Label>
                 <Textarea placeholder="Mô tả giai đoạn..." className="mt-1.5 min-h-[60px] resize-none" value={stageForm_PL.description} onChange={(e) => setStageForm_PL(prev => ({ ...prev, description: e.target.value }))} />
               </div>
+              {!editingStage_PL?.isFixed && (
+                <>
+                  <div>
+                    <Label className="text-sm font-medium">SLA (giờ)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="VD: 72"
+                      className="mt-1.5"
+                      value={stageForm_PL.slaHours}
+                      onChange={(e) => setStageForm_PL(prev => ({ ...prev, slaHours: e.target.value }))}
+                    />
+                    <p className="mt-1 text-xs text-[#455560]">VD: 72 = 3 ngày làm việc. Để trống nếu không giới hạn.</p>
+                  </div>
+                  {renderTransitionSection(editingStage_PL?.id)}
+                </>
+              )}
             </div>
             <DialogFooter className="px-6 py-4 border-t border-[#e6ebf1] gap-2 sm:gap-0">
               <Button variant="outline" onClick={() => setShowEditStageModal_PL(false)}>Hủy</Button>
