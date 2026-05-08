@@ -11,57 +11,27 @@ import OrderManagement from './components/OrderManagement'
 import TaskManagement from './components/TaskManagement'
 import KPIManagement from './components/KPIManagement'
 import ReportsManagement from './components/ReportsManagement'
+import MktReportsManagement from './components/mkt-reports/MktReportsManagement'
 import SettingsManagement from './components/SettingsManagement'
 import ChatManagement from './components/ChatManagement'
 import MarketingCampaigns from './components/MarketingCampaigns'
 import AutomationManagement from './components/automation/AutomationManagement'
-import MktSectionPage from '@/src/modules/mkt/pages/MktSectionPage'
-import { mapAppRoleToMktRole } from '@/src/modules/mkt/utils/roleMapping'
-import { MOCK_USERS } from '@/src/modules/mkt/mocks/mock-users'
-
-import ChatbotAssistant from './components/ChatbotAssistantNew'
-// import VileadsChatbot from './components/VileadsChatbot'
 
 export default function Home() {
-  const [currentView, setCurrentView] = useState('dashboard') // Đổi về dashboard làm mặc định
-  const [userRole, setUserRole] = useState('admin') // Theo dõi vai trò người dùng
-  const [viewParams, setViewParams] = useState<any>({}) // Params cho các view
+  const [currentView, setCurrentView] = useState('dashboard')
+  const [userRole, setUserRole] = useState('admin')
 
-  const handleViewChange = (view: string, params?: any) => {
+  const handleViewChange = (view: string) => {
     setCurrentView(view)
-    if (params) setViewParams(params)
-    else setViewParams({})
   }
 
   const handleRoleChange = (role: string) => {
     setUserRole(role)
-    // Nếu chuyển sang kế toán và đang ở dashboard, chuyển sang dashboard kế toán
-    if (role === 'accountant' && currentView === 'dashboard') {
-      // Dashboard sẽ tự động hiển thị AccountantDashboard
-    }
   }
 
   const renderContent = () => {
-    if (currentView === 'mkt-group' || currentView.startsWith('mkt-')) {
-      const mappedMktRole = mapAppRoleToMktRole(userRole)
-      const mktUser =
-        MOCK_USERS.find(u => u.role === mappedMktRole) ||
-        MOCK_USERS.find(u => u.role === 'employee') ||
-        MOCK_USERS[0]
-
-      return (
-        <MktSectionPage
-          currentUser={mktUser}
-          currentView={currentView}
-          viewParams={viewParams}
-          onNavigate={handleViewChange}
-        />
-      )
-    }
-
     switch (currentView) {
       case 'dashboard':
-        // Hiển thị dashboard phù hợp với vai trò
         if (userRole === 'accountant') {
           return <AccountantDashboard />
         }
@@ -70,9 +40,8 @@ export default function Home() {
         return <SalesManagement />
       case 'customers':
         return <CustomersManagement />
-      case 'leads': // Redirect cũ để backward compatibility
-        return <SalesManagement />
-      case 'deals': // Redirect cũ để backward compatibility
+      case 'leads':
+      case 'deals':
         return <SalesManagement />
       case 'orders':
         return <OrderManagement />
@@ -80,16 +49,16 @@ export default function Home() {
         return <TaskManagement />
       case 'kpi':
         return <KPIManagement />
-      case 'products':  // Redirect to settings for backward compatibility
+      case 'products':
+      case 'employees':
+      case 'company':
         return <SettingsManagement />
-      case 'employees': // Redirect to settings for backward compatibility
-        return <SettingsManagement />
-      case 'kpis':      // Redirect to reports for backward compatibility
+      case 'kpis':
         return <ReportsManagement />
-      case 'company':   // Redirect to settings for backward compatibility
-        return <SettingsManagement />
       case 'reports':
         return <ReportsManagement onNavigate={handleViewChange} />
+      case 'mkt-reports':
+        return <MktReportsManagement />
       case 'settings':
         return <SettingsManagement />
       case 'chat':
@@ -105,20 +74,24 @@ export default function Home() {
 
   return (
     <div className="flex h-screen bg-gray-50">
-      <VileadSidebar 
-        currentView={currentView} 
+      <VileadSidebar
+        currentView={currentView}
         setCurrentView={handleViewChange}
         userRole={userRole}
         onRoleChange={handleRoleChange}
       />
-      <div className="flex-1 flex flex-col overflow-hidden" style={{ marginLeft: '256px' }}>
+      <div className="flex flex-1 flex-col overflow-hidden" style={{ marginLeft: '256px' }}>
         <Header />
-        <main className={['chat', 'automation'].includes(currentView) ? 'flex-1 overflow-hidden' : 'flex-1 overflow-auto p-6'}>
+        <main
+          className={
+            ['chat', 'automation'].includes(currentView)
+              ? 'flex-1 overflow-hidden'
+              : 'flex-1 overflow-auto p-6'
+          }
+        >
           {renderContent()}
         </main>
       </div>
-      {/* AI Chatbot - Hidden per request */}
-      {/* <ChatbotAssistant /> */}
     </div>
   )
 }

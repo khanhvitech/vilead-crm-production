@@ -105,19 +105,19 @@ const getMenuItemsByRole = (userRole: string = 'sale') => {
       disabled: false,
     },
     {
-      id: 'mkt-group',
-      icon: Target,
-      label: 'Báo cáo tự động MKT',
-      tooltip: 'Báo cáo MKT: Quản lý và theo dõi chỉ số MKT Facebook',
-      roles: ['admin', 'ceo', 'leader', 'sale', 'accountant'],
-      disabled: false,
-    },
-    {
       id: 'reports',
       icon: FileText,
       label: 'Báo cáo',
       tooltip: 'Báo cáo: Doanh số, hiệu suất và KPIs',
       roles: ['admin', 'ceo', 'leader', 'accountant'],
+      disabled: false,
+    },
+    {
+      id: 'mkt-reports',
+      icon: BarChart3,
+      label: 'Báo cáo MKT',
+      tooltip: 'Báo cáo MKT: Tài khoản Facebook, Fanpage, UID và máy',
+      roles: ['admin', 'ceo', 'leader'],
       disabled: false,
     },
     {
@@ -219,10 +219,7 @@ export default function VileadSidebar({
         <nav className="flex-1 space-y-2 overflow-y-auto p-4">
           {menuItems.map(item => {
             const Icon = item.icon
-            const isMktMenu = item.id === 'mkt-group'
-            const isActive = isMktMenu
-              ? currentView === 'mkt-group' || currentView.startsWith('mkt-')
-              : currentView === item.id
+            const isActive = currentView === item.id
             const isDisabled = item.disabled
 
             return (
@@ -230,7 +227,7 @@ export default function VileadSidebar({
                 key={item.id}
                 onClick={() => {
                   if (!isDisabled) {
-                    setCurrentView(isMktMenu ? 'mkt-dashboard' : item.id)
+                    setCurrentView(item.id)
                   }
                 }}
                 disabled={isDisabled}
