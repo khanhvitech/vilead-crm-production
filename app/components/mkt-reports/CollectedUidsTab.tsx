@@ -7,14 +7,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import { Card, CardContent } from '@/components/ui/card'
 import type { MktReportsController } from './useMktReports'
-import { FilterChip, MetricCard, StatusBadge } from './shared'
+import { FilterChip, MetricCard, PeriodSelect, StatusBadge } from './shared'
 
 export default function CollectedUidsTab({ controller }: { controller: MktReportsController }) {
   const {
-    uidSourceFilter,
-    setUidSourceFilter,
-    globalEmployee,
-    setGlobalEmployee,
+    uidFilters,
+    setUidFilters,
     employees,
     totalScans,
     totalUidCount,
@@ -22,7 +20,7 @@ export default function CollectedUidsTab({ controller }: { controller: MktReport
     filteredUidCollections,
     exportUids,
     exportUidRecord,
-      getEmployeeName,
+    getEmployeeName,
     uidTableFooterSummary,
   } = controller
 
@@ -61,20 +59,15 @@ export default function CollectedUidsTab({ controller }: { controller: MktReport
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
-          <Select value={uidSourceFilter} onValueChange={value => setUidSourceFilter(value as typeof uidSourceFilter)}>
-            <SelectTrigger className="w-[170px]">
-              <SelectValue placeholder="Tất cả nguồn" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả nguồn</SelectItem>
-              <SelectItem value="friends">Bạn bè</SelectItem>
-              <SelectItem value="group">Group</SelectItem>
-              <SelectItem value="page">Page</SelectItem>
-              <SelectItem value="other">Khác</SelectItem>
-            </SelectContent>
-          </Select>
+          <PeriodSelect
+            value={uidFilters.period}
+            onChange={value => setUidFilters(current => ({ ...current, period: value }))}
+          />
 
-          <Select value={globalEmployee} onValueChange={setGlobalEmployee}>
+          <Select
+            value={uidFilters.employeeId}
+            onValueChange={value => setUidFilters(current => ({ ...current, employeeId: value }))}
+          >
             <SelectTrigger className="w-[170px]">
               <SelectValue placeholder="Tất cả NV" />
             </SelectTrigger>
@@ -85,6 +78,22 @@ export default function CollectedUidsTab({ controller }: { controller: MktReport
                   {employee.name}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={uidFilters.source}
+            onValueChange={value => setUidFilters(current => ({ ...current, source: value as typeof current.source }))}
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Tất cả nguồn" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả nguồn</SelectItem>
+              <SelectItem value="friends">Bạn bè</SelectItem>
+              <SelectItem value="group">Group</SelectItem>
+              <SelectItem value="page">Page</SelectItem>
+              <SelectItem value="other">Khác</SelectItem>
             </SelectContent>
           </Select>
         </div>

@@ -5,18 +5,14 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { MktReportsController } from './useMktReports'
-import { SubTabButton, StatusBadge } from './shared'
+import { PeriodSelect, SubTabButton, StatusBadge } from './shared'
 
 export default function PostsCommentsTab({ controller }: { controller: MktReportsController }) {
   const {
     postCommentTab,
     setPostCommentTab,
-    postCommentEmployeeFilter,
-    setPostCommentEmployeeFilter,
-    postCommentSoftwareFilter,
-    setPostCommentSoftwareFilter,
-    postCommentTypeFilter,
-    setPostCommentTypeFilter,
+    postsCommentsFilters,
+    setPostsCommentsFilters,
     employees,
     filteredPosts,
     filteredComments,
@@ -38,7 +34,32 @@ export default function PostsCommentsTab({ controller }: { controller: MktReport
 
       <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
         <div className="flex flex-wrap gap-3">
-          <Select value={postCommentEmployeeFilter} onValueChange={setPostCommentEmployeeFilter}>
+          <PeriodSelect
+            value={postsCommentsFilters.period}
+            onChange={value => setPostsCommentsFilters(current => ({ ...current, period: value }))}
+          />
+
+          <Select
+            value={postsCommentsFilters.software}
+            onValueChange={value =>
+              setPostsCommentsFilters(current => ({ ...current, software: value as typeof current.software }))
+            }
+          >
+            <SelectTrigger className="w-[160px]">
+              <SelectValue placeholder="Tất cả phần mềm" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả phần mềm</SelectItem>
+              <SelectItem value="mkt-care">MKT Care</SelectItem>
+              <SelectItem value="mkt-post">MKT Post</SelectItem>
+              <SelectItem value="mkt-page">MKT Page</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={postsCommentsFilters.employeeId}
+            onValueChange={value => setPostsCommentsFilters(current => ({ ...current, employeeId: value }))}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tất cả NV" />
             </SelectTrigger>
@@ -52,19 +73,10 @@ export default function PostsCommentsTab({ controller }: { controller: MktReport
             </SelectContent>
           </Select>
 
-          <Select value={postCommentSoftwareFilter} onValueChange={value => setPostCommentSoftwareFilter(value as typeof postCommentSoftwareFilter)}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Tất cả phần mềm" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả phần mềm</SelectItem>
-              <SelectItem value="mkt-care">MKT Care</SelectItem>
-              <SelectItem value="mkt-post">MKT Post</SelectItem>
-              <SelectItem value="mkt-page">MKT Page</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={postCommentTypeFilter} onValueChange={setPostCommentTypeFilter}>
+          <Select
+            value={postsCommentsFilters.type}
+            onValueChange={value => setPostsCommentsFilters(current => ({ ...current, type: value }))}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="Tất cả loại" />
             </SelectTrigger>
@@ -153,4 +165,3 @@ export default function PostsCommentsTab({ controller }: { controller: MktReport
     </div>
   )
 }
-

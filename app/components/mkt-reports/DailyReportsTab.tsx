@@ -3,12 +3,22 @@
 import { Fragment } from 'react'
 import { ChevronDown, ChevronRight, Download, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { MktReportsController } from './useMktReports'
-import { CompactStatCard, SubTabButton, StatusBadge } from './shared'
+import { CompactStatCard, PeriodSelect, StatusBadge, SubTabButton } from './shared'
 
 export default function DailyReportsTab({ controller }: { controller: MktReportsController }) {
   const {
+    dailyFilters,
+    setDailyFilters,
+    employees,
     dailyTab,
     setDailyTab,
     filteredDailyByEmployee,
@@ -22,17 +32,60 @@ export default function DailyReportsTab({ controller }: { controller: MktReports
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-col gap-3 rounded-[16px] border border-[#e6ebf1] bg-white p-4">
+        <div className="flex flex-wrap gap-3">
+          <PeriodSelect
+            value={dailyFilters.period}
+            onChange={value => setDailyFilters(current => ({ ...current, period: value }))}
+            className="w-[150px]"
+          />
+
+          <Select
+            value={dailyFilters.software}
+            onValueChange={value => setDailyFilters(current => ({ ...current, software: value as typeof current.software }))}
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Tất cả phần mềm" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả phần mềm</SelectItem>
+              <SelectItem value="mkt-care">MKT Care</SelectItem>
+              <SelectItem value="mkt-post">MKT Post</SelectItem>
+              <SelectItem value="mkt-page">MKT Page</SelectItem>
+              <SelectItem value="mkt-uid">MKT UID</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={dailyFilters.employeeId}
+            onValueChange={value => setDailyFilters(current => ({ ...current, employeeId: value }))}
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Tất cả nhân viên" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả nhân viên</SelectItem>
+              {employees.map(employee => (
+                <SelectItem key={employee.id} value={employee.id}>
+                  {employee.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <div className="ml-auto">
+            <Button variant="outline" onClick={exportDaily}>
+              <Download className="h-4 w-4" />
+              Xuất Excel
+            </Button>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           <SubTabButton active={dailyTab === 'by-employee'} label="Theo Nhân viên" onClick={() => setDailyTab('by-employee')} />
           <SubTabButton active={dailyTab === 'by-software'} label="Theo Phần mềm" onClick={() => setDailyTab('by-software')} />
           <SubTabButton active={dailyTab === 'by-day'} label="Theo Ngày" onClick={() => setDailyTab('by-day')} />
         </div>
-
-        <Button variant="outline" onClick={exportDaily}>
-          <Download className="h-4 w-4" />
-          Xuất Excel
-        </Button>
       </div>
 
       {dailyTab === 'by-employee' ? (
@@ -83,6 +136,7 @@ export default function DailyReportsTab({ controller }: { controller: MktReports
                           <div className="text-xs font-bold uppercase tracking-wide text-[#72849a]">
                             Breakdown - {getEmployeeName(row.employeeId)}
                           </div>
+
                           <div className="grid gap-3 lg:grid-cols-4">
                             {row.breakdown.map(item => (
                               <CompactStatCard
@@ -136,7 +190,9 @@ export default function DailyReportsTab({ controller }: { controller: MktReports
             {filteredDailyBySoftware.map((row, index) => (
               <TableRow key={row.software}>
                 <TableCell>{index + 1}</TableCell>
-                <TableCell><StatusBadge kind="software" value={row.software} /></TableCell>
+                <TableCell>
+                  <StatusBadge kind="software" value={row.software} />
+                </TableCell>
                 <TableCell>{row.accounts}</TableCell>
                 <TableCell>{row.messages ?? '—'}</TableCell>
                 <TableCell>{row.posts ?? '—'}</TableCell>

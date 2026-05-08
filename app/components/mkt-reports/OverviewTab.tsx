@@ -12,14 +12,55 @@ import {
   YAxis,
 } from 'recharts'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import type { MktReportsController } from './useMktReports'
-import { MetricCard, overviewChartColors } from './shared'
+import { MetricCard, PeriodSelect, overviewChartColors } from './shared'
 
 export default function OverviewTab({ controller }: { controller: MktReportsController }) {
-  const { overviewStats, overviewTrend } = controller
+  const { overviewStats, overviewTrend, overviewFilters, setOverviewFilters, employees } = controller
 
   return (
     <div className="space-y-6">
+      <div className="flex flex-wrap items-center gap-3">
+        <PeriodSelect
+          value={overviewFilters.period}
+          onChange={value => setOverviewFilters(current => ({ ...current, period: value }))}
+        />
+
+        <Select
+          value={overviewFilters.software}
+          onValueChange={value => setOverviewFilters(current => ({ ...current, software: value as typeof current.software }))}
+        >
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="Tất cả phần mềm" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả phần mềm</SelectItem>
+            <SelectItem value="mkt-care">MKT Care</SelectItem>
+            <SelectItem value="mkt-post">MKT Post</SelectItem>
+            <SelectItem value="mkt-page">MKT Page</SelectItem>
+            <SelectItem value="mkt-uid">MKT UID</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={overviewFilters.employeeId}
+          onValueChange={value => setOverviewFilters(current => ({ ...current, employeeId: value }))}
+        >
+          <SelectTrigger className="w-[170px]">
+            <SelectValue placeholder="Tất cả nhân viên" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tất cả nhân viên</SelectItem>
+            {employees.map(employee => (
+              <SelectItem key={employee.id} value={employee.id}>
+                {employee.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <section className="space-y-3">
         <h3 className="text-xs font-bold uppercase tracking-wide text-[#98a5b3]">Tình trạng tài khoản profile</h3>
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -79,4 +120,3 @@ export default function OverviewTab({ controller }: { controller: MktReportsCont
     </div>
   )
 }
-

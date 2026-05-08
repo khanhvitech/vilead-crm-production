@@ -5,13 +5,22 @@ import { type ReactNode } from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { cn } from '@/lib/utils'
 import type {
+  MktPeriod,
   MktFacebookStatus,
   MktFanpageStatus,
   MktSoftwareFilter,
   MktUidSource,
 } from './types'
+
+export const PERIOD_OPTIONS: Array<{ value: MktPeriod; label: string }> = [
+  { value: 'today', label: 'Hôm nay' },
+  { value: 'this_week', label: 'Tuần này' },
+  { value: 'this_month', label: 'Tháng này' },
+  { value: 'last_month', label: 'Tháng trước' },
+]
 
 export function MainTabButton({
   active,
@@ -233,6 +242,31 @@ export function TableActionButton({
       <Icon className="h-4 w-4" />
       {label}
     </Button>
+  )
+}
+
+export function PeriodSelect({
+  value,
+  onChange,
+  className,
+}: {
+  value: MktPeriod
+  onChange: (value: MktPeriod) => void
+  className?: string
+}) {
+  return (
+    <Select value={value} onValueChange={nextValue => onChange(nextValue as MktPeriod)}>
+      <SelectTrigger className={cn('w-[160px]', className)}>
+        <SelectValue placeholder="Ngày" />
+      </SelectTrigger>
+      <SelectContent>
+        {PERIOD_OPTIONS.map(option => (
+          <SelectItem key={option.value} value={option.value}>
+            {option.label}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
   )
 }
 

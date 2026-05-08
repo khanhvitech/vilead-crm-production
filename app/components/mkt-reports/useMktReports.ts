@@ -16,10 +16,13 @@ import {
 } from './mockData'
 import type {
   MktAccountDetailTab,
+  MktDailyByDayRow,
+  MktDailyEmployeeRow,
   MktDailySubTab,
   MktFacebookAccount,
   MktFanpage,
   MktFanpageDetailTab,
+  MktMachine,
   MktPeriod,
   MktPostCommentSubTab,
   MktReportMainTab,
@@ -28,7 +31,35 @@ import type {
   MktUidSource,
 } from './types'
 
-const softwareLabelMap: Record<string, string> = {
+type MktBaseTabFilters = {
+  period: MktPeriod
+  software: MktSoftwareFilter
+  employeeId: string
+}
+
+type MktAccountTabFilters = MktBaseTabFilters & {
+  status: 'all' | 'live' | 'die' | 'inactive'
+  search: string
+}
+
+type MktFanpageTabFilters = MktBaseTabFilters & {
+  status: 'all' | 'active' | 'restricted' | 'deleted'
+}
+
+type MktUidTabFilters = {
+  period: MktPeriod
+  employeeId: string
+  source: 'all' | MktUidSource
+}
+
+type MktPostsCommentsTabFilters = MktBaseTabFilters & {
+  type: string
+}
+
+type MktDailyTabFilters = MktBaseTabFilters
+type MktMachineTabFilters = MktBaseTabFilters
+
+const softwareLabelMap: Record<MktSoftwareFilter, string> = {
   all: 'Tất cả phần mềm',
   'mkt-care': 'MKT Care',
   'mkt-post': 'MKT Post',
@@ -37,6 +68,8 @@ const softwareLabelMap: Record<string, string> = {
 }
 
 const employeeNameMap = Object.fromEntries(MKT_EMPLOYEES.map(employee => [employee.id, employee.name]))
+const periodDefault: MktPeriod = 'today'
+const machineSoftwareOrder: MktSoftwareFilter[] = ['mkt-care', 'mkt-post', 'mkt-page', 'mkt-uid']
 
 const createCsv = (filename: string, rows: Record<string, string | number | null | undefined>[]) => {
   if (typeof window === 'undefined') {
@@ -79,6 +112,11 @@ const normalizeDate = (value: string) => {
   return value
 }
 
+const normalizeDayLabel = (value: string) => {
+  const [day, month] = value.split('/')
+  return `2026-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
+}
+
 const isInSelectedPeriod = (dateValue: string, period: MktPeriod) => {
   const normalized = normalizeDate(dateValue)
   if (period === 'today') {
@@ -96,10 +134,10 @@ const isInSelectedPeriod = (dateValue: string, period: MktPeriod) => {
   return normalized.startsWith('2026-04')
 }
 
-const matchesGlobalSoftware = (software: string, selectedSoftware: MktSoftwareFilter) =>
+const matchesSoftware = (software: string, selectedSoftware: MktSoftwareFilter) =>
   selectedSoftware === 'all' ? true : software === selectedSoftware
 
-const matchesGlobalEmployee = (employeeId: string, selectedEmployee: string) =>
+const matchesEmployee = (employeeId: string, selectedEmployee: string) =>
   selectedEmployee === 'all' ? true : employeeId === selectedEmployee
 
 const getEmployeeName = (employeeId: string) => employeeNameMap[employeeId] ?? employeeId
@@ -111,29 +149,231 @@ const getAccountStatusLabel = (status: MktFacebookAccount['status']) => {
   return 'Checkpoint'
 }
 
+const accountHasPeriodActivity = (account: MktFacebookAccount, period: MktPeriod) =>
+  account.metrics.some(metric => isInSelectedPeriod(metric.date, period))
+
+const fanpageHasPeriodActivity = (fanpage: MktFanpage, period: MktPeriod) =>
+  fanpage.trend.some(item => isInSelectedPeriod(item.date, period))
+
+const getMetricsForPeriod = (account: MktFacebookAccount, period: MktPeriod) =>
+  account.metrics.filter(metric => isInSelectedPeriod(metric.date, period))
+
+const getMetricsForDate = (account: MktFacebookAccount, dateLabel: string) =>
+  account.metrics.filter(metric => normalizeDayLabel(metric.date) === dateLabel)
+
+const getMatchingAccounts = (filters: { period: MktPeriod; software: MktSoftwareFilter; employeeId: string }) =>
+  MKT_FACEBOOK_ACCOUNTS.filter(
+    account =>
+      accountHasPeriodActivity(account, filters.period) &&
+      matchesSoftware(account.software, filters.software) &&
+      matchesEmployee(account.employeeId, filters.employeeId)
+  )
+
+const getMatchingFanpages = (filters: { period: MktPeriod; software: MktSoftwareFilter; employeeId: string }) =>
+  MKT_FANPAGES.filter(
+    fanpage =>
+      fanpageHasPeriodActivity(fanpage, filters.period) &&
+      (filters.software === 'all' || filters.software === 'mkt-page') &&
+      matchesEmployee(fanpage.employeeId, filters.employeeId)
+  )
+
+const getMatchingPosts = (filters: { period: MktPeriod; software: MktSoftwareFilter; employeeId: string }) =>
+  MKT_POSTS.filter(
+    record =>
+      isInSelectedPeriod(record.time, filters.period) &&
+      matchesSoftware(record.software, filters.software) &&
+      matchesEmployee(record.employeeId, filters.employeeId)
+  )
+
+const getMatchingComments = (filters: { period: MktPeriod; software: MktSoftwareFilter; employeeId: string }) =>
+  MKT_COMMENTS.filter(
+    record =>
+      isInSelectedPeriod(record.time, filters.period) &&
+      matchesSoftware(record.software, filters.software) &&
+      matchesEmployee(record.employeeId, filters.employeeId)
+  )
+
+const getMatchingUidCollections = (filters: { period: MktPeriod; employeeId: string; source?: 'all' | MktUidSource }) =>
+  MKT_UID_COLLECTIONS.filter(
+    record =>
+      isInSelectedPeriod(record.time, filters.period) &&
+      matchesEmployee(record.employeeId, filters.employeeId) &&
+      (filters.source === undefined || filters.source === 'all' ? true : record.source === filters.source)
+  )
+
+const getDailyEmployeeRow = (
+  employeeId: string,
+  filters: MktDailyTabFilters
+): MktDailyEmployeeRow => {
+  const matchingAccounts = getMatchingAccounts({ ...filters, employeeId })
+  const matchingPosts = getMatchingPosts({ ...filters, employeeId })
+  const matchingComments = getMatchingComments({ ...filters, employeeId })
+  const matchingUidCollections = getMatchingUidCollections({ period: filters.period, employeeId })
+
+  const live = matchingAccounts.filter(account => account.status === 'live').length
+  const die = matchingAccounts.filter(account => account.status === 'die').length
+  const messages = matchingAccounts.reduce(
+    (sum, account) => sum + getMetricsForPeriod(account, filters.period).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+    0
+  )
+  const likes = matchingAccounts.reduce(
+    (sum, account) => sum + getMetricsForPeriod(account, filters.period).reduce((metricSum, metric) => metricSum + metric.likes, 0),
+    0
+  )
+  const posts = matchingPosts.length
+  const comments = matchingComments.length
+  const uids =
+    filters.software === 'mkt-uid'
+      ? matchingUidCollections.reduce((sum, record) => sum + record.uidCount, 0)
+      : matchingAccounts.reduce(
+          (sum, account) => sum + getMetricsForPeriod(account, filters.period).reduce((metricSum, metric) => metricSum + metric.uids, 0),
+          0
+        )
+
+  const breakdown = machineSoftwareOrder.map(software => {
+    const softwareAccounts = getMatchingAccounts({ period: filters.period, software, employeeId })
+    const softwarePosts = getMatchingPosts({ period: filters.period, software, employeeId })
+    return {
+      software,
+      softwareLabel: softwareLabelMap[software],
+      messages: softwareAccounts.reduce(
+        (sum, account) => sum + getMetricsForPeriod(account, filters.period).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+        0
+      ),
+      posts: softwarePosts.length,
+    }
+  })
+
+  const latestPostRecord =
+    matchingPosts
+      .slice()
+      .sort((a, b) => normalizeDate(b.time).localeCompare(normalizeDate(a.time)))[0] ?? null
+
+  return {
+    employeeId,
+    live,
+    die,
+    messages,
+    posts,
+    likes,
+    comments,
+    uids,
+    breakdown,
+    latestPost: latestPostRecord
+      ? {
+          time: latestPostRecord.time,
+          typeLabel: latestPostRecord.typeLabel,
+          content: latestPostRecord.content,
+          viewLabel: 'Xem',
+        }
+      : {
+          time: 'Không có',
+          typeLabel: 'Group',
+          content: 'Chưa có bài đăng phù hợp bộ lọc hiện tại',
+          viewLabel: 'Xem',
+        },
+  }
+}
+
+const getDailyByDayRow = (dateLabel: string, filters: MktDailyTabFilters): MktDailyByDayRow => {
+  const normalizedDate = normalizeDayLabel(dateLabel)
+  const matchingAccounts = MKT_FACEBOOK_ACCOUNTS.filter(
+    account =>
+      matchesEmployee(account.employeeId, filters.employeeId) &&
+      matchesSoftware(account.software, filters.software) &&
+      getMetricsForDate(account, normalizedDate).length > 0 &&
+      isInSelectedPeriod(normalizedDate, filters.period)
+  )
+  const matchingPosts = MKT_POSTS.filter(
+    record =>
+      normalizeDate(record.time) === normalizedDate &&
+      matchesEmployee(record.employeeId, filters.employeeId) &&
+      matchesSoftware(record.software, filters.software) &&
+      isInSelectedPeriod(record.time, filters.period)
+  )
+  const matchingComments = MKT_COMMENTS.filter(
+    record =>
+      normalizeDate(record.time) === normalizedDate &&
+      matchesEmployee(record.employeeId, filters.employeeId) &&
+      matchesSoftware(record.software, filters.software) &&
+      isInSelectedPeriod(record.time, filters.period)
+  )
+  const matchingUidCollections = MKT_UID_COLLECTIONS.filter(
+    record =>
+      normalizeDate(record.time) === normalizedDate &&
+      matchesEmployee(record.employeeId, filters.employeeId) &&
+      isInSelectedPeriod(record.time, filters.period)
+  )
+
+  return {
+    dateLabel,
+    live: matchingAccounts.filter(account => account.status === 'live').length,
+    die: matchingAccounts.filter(account => account.status === 'die').length,
+    messages: matchingAccounts.reduce(
+      (sum, account) => sum + getMetricsForDate(account, normalizedDate).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+      0
+    ),
+    posts: matchingPosts.length,
+    likes: matchingAccounts.reduce(
+      (sum, account) => sum + getMetricsForDate(account, normalizedDate).reduce((metricSum, metric) => metricSum + metric.likes, 0),
+      0
+    ),
+    comments: matchingComments.length,
+    uids:
+      filters.software === 'mkt-uid'
+        ? matchingUidCollections.reduce((sum, record) => sum + record.uidCount, 0)
+        : matchingAccounts.reduce(
+            (sum, account) => sum + getMetricsForDate(account, normalizedDate).reduce((metricSum, metric) => metricSum + metric.uids, 0),
+            0
+          ),
+  }
+}
+
 export function useMktReports() {
   const [activeTab, setActiveTab] = useState<MktReportMainTab>('overview')
-  const [period, setPeriod] = useState<MktPeriod>('today')
-  const [globalSoftware, setGlobalSoftware] = useState<MktSoftwareFilter>('all')
-  const [globalEmployee, setGlobalEmployee] = useState<string>('all')
-
-  const [accountSearch, setAccountSearch] = useState('')
-  const [accountStatusFilter, setAccountStatusFilter] = useState<'all' | 'live' | 'die' | 'inactive'>('all')
-  const [accountSoftwareFilter, setAccountSoftwareFilter] = useState<'all' | 'mkt-care' | 'mkt-post'>('all')
-
-  const [fanpageStatusFilter, setFanpageStatusFilter] = useState<'all' | 'active' | 'restricted' | 'deleted'>('all')
-  const [fanpageEmployeeFilter, setFanpageEmployeeFilter] = useState<string>('all')
-
-  const [uidSourceFilter, setUidSourceFilter] = useState<'all' | MktUidSource>('all')
+  const [overviewFilters, setOverviewFilters] = useState<MktBaseTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+  })
+  const [accountFilters, setAccountFilters] = useState<MktAccountTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+    status: 'all',
+    search: '',
+  })
+  const [fanpageFilters, setFanpageFilters] = useState<MktFanpageTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+    status: 'all',
+  })
+  const [uidFilters, setUidFilters] = useState<MktUidTabFilters>({
+    period: periodDefault,
+    employeeId: 'all',
+    source: 'all',
+  })
+  const [postsCommentsFilters, setPostsCommentsFilters] = useState<MktPostsCommentsTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+    type: 'all',
+  })
+  const [dailyFilters, setDailyFilters] = useState<MktDailyTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+  })
+  const [machineFilters, setMachineFilters] = useState<MktMachineTabFilters>({
+    period: periodDefault,
+    software: 'all',
+    employeeId: 'all',
+  })
 
   const [postCommentTab, setPostCommentTab] = useState<MktPostCommentSubTab>('posts')
-  const [postCommentEmployeeFilter, setPostCommentEmployeeFilter] = useState<string>('all')
-  const [postCommentSoftwareFilter, setPostCommentSoftwareFilter] = useState<'all' | 'mkt-post' | 'mkt-page' | 'mkt-care'>('all')
-  const [postCommentTypeFilter, setPostCommentTypeFilter] = useState('all')
-
   const [dailyTab, setDailyTab] = useState<MktDailySubTab>('by-employee')
   const [expandedEmployeeId, setExpandedEmployeeId] = useState<string | null>(null)
-
   const [selectedAccount, setSelectedAccount] = useState<MktFacebookAccount | null>(null)
   const [accountDetailTab, setAccountDetailTab] = useState<MktAccountDetailTab>('overview')
   const [selectedFanpage, setSelectedFanpage] = useState<MktFanpage | null>(null)
@@ -143,118 +383,159 @@ export function useMktReports() {
 
   const employees = MKT_EMPLOYEES
 
-  const filteredAccounts = MKT_FACEBOOK_ACCOUNTS.filter(account => {
-    const matchesGlobal =
-      matchesGlobalSoftware(account.software, globalSoftware) &&
-      matchesGlobalEmployee(account.employeeId, globalEmployee)
-
-    const matchesStatus = accountStatusFilter === 'all' ? true : account.status === accountStatusFilter
-    const matchesSoftware = accountSoftwareFilter === 'all' ? true : account.software === accountSoftwareFilter
-    const keyword = accountSearch.trim().toLowerCase()
+  const filteredAccountsBase = MKT_FACEBOOK_ACCOUNTS.filter(account => {
+    const keyword = accountFilters.search.trim().toLowerCase()
     const matchesSearch =
       keyword.length === 0
         ? true
         : account.name.toLowerCase().includes(keyword) || account.uid.toLowerCase().includes(keyword)
 
-    return matchesGlobal && matchesStatus && matchesSoftware && matchesSearch
-  })
-
-  const accountBaseForCounts = MKT_FACEBOOK_ACCOUNTS.filter(account => {
-    const matchesGlobal =
-      matchesGlobalSoftware(account.software, globalSoftware) &&
-      matchesGlobalEmployee(account.employeeId, globalEmployee)
-    const matchesSoftware = accountSoftwareFilter === 'all' ? true : account.software === accountSoftwareFilter
-    const keyword = accountSearch.trim().toLowerCase()
-    const matchesSearch =
-      keyword.length === 0
-        ? true
-        : account.name.toLowerCase().includes(keyword) || account.uid.toLowerCase().includes(keyword)
-
-    return matchesGlobal && matchesSoftware && matchesSearch
-  })
-
-  const filteredFanpages = MKT_FANPAGES.filter(fanpage => {
-    const matchesGlobal =
-      matchesGlobalSoftware('mkt-page', globalSoftware) &&
-      matchesGlobalEmployee(fanpage.employeeId, globalEmployee)
-    const matchesStatus = fanpageStatusFilter === 'all' ? true : fanpage.status === fanpageStatusFilter
-    const matchesEmployee = fanpageEmployeeFilter === 'all' ? true : fanpage.employeeId === fanpageEmployeeFilter
-
-    return matchesGlobal && matchesStatus && matchesEmployee
-  })
-
-  const filteredUidCollections = MKT_UID_COLLECTIONS.filter(record => {
-    const matchesGlobal =
-      matchesGlobalSoftware('mkt-uid', globalSoftware) &&
-      matchesGlobalEmployee(record.employeeId, globalEmployee)
-    const matchesSource = uidSourceFilter === 'all' ? true : record.source === uidSourceFilter
-    return matchesGlobal && matchesSource && isInSelectedPeriod(record.time, period)
-  })
-
-  const filteredPosts = MKT_POSTS.filter(record => {
-    const matchesGlobal =
-      matchesGlobalSoftware(record.software, globalSoftware) &&
-      matchesGlobalEmployee(record.employeeId, globalEmployee)
-    const matchesEmployee = postCommentEmployeeFilter === 'all' ? true : record.employeeId === postCommentEmployeeFilter
-    const matchesSoftware = postCommentSoftwareFilter === 'all' ? true : record.software === postCommentSoftwareFilter
-    const matchesType = postCommentTypeFilter === 'all' ? true : record.typeLabel === postCommentTypeFilter
-    return matchesGlobal && matchesEmployee && matchesSoftware && matchesType && isInSelectedPeriod(record.time, period)
-  })
-
-  const filteredComments = MKT_COMMENTS.filter(record => {
-    const matchesGlobal =
-      matchesGlobalSoftware(record.software, globalSoftware) &&
-      matchesGlobalEmployee(record.employeeId, globalEmployee)
-    const matchesEmployee = postCommentEmployeeFilter === 'all' ? true : record.employeeId === postCommentEmployeeFilter
-    const matchesSoftware = postCommentSoftwareFilter === 'all' ? true : record.software === postCommentSoftwareFilter
-    const matchesType = postCommentTypeFilter === 'all' ? true : record.typeLabel === postCommentTypeFilter
-    return matchesGlobal && matchesEmployee && matchesSoftware && matchesType && isInSelectedPeriod(record.time, period)
-  })
-
-  const filteredDailyByEmployee = MKT_DAILY_BY_EMPLOYEE.filter(row => {
-    const matchesEmployee = matchesGlobalEmployee(row.employeeId, globalEmployee)
-    return matchesEmployee
-  })
-
-  const filteredDailyBySoftware = MKT_DAILY_BY_SOFTWARE.filter(row =>
-    globalSoftware === 'all' ? true : row.software === globalSoftware
-  )
-
-  const filteredDailyByDay = MKT_DAILY_BY_DAY
-
-  const filteredMachines = MKT_MACHINES.filter(machine => {
-    const matchesSoftware =
-      globalSoftware === 'all' ? true : machine.installedSoftware.includes(globalSoftware)
-    const matchesEmployee = matchesGlobalEmployee(machine.employeeId, globalEmployee)
-    return matchesSoftware && matchesEmployee
-  })
-
-  const overviewAccounts = MKT_FACEBOOK_ACCOUNTS.filter(account => {
     return (
-      matchesGlobalSoftware(account.software, globalSoftware) &&
-      matchesGlobalEmployee(account.employeeId, globalEmployee)
+      accountHasPeriodActivity(account, accountFilters.period) &&
+      matchesSoftware(account.software, accountFilters.software) &&
+      matchesEmployee(account.employeeId, accountFilters.employeeId) &&
+      matchesSearch
     )
   })
 
-  const overviewFanpages = MKT_FANPAGES.filter(fanpage => matchesGlobalEmployee(fanpage.employeeId, globalEmployee))
+  const filteredAccounts = filteredAccountsBase.filter(account =>
+    accountFilters.status === 'all' ? true : account.status === accountFilters.status
+  )
 
+  const accountStatusCounts = {
+    live: filteredAccountsBase.filter(account => account.status === 'live').length,
+    die: filteredAccountsBase.filter(account => account.status === 'die').length,
+    checkpoint: filteredAccountsBase.filter(account => account.status === 'checkpoint').length,
+    inactive: filteredAccountsBase.filter(account => account.status === 'inactive').length,
+  }
+
+  const filteredFanpages = getMatchingFanpages(fanpageFilters).filter(fanpage =>
+    fanpageFilters.status === 'all' ? true : fanpage.status === fanpageFilters.status
+  )
+
+  const filteredUidCollections = getMatchingUidCollections(uidFilters)
+
+  const filteredPosts = getMatchingPosts(postsCommentsFilters).filter(record =>
+    postsCommentsFilters.type === 'all' ? true : record.typeLabel === postsCommentsFilters.type
+  )
+
+  const filteredComments = getMatchingComments(postsCommentsFilters).filter(record =>
+    postsCommentsFilters.type === 'all' ? true : record.typeLabel === postsCommentsFilters.type
+  )
+
+  const filteredDailyByEmployee = MKT_DAILY_BY_EMPLOYEE
+    .map(row => getDailyEmployeeRow(row.employeeId, dailyFilters))
+    .filter(row => {
+      if (dailyFilters.employeeId !== 'all' && row.employeeId !== dailyFilters.employeeId) {
+        return false
+      }
+
+      return (
+        row.live > 0 ||
+        row.die > 0 ||
+        row.messages > 0 ||
+        row.posts > 0 ||
+        row.likes > 0 ||
+        row.comments > 0 ||
+        row.uids > 0
+      )
+    })
+
+  const filteredDailyBySoftware = machineSoftwareOrder
+    .filter(software => (dailyFilters.software === 'all' ? true : software === dailyFilters.software))
+    .map(software => {
+      const matchingAccounts = getMatchingAccounts({ period: dailyFilters.period, software, employeeId: dailyFilters.employeeId })
+      const matchingPosts = getMatchingPosts({ period: dailyFilters.period, software, employeeId: dailyFilters.employeeId })
+      const matchingComments = getMatchingComments({ period: dailyFilters.period, software, employeeId: dailyFilters.employeeId })
+      const matchingUidCollections = getMatchingUidCollections({ period: dailyFilters.period, employeeId: dailyFilters.employeeId })
+
+      return {
+        software,
+        softwareLabel: softwareLabelMap[software],
+        accounts: matchingAccounts.length,
+        messages:
+          software === 'mkt-care'
+            ? matchingAccounts.reduce(
+                (sum, account) =>
+                  sum + getMetricsForPeriod(account, dailyFilters.period).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+                0
+              )
+            : software === 'mkt-page'
+              ? matchingAccounts.reduce(
+                  (sum, account) =>
+                    sum + getMetricsForPeriod(account, dailyFilters.period).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+                  0
+                )
+              : null,
+        posts: software === 'mkt-post' || software === 'mkt-page' ? matchingPosts.length : null,
+        likes:
+          software === 'mkt-uid'
+            ? null
+            : matchingAccounts.reduce(
+                (sum, account) =>
+                  sum + getMetricsForPeriod(account, dailyFilters.period).reduce((metricSum, metric) => metricSum + metric.likes, 0),
+                0
+              ),
+        comments: software === 'mkt-uid' ? null : matchingComments.length,
+        uids: software === 'mkt-uid' ? matchingUidCollections.reduce((sum, record) => sum + record.uidCount, 0) : null,
+      }
+    })
+    .filter(row => row.accounts > 0 || row.messages || row.posts || row.likes || row.comments || row.uids)
+
+  const filteredDailyByDay = MKT_DAILY_BY_DAY
+    .filter(row => isInSelectedPeriod(row.dateLabel, dailyFilters.period))
+    .map(row => getDailyByDayRow(row.dateLabel, dailyFilters))
+    .filter(row => {
+      if (dailyFilters.employeeId === 'all' && dailyFilters.software === 'all') {
+        return true
+      }
+
+      return (
+        row.live > 0 ||
+        row.die > 0 ||
+        row.messages > 0 ||
+        row.posts > 0 ||
+        row.likes > 0 ||
+        row.comments > 0 ||
+        row.uids > 0
+      )
+    })
+
+  const filteredMachines = MKT_MACHINES.filter(
+    machine =>
+      isInSelectedPeriod(machine.lastSync, machineFilters.period) &&
+      (machineFilters.software === 'all' ? true : machine.installedSoftware.includes(machineFilters.software)) &&
+      matchesEmployee(machine.employeeId, machineFilters.employeeId)
+  )
+
+  const overviewAccounts = getMatchingAccounts(overviewFilters)
+  const overviewFanpages = getMatchingFanpages(overviewFilters)
+  const overviewPosts = getMatchingPosts(overviewFilters)
+  const overviewComments = getMatchingComments(overviewFilters)
+  const overviewUidCollections =
+    overviewFilters.software === 'all' || overviewFilters.software === 'mkt-uid'
+      ? getMatchingUidCollections({ period: overviewFilters.period, employeeId: overviewFilters.employeeId })
+      : []
+  const overviewMessages = overviewAccounts.reduce(
+    (sum, account) =>
+      sum + getMetricsForPeriod(account, overviewFilters.period).reduce((metricSum, metric) => metricSum + metric.messages, 0),
+    0
+  )
+  const overviewLikes =
+    overviewFilters.software === 'mkt-uid'
+      ? 0
+      : overviewAccounts.reduce(
+          (sum, account) =>
+            sum + getMetricsForPeriod(account, overviewFilters.period).reduce((metricSum, metric) => metricSum + metric.likes, 0),
+          0
+        )
   const totalUidCount = filteredUidCollections.reduce((sum, record) => sum + record.uidCount, 0)
   const totalScans = filteredUidCollections.length
   const fanpageFollowerNetChange = filteredFanpages.reduce((sum, fanpage) => sum + fanpage.newFollower + fanpage.unfollow, 0)
-  const liveCount = overviewAccounts.filter(account => account.status === 'live').length
-  const dieCount = overviewAccounts.filter(account => account.status === 'die').length
-  const checkpointCount = overviewAccounts.filter(account => account.status === 'checkpoint').length
-  const messageCount = filteredDailyByEmployee.reduce((sum, row) => sum + row.messages, 0)
-  const postCount = filteredDailyByEmployee.reduce((sum, row) => sum + row.posts, 0)
-  const likeCount = filteredDailyByEmployee.reduce((sum, row) => sum + row.likes, 0)
-  const commentCount = filteredDailyByEmployee.reduce((sum, row) => sum + row.comments, 0)
-  const activeFanpageCount = overviewFanpages.filter(page => page.status === 'active').length
-  const totalFollower = overviewFanpages.reduce((sum, page) => sum + page.follower, 0)
-  const fanpagePostCount = overviewFanpages.reduce((sum, page) => sum + page.posts, 0)
-  const inboundReactionCount = overviewFanpages.reduce((sum, page) => sum + page.reactions, 0)
-  const inboundCommentCount = overviewFanpages.reduce((sum, page) => sum + page.comments, 0)
 
-  const overviewTrend = filteredDailyByDay
+  const overviewTrend = MKT_DAILY_BY_DAY
+    .filter(row => isInSelectedPeriod(row.dateLabel, overviewFilters.period))
+    .map(row => getDailyByDayRow(row.dateLabel, overviewFilters))
     .slice()
     .reverse()
     .map(item => ({
@@ -283,13 +564,6 @@ export function useMktReports() {
       value: filteredUidCollections.filter(item => item.source === 'other').reduce((sum, item) => sum + item.uidCount, 0),
     },
   ]
-
-  const accountStatusCounts = {
-    live: accountBaseForCounts.filter(account => account.status === 'live').length,
-    die: accountBaseForCounts.filter(account => account.status === 'die').length,
-    checkpoint: accountBaseForCounts.filter(account => account.status === 'checkpoint').length,
-    inactive: accountBaseForCounts.filter(account => account.status === 'inactive').length,
-  }
 
   const uidTableFooterSummary = {
     totalScans,
@@ -470,36 +744,33 @@ export function useMktReports() {
   return {
     activeTab,
     setActiveTab,
-    period,
-    setPeriod,
-    globalSoftware,
-    setGlobalSoftware,
-    globalEmployee,
-    setGlobalEmployee,
     employees,
     softwareLabelMap,
     getEmployeeName,
     getAccountStatusLabel,
 
-    accountSearch,
-    setAccountSearch,
-    accountStatusFilter,
-    setAccountStatusFilter,
-    accountSoftwareFilter,
-    setAccountSoftwareFilter,
+    overviewFilters,
+    setOverviewFilters,
+    accountFilters,
+    setAccountFilters,
+    fanpageFilters,
+    setFanpageFilters,
+    uidFilters,
+    setUidFilters,
+    postsCommentsFilters,
+    setPostsCommentsFilters,
+    dailyFilters,
+    setDailyFilters,
+    machineFilters,
+    setMachineFilters,
+
     filteredAccounts,
     accountStatusCounts,
     exportAccounts,
 
-    fanpageStatusFilter,
-    setFanpageStatusFilter,
-    fanpageEmployeeFilter,
-    setFanpageEmployeeFilter,
     filteredFanpages,
     exportFanpages,
 
-    uidSourceFilter,
-    setUidSourceFilter,
     filteredUidCollections,
     uidSourceSummary,
     uidTableFooterSummary,
@@ -510,12 +781,6 @@ export function useMktReports() {
 
     postCommentTab,
     setPostCommentTab,
-    postCommentEmployeeFilter,
-    setPostCommentEmployeeFilter,
-    postCommentSoftwareFilter,
-    setPostCommentSoftwareFilter,
-    postCommentTypeFilter,
-    setPostCommentTypeFilter,
     filteredPosts,
     filteredComments,
     exportPostsComments,
@@ -548,19 +813,22 @@ export function useMktReports() {
     setFanpageDetailTab,
 
     overviewStats: {
-      liveCount,
-      dieCount,
-      checkpointCount,
-      messageCount,
-      postCount,
-      likeCount,
-      commentCount,
-      activeFanpageCount,
-      totalFollower,
-      fanpagePostCount,
-      inboundReactionCount,
-      inboundCommentCount,
-      totalUidCount,
+      liveCount: overviewAccounts.filter(account => account.status === 'live').length,
+      dieCount: overviewAccounts.filter(account => account.status === 'die').length,
+      checkpointCount: overviewAccounts.filter(account => account.status === 'checkpoint').length,
+      messageCount: overviewMessages,
+      postCount: overviewPosts.length,
+      likeCount: overviewLikes,
+      commentCount: overviewComments.length,
+      activeFanpageCount: overviewFanpages.filter(page => page.status === 'active').length,
+      totalFollower: overviewFanpages.reduce((sum, page) => sum + page.follower, 0),
+      fanpagePostCount: overviewFanpages.reduce((sum, page) => sum + page.posts, 0),
+      inboundReactionCount: overviewFanpages.reduce((sum, page) => sum + page.reactions, 0),
+      inboundCommentCount: overviewFanpages.reduce((sum, page) => sum + page.comments, 0),
+      totalUidCount:
+        overviewFilters.software === 'all' || overviewFilters.software === 'mkt-uid'
+          ? overviewUidCollections.reduce((sum, record) => sum + record.uidCount, 0)
+          : 0,
     },
     overviewTrend,
     fanpageFollowerNetChange,

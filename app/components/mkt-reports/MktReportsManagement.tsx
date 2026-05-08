@@ -9,7 +9,6 @@ import {
   Monitor,
   TrendingUp,
 } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import OverviewTab from './OverviewTab'
 import FacebookAccountsTab from './FacebookAccountsTab'
 import FanpagesTab from './FanpagesTab'
@@ -20,7 +19,7 @@ import MachinesTab from './MachinesTab'
 import AccountDetailDialog from './AccountDetailDialog'
 import FanpageDetailDialog from './FanpageDetailDialog'
 import AddMachineDialog from './AddMachineDialog'
-import { MainTabButton, StatusBadge, SubTabButton } from './shared'
+import { MainTabButton } from './shared'
 import { useMktReports } from './useMktReports'
 
 const tabItems = [
@@ -51,44 +50,6 @@ export default function MktReportsManagement() {
             <span className="h-2 w-2 rounded-full bg-[#2dc56a]" />
             Đồng bộ mỗi 15 phút
           </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-        <div className="flex flex-wrap gap-2">
-          <SubTabButton active={controller.period === 'today'} label="Hôm nay" onClick={() => controller.setPeriod('today')} />
-          <SubTabButton active={controller.period === 'this_week'} label="Tuần này" onClick={() => controller.setPeriod('this_week')} />
-          <SubTabButton active={controller.period === 'this_month'} label="Tháng này" onClick={() => controller.setPeriod('this_month')} />
-          <SubTabButton active={controller.period === 'last_month'} label="Tháng trước" onClick={() => controller.setPeriod('last_month')} />
-        </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Select value={controller.globalSoftware} onValueChange={value => controller.setGlobalSoftware(value as typeof controller.globalSoftware)}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Tất cả phần mềm" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả phần mềm</SelectItem>
-              <SelectItem value="mkt-care">MKT Care</SelectItem>
-              <SelectItem value="mkt-post">MKT Post</SelectItem>
-              <SelectItem value="mkt-page">MKT Page</SelectItem>
-              <SelectItem value="mkt-uid">MKT UID</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={controller.globalEmployee} onValueChange={controller.setGlobalEmployee}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Tất cả nhân viên" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Tất cả nhân viên</SelectItem>
-              {controller.employees.map(employee => (
-                <SelectItem key={employee.id} value={employee.id}>
-                  {employee.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
         </div>
       </div>
 

@@ -5,15 +5,13 @@ import { Button } from '@/components/ui/button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import type { MktReportsController } from './useMktReports'
-import { MetricCard, StatusBadge, TableActionButton } from './shared'
+import { MetricCard, PeriodSelect, StatusBadge, TableActionButton } from './shared'
 
 export default function FanpagesTab({ controller }: { controller: MktReportsController }) {
   const {
     filteredFanpages,
-    fanpageStatusFilter,
-    setFanpageStatusFilter,
-    fanpageEmployeeFilter,
-    setFanpageEmployeeFilter,
+    fanpageFilters,
+    setFanpageFilters,
     employees,
     exportFanpages,
     getEmployeeName,
@@ -34,22 +32,30 @@ export default function FanpagesTab({ controller }: { controller: MktReportsCont
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        <MetricCard title="Page hoạt động" value={filteredFanpages.filter(item => item.status === 'active').length} tone="success" />
-        <MetricCard
-          title="Tổng follower"
-          value={totals.follower.toLocaleString('vi-VN')}
-          hint={`${fanpageFollowerNetChange >= 0 ? '+' : ''}${fanpageFollowerNetChange} net hôm nay`}
-          hintTone={fanpageFollowerNetChange >= 0 ? 'success' : 'danger'}
-        />
-        <MetricCard title="Follower mới" value={totals.newFollower} tone="success" />
-        <MetricCard title="Unfollow" value={Math.abs(totals.unfollow)} tone="danger" />
-        <MetricCard title="Reaction nhận về" value={totals.reactions} />
-      </div>
-
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <Select value={fanpageEmployeeFilter} onValueChange={setFanpageEmployeeFilter}>
+        <div className="flex flex-wrap gap-3">
+          <PeriodSelect
+            value={fanpageFilters.period}
+            onChange={value => setFanpageFilters(current => ({ ...current, period: value }))}
+          />
+
+          <Select
+            value={fanpageFilters.software}
+            onValueChange={value => setFanpageFilters(current => ({ ...current, software: value as typeof current.software }))}
+          >
+            <SelectTrigger className="w-[170px]">
+              <SelectValue placeholder="Tất cả phần mềm" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Tất cả phần mềm</SelectItem>
+              <SelectItem value="mkt-page">MKT Page</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={fanpageFilters.employeeId}
+            onValueChange={value => setFanpageFilters(current => ({ ...current, employeeId: value }))}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tất cả nhân viên" />
             </SelectTrigger>
@@ -63,7 +69,10 @@ export default function FanpagesTab({ controller }: { controller: MktReportsCont
             </SelectContent>
           </Select>
 
-          <Select value={fanpageStatusFilter} onValueChange={value => setFanpageStatusFilter(value as typeof fanpageStatusFilter)}>
+          <Select
+            value={fanpageFilters.status}
+            onValueChange={value => setFanpageFilters(current => ({ ...current, status: value as typeof current.status }))}
+          >
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Tất cả trạng thái" />
             </SelectTrigger>
@@ -80,6 +89,19 @@ export default function FanpagesTab({ controller }: { controller: MktReportsCont
           <Download className="h-4 w-4" />
           Xuất
         </Button>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <MetricCard title="Page hoạt động" value={filteredFanpages.filter(item => item.status === 'active').length} tone="success" />
+        <MetricCard
+          title="Tổng follower"
+          value={totals.follower.toLocaleString('vi-VN')}
+          hint={`${fanpageFollowerNetChange >= 0 ? '+' : ''}${fanpageFollowerNetChange} net hôm nay`}
+          hintTone={fanpageFollowerNetChange >= 0 ? 'success' : 'danger'}
+        />
+        <MetricCard title="Follower mới" value={totals.newFollower} tone="success" />
+        <MetricCard title="Unfollow" value={Math.abs(totals.unfollow)} tone="danger" />
+        <MetricCard title="Reaction nhận về" value={totals.reactions} />
       </div>
 
       <Table>
