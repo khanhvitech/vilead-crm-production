@@ -290,10 +290,27 @@ export interface Attachment {
   uploaded_at: Date;
 }
 
+export type RecipientSourceType = 'crm' | 'file';
+
+export interface UploadedRecipientFile {
+  name: string;
+  type: 'csv' | 'xlsx' | 'xls';
+  size: number;
+  total_rows: number;
+  valid_rows: number;
+  invalid_rows: number;
+  duplicate_rows: number;
+}
+
 export interface RecipientFilter {
+  source_type?: RecipientSourceType;
   labels: string[];
   sources: string[];
   statuses: string[];
+  products?: string[];
+  customerTypes?: string[];
+  selected_recipient_ids?: string[];
+  uploaded_file?: UploadedRecipientFile | null;
   date_range: {
     from: Date | null;
     to: Date | null;
@@ -480,6 +497,29 @@ export interface CustomerStatus {
   id: string;
   name: string;
   color: string;
+}
+
+export interface CustomerProductOption {
+  id: string;
+  name: string;
+}
+
+export interface CustomerTypeOption {
+  id: string;
+  name: string;
+  color: string;
+}
+
+export interface EmailRecipientRow {
+  id: string;
+  email: string;
+  name: string;
+  labels: string[];
+  products: string[];
+  source: string;
+  customerType: string;
+  status: 'valid' | 'invalid' | 'duplicate';
+  error?: string;
 }
 
 export interface RecipientsPreview {

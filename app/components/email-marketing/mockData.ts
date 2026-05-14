@@ -9,8 +9,11 @@ import {
   TemplateVariable,
   Campaign,
   CustomerLabel,
+  CustomerProductOption,
   CustomerSource,
   CustomerStatus,
+  CustomerTypeOption,
+  EmailRecipientRow,
   RecipientsPreview,
   EmailSendLog,
   EmailLogStatus,
@@ -586,6 +589,108 @@ export const MOCK_CUSTOMER_STATUSES: CustomerStatus[] = [
   { id: 'sts-004', name: 'Quan tâm', color: '#8B5CF6' },
   { id: 'sts-005', name: 'Chốt deal', color: '#22C55E' },
   { id: 'sts-006', name: 'Không quan tâm', color: '#6B7280' }
+];
+
+export const MOCK_CUSTOMER_PRODUCTS: CustomerProductOption[] = [
+  { id: 'prd-001', name: 'CRM Basic' },
+  { id: 'prd-002', name: 'CRM Professional' },
+  { id: 'prd-003', name: 'CRM Enterprise' },
+  { id: 'prd-004', name: 'Marketing Automation' },
+  { id: 'prd-005', name: 'AI Analytics Module' }
+];
+
+export const MOCK_CUSTOMER_TYPES: CustomerTypeOption[] = [
+  { id: 'type-diamond', name: 'Kim cương', color: '#2563EB' },
+  { id: 'type-gold', name: 'Vàng', color: '#D97706' },
+  { id: 'type-silver', name: 'Bạc', color: '#64748B' },
+  { id: 'type-bronze', name: 'Đồng', color: '#B45309' },
+  { id: 'type-new', name: 'Khách mới', color: '#10B981' }
+];
+
+export const MOCK_EMAIL_RECIPIENTS: EmailRecipientRow[] = [
+  {
+    id: 'cust-001',
+    email: 'nguyen.a@gmail.com',
+    name: 'Nguyễn Văn A',
+    labels: ['lbl-001', 'lbl-003'],
+    products: ['prd-002', 'prd-004'],
+    source: 'src-001',
+    customerType: 'type-diamond',
+    status: 'valid'
+  },
+  {
+    id: 'cust-002',
+    email: 'tran.b@company.vn',
+    name: 'Trần Thị B',
+    labels: ['lbl-002', 'lbl-003'],
+    products: ['prd-001'],
+    source: 'src-002',
+    customerType: 'type-gold',
+    status: 'valid'
+  },
+  {
+    id: 'cust-003',
+    email: 'le.c@email.com',
+    name: 'Lê Văn C',
+    labels: ['lbl-004'],
+    products: ['prd-004'],
+    source: 'src-004',
+    customerType: 'type-silver',
+    status: 'valid'
+  },
+  {
+    id: 'cust-004',
+    email: 'pham.d@corp.vn',
+    name: 'Phạm Thị D',
+    labels: ['lbl-001', 'lbl-003'],
+    products: ['prd-003', 'prd-005'],
+    source: 'src-005',
+    customerType: 'type-diamond',
+    status: 'valid'
+  },
+  {
+    id: 'cust-005',
+    email: 'hoang.e@yahoo.com',
+    name: 'Hoàng Văn E',
+    labels: ['lbl-005'],
+    products: ['prd-001', 'prd-004'],
+    source: 'src-006',
+    customerType: 'type-bronze',
+    status: 'valid'
+  },
+  {
+    id: 'cust-006',
+    email: '',
+    name: 'Đỗ Minh F',
+    labels: ['lbl-002'],
+    products: ['prd-002'],
+    source: 'src-003',
+    customerType: 'type-new',
+    status: 'invalid',
+    error: 'Thiếu email'
+  },
+  {
+    id: 'cust-007',
+    email: 'mai.g@company',
+    name: 'Mai Thị G',
+    labels: ['lbl-004'],
+    products: ['prd-005'],
+    source: 'src-001',
+    customerType: 'type-silver',
+    status: 'invalid',
+    error: 'Sai định dạng email'
+  },
+  {
+    id: 'cust-008',
+    email: 'tran.b@company.vn',
+    name: 'Trần Thị B - chi nhánh',
+    labels: ['lbl-003'],
+    products: ['prd-001'],
+    source: 'src-002',
+    customerType: 'type-gold',
+    status: 'duplicate',
+    error: 'Trùng email'
+  }
 ];
 
 // Recipients Preview (simulated API response)
@@ -1440,9 +1545,14 @@ export const getSenderEmailById = (id: string): SenderEmail | undefined => {
 
 // Default recipient filter
 export const DEFAULT_RECIPIENT_FILTER = {
+  source_type: 'crm' as const,
   labels: [],
   sources: [],
   statuses: [],
+  products: [],
+  customerTypes: [],
+  selected_recipient_ids: [],
+  uploaded_file: null,
   date_range: null,
   exclude_sent_within_days: 7,
   exclude_unsubscribed: true,

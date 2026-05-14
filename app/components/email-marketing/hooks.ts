@@ -47,6 +47,7 @@ import {
   MOCK_EMAIL_LIMITS, 
   MOCK_TEMPLATES,
   MOCK_CAMPAIGNS,
+  MOCK_EMAIL_RECIPIENTS,
   MOCK_RECIPIENTS_PREVIEW,
   DEFAULT_RECIPIENT_FILTER,
   CURRENT_USER,
@@ -1552,20 +1553,41 @@ export function useCampaignEditor(initialCampaign?: Campaign | null) {
   }, []);
 
   // Preview recipients (simulated)
-  const previewRecipients = useCallback(async (): Promise<RecipientsPreview> => {
+  const previewRecipients = useCallback(async (filterOverride?: RecipientFilter): Promise<RecipientsPreview> => {
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 300));
+
+    const targetFilter = filterOverride || formData.recipient_filter;
     
-    // Return mock data with some variation based on filter
-    const hasFilters = formData.recipient_filter.labels.length > 0 || 
-                       formData.recipient_filter.sources.length > 0 ||
-                       formData.recipient_filter.statuses.length > 0;
+    const selectedCount = targetFilter.selected_recipient_ids?.length || 0;
+    const fileInfo = targetFilter.uploaded_file;
+    const matchingMockRecipients = MOCK_EMAIL_RECIPIENTS.filter(recipient => {
+      const matchLabels = targetFilter.labels.length === 0 || targetFilter.labels.some(label => recipient.labels.includes(label));
+      const matchSources = targetFilter.sources.length === 0 || targetFilter.sources.includes(recipient.source);
+      const matchProducts = (targetFilter.products?.length || 0) === 0 || (targetFilter.products || []).some(product => recipient.products.includes(product));
+      const matchCustomerTypes = (targetFilter.customerTypes?.length || 0) === 0 || (targetFilter.customerTypes || []).includes(recipient.customerType);
+      return matchLabels && matchSources && matchProducts && matchCustomerTypes;
+    });
+    const usesExplicitSelection = Boolean(
+      targetFilter.source_type ||
+      targetFilter.uploaded_file ||
+      targetFilter.selected_recipient_ids
+    );
     
     const preview: RecipientsPreview = {
       ...MOCK_RECIPIENTS_PREVIEW,
-      total_customers: hasFilters ? 320 : 520,
-      valid_emails: hasFilters ? 305 : 485,
-      invalid_emails: hasFilters ? 15 : 35
+      total_customers: targetFilter.source_type === 'file'
+        ? fileInfo?.total_rows || selectedCount
+        : matchingMockRecipients.length,
+      valid_emails: usesExplicitSelection ? selectedCount : (targetFilter.source_type === 'file'
+        ? fileInfo?.valid_rows || 0
+        : matchingMockRecipients.filter(recipient => recipient.status === 'valid').length),
+      invalid_emails: targetFilter.source_type === 'file'
+        ? fileInfo?.invalid_rows || 0
+        : matchingMockRecipients.filter(recipient => recipient.status === 'invalid').length,
+      duplicates_removed: targetFilter.source_type === 'file'
+        ? fileInfo?.duplicate_rows || 0
+        : matchingMockRecipients.filter(recipient => recipient.status === 'duplicate').length
     };
     
     setRecipientsPreview(preview);

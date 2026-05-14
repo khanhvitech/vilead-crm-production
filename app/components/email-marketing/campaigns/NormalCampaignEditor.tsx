@@ -202,7 +202,7 @@ export function NormalCampaignEditor({ campaign, mode, onSave, onStart, onClose 
   // Handle recipient filter save
   const handleRecipientsSave = async (filter: RecipientFilter) => {
     updateField('recipient_filter', filter);
-    await previewRecipients();
+    await previewRecipients(filter);
     closeModal();
   };
 
