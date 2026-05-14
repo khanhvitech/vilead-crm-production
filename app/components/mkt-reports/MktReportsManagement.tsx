@@ -1,5 +1,6 @@
 'use client'
 
+import { useCallback, useState } from 'react'
 import {
   BarChart3,
   Database,
@@ -21,6 +22,8 @@ import FanpageDetailDialog from './FanpageDetailDialog'
 import AddMachineDialog from './AddMachineDialog'
 import { MainTabButton } from './shared'
 import { useMktReports } from './useMktReports'
+import { useSettingsStore } from '@/app/stores/useSettingsStore'
+import { MktSettingsForm } from './MktSettingsForm'
 
 const tabItems = [
   { id: 'overview', label: 'Tổng quan', icon: <BarChart3 className="h-4 w-4" /> },
@@ -34,6 +37,12 @@ const tabItems = [
 
 export default function MktReportsManagement() {
   const controller = useMktReports()
+  const isMktConfigured = useSettingsStore((state) => state.isMktConfigured)
+  const [, setRenderKey] = useState(0)
+
+  const handleSaveSuccess = useCallback(() => {
+    setRenderKey((prev) => prev + 1)
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -53,33 +62,39 @@ export default function MktReportsManagement() {
         </div>
       </div>
 
-      <div className="border-b border-[#e6ebf1]">
-        <nav className="flex flex-wrap gap-6">
-          {tabItems.map(item => (
-            <MainTabButton
-              key={item.id}
-              active={controller.activeTab === item.id}
-              icon={item.icon}
-              label={item.label}
-              onClick={() => controller.setActiveTab(item.id)}
-            />
-          ))}
-        </nav>
-      </div>
+      {isMktConfigured() ? (
+        <>
+          <div className="border-b border-[#e6ebf1]">
+            <nav className="flex flex-wrap gap-6">
+              {tabItems.map(item => (
+                <MainTabButton
+                  key={item.id}
+                  active={controller.activeTab === item.id}
+                  icon={item.icon}
+                  label={item.label}
+                  onClick={() => controller.setActiveTab(item.id)}
+                />
+              ))}
+            </nav>
+          </div>
 
-      <div>
-        {controller.activeTab === 'overview' ? <OverviewTab controller={controller} /> : null}
-        {controller.activeTab === 'accounts' ? <FacebookAccountsTab controller={controller} /> : null}
-        {controller.activeTab === 'fanpages' ? <FanpagesTab controller={controller} /> : null}
-        {controller.activeTab === 'uids' ? <CollectedUidsTab controller={controller} /> : null}
-        {controller.activeTab === 'posts-comments' ? <PostsCommentsTab controller={controller} /> : null}
-        {controller.activeTab === 'daily' ? <DailyReportsTab controller={controller} /> : null}
-        {controller.activeTab === 'machines' ? <MachinesTab controller={controller} /> : null}
-      </div>
+          <div>
+            {controller.activeTab === 'overview' ? <OverviewTab controller={controller} /> : null}
+            {controller.activeTab === 'accounts' ? <FacebookAccountsTab controller={controller} /> : null}
+            {controller.activeTab === 'fanpages' ? <FanpagesTab controller={controller} /> : null}
+            {controller.activeTab === 'uids' ? <CollectedUidsTab controller={controller} /> : null}
+            {controller.activeTab === 'posts-comments' ? <PostsCommentsTab controller={controller} /> : null}
+            {controller.activeTab === 'daily' ? <DailyReportsTab controller={controller} /> : null}
+            {controller.activeTab === 'machines' ? <MachinesTab controller={controller} /> : null}
+          </div>
 
-      <AccountDetailDialog controller={controller} />
-      <FanpageDetailDialog controller={controller} />
-      <AddMachineDialog controller={controller} />
+          <AccountDetailDialog controller={controller} />
+          <FanpageDetailDialog controller={controller} />
+          <AddMachineDialog controller={controller} />
+        </>
+      ) : (
+        <MktSettingsForm onSaveSuccess={handleSaveSuccess} />
+      )}
     </div>
   )
 }

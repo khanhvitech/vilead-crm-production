@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import FormulaBuilder, { FormulaVariable } from './FormulaBuilder'
-import TaxManagement from './settings/TaxManagement'
+import { GeneralSettingsContent } from './settings/GeneralSettingsContent'
 import BillingManagement from './settings/billing/BillingManagement'
 import {
   Settings,
@@ -2153,8 +2153,6 @@ const RoleManagementNew = () => {
 
 export default function SettingsManagement() {
   const [activeTab, setActiveTab] = useState('workflow')
-  const [generalVatCollapsed, setGeneralVatCollapsed] = useState(false)
-  const [includeTaxInRevenue, setIncludeTaxInRevenue] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [showUserModal, setShowUserModal] = useState(false)
@@ -8876,48 +8874,7 @@ export default function SettingsManagement() {
       <div className="flex-1 pl-6">
         {/* Cài đặt chung */}
         {activeTab === 'general' && (
-          <div className="space-y-6">
-            {/* Nút Lưu thay đổi */}
-            <div className="flex justify-end">
-              <Button className="bg-[#3e79f7] text-white border border-[#3e79f7] rounded-[10px] hover:bg-[#699dff]">
-                <Save className="w-4 h-4 mr-2" />
-                Lưu thay đổi
-              </Button>
-            </div>
-            {/* Thuế GTGT - Collapsible */}
-            <div className="bg-white border border-[#e6ebf1] rounded-[10px]">
-              <button
-                onClick={() => setGeneralVatCollapsed(!generalVatCollapsed)}
-                className="w-full flex items-center justify-between p-6 text-left"
-              >
-                <div>
-                  <h2 className="text-base font-semibold text-[#1a3353]">Thuế giá trị gia tăng</h2>
-                </div>
-                {generalVatCollapsed ? (
-                  <ChevronRight className="w-5 h-5 text-[#455560]" />
-                ) : (
-                  <ChevronDown className="w-5 h-5 text-[#455560]" />
-                )}
-              </button>
-              {!generalVatCollapsed && (
-                <div className="px-6 pb-6 -mt-2">
-                  <div className="flex items-center gap-3 mb-4">
-                    <input
-                      type="checkbox"
-                      id="tax-in-revenue"
-                      checked={includeTaxInRevenue}
-                      onChange={(e) => setIncludeTaxInRevenue(e.target.checked)}
-                      className="w-4 h-4 rounded border-[#e6ebf1] text-[#3e79f7] focus:ring-[#3e79f7]"
-                    />
-                    <label htmlFor="tax-in-revenue" className="text-sm text-[#455560] cursor-pointer select-none">
-                      Tính thuế vào doanh số nhân viên
-                    </label>
-                  </div>
-                  <TaxManagement />
-                </div>
-              )}
-            </div>
-          </div>
+          <GeneralSettingsContent />
         )}
 
         {activeTab === 'company' && <CompanyManagement />}
