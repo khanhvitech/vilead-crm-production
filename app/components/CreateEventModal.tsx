@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import { 
@@ -248,9 +248,9 @@ export default function CreateEventModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-[10px] shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
           <div className="flex items-center space-x-3">
             <Calendar className="w-6 h-6 text-blue-600" />
             <h2 className="text-xl font-semibold text-gray-900">Tạo lịch mới</h2>
@@ -287,10 +287,10 @@ export default function CreateEventModal({
                         key={type.value}
                         type="button"
                         onClick={() => setFormData(prev => ({ ...prev, type: type.value as any }))}
-                        className={`p-4 border-2 rounded-lg flex flex-col items-center space-y-2 transition-all ${
+                        className={`p-4 border-2 rounded-[10px] flex flex-col items-center space-y-2 transition-all ${
                           formData.type === type.value
                             ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                            : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                         }`}
                       >
                         <Icon className="w-6 h-6" style={{ color: type.color }} />
@@ -311,8 +311,8 @@ export default function CreateEventModal({
                   id="title"
                   value={formData.title}
                   onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    errors.title ? 'border-red-500' : 'border-gray-300'
+                  className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] ${
+                    errors.title ? 'border-red-500' : 'border-[#e6ebf1]'
                   }`}
                   placeholder="Nhập tiêu đề sự kiện..."
                 />
@@ -331,7 +331,7 @@ export default function CreateEventModal({
                   rows={3}
                   value={formData.description}
                   onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                   placeholder="Mô tả chi tiết về sự kiện..."
                 />
               </div>
@@ -347,8 +347,8 @@ export default function CreateEventModal({
                     id="startDate"
                     value={formData.startDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                      errors.startDate ? 'border-red-500' : 'border-gray-300'
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] ${
+                      errors.startDate ? 'border-red-500' : 'border-[#e6ebf1]'
                     }`}
                   />
                   {errors.startDate && (
@@ -365,7 +365,7 @@ export default function CreateEventModal({
                     id="endDate"
                     value={formData.endDate}
                     onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                   />
                 </div>
               </div>
@@ -396,8 +396,8 @@ export default function CreateEventModal({
                       id="startTime"
                       value={formData.startTime}
                       onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.startTime ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] ${
+                        errors.startTime ? 'border-red-500' : 'border-[#e6ebf1]'
                       }`}
                     />
                     {errors.startTime && (
@@ -414,8 +414,8 @@ export default function CreateEventModal({
                       id="endTime"
                       value={formData.endTime}
                       onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                        errors.endTime ? 'border-red-500' : 'border-gray-300'
+                      className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] ${
+                        errors.endTime ? 'border-red-500' : 'border-[#e6ebf1]'
                       }`}
                     />
                     {errors.endTime && (
@@ -443,7 +443,7 @@ export default function CreateEventModal({
                       className={`px-4 py-2 border rounded-md text-sm font-medium transition-colors ${
                         formData.priority === priority.value
                           ? `bg-${priority.color}-100 border-${priority.color}-500 text-${priority.color}-700`
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-50'
+                          : 'border-[#e6ebf1] text-gray-700 hover:bg-gray-50'
                       }`}
                     >
                       {priority.label}
@@ -471,7 +471,7 @@ export default function CreateEventModal({
                     id="location"
                     value={formData.location}
                     onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     placeholder="Nhập địa điểm..."
                   />
                 </div>
@@ -490,7 +490,7 @@ export default function CreateEventModal({
                         <button
                           key={type.value}
                           type="button"
-                          className="p-3 border border-gray-200 rounded-lg flex flex-col items-center space-y-2 hover:border-gray-300 transition-colors"
+                          className="p-3 border border-[#e6ebf1] rounded-[10px] flex flex-col items-center space-y-2 hover:border-[#e6ebf1] transition-colors"
                         >
                           <Icon className="w-5 h-5 text-gray-600" />
                           <span className="text-sm">{type.label}</span>
@@ -506,7 +506,7 @@ export default function CreateEventModal({
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Người tham gia *
                 </label>
-                <div className="space-y-2 max-h-40 overflow-y-auto border border-gray-300 rounded-md p-3">
+                <div className="space-y-2 max-h-40 overflow-y-auto border border-[#e6ebf1] rounded-md p-3">
                   {employees.map(employee => (
                     <label key={employee.id} className="flex items-center space-x-3">
                       <input
@@ -554,7 +554,7 @@ export default function CreateEventModal({
                         relatedId: '',
                         relatedName: ''
                       }))}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
                       <option value="">Chọn loại</option>
                       <option value="lead">Lead</option>
@@ -579,7 +579,7 @@ export default function CreateEventModal({
                             relatedName: selected?.name || ''
                           }))
                         }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       >
                         <option value="">Chọn...</option>
                         {getRelatedOptions().map(option => (
@@ -619,7 +619,7 @@ export default function CreateEventModal({
                   <select
                     value={formData.recurringPattern}
                     onChange={(e) => setFormData(prev => ({ ...prev, recurringPattern: e.target.value }))}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                   >
                     <option value="">Chọn chu kỳ</option>
                     <option value="daily">Hàng ngày</option>
@@ -665,7 +665,7 @@ export default function CreateEventModal({
               </div>
 
               {/* Summary */}
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50 p-4 rounded-[10px]">
                 <h4 className="font-medium text-gray-900 mb-2">Tóm tắt</h4>
                 <div className="space-y-1 text-sm text-gray-600">
                   <div><strong>Tiêu đề:</strong> {formData.title}</div>
@@ -681,12 +681,12 @@ export default function CreateEventModal({
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200">
+        <div className="flex items-center justify-between p-6 border-t border-[#e6ebf1]">
           <div className="flex space-x-3">
             {step > 1 && (
               <button
                 onClick={handleBack}
-                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+                className="px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
               >
                 Quay lại
               </button>
@@ -696,7 +696,7 @@ export default function CreateEventModal({
           <div className="flex space-x-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-md hover:bg-gray-50 transition-colors"
             >
               Hủy
             </button>
@@ -704,7 +704,7 @@ export default function CreateEventModal({
             {step < 3 ? (
               <button
                 onClick={handleNext}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors flex items-center space-x-2"
               >
                 <span>Tiếp theo</span>
                 <span>→</span>
@@ -712,7 +712,7 @@ export default function CreateEventModal({
             ) : (
               <button
                 onClick={handleSave}
-                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center space-x-2"
+                className="px-4 py-2 bg-[#2dc56a] text-white rounded-md hover:bg-[#04d182] transition-colors flex items-center space-x-2"
               >
                 <Save className="w-4 h-4" />
                 <span>Tạo lịch</span>

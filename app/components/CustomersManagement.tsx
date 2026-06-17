@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo, useEffect } from 'react'
 import { 
@@ -9,10 +9,13 @@ import {
   Bell, RefreshCw, Zap, BarChart3, PieChart, CheckCircle, XCircle,
   FileText, History, Send, Settings, Download, Crown, Award, UserPlus,
   Info, ArrowUpRight, ArrowDownRight, X, MessageSquare, Columns,
-  Brain, BarChart, Package, Edit, ShoppingCart, StickyNote, Save
+  Brain, BarChart, Package, Edit, ShoppingCart, StickyNote, Save, Sliders, HelpCircle
 } from 'lucide-react'
 import CustomerEventsManager from './CustomerEventsManager'
 import CustomerAnalytics from './CustomerAnalytics'
+import CustomerDetailModal from './CustomerDetailModal'
+import { CreatableSelect, CreatableSelectOption } from '@/components/ui/creatable-select'
+import { defaultTaxes } from './settings/TaxManagement'
 
 interface CustomerTag {
   id: string
@@ -53,6 +56,23 @@ interface CustomerProduct {
   quantity: number
   price: number
   status: 'active' | 'expired' | 'cancelled'
+}
+
+interface NoteAttachment {
+  id: string
+  fileName: string
+  fileSize: number
+  fileType: string
+  uploadedAt: string
+  thumbnailUrl?: string
+}
+
+interface CustomerNote {
+  id: string
+  content: string
+  createdAt: string
+  createdBy: string
+  attachments: NoteAttachment[]
 }
 
 interface Customer {
@@ -155,7 +175,7 @@ interface Customer {
   customFields?: Record<string, any>
   
   // Metadata
-  notes: string
+  notes?: CustomerNote[]
   internalNotes?: string
   createdAt: string
   updatedAt: string
@@ -210,6 +230,16 @@ export default function CustomersManagement() {
   const [selectedCustomerForOrder, setSelectedCustomerForOrder] = useState<Customer | null>(null)
   const [selectedProducts, setSelectedProducts] = useState<string[]>([])
   const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({}) // Track package for each product
+  const [productQuantities, setProductQuantities] = useState<{[productId: string]: number}>({}) // Track quantity for each product
+  const [orderNotes, setOrderNotes] = useState('') // Order notes
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả') // Category filter
+  const [paymentDeadline, setPaymentDeadline] = useState('')
+  const [discountPercent, setDiscountPercent] = useState(0)
+  const [discountType, setDiscountType] = useState<'%' | 'VND'>('%')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [paymentMode, setPaymentMode] = useState<'full' | 'installment'>('full')
+  const [paymentInstallments, setPaymentInstallments] = useState(1)
+  const [installmentData, setInstallmentData] = useState([{amount: 0, date: ''}])
   const [newOrderData, setNewOrderData] = useState({
     notes: '',
     discountPercent: 0,
@@ -217,6 +247,8 @@ export default function CustomersManagement() {
     totalAmount: 0,
     finalAmount: 0
   })
+  const [taxId, setTaxId] = useState('vat-10')
+  const [taxRate, setTaxRate] = useState(10)
 
   // Available products and packages list
   const availableProducts = [
@@ -270,6 +302,7 @@ export default function CustomersManagement() {
     if (showCreateOrderModal) {
       handleOrderDiscountChange(newOrderData.discountPercent)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedProducts, selectedPackages, showCreateOrderModal])
 
   const [showFilters, setShowFilters] = useState(false)
@@ -312,6 +345,7 @@ export default function CustomersManagement() {
   const [editReason, setEditReason] = useState('')
   
   const [showColumnSelector, setShowColumnSelector] = useState(false)
+  const [openActionMenu, setOpenActionMenu] = useState<number | null>(null)
   const [visibleColumns, setVisibleColumns] = useState({
     checkbox: true,
     no: true,
@@ -342,6 +376,90 @@ export default function CustomersManagement() {
   const [sortBy, setSortBy] = useState('name')
   const [showRemarketingModal, setShowRemarketingModal] = useState(false)
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false)
+  const [addCustomerStep, setAddCustomerStep] = useState<1 | 2>(1)
+  const [showCustomerFieldSettingsModal, setShowCustomerFieldSettingsModal] = useState(false)
+  
+  // Customer form field visibility state
+  const [customerFormFieldVisibility, setCustomerFormFieldVisibility] = useState({
+    phone: true,
+    email: true,
+    customerName: true,
+    company: true,
+    position: true,
+    industry: true,
+    companySize: true,
+    website: false,
+    address: true,
+    source: true,
+    region: true,
+    assignedTo: true,
+    product: true,
+    content: true,
+    notes: true
+  })
+
+  // Customer source options
+  const defaultCustomerSourceOptions: CreatableSelectOption[] = [
+    { value: 'website', label: 'Website', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'facebook', label: 'Facebook', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'google', label: 'Google Ads', color: 'bg-red-100 text-red-700 border-red-200' },
+    { value: 'referral', label: 'Giới thiệu', color: 'bg-green-100 text-green-700 border-green-200' },
+    { value: 'cold-call', label: 'Cold Call', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    { value: 'exhibition', label: 'Triển lãm', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { value: 'linkedin', label: 'LinkedIn', color: 'bg-sky-100 text-sky-700 border-sky-200' },
+    { value: 'email-marketing', label: 'Email Marketing', color: 'bg-pink-100 text-pink-700 border-pink-200' },
+    { value: 'webinar', label: 'Webinar', color: 'bg-teal-100 text-teal-700 border-teal-200' },
+    { value: 'partner', label: 'Đối tác', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+  ]
+
+  // Customer industry options
+  const defaultCustomerIndustryOptions: CreatableSelectOption[] = [
+    { value: 'technology', label: 'Công nghệ thông tin', color: 'bg-blue-100 text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'finance', label: 'Tài chính - Ngân hàng', color: 'bg-green-100 text-green-700 border-green-200' },
+    { value: 'healthcare', label: 'Y tế - Sức khỏe', color: 'bg-red-100 text-red-700 border-red-200' },
+    { value: 'education', label: 'Giáo dục', color: 'bg-purple-100 text-purple-700 border-purple-200' },
+    { value: 'retail', label: 'Bán lẻ', color: 'bg-orange-100 text-orange-700 border-orange-200' },
+    { value: 'manufacturing', label: 'Sản xuất', color: 'bg-gray-100 text-gray-700 border-[#e6ebf1]' },
+    { value: 'real-estate', label: 'Bất động sản', color: 'bg-yellow-100 text-yellow-700 border-yellow-200' },
+    { value: 'consulting', label: 'Tư vấn', color: 'bg-[#f0f7ff] text-[#3e79f7] border-[#c7d9fd]' },
+    { value: 'marketing', label: 'Marketing', color: 'bg-pink-100 text-pink-700 border-pink-200' },
+    { value: 'logistics', label: 'Vận chuyển - Logistics', color: 'bg-teal-100 text-teal-700 border-teal-200' },
+  ]
+
+  const [customCustomerSources, setCustomCustomerSources] = useState<CreatableSelectOption[]>([])
+  const [customCustomerIndustries, setCustomCustomerIndustries] = useState<CreatableSelectOption[]>([])
+  
+  const allCustomerSourceOptions = [...defaultCustomerSourceOptions, ...customCustomerSources]
+  const allCustomerIndustryOptions = [...defaultCustomerIndustryOptions, ...customCustomerIndustries]
+
+  // Handler to add new customer source
+  const handleAddNewCustomerSource = (label: string) => {
+    const newValue = label.toLowerCase().replace(/\s+/g, '-')
+    const colors = ['bg-cyan-100 text-cyan-700 border-cyan-200', 'bg-emerald-100 text-emerald-700 border-emerald-200', 'bg-amber-100 text-amber-700 border-amber-200']
+    const randomColor = colors[customCustomerSources.length % colors.length]
+    setCustomCustomerSources(prev => [...prev, { value: newValue, label, color: randomColor }])
+  }
+
+  // Handler to add new customer industry
+  const handleAddNewCustomerIndustry = (label: string) => {
+    const newValue = label.toLowerCase().replace(/\s+/g, '-')
+    const colors = ['bg-cyan-100 text-cyan-700 border-cyan-200', 'bg-emerald-100 text-emerald-700 border-emerald-200', 'bg-amber-100 text-amber-700 border-amber-200']
+    const randomColor = colors[customCustomerIndustries.length % colors.length]
+    setCustomCustomerIndustries(prev => [...prev, { value: newValue, label, color: randomColor }])
+  }
+
+  // Currency format helper for customer form
+  const formatCustomerCurrencyInput = (value: string): string => {
+    const numericValue = value.replace(/\D/g, '')
+    if (!numericValue) return ''
+    return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+  }
+
+  const handleCustomerEstimatedRevenueChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const formatted = formatCustomerCurrencyInput(e.target.value)
+    setNewCustomerData(prev => ({ ...prev}))
+  }
+
   const [showRankingDefinitionModal, setShowRankingDefinitionModal] = useState(false)
   const [isEditingRanking, setIsEditingRanking] = useState(false)
   const [rankingSettings, setRankingSettings] = useState({
@@ -384,6 +502,7 @@ export default function CustomersManagement() {
   const [selectedCustomerIds, setSelectedCustomerIds] = useState<string[]>([])
   const [selectAll, setSelectAll] = useState(false)
   const [showQuickTaskModal, setShowQuickTaskModal] = useState(false)
+  const [showExportDropdown, setShowExportDropdown] = useState(false)
   const [quickTaskData, setQuickTaskData] = useState({
     title: '',
     description: '',
@@ -491,7 +610,7 @@ export default function CustomersManagement() {
     company: '',
     position: '',
     industry: '',
-    companySize: 'small',
+    companySize: '',
     customerType: 'individual', // Changed from 'bronze' to 'individual'
     status: 'active',
     preferredChannel: 'email',
@@ -503,6 +622,10 @@ export default function CustomersManagement() {
     source: 'website', // Added source field
     marketingConsent: false,
     smsConsent: false,
+    estimatedRevenue: '', // Doanh thu ước tính
+    province: 'hcm', // Tỉnh thành
+    assignedTo: '', // Phân công cho
+    interestedContent: '', // Nội dung quan tâm
     // Required product fields - now supporting multiple products
     selectedProducts: [] as Array<{
       productId: string,
@@ -789,7 +912,7 @@ export default function CustomersManagement() {
       predictedRevenue: 3500000,
       supportTickets: 3,
       supportPriority: 'high',
-      notes: 'Khách hàng VIP, luôn đánh giá cao dịch vụ',
+      notes: [],
       internalNotes: 'Có thể nâng cấp lên gói Enterprise',
       createdAt: '2023-01-15',
       updatedAt: '2024-01-22',
@@ -910,7 +1033,7 @@ export default function CustomersManagement() {
       predictedRevenue: 800000,
       supportTickets: 1,
       supportPriority: 'medium',
-      notes: 'Quan tâm đến công nghệ AI, thường yêu cầu demo',
+      notes: [],
       createdAt: '2023-06-10',
       updatedAt: '2024-01-20',
       createdBy: 'sales_rep',
@@ -1034,7 +1157,7 @@ export default function CustomersManagement() {
       predictedRevenue: 600000,
       supportTickets: 8,
       supportPriority: 'high',
-      notes: 'Khách hàng ít tương tác, cần chăm sóc đặc biệt',
+      notes: [],
       internalNotes: 'Có vấn đề về thanh toán, cần theo dõi',
       createdAt: '2023-03-20',
       updatedAt: '2023-12-01',
@@ -1145,7 +1268,8 @@ export default function CustomersManagement() {
       totalSpent: 450000,
       averageOrderFrequency: 1,
       supportTickets: 0,
-      supportPriority: 'low',      notes: 'Khách hàng mới, tiềm năng phát triển',
+      supportPriority: 'low',
+      notes: [],
       createdAt: '2023-12-01',
       updatedAt: '2024-01-16',
       createdBy: 'sales_rep',
@@ -1230,7 +1354,8 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0.5,
       supportTickets: 2,
       supportPriority: 'low',
-      notes: 'Khách hàng ngưng hoạt động từ Q3/2023',      internalNotes: 'Chuyển sang đối thủ cạnh tranh',
+      notes: [],
+      internalNotes: 'Chuyển sang đối thủ cạnh tranh',
       createdAt: '2022-05-10',
       updatedAt: '2023-09-10',
       createdBy: 'sales_manager',
@@ -1356,7 +1481,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 1.2,
       supportTickets: 0,
       supportPriority: 'medium',
-      notes: 'Freelancer làm web design, quan tâm đến tools thiết kế',
+      notes: [],
       createdAt: '2023-10-05',
       updatedAt: '2024-01-12',
       createdBy: 'online_form',
@@ -1457,7 +1582,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 2,
       supportTickets: 1,
       supportPriority: 'high',
-      notes: 'Giáo viên tiểu học, mua phần mềm giáo dục cho lớp học',
+      notes: [],
       createdAt: '2023-05-20',
       updatedAt: '2024-01-07',
       createdBy: 'facebook_lead',
@@ -1508,7 +1633,7 @@ export default function CustomersManagement() {
       customerType: 'returning',
       tags: [
         { id: '9', name: 'Khách hàng quay lại', color: 'bg-green-100 text-green-800', category: 'value' },
-        { id: '10', name: 'Giáo dục', color: 'bg-indigo-100 text-indigo-800', category: 'behavior' }
+        { id: '10', name: 'Giáo dục', color: 'bg-[#f0f7ff] text-indigo-800', category: 'behavior' }
       ],
       totalValue: '850,000',
       lifetimeValue: '1,700,000',
@@ -1553,7 +1678,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0,
       supportTickets: 0,
       supportPriority: 'medium',
-      notes: 'Khách hàng giáo dục, mua sản phẩm định kỳ',
+      notes: [],
       createdAt: '2023-08-20',
       updatedAt: '2024-01-23',
       createdBy: 'sales_rep',
@@ -1658,7 +1783,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0.5,
       supportTickets: 5,
       supportPriority: 'low',
-      notes: 'Khách hàng đã chuyển sang đối thủ cạnh tranh',
+      notes: [],
       internalNotes: 'Không thể giữ chân, giá cả không cạnh tranh',
       createdAt: '2022-03-10',
       updatedAt: '2023-08-15',
@@ -1774,7 +1899,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0.3,
       supportTickets: 2,
       supportPriority: 'medium',
-      notes: 'Khách hàng theo mùa, thường mua cuối năm',
+      notes: [],
       internalNotes: 'Dự kiến sẽ quay lại Q1/2024',
       createdAt: '2022-01-20',
       updatedAt: '2023-12-20',
@@ -1898,7 +2023,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 2.5,
       supportTickets: 1,
       supportPriority: 'high',
-      notes: 'Khách hàng VIP trong lĩnh vực y tế, rất quan tâm đến bảo mật',
+      notes: [],
       internalNotes: 'Có thể mở rộng sang các bệnh viện khác',
       createdAt: '2022-08-10',
       updatedAt: '2024-01-24',
@@ -2020,7 +2145,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0.8,
       supportTickets: 4,
       supportPriority: 'medium',
-      notes: 'Chuyên về dự án xây dựng lớn, thường mua theo batch',
+      notes: [],
       internalNotes: 'Có tiềm năng mở rộng sang các tỉnh khác',
       createdAt: '2023-02-15',
       updatedAt: '2024-01-19',
@@ -2143,7 +2268,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 2,
       supportTickets: 2,
       supportPriority: 'low',
-      notes: 'Chủ cửa hàng thời trang, quan tâm đến marketing online',
+      notes: [],
       internalNotes: 'Có thể upsell social media management tools',
       createdAt: '2023-05-20',
       updatedAt: '2024-01-18',
@@ -2265,7 +2390,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 1,
       supportTickets: 6,
       supportPriority: 'high',
-      notes: 'Chủ chuỗi nhà hàng, gần đây ít tương tác',
+      notes: [],
       internalNotes: 'Cần follow up gấp, có nguy cơ churn cao',
       createdAt: '2023-01-10',
       updatedAt: '2024-01-05',
@@ -2345,7 +2470,7 @@ export default function CustomersManagement() {
       status: 'active',
       customerType: 'new',
       tags: [
-        { id: '23', name: 'Sách', color: 'bg-indigo-100 text-indigo-800', category: 'behavior' },
+        { id: '23', name: 'Sách', color: 'bg-[#f0f7ff] text-indigo-800', category: 'behavior' },
         { id: '24', name: 'Khách hàng mới', color: 'bg-green-100 text-green-800', category: 'value' }
       ],
       totalValue: '320,000',
@@ -2397,7 +2522,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 2,
       supportTickets: 0,
       supportPriority: 'low',
-      notes: 'Khách hàng mới trong lĩnh vực sách, rất tích cực',
+      notes: [],
       internalNotes: 'Tiềm năng phát triển tốt, có thể mở rộng',
       createdAt: '2024-01-10',
       updatedAt: '2024-01-23',
@@ -2497,7 +2622,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 1.5,
       supportTickets: 3,
       supportPriority: 'medium',
-      notes: 'Chủ xưởng ô tô, đã quay lại sau khi tạm ngưng',
+      notes: [],
       internalNotes: 'Từng dừng hợp tác 2 tháng, nay đã quay lại',
       createdAt: '2023-09-20',
       updatedAt: '2024-01-17',
@@ -2616,7 +2741,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0.6,
       supportTickets: 5,
       supportPriority: 'low',
-      notes: 'Chuỗi nhà thuốc, tạm ngưng do thay đổi hệ thống nội bộ',
+      notes: [],
       internalNotes: 'Có thể quay lại trong Q2/2024',
       createdAt: '2022-04-10',
       updatedAt: '2023-11-15',
@@ -3039,9 +3164,14 @@ export default function CustomersManagement() {
       return
     }
 
-    // Validate product and package selection
-    if (newCustomerData.selectedProducts.length === 0) {
-      alert('Vui lòng chọn ít nhất một sản phẩm và gói dịch vụ')
+    // Validate product selection from Step 2
+    if (selectedProducts.length === 0) {
+      alert('Vui lòng chọn ít nhất một sản phẩm')
+      return
+    }
+
+    if (!paymentDeadline) {
+      alert('Vui lòng chọn thời hạn thanh toán')
       return
     }
 
@@ -3103,7 +3233,7 @@ export default function CustomersManagement() {
       averageOrderFrequency: 0,
       supportTickets: 0,
       supportPriority: 'medium',
-      notes: newCustomerData.notes,
+      notes: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       createdBy: 'Admin',
@@ -3118,42 +3248,62 @@ export default function CustomersManagement() {
       }
     }
 
-    // Create order with multiple products for the new customer
-    const orderItems = newCustomerData.selectedProducts.map(product => ({
-      productId: product.productId,
-      productName: product.productName,
-      packageId: product.packageId,
-      packageName: product.packageName,
-      price: product.price,
-      features: product.features
-    }))
+    // Build order items from Step 2 state
+    const orderItems = selectedProducts.map(productId => {
+      const product = availableProducts.find(p => p.id === productId)
+      const pkgId = selectedPackages[productId]
+      const pkg = availablePackages[productId as keyof typeof availablePackages]?.find(p => p.id === pkgId)
+      const quantity = productQuantities[productId] || 1
+      return {
+        productId: productId,
+        productName: product?.name || '',
+        packageId: pkgId || '',
+        packageName: pkg?.name || 'Standard',
+        price: ((product?.price || 0) + (pkg?.price || 0)) * quantity,
+        quantity: quantity
+      }
+    })
+
+    const subtotal = orderItems.reduce((sum, item) => sum + item.price, 0)
+    const discountAmount = discountType === '%' 
+      ? subtotal * discountPercent / 100 
+      : discountPercent
+    const afterDiscount = subtotal - discountAmount
+    const vatAmount = afterDiscount * 0.1
+    const grandTotal = afterDiscount + vatAmount
     
     const newOrder = {
       id: Math.random().toString(36).substr(2, 9),
       customerId: newCustomer.id,
       customerName: newCustomer.name,
       items: orderItems,
-      totalAmount: newCustomerData.totalAmount,
-      discountPercent: newCustomerData.discountPercent,
-      paymentMethod: newCustomerData.paymentMethod,
-      finalAmount: newCustomerData.finalAmount,
-      status: 'pending_payment', // Chờ thanh toán
+      totalAmount: subtotal,
+      discountPercent: discountPercent,
+      discountType: discountType,
+      discountAmount: discountAmount,
+      vatAmount: vatAmount,
+      finalAmount: grandTotal,
+      paymentMethod: paymentMethod,
+      paymentMode: paymentMode,
+      paymentDeadline: paymentDeadline,
+      installmentData: paymentMode === 'installment' ? installmentData : [],
+      status: 'pending_payment',
       createdDate: new Date().toISOString().split('T')[0],
-      dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 7 days from now
-      notes: `Đơn hàng tự động tạo khi thêm khách hàng. Bao gồm ${orderItems.length} sản phẩm/gói.`,
+      dueDate: paymentDeadline,
+      notes: orderNotes || `Đơn hàng tự động tạo khi thêm khách hàng.`,
       itemsSummary: orderItems.map(item => `${item.productName} - ${item.packageName}`).join(', ')
     }
 
-    // Here you would normally add to the customers array and orders array
-    // For now, we'll just show a success message
-    const productsSummary = orderItems.map(item => `• ${item.productName} - ${item.packageName}: ${item.price.toLocaleString('vi-VN')} VND`).join('\n')
+    // Show success message
+    const productsSummary = orderItems.map(item => `• ${item.productName} - ${item.packageName}: ${formatCurrency(item.price.toString())} VNĐ`).join('\n')
     
-    let paymentInfo = `\nTổng tiền hàng: ${newCustomerData.totalAmount.toLocaleString('vi-VN')} VND`
-    if (newCustomerData.discountPercent > 0) {
-      paymentInfo += `\nGiảm giá (${newCustomerData.discountPercent}%): -${(newCustomerData.totalAmount * newCustomerData.discountPercent / 100).toLocaleString('vi-VN')} VND`
+    let paymentInfo = `\nTổng tiền hàng: ${formatCurrency(subtotal.toString())} VNĐ`
+    if (discountAmount > 0) {
+      paymentInfo += `\nGiảm giá: -${formatCurrency(discountAmount.toString())} VNĐ`
     }
-    paymentInfo += `\nThành tiền: ${newCustomerData.finalAmount.toLocaleString('vi-VN')} VND`
-    paymentInfo += `\nHình thức thanh toán: ${newCustomerData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}`
+    paymentInfo += `\nVAT (10%): +${formatCurrency(vatAmount.toString())} VNĐ`
+    paymentInfo += `\nTổng cộng: ${formatCurrency(grandTotal.toString())} VNĐ`
+    paymentInfo += `\nThời hạn thanh toán: ${paymentDeadline}`
     
     alert(`Khách hàng mới đã được thêm thành công!\n\nĐơn hàng ${newOrder.id} đã được tạo với trạng thái "Chờ thanh toán"\n\nSản phẩm:\n${productsSummary}${paymentInfo}`)
     
@@ -3181,12 +3331,30 @@ export default function CustomersManagement() {
       source: 'website',
       marketingConsent: false,
       smsConsent: false,
+      estimatedRevenue: '',
+      province: 'hcm',
+      assignedTo: '',
+      interestedContent: '',
       selectedProducts: [],
       totalAmount: 0,
       discountPercent: 0,
       paymentMethod: 'cash',
       finalAmount: 0
     })
+    // Reset Step 2 states
+    setSelectedProducts([])
+    setSelectedPackages({})
+    setProductQuantities({})
+    setOrderNotes('')
+    setSelectedCategory('Tất cả')
+    setPaymentDeadline('')
+    setDiscountPercent(0)
+    setDiscountType('%')
+    setPaymentMethod('cash')
+    setPaymentMode('full')
+    setPaymentInstallments(1)
+    setInstallmentData([{amount: 0, date: ''}])
+    setAddCustomerStep(1)
     setShowAddCustomerModal(false)
   }
 
@@ -3414,7 +3582,7 @@ export default function CustomersManagement() {
       {/* Remarketing Campaign Modal - Multi-step Flow */}
       {showRemarketingModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
-          <div className="bg-white rounded-lg shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-6xl w-full mx-4 max-h-[90vh] overflow-hidden">
             {/* Header with Steps */}
             <div className="flex items-center justify-between p-6 border-b bg-gradient-to-r from-orange-50 to-amber-50">
               <div className="flex items-center space-x-4">
@@ -3484,10 +3652,10 @@ export default function CustomersManagement() {
                     {/* Email Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('email')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'email' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3510,10 +3678,10 @@ export default function CustomersManagement() {
                     {/* SMS Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('sms')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'sms' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3536,10 +3704,10 @@ export default function CustomersManagement() {
                     {/* Phone Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('phone')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'phone' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3562,15 +3730,15 @@ export default function CustomersManagement() {
                     {/* Multi-Channel */}
                     <div 
                       onClick={() => setRemarketingCampaignType('multi')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'multi' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-12 h-12 bg-indigo-100 rounded-full flex items-center justify-center">
-                          <Target className="w-6 h-6 text-indigo-600" />
+                        <div className="w-12 h-12 bg-[#f0f7ff] rounded-full flex items-center justify-center">
+                          <Target className="w-6 h-6 text-[#3e79f7]" />
                         </div>
                         <div>
                           <h4 className="font-semibold text-gray-900">Multi-Channel</h4>
@@ -3588,10 +3756,10 @@ export default function CustomersManagement() {
                     {/* Social Media */}
                     <div 
                       onClick={() => setRemarketingCampaignType('social')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'social' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3614,10 +3782,10 @@ export default function CustomersManagement() {
                     {/* Promotion Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('promotion')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'promotion' 
                           ? 'border-orange-500 bg-orange-50' 
-                          : 'border-gray-200 hover:border-orange-300 hover:bg-orange-25'
+                          : 'border-[#e6ebf1] hover:border-orange-300 hover:bg-orange-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3640,10 +3808,10 @@ export default function CustomersManagement() {
                     {/* Birthday Campaign */}
                     <div 
                       onClick={() => setRemarketingCampaignType('birthday')}
-                      className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`p-6 border-2 rounded-[10px] cursor-pointer transition-all ${
                         remarketingCampaignType === 'birthday' 
                           ? 'border-pink-500 bg-pink-50' 
-                          : 'border-gray-200 hover:border-pink-300 hover:bg-pink-25'
+                          : 'border-[#e6ebf1] hover:border-pink-300 hover:bg-pink-25'
                       }`}
                     >
                       <div className="flex items-center space-x-3 mb-4">
@@ -3676,13 +3844,13 @@ export default function CustomersManagement() {
                   </div>
 
                   {/* Filters */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-lg">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 p-4 bg-gray-50 rounded-[10px]">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">Mức độ rủi ro</label>
                       <select
                         value={remarketingFilters.riskLevel}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, riskLevel: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="high">Cao (≥70%)</option>
@@ -3696,7 +3864,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.daysSinceLastContact}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, daysSinceLastContact: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="7">≥ 7 ngày</option>
@@ -3711,7 +3879,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.customerType}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, customerType: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="diamond">Kim cương</option>
@@ -3726,7 +3894,7 @@ export default function CustomersManagement() {
                       <select
                         value={remarketingFilters.engagementScore}
                         onChange={(e) => setRemarketingFilters(prev => ({ ...prev, engagementScore: e.target.value }))}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                       >
                         <option value="">Tất cả</option>
                         <option value="high">Cao (≥70)</option>
@@ -3738,7 +3906,7 @@ export default function CustomersManagement() {
 
                   {/* Birthday Campaign Specific Filters */}
                   {remarketingCampaignType === 'birthday' && (
-                    <div className="p-4 bg-pink-50 border border-pink-200 rounded-lg">
+                    <div className="p-4 bg-pink-50 border border-pink-200 rounded-[10px]">
                       <h4 className="font-medium text-pink-800 mb-3 flex items-center">
                         🎂 Bộ lọc sinh nhật
                       </h4>
@@ -3748,7 +3916,7 @@ export default function CustomersManagement() {
                           <select
                             value={remarketingFilters.birthdayPeriod}
                             onChange={(e) => setRemarketingFilters(prev => ({ ...prev, birthdayPeriod: e.target.value, birthdayMonth: '' }))}
-                            className="w-full px-3 py-2 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                            className="w-full px-3 py-2 border border-pink-300 rounded-[10px] focus:ring-2 focus:ring-pink-500"
                           >
                             <option value="">Tháng này + tháng tới (mặc định)</option>
                             <option value="today">🎯 Hôm nay</option>
@@ -3764,7 +3932,7 @@ export default function CustomersManagement() {
                           <select
                             value={remarketingFilters.birthdayMonth}
                             onChange={(e) => setRemarketingFilters(prev => ({ ...prev, birthdayMonth: e.target.value, birthdayPeriod: '' }))}
-                            className="w-full px-3 py-2 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-500"
+                            className="w-full px-3 py-2 border border-pink-300 rounded-[10px] focus:ring-2 focus:ring-pink-500"
                             disabled={remarketingFilters.birthdayPeriod !== ''}
                           >
                             <option value="">Chọn tháng sinh nhật</option>
@@ -3813,12 +3981,12 @@ export default function CustomersManagement() {
                     
                     <div className="max-h-80 overflow-y-auto space-y-2">
                       {getFilteredRemarketingCustomers().map(customer => (
-                        <div key={customer.id} className="flex items-center space-x-3 p-3 bg-white border border-gray-200 rounded-lg hover:bg-gray-50">
+                        <div key={customer.id} className="flex items-center space-x-3 p-3 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">
                           <input
                             type="checkbox"
                             checked={selectedRemarketingCustomers.find(c => c.id === customer.id) !== undefined}
                             onChange={() => handleRemarketingCustomerToggle(customer)}
-                            className="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            className="rounded border-[#e6ebf1] text-orange-600 focus:ring-orange-500"
                           />
                           <div className="w-10 h-10 bg-gradient-to-r from-orange-400 to-orange-600 rounded-full flex items-center justify-center text-white font-medium">
                             {customer.name.charAt(0)}
@@ -3890,14 +4058,14 @@ export default function CustomersManagement() {
                                 ? `🎂 Chúc mừng sinh nhật - ${new Date().toLocaleDateString('vi-VN')}`
                                 : `Remarketing ${remarketingCampaignType.toUpperCase()} - ${new Date().toLocaleDateString('vi-VN')}`
                             }
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         <div>
                           <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian bắt đầu</label>
                           <input
                             type="datetime-local"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                         {remarketingCampaignType === 'promotion' && (
@@ -3908,7 +4076,7 @@ export default function CustomersManagement() {
                               defaultValue="20"
                               min="5"
                               max="50"
-                              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                             />
                           </div>
                         )}
@@ -3916,7 +4084,7 @@ export default function CustomersManagement() {
                           <div className="space-y-3">
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">🎁 Ưu đãi sinh nhật</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="discount">Giảm giá 15%</option>
                                 <option value="gift">Quà tặng miễn phí</option>
                                 <option value="voucher">Voucher 100k</option>
@@ -3925,7 +4093,7 @@ export default function CustomersManagement() {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">📅 Gửi trước sinh nhật</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="0">Vào ngày sinh nhật</option>
                                 <option value="1">1 ngày trước</option>
                                 <option value="3">3 ngày trước</option>
@@ -3934,7 +4102,7 @@ export default function CustomersManagement() {
                             </div>
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-2">💌 Template tin nhắn</label>
-                              <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500">
+                              <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-pink-500">
                                 <option value="formal">Lời chúc trang trọng</option>
                                 <option value="friendly">Lời chúc thân thiện</option>
                                 <option value="cute">Lời chúc dễ thương</option>
@@ -3948,7 +4116,7 @@ export default function CustomersManagement() {
                           <textarea
                             rows={3}
                             placeholder="Ghi chú thêm về chiến dịch..."
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-orange-500"
                           />
                         </div>
                       </div>
@@ -3974,7 +4142,7 @@ export default function CustomersManagement() {
                   </div>
 
                   {/* Campaign Preview */}
-                  <div className={`border rounded-lg p-6 ${
+                  <div className={`border rounded-[10px] p-6 ${
                     remarketingCampaignType === 'birthday' 
                       ? 'bg-gradient-to-r from-pink-50 to-purple-50 border-pink-200' 
                       : 'bg-gradient-to-r from-orange-50 to-amber-50 border-orange-200'
@@ -4028,7 +4196,7 @@ export default function CustomersManagement() {
                     
                     {/* Birthday specific preview */}
                     {remarketingCampaignType === 'birthday' && (
-                      <div className="mt-4 p-4 bg-white rounded-lg border border-pink-200">
+                      <div className="mt-4 p-4 bg-white rounded-[10px] border border-pink-200">
                         <h5 className="font-medium text-pink-800 mb-2">💌 Preview tin nhắn sinh nhật:</h5>
                         <div className="text-sm text-gray-700 italic bg-pink-50 p-3 rounded border-l-4 border-pink-400">
                           &quot;🎉 Chúc mừng sinh nhật {selectedRemarketingCustomers[0]?.name || '[Tên khách hàng]'}! 🎂<br/>
@@ -4069,7 +4237,7 @@ export default function CustomersManagement() {
                       })
                     }
                   }}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-700 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                 >
                   {remarketingStep > 1 ? 'Quay lại' : 'Đóng'}
                 </button>
@@ -4106,7 +4274,7 @@ export default function CustomersManagement() {
                     (remarketingStep === 1 && !remarketingCampaignType) ||
                     (remarketingStep === 2 && selectedRemarketingCustomers.length === 0)
                   }
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
                 >
                   {remarketingStep < 3 ? 'Tiếp tục' : 'Chạy chiến dịch'}
                 </button>
@@ -4116,26 +4284,56 @@ export default function CustomersManagement() {
         </div>
       )}
 
-      {/* Add Customer Modal */}
+      {/* Add Customer Modal - 2 Step Flow */}
       {showAddCustomerModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="px-6 py-4 border-b border-gray-200">
+          <div className={`bg-white rounded-[10px] shadow-xl w-full mx-4 max-h-[90vh] overflow-y-auto ${addCustomerStep === 1 ? 'max-w-2xl' : 'max-w-4xl'}`}>
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <h3 className="text-lg font-semibold text-gray-900">Thêm khách hàng mới</h3>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {addCustomerStep === 1 ? 'Thêm khách hàng mới' : 'Tạo đơn hàng'}
+                  </h3>
+                  {addCustomerStep === 1 && (
+                    <button
+                      onClick={() => setShowCustomerFieldSettingsModal(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-gray-600 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 hover:text-gray-700 transition-all"
+                    >
+                      Thiết lập trường thông tin
+                    </button>
+                  )}
                 </div>
-                <button
-                  onClick={() => setShowAddCustomerModal(false)}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-3">
+                  {/* Step Indicator */}
+                  <div className="flex items-center gap-2">
+                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 1 ? 'bg-[#3e79f7] text-white' : 'bg-[#2dc56a] text-white'}`}>
+                      {addCustomerStep === 1 ? '1' : '✓'}
+                    </div>
+                    <div className="w-8 h-0.5 bg-gray-300">
+                      <div className={`h-full ${addCustomerStep === 2 ? 'bg-[#3e79f7]' : 'bg-gray-300'}`}></div>
+                    </div>
+                    <div className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold ${addCustomerStep === 2 ? 'bg-[#3e79f7] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                      2
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowAddCustomerModal(false)
+                      setAddCustomerStep(1)
+                    }}
+                    className="text-gray-400 hover:text-gray-600 transition-colors"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* Step 1: Customer Information */}
+            {addCustomerStep === 1 && (
+            <>
             <div className="p-6 space-y-6">
               {/* Customer Type Selection */}
               <div>
@@ -4144,14 +4342,14 @@ export default function CustomersManagement() {
                   Loại khách hàng
                 </h4>
                 <div className="grid grid-cols-2 gap-4">
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
                       value="individual"
                       checked={newCustomerData.customerType === 'individual'}
                       onChange={(e) => handleInputChange('customerType', e.target.value)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">👤 Cá nhân</div>
@@ -4159,14 +4357,14 @@ export default function CustomersManagement() {
                     </div>
                   </label>
                   
-                  <label className="relative flex items-center p-3 border border-gray-300 rounded-lg cursor-pointer hover:border-blue-500 transition-colors">
+                  <label className="relative flex items-center p-3 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:border-blue-500 transition-colors">
                     <input
                       type="radio"
                       name="customerType"
                       value="business"
                       checked={newCustomerData.customerType === 'business'}
                       onChange={(e) => handleInputChange('customerType', e.target.value)}
-                      className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2"
+                      className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] focus:ring-[#3e79f7] focus:ring-2"
                     />
                     <div className="ml-3">
                       <div className="text-sm font-medium text-gray-900">🏢 Công ty</div>
@@ -4176,17 +4374,15 @@ export default function CustomersManagement() {
                 </div>
               </div>
 
-              {/* Required Information */}
+              {/* Thông tin cơ bản */}
               <div>
                 <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="text-red-500">*</span>
-                  Thông tin bắt buộc
+                  <Building2 className="w-4 h-4 text-purple-500" />
+                  Thông tin cơ bản
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Tên khách hàng <span className="text-red-500">*</span>
-                    </label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tên khách hàng</label>
                     <input
                       type="text"
                       value={`${newCustomerData.firstName} ${newCustomerData.lastName}`.trim()}
@@ -4198,39 +4394,49 @@ export default function CustomersManagement() {
                         handleInputChange('lastName', lastName)
                       }}
                       placeholder="Nhập tên khách hàng..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Số điện thoại <span className="text-red-500">*</span>
-                    </label>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Số điện thoại <span className="text-red-500">*</span></label>
                     <input
                       type="tel"
                       value={newCustomerData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                       placeholder="0901234567"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
                   </div>
-                  
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-gray-700 mb-1">
-                      Email <span className="text-red-500">*</span>
-                    </label>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Email <span className="text-red-500">*</span></label>
                     <input
                       type="email"
                       value={newCustomerData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
                       placeholder="email@domain.com"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Doanh thu ước tính</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={newCustomerData.estimatedRevenue}
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '')
+                          handleInputChange('estimatedRevenue', value ? formatCurrency(value) : '')
+                        }}
+                        placeholder="1.000.000"
+                        className="w-full px-3 py-2 pr-12 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">VNĐ</span>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Company Information - Only show for business customers */}
+              {/* Thông tin công ty - Only show for business customers */}
               {newCustomerData.customerType === 'business' && (
                 <div>
                   <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
@@ -4245,10 +4451,9 @@ export default function CustomersManagement() {
                         value={newCustomerData.company}
                         onChange={(e) => handleInputChange('company', e.target.value)}
                         placeholder="Tên công ty..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Chức vụ</label>
                       <input
@@ -4256,303 +4461,691 @@ export default function CustomersManagement() {
                         value={newCustomerData.position}
                         onChange={(e) => handleInputChange('position', e.target.value)}
                         placeholder="CEO, Manager..."
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                       />
                     </div>
-                    
                     <div>
                       <label className="block text-xs font-medium text-gray-700 mb-1">Ngành nghề</label>
-                      <select 
+                      <CreatableSelect
+                        options={allCustomerIndustryOptions}
                         value={newCustomerData.industry}
-                        onChange={(e) => handleInputChange('industry', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Chọn ngành nghề</option>
-                        <option value="Công nghệ">Công nghệ</option>
-                        <option value="Tài chính">Tài chính</option>
-                        <option value="Y tế">Y tế</option>
-                        <option value="Bán lẻ">Bán lẻ</option>
-                        <option value="Sản xuất">Sản xuất</option>
-                        <option value="Giáo dục">Giáo dục</option>
-                        <option value="Bất động sản">Bất động sản</option>
-                        <option value="Khác">Khác</option>
-                      </select>
+                        onChange={(value) => handleInputChange('industry', value)}
+                        onAddNew={handleAddNewCustomerIndustry}
+                        placeholder="Lựa chọn hoặc thêm mới"
+                      />
                     </div>
-                    
                     <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty</label>
-                      <select 
+                      <label className="block text-xs font-medium text-gray-700 mb-1">Quy mô công ty (số nhân viên)</label>
+                      <input
+                        type="text"
                         value={newCustomerData.companySize}
-                        onChange={(e) => handleInputChange('companySize', e.target.value)}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="small">Nhỏ (1-50 nhân viên)</option>
-                        <option value="medium">Trung bình (51-200 nhân viên)</option>
-                        <option value="large">Lớn (201-1000 nhân viên)</option>
-                        <option value="enterprise">Doanh nghiệp (1000+ nhân viên)</option>
-                      </select>
+                        onChange={(e) => {
+                          const value = e.target.value.replace(/\D/g, '')
+                          handleInputChange('companySize', value)
+                        }}
+                        placeholder="Nhập số nhân viên"
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                      />
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Product and Package Selection - Required */}
+              {/* Nguồn lead & Phân công */}
               <div>
                 <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <span className="text-red-500">*</span>
-                  <Package className="w-4 h-4 text-purple-500" />
-                  Chọn sản phẩm và gói dịch vụ
-                </h4>
-                
-                {/* Add Product Section */}
-                <div className="space-y-4 p-4 bg-gray-50 rounded-lg mb-4">
-                  <h5 className="text-sm font-medium text-gray-700">Thêm sản phẩm mới:</h5>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Sản phẩm</label>
-                      <select
-                        value={tempProduct.selectedProduct}
-                        onChange={(e) => {
-                          setTempProduct(prev => ({
-                            ...prev,
-                            selectedProduct: e.target.value,
-                            selectedPackage: '' // Reset package when product changes
-                          }))
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      >
-                        <option value="">Chọn sản phẩm...</option>
-                        {products.map(product => (
-                          <option key={product.id} value={product.id}>
-                            {product.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div>
-                      <label className="block text-xs font-medium text-gray-700 mb-1">Gói dịch vụ</label>
-                      <select
-                        value={tempProduct.selectedPackage}
-                        onChange={(e) => {
-                          setTempProduct(prev => ({
-                            ...prev,
-                            selectedPackage: e.target.value
-                          }))
-                        }}
-                        disabled={!tempProduct.selectedProduct}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
-                      >
-                        <option value="">Chọn gói...</option>
-                        {tempProduct.selectedProduct && packages[tempProduct.selectedProduct as keyof typeof packages]?.map(pkg => (
-                          <option key={pkg.id} value={pkg.id}>
-                            {pkg.name} - {pkg.price.toLocaleString('vi-VN')} VND
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="flex items-end">
-                      <button
-                        type="button"
-                        onClick={addProductToCustomer}
-                        disabled={!tempProduct.selectedProduct || !tempProduct.selectedPackage}
-                        className="w-full px-3 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
-                      >
-                        <Plus className="w-4 h-4 inline mr-1" />
-                        Thêm
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Selected Products List */}
-                {newCustomerData.selectedProducts.length > 0 && (
-                  <div className="space-y-3">
-                    <h5 className="text-sm font-medium text-gray-700">Sản phẩm đã chọn:</h5>
-                    <div className="space-y-2">
-                      {newCustomerData.selectedProducts.map((product, index) => (
-                        <div key={`${product.productId}-${product.packageId}`} className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-md">
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <h6 className="text-sm font-medium text-blue-900">
-                                {product.productName} - {product.packageName}
-                              </h6>
-                              <span className="text-sm font-bold text-blue-600">
-                                {product.price.toLocaleString('vi-VN')} VND
-                              </span>
-                            </div>
-                            <div className="text-xs text-blue-700 mt-1">
-                              <strong>Tính năng:</strong> {product.features.join(', ')}
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => removeProductFromCustomer(product.productId, product.packageId)}
-                            className="ml-3 p-1 text-red-500 hover:text-red-700 hover:bg-red-100 rounded transition-colors"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                    
-                    {/* Total Amount */}
-                    <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-green-900">Tổng giá trị hàng:</span>
-                        <span className="text-lg font-bold text-green-600">
-                          {newCustomerData.totalAmount.toLocaleString('vi-VN')} VND
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Payment Information */}
-                    <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                      <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
-                      
-                      {/* Discount */}
-                      <div className="mb-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
-                          Giảm giá (%)
-                        </label>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={newCustomerData.discountPercent}
-                          onChange={(e) => handleDiscountChange(Number(e.target.value))}
-                          className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                          placeholder="0"
-                        />
-                      </div>
-
-                      {/* Payment Method */}
-                      <div className="mb-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Hình thức thanh toán
-                        </label>
-                        <div className="space-y-2">
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name="customerPaymentMethod"
-                              value="cash"
-                              checked={newCustomerData.paymentMethod === 'cash'}
-                              onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
-                          </label>
-                          <label className="flex items-center">
-                            <input
-                              type="radio"
-                              name="customerPaymentMethod"
-                              value="transfer"
-                              checked={newCustomerData.paymentMethod === 'transfer'}
-                              onChange={(e) => handlePaymentMethodChange(e.target.value)}
-                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                            />
-                            <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
-                          </label>
-                        </div>
-                      </div>
-
-                      {/* Final Amount */}
-                      <div className="bg-white rounded-md p-3 border border-blue-200">
-                        <div className="flex justify-between text-sm">
-                          <span>Tổng tiền hàng:</span>
-                          <span>{newCustomerData.totalAmount.toLocaleString('vi-VN')} VND</span>
-                        </div>
-                        {newCustomerData.discountPercent > 0 && (
-                          <div className="flex justify-between text-sm text-red-600">
-                            <span>Giảm giá ({newCustomerData.discountPercent}%):</span>
-                            <span>-{(newCustomerData.totalAmount * newCustomerData.discountPercent / 100).toLocaleString('vi-VN')} VND</span>
-                          </div>
-                        )}
-                        <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
-                          <span>Thành tiền:</span>
-                          <span className="text-green-600">{newCustomerData.finalAmount.toLocaleString('vi-VN')} VND</span>
-                        </div>
-                        <div className="text-xs text-gray-600 mt-1">
-                          Hình thức: {newCustomerData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {newCustomerData.selectedProducts.length === 0 && (
-                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                    <p className="text-sm text-yellow-700">
-                      ⚠️ Vui lòng chọn ít nhất một sản phẩm và gói dịch vụ để tiếp tục
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              {/* Optional Information */}
-              <div>
-                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
-                  <Info className="w-4 h-4 text-gray-500" />
-                  Thông tin bổ sung
+                  <Target className="w-4 h-4 text-green-500" />
+                  Nguồn lead & Phân công
                 </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Địa chỉ</label>
-                    <input
-                      type="text"
-                      value={newCustomerData.address}
-                      onChange={(e) => handleInputChange('address', e.target.value)}
-                      placeholder="Địa chỉ..."
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn</label>
+                    <CreatableSelect
+                      options={allCustomerSourceOptions}
+                      value={newCustomerData.source}
+                      onChange={(value) => handleInputChange('source', value)}
+                      onAddNew={handleAddNewCustomerSource}
+                      placeholder="Lựa chọn hoặc thêm mới"
                     />
                   </div>
-                  
                   <div>
-                    <label className="block text-xs font-medium text-gray-700 mb-1">Nguồn khách hàng</label>
-                    <select 
-                      value={newCustomerData.source}
-                      onChange={(e) => handleInputChange('source', e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Tỉnh thành</label>
+                    <select
+                      value={newCustomerData.province}
+                      onChange={(e) => handleInputChange('province', e.target.value)}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
                     >
-                      <option value="website">Website</option>
-                      <option value="referral">Giới thiệu</option>
-                      <option value="social_media">Mạng xã hội</option>
-                      <option value="advertising">Quảng cáo</option>
-                      <option value="event">Sự kiện</option>
+                      <option value="hanoi">Hà Nội</option>
+                      <option value="hcm">TP. Hồ Chí Minh</option>
+                      <option value="danang">Đà Nẵng</option>
+                      <option value="haiphong">Hải Phòng</option>
+                      <option value="cantho">Cần Thơ</option>
                       <option value="other">Khác</option>
                     </select>
                   </div>
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-medium text-gray-700 mb-1">
+                      Phân công cho
+                      <div className="inline-block ml-1 relative">
+                        <HelpCircle className="w-3 h-3 text-gray-400 hover:text-gray-600 cursor-help inline" />
+                      </div>
+                    </label>
+                    <select
+                      value={newCustomerData.assignedTo}
+                      onChange={(e) => handleInputChange('assignedTo', e.target.value)}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                    >
+                      <option value="">Mặc định (Minh Expert - người tạo)</option>
+                      <option value="Nguyễn Văn A">Nguyễn Văn A (12 leads hiện tại)</option>
+                      <option value="Trần Thị B">Trần Thị B (8 leads hiện tại)</option>
+                      <option value="Lê Văn C">Lê Văn C (15 leads hiện tại)</option>
+                      <option value="Phạm Thị D">Phạm Thị D (10 leads hiện tại)</option>
+                      <option value="Hoàng Văn E">Hoàng Văn E (6 leads hiện tại)</option>
+                      <option value="Đỗ Thị F">Đỗ Thị F (9 leads hiện tại)</option>
+                    </select>
+                  </div>
                 </div>
-                
-                <div className="mt-4">
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Ghi chú</label>
-                  <textarea
-                    value={newCustomerData.notes}
-                    onChange={(e) => handleInputChange('notes', e.target.value)}
-                    placeholder="Ghi chú về khách hàng..."
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
+              </div>
+
+              {/* Mô tả chi tiết */}
+              <div>
+                <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center gap-2">
+                  <Calendar className="w-4 h-4 text-orange-500" />
+                  Mô tả chi tiết
+                </h4>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Nội dung quan tâm</label>
+                    <textarea
+                      value={newCustomerData.interestedContent}
+                      onChange={(e) => handleInputChange('interestedContent', e.target.value)}
+                      placeholder="Mô tả nhu cầu, yêu cầu của khách hàng..."
+                      rows={3}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Ghi chú</label>
+                    <textarea
+                      value={newCustomerData.notes}
+                      onChange={(e) => handleInputChange('notes', e.target.value)}
+                      placeholder="Ghi chú thêm về khách hàng này..."
+                      rows={2}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
             
-            <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-end space-x-3">
               <button
-                onClick={() => setShowAddCustomerModal(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                onClick={() => {
+                  setShowAddCustomerModal(false)
+                  setAddCustomerStep(1)
+                }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
               >
                 Hủy
               </button>
               <button
-                onClick={handleAddCustomer}
-                disabled={!newCustomerData.firstName && !newCustomerData.lastName || !newCustomerData.email || !newCustomerData.phone || newCustomerData.selectedProducts.length === 0}
-                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                onClick={() => setAddCustomerStep(2)}
+                disabled={!newCustomerData.firstName && !newCustomerData.lastName || !newCustomerData.email || !newCustomerData.phone}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] border border-transparent rounded-[10px] hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
               >
-                Thêm khách hàng & Tạo đơn hàng ({newCustomerData.selectedProducts.length} sản phẩm)
+                Tạo đơn hàng
               </button>
+            </div>
+            </>
+            )}
+
+            {/* Step 2: Order Creation */}
+            {addCustomerStep === 2 && (
+            <>
+            {/* Customer Info Summary */}
+            <div className="flex items-center gap-3 mx-6 mt-4 mb-4 p-3 rounded-[10px]">
+              <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
+                <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
+                  <User className="h-6 w-6" />
+                </span>
+              </span>
+              <div className="flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-slate-900">
+                    {`${newCustomerData.firstName} ${newCustomerData.lastName}`.trim() || 'Khách hàng mới'}
+                  </h3>
+                </div>
+                <p className="text-sm text-slate-600">
+                  <span className="mr-3">{newCustomerData.phone}</span>
+                  <span>{newCustomerData.email}</span>
+                </p>
+              </div>
+            </div>
+
+            <div className="px-6 pb-6 space-y-4">
+              {/* Order Notes */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú đơn hàng</label>
+                <textarea
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                  rows={2}
+                  placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Chọn thể loại sản phẩm</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                >
+                  <option value="Tất cả">Tất cả</option>
+                  <option value="Sản phẩm">Sản phẩm</option>
+                </select>
+              </div>
+
+              {/* Product Selection - 2 Column Grid */}
+              <div className="bg-gray-50 rounded-[10px] p-4">
+                <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
+                <div className="max-h-80 overflow-y-auto">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
+                      <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedProducts([...selectedProducts, product.id])
+                                const defaultPackage = availablePackages[product.id as keyof typeof availablePackages]?.[0]
+                                if (defaultPackage) {
+                                  setSelectedPackages({...selectedPackages, [product.id]: defaultPackage.id})
+                                }
+                                setProductQuantities({...productQuantities, [product.id]: 1})
+                              } else {
+                                setSelectedProducts(selectedProducts.filter(id => id !== product.id))
+                                const newPackages = {...selectedPackages}
+                                delete newPackages[product.id]
+                                setSelectedPackages(newPackages)
+                                const newQuantities = {...productQuantities}
+                                delete newQuantities[product.id]
+                                setProductQuantities(newQuantities)
+                              }
+                            }}
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
+                              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{product.category}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                            <p className="text-sm font-semibold text-green-600 mt-1">{product.price.toLocaleString('vi-VN')} VNĐ</p>
+                          </div>
+                        </label>
+                        {selectedProducts.includes(product.id) && availablePackages[product.id as keyof typeof availablePackages] && (
+                          <div className="ml-7 mt-2 p-2 bg-gray-50 rounded">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Chọn gói:</label>
+                                <select
+                                  value={selectedPackages[product.id] || ''}
+                                  onChange={(e) => setSelectedPackages({...selectedPackages, [product.id]: e.target.value})}
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
+                                >
+                                  {availablePackages[product.id as keyof typeof availablePackages]?.map(pkg => (
+                                    <option key={pkg.id} value={pkg.id}>
+                                      {pkg.name} {pkg.price > 0 ? `(+${pkg.price.toLocaleString('vi-VN')} VNĐ)` : ''}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Số lượng:</label>
+                                <input
+                                  type="number"
+                                  min={1}
+                                  value={productQuantities[product.id] || 1}
+                                  onChange={(e) => setProductQuantities({...productQuantities, [product.id]: Math.max(1, parseInt(e.target.value) || 1)})}
+                                  className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">Không có sản phẩm nào trong thể loại này</p>
+                )}
+              </div>
+
+              {/* Order Summary */}
+              {selectedProducts.length > 0 && (() => {
+                const subtotal = selectedProducts.reduce((sum, productId) => {
+                  const product = availableProducts.find(p => p.id === productId)
+                  const selectedPackageId = selectedPackages[productId]
+                  const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                  const quantity = productQuantities[productId] || 1
+                  return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                }, 0)
+                const totalBeforeDiscount = subtotal
+                const discountAmount = discountType === '%' 
+                  ? totalBeforeDiscount * discountPercent / 100 
+                  : discountPercent
+                const afterDiscount = totalBeforeDiscount - discountAmount
+                const vatAmount = afterDiscount * 0.1
+                const grandTotal = afterDiscount + vatAmount
+                
+                return (
+                  <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
+                    <h5 className="text-sm font-medium text-green-800 mb-3">
+                      Đã chọn {selectedProducts.length} sản phẩm:
+                    </h5>
+                    <div className="space-y-2 text-sm">
+                      {selectedProducts.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const quantity = productQuantities[productId] || 1
+                        const productTotal = ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                        
+                        return product ? (
+                          <div key={productId} className="flex justify-between text-gray-700">
+                            <span>{product.name} ({selectedPackage?.name || 'Standard'}) x{quantity}</span>
+                            <span className="font-medium text-green-600">
+                              {formatCurrency(productTotal.toString())} VNĐ
+                            </span>
+                          </div>
+                        ) : null
+                      })}
+                      {discountAmount > 0 && (
+                        <div className="flex justify-between text-gray-600 border-t border-green-200 pt-2 mt-2">
+                          <span>Giảm giá {discountType === '%' ? `(${discountPercent}%)` : ''}:</span>
+                          <span className="font-medium text-red-500">-{formatCurrency(discountAmount.toString())} VNĐ</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-gray-600 pt-1">
+                        <span>Phí VAT (10%):</span>
+                        <span className="font-medium text-gray-700">+{formatCurrency(vatAmount.toString())} VNĐ</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-green-700 border-t border-green-300 pt-2 mt-2">
+                        <span>Tổng cộng:</span>
+                        <span className="text-lg">{formatCurrency(grandTotal.toString())} VNĐ</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Payment Info Section */}
+              <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Thời hạn thanh toán <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      value={paymentDeadline}
+                      onChange={(e) => setPaymentDeadline(e.target.value)}
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Giảm giá</label>
+                    <div className="flex items-center space-x-2">
+                      <input
+                        type="number"
+                        min="0"
+                        max={discountType === '%' ? 100 : undefined}
+                        value={discountPercent}
+                        onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
+                        placeholder="0"
+                        className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      />
+                      <select 
+                        value={discountType}
+                        onChange={(e) => {
+                          setDiscountType(e.target.value as '%' | 'VND')
+                          setDiscountPercent(0)
+                        }}
+                        className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                      >
+                        <option value="%">%</option>
+                        <option value="VND">VNĐ</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payment Method */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Hình thức thanh toán</label>
+                    <select
+                      value={paymentMethod}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                    >
+                      <option value="cash">Tiền mặt</option>
+                      <option value="bank_transfer">Chuyển khoản</option>
+                      <option value="installment">Trả góp</option>
+                      <option value="momo">Momo</option>
+                      <option value="card">Thẻ</option>
+                      <option value="custom">Tùy chỉnh</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Payment Mode */}
+                <div className="mb-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
+                    <div className="flex gap-3">
+                      <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                        <input
+                          type="radio"
+                          name="newCustomerPaymentMode"
+                          value="full"
+                          checked={paymentMode === 'full'}
+                          onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                          className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
+                      </label>
+                      <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                        <input
+                          type="radio"
+                          name="newCustomerPaymentMode"
+                          value="installment"
+                          checked={paymentMode === 'installment'}
+                          onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                          className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                        />
+                        <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Installment Details */}
+                {paymentMode === 'installment' && (
+                <div className="border-t border-[#e6ebf1] pt-4">
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Số lần thanh toán</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="12"
+                      value={paymentInstallments}
+                      onChange={(e) => {
+                        const num = Math.max(1, Math.min(12, parseInt(e.target.value) || 1))
+                        setPaymentInstallments(num)
+                        const newInstallments = Array.from({length: num}, (_, i) => 
+                          installmentData[i] || {amount: 0, date: ''}
+                        )
+                        setInstallmentData(newInstallments)
+                      }}
+                      className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                    />
+                  </div>
+
+                  {installmentData.map((installment, index) => {
+                    const subtotalCalc = selectedProducts.reduce((sum, productId) => {
+                      const product = availableProducts.find(p => p.id === productId)
+                      const selectedPackageId = selectedPackages[productId]
+                      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                      const quantity = productQuantities[productId] || 1
+                      return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                    }, 0)
+                    const discountAmountCalc = discountType === '%' 
+                      ? subtotalCalc * discountPercent / 100 
+                      : discountPercent
+                    const afterDiscountCalc = subtotalCalc - discountAmountCalc
+                    const grandTotalCalc = afterDiscountCalc + afterDiscountCalc * 0.1
+                    const otherInstallmentsTotal = installmentData.reduce((sum, inst, i) => 
+                      i !== index ? sum + inst.amount : sum, 0
+                    )
+                    const maxAllowed = Math.max(0, grandTotalCalc - otherInstallmentsTotal)
+                    const isOverLimit = installment.amount > maxAllowed
+                    
+                    return (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={formatCurrency(installment.amount.toString())}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+                            const validatedValue = Math.min(value, maxAllowed)
+                            const newData = [...installmentData]
+                            newData[index] = {...newData[index], amount: validatedValue}
+                            setInstallmentData(newData)
+                          }}
+                          placeholder="0"
+                          className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
+                        />
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <div className="flex-1">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Ngày thanh toán đợt {index + 1}
+                          </label>
+                          <input
+                            type="date"
+                            value={installment.date}
+                            onChange={(e) => {
+                              const newData = [...installmentData]
+                              newData[index] = {...newData[index], date: e.target.value}
+                              setInstallmentData(newData)
+                            }}
+                            min={new Date().toISOString().split('T')[0]}
+                            className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    )
+                  })}
+                </div>
+                )}
+              </div>
+
+              <p className="text-sm text-gray-600 mt-4">
+                Khách hàng sẽ được tạo lead và đơn hàng với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển thành khách hàng.
+              </p>
+            </div>
+
+            <div className="px-6 py-4 border-t border-[#e6ebf1] flex justify-between">
+              <button
+                onClick={() => setAddCustomerStep(1)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
+              >
+                ← Quay lại
+              </button>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    setShowAddCustomerModal(false)
+                    setAddCustomerStep(1)
+                  }}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
+                >
+                  Hủy
+                </button>
+                <button
+                  onClick={handleAddCustomer}
+                  disabled={selectedProducts.length === 0 || !paymentDeadline}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#2dc56a] border border-transparent rounded-[10px] hover:bg-[#04d182] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                >
+                  Thêm khách hàng
+                </button>
+              </div>
+            </div>
+            </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Customer Field Settings Modal */}
+      {showCustomerFieldSettingsModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4 max-h-[90vh] overflow-hidden">
+            <div className="px-6 py-4 border-b border-[#e6ebf1]">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex border border-[#e6ebf1] rounded-[10px] overflow-hidden">
+                    <button className="px-4 py-2 text-sm font-medium bg-white text-gray-900 border-r border-[#e6ebf1]">
+                      Ẩn hiện trường dữ liệu
+                    </button>
+                    <button 
+                      onClick={() => setShowCustomerFieldSettingsModal(false)}
+                      className="px-4 py-2 text-sm font-medium hover:bg-[#04d182] transition-all text-white bg-[#2dc56a] rounded-r-lg flex items-center gap-1"
+                    >
+                      Lưu
+                    </button>
+                  </div>
+                </div>
+                <button 
+                  onClick={() => setShowCustomerFieldSettingsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+            <div className="p-6 max-h-[60vh] overflow-y-auto">
+              <div className="space-y-3">
+                {/* Required fields - disabled */}
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
+                  <span className="text-sm text-gray-600">Số điện thoại</span>
+                  <input 
+                    disabled 
+                    type="checkbox" 
+                    checked 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px] border border-[#e6ebf1] opacity-70 cursor-not-allowed">
+                  <span className="text-sm text-gray-600">Email</span>
+                  <input 
+                    disabled 
+                    type="checkbox" 
+                    checked 
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded cursor-not-allowed" 
+                  />
+                </label>
+
+                {/* Configurable fields */}
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Tên khách hàng</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.customerName}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, customerName: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Công ty</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.company}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, company: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Chức vụ</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.position}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, position: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Ngành nghề</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.industry}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, industry: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Quy mô công ty</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.companySize}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, companySize: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Địa chỉ</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.address}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, address: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Nguồn</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.source}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, source: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Sản phẩm quan tâm</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.product}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, product: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Nội dung quan tâm</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.content}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, content: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                <label className="flex items-center justify-between p-3 bg-white rounded-[10px] border border-[#e6ebf1] hover:bg-gray-50 cursor-pointer">
+                  <span className="text-sm text-gray-700">Ghi chú</span>
+                  <input 
+                    type="checkbox" 
+                    checked={customerFormFieldVisibility.notes}
+                    onChange={(e) => setCustomerFormFieldVisibility(prev => ({ ...prev, notes: e.target.checked }))}
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] cursor-pointer" 
+                  />
+                </label>
+                
+                <p className="text-xs text-gray-500 mt-4 pt-3 border-t border-[#e6ebf1]">
+                  <span className="text-red-500">*</span> Số điện thoại và Email là trường bắt buộc, không thể ẩn.
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -4561,7 +5154,7 @@ export default function CustomersManagement() {
       {/* Ranking Definition Modal */}
       {showRankingDefinitionModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-hidden">
             <div className="flex items-center justify-between p-6 border-b">
               <div className="flex items-center space-x-3">
                 <Crown className="w-6 h-6 text-yellow-600" />
@@ -4574,7 +5167,7 @@ export default function CustomersManagement() {
                 {!isEditingRanking ? (
                   <button
                     onClick={() => setIsEditingRanking(true)}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-[#c7d9fd] rounded-[10px] hover:bg-blue-100 transition-colors"
                   >
                     <Edit className="w-4 h-4 mr-1" />
                     Chỉnh sửa
@@ -4583,14 +5176,14 @@ export default function CustomersManagement() {
                   <>
                     <button
                       onClick={handleSaveRankingSettings}
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-green-600 border border-transparent rounded-lg hover:bg-green-700 transition-colors"
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-[#2dc56a] border border-transparent rounded-[10px] hover:bg-[#04d182] transition-colors"
                     >
                       <Save className="w-4 h-4 mr-1" />
                       Lưu
                     </button>
                     <button
                       onClick={handleCancelEditRanking}
-                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-300 rounded-lg hover:bg-gray-200 transition-colors"
+                      className="inline-flex items-center px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-200 transition-colors"
                     >
                       Hủy
                     </button>
@@ -4609,7 +5202,7 @@ export default function CustomersManagement() {
               {/* Ranking Tiers */}
               <div className="space-y-6">
                 {/* Diamond */}
-                <div className="border border-purple-200 rounded-lg p-6 bg-gradient-to-r from-purple-50 to-pink-50">
+                <div className="border border-purple-200 rounded-[10px] p-6 bg-gradient-to-r from-purple-50 to-pink-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full flex items-center justify-center">
                       <Crown className="w-6 h-6 text-white" />
@@ -4630,7 +5223,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.totalSpent}
                               onChange={(e) => updateRankingSetting('diamond', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">VND</span>
                           </div>
@@ -4640,7 +5233,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.orderCount}
                               onChange={(e) => updateRankingSetting('diamond', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">đơn</span>
                           </div>
@@ -4650,7 +5243,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.diamond.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('diamond', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-purple-600">tháng</span>
                           </div>
@@ -4687,7 +5280,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('diamond', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('diamond', index)}
@@ -4710,7 +5303,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Gold */}
-                <div className="border border-yellow-200 rounded-lg p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
+                <div className="border border-yellow-200 rounded-[10px] p-6 bg-gradient-to-r from-yellow-50 to-amber-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-yellow-500 to-amber-500 rounded-full flex items-center justify-center">
                       <Star className="w-6 h-6 text-white" />
@@ -4731,7 +5324,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.totalSpent}
                               onChange={(e) => updateRankingSetting('gold', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">VND</span>
                           </div>
@@ -4741,7 +5334,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.orderCount}
                               onChange={(e) => updateRankingSetting('gold', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">đơn</span>
                           </div>
@@ -4751,7 +5344,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.gold.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('gold', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-yellow-600">tháng</span>
                           </div>
@@ -4788,7 +5381,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('gold', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('gold', index)}
@@ -4811,7 +5404,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Silver */}
-                <div className="border border-gray-200 rounded-lg p-6 bg-gradient-to-r from-gray-50 to-slate-50">
+                <div className="border border-[#e6ebf1] rounded-[10px] p-6 bg-gradient-to-r from-gray-50 to-slate-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-gray-400 to-slate-400 rounded-full flex items-center justify-center">
                       <Award className="w-6 h-6 text-white" />
@@ -4832,7 +5425,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.totalSpent}
                               onChange={(e) => updateRankingSetting('silver', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">VND</span>
                           </div>
@@ -4842,7 +5435,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.orderCount}
                               onChange={(e) => updateRankingSetting('silver', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">đơn</span>
                           </div>
@@ -4852,7 +5445,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.silver.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('silver', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-gray-600">tháng</span>
                           </div>
@@ -4889,7 +5482,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('silver', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('silver', index)}
@@ -4912,7 +5505,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Bronze */}
-                <div className="border border-orange-200 rounded-lg p-6 bg-gradient-to-r from-orange-50 to-amber-50">
+                <div className="border border-orange-200 rounded-[10px] p-6 bg-gradient-to-r from-orange-50 to-amber-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-amber-600 rounded-full flex items-center justify-center">
                       <UserCheck className="w-6 h-6 text-white" />
@@ -4933,7 +5526,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.totalSpent}
                               onChange={(e) => updateRankingSetting('bronze', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">VND</span>
                           </div>
@@ -4943,7 +5536,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.orderCount}
                               onChange={(e) => updateRankingSetting('bronze', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">đơn</span>
                           </div>
@@ -4953,7 +5546,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.bronze.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('bronze', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-orange-600">tháng</span>
                           </div>
@@ -4990,7 +5583,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('bronze', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('bronze', index)}
@@ -5013,7 +5606,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* New */}
-                <div className="border border-blue-200 rounded-lg p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
+                <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-gradient-to-r from-blue-50 to-indigo-50">
                   <div className="flex items-center space-x-3 mb-4">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
                       <UserPlus className="w-6 h-6 text-white" />
@@ -5025,7 +5618,7 @@ export default function CustomersManagement() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <h4 className="font-semibold text-blue-700">Tiêu chí chính:</h4>
+                      <h4 className="font-semibold text-[#3e79f7]">Tiêu chí chính:</h4>
                       {isEditingRanking ? (
                         <div className="space-y-2">
                           <div className="flex items-center space-x-2">
@@ -5034,7 +5627,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.totalSpent}
                               onChange={(e) => updateRankingSetting('new', 'totalSpent', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">VND</span>
                           </div>
@@ -5044,7 +5637,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.orderCount}
                               onChange={(e) => updateRankingSetting('new', 'orderCount', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">đơn</span>
                           </div>
@@ -5054,7 +5647,7 @@ export default function CustomersManagement() {
                               type="number"
                               value={rankingSettings.new.timeAsCustomer}
                               onChange={(e) => updateRankingSetting('new', 'timeAsCustomer', parseInt(e.target.value) || 0)}
-                              className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                              className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                             />
                             <span className="text-sm text-blue-600">tháng</span>
                           </div>
@@ -5069,7 +5662,7 @@ export default function CustomersManagement() {
                     </div>
                     <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <h4 className="font-semibold text-blue-700">Đặc quyền:</h4>
+                        <h4 className="font-semibold text-[#3e79f7]">Đặc quyền:</h4>
                         {isEditingRanking && (
                           <button
                             onClick={() => addBenefit('new')}
@@ -5091,7 +5684,7 @@ export default function CustomersManagement() {
                                   newBenefits[index] = e.target.value
                                   updateRankingSetting('new', 'benefits', newBenefits)
                                 }}
-                                className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                                className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                               />
                               <button
                                 onClick={() => removeBenefit('new', index)}
@@ -5114,11 +5707,11 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Additional Info */}
-                <div className="border border-blue-200 rounded-lg p-6 bg-blue-50">
+                <div className="border border-[#c7d9fd] rounded-[10px] p-6 bg-blue-50">
                   <h3 className="text-lg font-bold text-blue-800 mb-4">📋 Quy trình đánh giá</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                      <h4 className="font-semibold text-blue-700 mb-2">Tần suất cập nhật:</h4>
+                      <h4 className="font-semibold text-[#3e79f7] mb-2">Tần suất cập nhật:</h4>
                       <ul className="text-sm text-blue-600 space-y-1">
                         <li>• Tự động: Mỗi đơn hàng mới</li>
                         <li>• Định kỳ: Cuối mỗi tháng</li>
@@ -5126,7 +5719,7 @@ export default function CustomersManagement() {
                       </ul>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-blue-700 mb-2">Yếu tố bổ sung:</h4>
+                      <h4 className="font-semibold text-[#3e79f7] mb-2">Yếu tố bổ sung:</h4>
                       <ul className="text-sm text-blue-600 space-y-1">
                         <li>• Phản hồi khách hàng</li>
                         <li>• Mức độ tương tác</li>
@@ -5142,7 +5735,7 @@ export default function CustomersManagement() {
             <div className="flex items-center justify-end p-6 border-t bg-gray-50">
               <button
                 onClick={() => setShowRankingDefinitionModal(false)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="px-6 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff]"
               >
                 Đã hiểu
               </button>
@@ -5158,45 +5751,10 @@ export default function CustomersManagement() {
           <h1 className="text-2xl font-bold text-gray-900">Chăm sóc Khách hàng</h1>
           <p className="text-gray-600">Quản lý thông tin chi tiết và hành vi khách hàng</p>
         </div>
-        <div className="flex items-center space-x-3">
-          <div className="relative group">
-            <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
-              <Download className="w-4 h-4" />
-              <span>Xuất dữ liệu ({filteredCustomers.length})</span>
-              <ChevronDown className="w-4 h-4" />
-            </button>
-            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-              <div className="py-2">
-                <button
-                  onClick={() => handleExportData('csv')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <FileText className="w-4 h-4 text-green-600" />
-                  <span>Xuất CSV</span>
-                </button>
-                <button
-                  onClick={() => handleExportData('excel')}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2"
-                >
-                  <FileText className="w-4 h-4 text-blue-600" />
-                  <span>Xuất Excel</span>
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <button 
-            onClick={() => setShowAddCustomerModal(true)}
-            className="btn-primary flex items-center space-x-2"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Thêm khách hàng</span>
-          </button>
-        </div>
       </div>
 
-      {/* Customer Classification Section */}
-      <div className="mb-6">
+      {/* Section 1: Tổng quan - Phân loại khách hàng */}
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6 mb-6">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-lg font-semibold text-gray-800">Phân loại khách hàng</h2>
           <div className="flex items-center space-x-3">
@@ -5218,214 +5776,129 @@ export default function CustomersManagement() {
                 </button>
               </div>
             )}
-            <button 
-              onClick={() => setFilterCustomerType('')}
-              className={`px-3 py-1 text-sm rounded-lg transition-colors ${
-                !filterCustomerType 
-                  ? 'bg-blue-600 text-white' 
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              }`}
-            >
-              Tất cả ({customers.filter(c => c.products && c.products.length > 0 && c.totalSpent > 0).length})
-            </button>
-            <button 
-              onClick={() => setShowRankingDefinitionModal(true)}
-              className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors"
-            >
-              <Info className="w-4 h-4 mr-2" />
-              <span>Cài đặt phân hạng</span>
-            </button>
           </div>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-          {/* VIP Customer */}
+          {/* VIP Customer - Kim cương */}
           <div 
             onClick={() => handleCustomerTypeFilter('diamond')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'diamond' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'diamond' ? 'ring-4 ring-purple-300' : ''
             }`}
           >
-            <div className="h-2 bg-purple-500 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-purple-100 p-3 mr-4 flex items-center justify-center">
-                  <Crown className="w-5 h-5 text-purple-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng kim cương</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'diamond').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">12% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Kim cương</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'diamond').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 2</p>
+                <p className="text-sm text-white/90 font-semibold">+12%</p>
               </div>
             </div>
           </div>
 
-          {/* Gold Customer */}
+          {/* Gold Customer - Vàng */}
           <div 
             onClick={() => handleCustomerTypeFilter('gold')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'gold' ? 'border-yellow-400 ring-2 ring-yellow-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-yellow-500 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'gold' ? 'ring-4 ring-yellow-300' : ''
             }`}
           >
-            <div className="h-2 bg-yellow-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-yellow-100 p-3 mr-4 flex items-center justify-center">
-                  <Star className="w-5 h-5 text-yellow-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Vàng</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'gold').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">5% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Vàng</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'gold').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 2</p>
+                <p className="text-sm text-white/90 font-semibold">+5%</p>
               </div>
             </div>
           </div>
 
-          {/* Silver Customer */}
+          {/* Silver Customer - Bạc */}
           <div 
             onClick={() => handleCustomerTypeFilter('silver')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'silver' ? 'border-gray-400 ring-2 ring-gray-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-gray-500 to-gray-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'silver' ? 'ring-4 ring-gray-300' : ''
             }`}
           >
-            <div className="h-2 bg-gray-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-gray-100 p-3 mr-4 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-gray-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Bạc</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'silver').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">12% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Bạc</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'silver').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 3</p>
+                <p className="text-sm text-white/90 font-semibold">+12%</p>
               </div>
             </div>
           </div>
 
-          {/* Bronze Customer */}
+          {/* Bronze Customer - Đồng */}
           <div 
             onClick={() => handleCustomerTypeFilter('bronze')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'bronze' ? 'border-orange-400 ring-2 ring-orange-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-500 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'bronze' ? 'ring-4 ring-orange-300' : ''
             }`}
           >
-            <div className="h-2 bg-orange-400 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-orange-100 p-3 mr-4 flex items-center justify-center">
-                  <Award className="w-5 h-5 text-orange-500" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Đồng</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'bronze').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">3% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Đồng</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'bronze').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 3</p>
+                <p className="text-sm text-white/90 font-semibold">+3%</p>
               </div>
             </div>
           </div>
 
-          {/* New Customer */}
+          {/* New Customer - Mới */}
           <div 
             onClick={() => handleCustomerTypeFilter('new')}
-            className={`bg-white rounded-lg shadow-sm border-2 hover:shadow-md transition-all cursor-pointer ${
-              filterCustomerType === 'new' ? 'border-blue-500 ring-2 ring-blue-200' : 'border-gray-200'
+            className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
+              filterCustomerType === 'new' ? 'ring-4 ring-blue-300' : ''
             }`}
           >
-            <div className="h-2 bg-blue-500 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="flex items-center">
-                <div className="rounded-full bg-blue-100 p-3 mr-4 flex items-center justify-center">
-                  <UserPlus className="w-5 h-5 text-blue-600" />
-                </div>
-                <div>
-                  <p className="text-sm text-gray-500">Khách hàng Mới</p>
-                  <p className="text-2xl font-bold">
-                    {filteredCustomers.filter(c => c.customerType === 'new').length}
-                  </p>
-                  <div className="flex items-center text-green-600 text-xs">
-                    <ArrowUpRight className="w-3 h-3" />
-                    <span className="ml-1">15% so với tháng trước</span>
-                  </div>
-                </div>
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Mới</p>
+              <p className="text-4xl font-extrabold text-white mb-1">
+                {filteredCustomers.filter(c => c.customerType === 'new').length}
+              </p>
+              <div className="flex items-center justify-between mt-3">
+                <p className="text-sm text-white/90">T.trước: 1</p>
+                <p className="text-sm text-white/90 font-semibold">+15%</p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filter Summary */}
-      {(searchTerm || filterStatus || filterIndustry || filterTag || filterCustomerType) && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-blue-600" />
-              <span className="text-sm font-medium text-blue-900">
-                Đang áp dụng bộ lọc - Hiển thị {filteredCustomers.length} trong tổng số {customers.filter(c => c.products && c.products.length > 0 && c.totalSpent > 0).length} khách hàng
-              </span>
-              {filterCustomerType && (
-                <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">
-                  Loại: {
-                    filterCustomerType === 'diamond' ? 'Kim cương' :
-                    filterCustomerType === 'gold' ? 'Vàng' :
-                    filterCustomerType === 'silver' ? 'Bạc' :
-                    filterCustomerType === 'bronze' ? 'Đồng' :
-                    filterCustomerType === 'new' ? 'Mới' :
-                    filterCustomerType === 'returning' ? 'Quay lại' : filterCustomerType
-                  }
-                </span>
-              )}
-            </div>
-            <div className="flex items-center space-x-2">
-              <span className="text-xs text-blue-700">
-                {(searchTerm || filterStatus || filterIndustry || filterTag || filterCustomerType) && " Bộ lọc cơ bản ✓"}
-              </span>
-              <button
-                onClick={() => {
-                  setSearchTerm('')
-                  setFilterStatus('')
-                  setFilterIndustry('')
-                  setFilterTag('')
-                  setFilterCustomerType('')
-                }}
-                className="text-xs text-blue-600 hover:text-blue-800 underline"
-              >
-                Xóa tất cả bộ lọc
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Content based on selected view */}
       {selectedView === 'list' && (
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6">
+        <>
+          {/* Section 3: Thanh công cụ tìm kiếm và lọc */}
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6 mb-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Danh sách khách hàng</h3>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-3 flex-wrap gap-y-3">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                   <input
@@ -5433,34 +5906,26 @@ export default function CustomersManagement() {
                     placeholder="Tìm kiếm khách hàng..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 pr-4 py-2 w-64 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    className="pl-10 pr-4 py-2 w-64 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none"
                   />
                 </div>
                 <select 
-                  value={sortBy} 
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm"
-                >
-                  <option value="name">Sắp xếp theo tên</option>
-                  <option value="lastInteraction">Tương tác gần nhất</option>
-                  <option value="totalValue">Giá trị</option>
-                </select>
-                <select 
                   value={filterStatus} 
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
                 >
                   <option value="">Tất cả trạng thái</option>
-                  <option value="active">Hoạt động</option>
-                  <option value="inactive">Không hoạt động</option>
-                  <option value="at-risk">Có nguy cơ</option>
-                  <option value="churned">Đã churn</option>
-                  <option value="dormant">Tạm ngưng</option>
+                  <option value="vip">💎 VIP</option>
+                  <option value="active">✅ Hoạt động</option>
+                  <option value="inactive">⏸️ Không hoạt động</option>
+                  <option value="at-risk">⚠️ Có nguy cơ</option>
+                  <option value="churned">❌ Đã churn</option>
+                  <option value="dormant">💤 Tạm ngưng</option>
                 </select>
                 <select 
                   value={filterCustomerType} 
                   onChange={(e) => setFilterCustomerType(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
                 >
                   <option value="">Tất cả hạng</option>
                   <option value="diamond">Kim cương</option>
@@ -5470,9 +5935,20 @@ export default function CustomersManagement() {
                   <option value="new">Mới</option>
                   <option value="returning">Quay lại</option>
                 </select>
+                <select 
+                  value={sortBy} 
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border border-[#e6ebf1] rounded-[10px] px-3 py-2 focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] outline-none text-sm"
+                >
+                  <option value="name">Sắp xếp theo tên</option>
+                  <option value="lastInteraction">Tương tác gần nhất</option>
+                  <option value="totalValue">Giá trị</option>
+                </select>
+              </div>
+              <div className="flex items-center space-x-3">
                 <button
                   onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-                  className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
                 >
                   <Filter className="w-4 h-4" />
                   <span>Lọc nâng cao</span>
@@ -5481,43 +5957,34 @@ export default function CustomersManagement() {
                 <div className="relative">
                   <button
                     onClick={() => setShowColumnSelector(!showColumnSelector)}
-                    className="flex items-center space-x-2 px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                    className="flex items-center space-x-2 px-3 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
                   >
                     <Columns className="w-4 h-4" />
-                    <span>Cột</span>
+                    <span>Hiển thị cột</span>
                   </button>
                   {showColumnSelector && (
-                    <div className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
+                    <div className="absolute right-0 mt-2 w-80 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-20">
                       <div className="p-4">
-                        <h4 className="font-medium text-gray-900 mb-3">Hiển thị cột</h4>
-                        <div className="space-y-2">
+                        <h4 className="font-medium text-gray-900 mb-3">Tùy chỉnh cột hiển thị</h4>
+                        <div className="grid grid-cols-2 gap-x-4 gap-y-2 max-h-72 overflow-y-auto">
                           {[
-                            { key: 'checkbox', label: 'Checkbox' },
-                            { key: 'no', label: 'STT' },
-                            { key: 'customerName', label: 'Tên khách hàng' },
-                            { key: 'phoneNumber', label: 'Số điện thoại' },
-                            { key: 'email', label: 'Email' },
+                            { key: 'email', label: 'Mail' },
                             { key: 'company', label: 'Công ty' },
                             { key: 'address', label: 'Địa chỉ' },
                             { key: 'region', label: 'Khu vực' },
                             { key: 'customerType', label: 'Loại khách hàng' },
                             { key: 'segment', label: 'Phân loại' },
                             { key: 'tags', label: 'Tags' },
-                            { key: 'source', label: 'Nguồn gốc' },
+                            { key: 'source', label: 'Nguồn' },
                             { key: 'accountManager', label: 'Sales phụ trách' },
                             { key: 'status', label: 'Trạng thái' },
-                            { key: 'lifecycleStage', label: 'Lifecycle Stage' },
                             { key: 'totalOrderValue', label: 'Tổng giá trị đơn' },
                             { key: 'orderCount', label: 'Số đơn hàng' },
                             { key: 'lastOrderDate', label: 'Đơn hàng gần nhất' },
                             { key: 'averageOrderValue', label: 'Giá trị đơn TB' },
-                            { key: 'lastContactDate', label: 'Lần liên hệ cuối' },
-                            { key: 'interactionCount', label: 'Số lần tương tác' },
-                            { key: 'createdDate', label: 'Ngày tạo' },
-                            { key: 'npsScore', label: 'NPS Score' },
-                            { key: 'actions', label: 'Hành động' }
+                            { key: 'actions', label: 'Thao tác' }
                           ].map(column => (
-                            <label key={column.key} className="flex items-center space-x-2">
+                            <label key={column.key} className="flex items-center space-x-2 py-1">
                               <input
                                 type="checkbox"
                                 checked={visibleColumns[column.key as keyof typeof visibleColumns]}
@@ -5525,13 +5992,13 @@ export default function CustomersManagement() {
                                   ...prev,
                                   [column.key]: e.target.checked
                                 }))}
-                                className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                                className="w-4 h-4 text-blue-800 rounded focus:ring-[#3e79f7] border-[#e6ebf1]"
                               />
                               <span className="text-sm text-gray-700">{column.label}</span>
                             </label>
                           ))}
                         </div>
-                        <div className="flex justify-between mt-3 pt-3 border-t border-gray-200">
+                        <div className="flex gap-3 mt-4 pt-3 border-t border-[#e6ebf1]">
                           <button
                             onClick={() => setVisibleColumns({
                               checkbox: true,
@@ -5548,268 +6015,245 @@ export default function CustomersManagement() {
                               source: true,
                               accountManager: true,
                               status: true,
-                              lifecycleStage: true,
+                              lifecycleStage: false,
                               totalOrderValue: true,
                               orderCount: true,
                               lastOrderDate: true,
                               averageOrderValue: true,
-                              lastContactDate: true,
-                              interactionCount: true,
-                              createdDate: true,
-                              npsScore: true,
-                              customerScore: true,
+                              lastContactDate: false,
+                              interactionCount: false,
+                              createdDate: false,
+                              npsScore: false,
+                              customerScore: false,
                               actions: true
                             })}
-                            className="text-xs text-blue-600 hover:text-blue-800"
+                            className="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-800 rounded-[10px] hover:bg-blue-900 transition-colors"
                           >
-                            Hiện tất cả
+                            Tất cả
                           </button>
                           <button
-                            onClick={() => setShowColumnSelector(false)}
-                            className="text-xs text-gray-600 hover:text-gray-800"
+                            onClick={() => {
+                              setVisibleColumns({
+                                checkbox: true,
+                                no: true,
+                                customerName: true,
+                                phoneNumber: true,
+                                email: true,
+                                company: true,
+                                address: false,
+                                region: true,
+                                customerType: true,
+                                segment: true,
+                                tags: true,
+                                source: true,
+                                accountManager: true,
+                                status: true,
+                                lifecycleStage: false,
+                                totalOrderValue: true,
+                                orderCount: true,
+                                lastOrderDate: true,
+                                averageOrderValue: true,
+                                lastContactDate: false,
+                                interactionCount: false,
+                                createdDate: false,
+                                npsScore: false,
+                                customerScore: false,
+                                actions: true
+                              })
+                              setShowColumnSelector(false)
+                            }}
+                            className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                           >
-                            Đóng
+                            Mặc định
                           </button>
                         </div>
                       </div>
                     </div>
                   )}
                 </div>
+
+
+
+                {/* Add Customer Button */}
+                <button 
+                  onClick={() => {
+                    setAddCustomerStep(1)
+                    setSelectedProducts([])
+                    setSelectedPackages({})
+                    setProductQuantities({})
+                    setOrderNotes('')
+                    setSelectedCategory('Tất cả')
+                    setPaymentDeadline('')
+                    setDiscountPercent(0)
+                    setDiscountType('%')
+                    setPaymentMethod('cash')
+                    setPaymentMode('full')
+                    setPaymentInstallments(1)
+                    setInstallmentData([{amount: 0, date: ''}])
+                    setShowAddCustomerModal(true)
+                  }}
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] text-sm"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Thêm khách hàng</span>
+                </button>
               </div>
             </div>
 
-            {/* Advanced Filters */}
+            {/* Advanced Filters - Inside toolbar container */}
             {showAdvancedFilters && (
-              <div className="mb-4 p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <h3 className="text-sm font-medium mb-3">Bộ lọc nâng cao</h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {/* Department */}
+              <div className="mt-4 pt-4 border-t border-[#e6ebf1]">
+                {/* Row 1: 4 columns - Người phụ trách, Khu vực, Sản phẩm đã mua, Tag */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                  {/* Người phụ trách */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Phòng ban</label>
-                    <select
-                      value={filterDepartment}
-                      onChange={(e) => setFilterDepartment(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả phòng ban</option>
-                      <option value="Sales">Phòng kinh doanh</option>
-                      <option value="Marketing">Phòng marketing</option>
-                      <option value="Customer Success">Phòng chăm sóc khách hàng</option>
-                      <option value="Business Development">Phòng phát triển kinh doanh</option>
-                      <option value="Support">Phòng hỗ trợ</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Người phụ trách</label>
+                    <div className="relative">
+                      <select
+                        value={filterAssignedPerson}
+                        onChange={(e) => setFilterAssignedPerson(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="">Chọn người phụ trách</option>
+                        <option value="Nguyễn Văn A">Nguyễn Văn A</option>
+                        <option value="Trần Thị B">Trần Thị B</option>
+                        <option value="Lê Văn C">Lê Văn C</option>
+                        <option value="Phạm Thị D">Phạm Thị D</option>
+                        <option value="Hoàng Văn E">Hoàng Văn E</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
 
-                  {/* Team */}
+                  {/* Khu vực */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Team</label>
-                    <select
-                      value={filterTeam}
-                      onChange={(e) => setFilterTeam(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả team</option>
-                      <option value="Team Alpha">Team Alpha</option>
-                      <option value="Team Beta">Team Beta</option>
-                      <option value="Team Gamma">Team Gamma</option>
-                      <option value="Team Delta">Team Delta</option>
-                      <option value="Team Enterprise">Team Enterprise</option>
-                      <option value="Team SMB">Team SMB</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Khu vực</label>
+                    <div className="relative">
+                      <select
+                        value={filterRegion}
+                        onChange={(e) => setFilterRegion(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="">Chọn khu vực</option>
+                        <option value="Hà Nội">Hà Nội</option>
+                        <option value="TP.HCM">TP.HCM</option>
+                        <option value="Đà Nẵng">Đà Nẵng</option>
+                        <option value="Hải Phòng">Hải Phòng</option>
+                        <option value="Cần Thơ">Cần Thơ</option>
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
 
-                  {/* Assigned Person */}
+                  {/* Sản phẩm đã mua */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Người phụ trách</label>
-                    <select
-                      value={filterAssignedPerson}
-                      onChange={(e) => setFilterAssignedPerson(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="Nguyễn Văn A">Nguyễn Văn A</option>
-                      <option value="Trần Thị B">Trần Thị B</option>
-                      <option value="Lê Văn C">Lê Văn C</option>
-                      <option value="Phạm Thị D">Phạm Thị D</option>
-                      <option value="Hoàng Văn E">Hoàng Văn E</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Sản phẩm đã mua</label>
+                    <div className="relative">
+                      <select
+                        value={filterPurchasedProduct.length > 0 ? filterPurchasedProduct[0] : ''}
+                        onChange={(e) => {
+                          if (e.target.value) {
+                            setFilterPurchasedProduct([e.target.value])
+                          } else {
+                            setFilterPurchasedProduct([])
+                          }
+                        }}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="">Chọn sản phẩm</option>
+                        {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || []))).map(productName => (
+                          <option key={productName} value={productName}>{productName}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
 
-                  {/* Region */}
+                  {/* Tag */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Khu vực</label>
-                    <select
-                      value={filterRegion}
-                      onChange={(e) => setFilterRegion(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="Hà Nội">Hà Nội</option>
-                      <option value="TP.HCM">TP.HCM</option>
-                      <option value="Đà Nẵng">Đà Nẵng</option>
-                      <option value="Hải Phòng">Hải Phòng</option>
-                      <option value="Cần Thơ">Cần Thơ</option>
-                    </select>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Tag</label>
+                    <div className="relative">
+                      <select
+                        value={filterTag}
+                        onChange={(e) => setFilterTag(e.target.value)}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md text-sm bg-white appearance-none cursor-pointer focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="">Chọn tag</option>
+                        {Array.from(new Set(customers.flatMap(c => c.tags?.map(t => t.name) || []))).sort().map(tagName => (
+                          <option key={tagName} value={tagName}>{tagName}</option>
+                        ))}
+                      </select>
+                      <ChevronDown className="w-4 h-4 text-gray-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                    </div>
                   </div>
+                </div>
 
-                  {/* Order Value Range */}
+                {/* Row 2: Giá trị đơn hàng và Ngày mua */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  {/* Giá trị đơn hàng (VND) */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Giá trị đơn hàng (VND)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Giá trị đơn hàng (VND)</label>
                     <div className="flex gap-2">
                       <input
                         type="number"
                         placeholder="Từ"
                         value={filterOrderValue.min}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, min: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                        className="flex-1 px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                       <input
                         type="number"
                         placeholder="Đến"
                         value={filterOrderValue.max}
                         onChange={(e) => setFilterOrderValue({...filterOrderValue, max: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
+                        className="flex-1 px-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       />
                     </div>
                   </div>
 
-                  {/* Last Interaction */}
+                  {/* Ngày mua */}
                   <div>
-                    <label className="block text-sm font-medium mb-1">Tương tác gần nhất</label>
-                    <select
-                      value={filterLastInteraction}
-                      onChange={(e) => setFilterLastInteraction(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
-                    >
-                      <option value="">Tất cả</option>
-                      <option value="recent">7 ngày qua</option>
-                      <option value="week">30 ngày qua</option>
-                      <option value="month">90 ngày qua</option>
-                      <option value="old">Hơn 90 ngày</option>
-                    </select>
-                  </div>
-
-                  {/* Purchase Date Range */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Ngày mua</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Ngày mua</label>
                     <div className="flex gap-2">
-                      <input
-                        type="date"
-                        value={filterPurchaseDate.start}
-                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
-                      />
-                      <input
-                        type="date"
-                        value={filterPurchaseDate.end}
-                        onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
-                        className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded-md"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Purchased Product - improved UI */}
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Sản phẩm đã mua</label>
-                    <div className="relative">
-                      <div 
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm cursor-pointer bg-white"
-                        onClick={() => setShowProductDropdown(!showProductDropdown)}
-                      >
-                        {filterPurchasedProduct.length === 0 ? (
-                          <span className="text-gray-500">Chọn sản phẩm...</span>
-                        ) : (
-                          <span className="text-blue-600">
-                            Đã chọn {filterPurchasedProduct.length} sản phẩm
-                          </span>
-                        )}
-                        <ChevronDown className={`w-4 h-4 float-right mt-0.5 transition-transform ${showProductDropdown ? 'rotate-180' : ''}`} />
+                      <div className="flex-1 relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Calendar className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="date"
+                          placeholder="Chọn ngày bắt đầu"
+                          value={filterPurchaseDate.start}
+                          onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, start: e.target.value})}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                        />
                       </div>
-                      
-                      {showProductDropdown && (
-                        <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-300 rounded-md shadow-lg mt-1 max-h-64 overflow-hidden">
-                          {/* Search input */}
-                          <div className="p-2 border-b border-gray-200">
-                            <input
-                              type="text"
-                              placeholder="Tìm kiếm sản phẩm..."
-                              value={productSearchTerm}
-                              onChange={(e) => setProductSearchTerm(e.target.value)}
-                              className="w-full px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                            />
-                          </div>
-                          
-                          {/* Options list */}
-                          <div className="max-h-48 overflow-y-auto">
-                            {/* Clear all option */}
-                            <div 
-                              className="px-3 py-2 text-sm cursor-pointer hover:bg-gray-50 border-b border-gray-100"
-                              onClick={() => setFilterPurchasedProduct([])}
-                            >
-                              <span className="text-red-600">✗ Bỏ chọn tất cả</span>
-                            </div>
-                            
-                            {Array.from(new Set(customers.flatMap(c => c.products?.map(p => p.name) || [])))
-                              .filter(productName => 
-                                productName.toLowerCase().includes(productSearchTerm.toLowerCase())
-                              )
-                              .map(productName => (
-                                <div 
-                                  key={productName}
-                                  className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 flex items-center"
-                                  onClick={() => {
-                                    if (filterPurchasedProduct.includes(productName)) {
-                                      setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== productName))
-                                    } else {
-                                      setFilterPurchasedProduct([...filterPurchasedProduct, productName])
-                                    }
-                                  }}
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={filterPurchasedProduct.includes(productName)}
-                                    onChange={() => {}} // Handled by parent div
-                                    className="mr-2 rounded"
-                                  />
-                                  <span className="flex-1">{productName}</span>
-                                </div>
-                              ))
-                            }
-                          </div>
+                      <div className="flex-1 relative">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+                          <Calendar className="w-4 h-4" />
                         </div>
-                      )}
-                      
-                      {/* Selected products tags */}
-                      {filterPurchasedProduct.length > 0 && (
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {filterPurchasedProduct.slice(0, 3).map(product => (
-                            <span 
-                              key={product}
-                              className="inline-flex items-center px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded"
-                            >
-                              {product.length > 15 ? product.substring(0, 15) + '...' : product}
-                              <button
-                                onClick={() => setFilterPurchasedProduct(filterPurchasedProduct.filter(p => p !== product))}
-                                className="ml-1 text-blue-600 hover:text-blue-800"
-                              >
-                                ×
-                              </button>
-                            </span>
-                          ))}
-                          {filterPurchasedProduct.length > 3 && (
-                            <span className="inline-flex items-center px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-                              +{filterPurchasedProduct.length - 3} khác
-                            </span>
-                          )}
-                        </div>
-                      )}
+                        <input
+                          type="date"
+                          placeholder="Chọn ngày kết thúc"
+                          value={filterPurchaseDate.end}
+                          onChange={(e) => setFilterPurchaseDate({...filterPurchaseDate, end: e.target.value})}
+                          className="w-full pl-9 pr-3 py-2 text-sm border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Clear Advanced Filters */}
-                <div className="mt-4 pt-3 border-t border-gray-200">
+                {/* Action Buttons */}
+                <div className="flex items-center gap-3 mt-4">
+                  <button
+                    onClick={() => {
+                      // Apply filter logic
+                      setShowAdvancedFilters(false)
+                    }}
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#2dc56a] rounded-md hover:bg-[#04d182] transition-colors"
+                  >
+                    Áp dụng bộ lọc
+                  </button>
                   <button
                     onClick={() => {
                       setFilterDepartment('')
@@ -5820,10 +6264,11 @@ export default function CustomersManagement() {
                       setFilterLastInteraction('')
                       setFilterPurchaseDate({start: '', end: ''})
                       setFilterPurchasedProduct([])
+                      setFilterTag('')
                       setProductSearchTerm('')
                       setShowProductDropdown(false)
                     }}
-                    className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-md hover:bg-gray-50 transition-colors"
                   >
                     <X className="w-4 h-4" />
                     <span>Xóa bộ lọc nâng cao</span>
@@ -5831,10 +6276,14 @@ export default function CustomersManagement() {
                 </div>
               </div>
             )}
+          </div>
+          {/* End Section 3: Thanh công cụ tìm kiếm và lọc */}
 
+          {/* Section 4: Bảng danh sách khách hàng */}
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             {/* Bulk Actions Toolbar */}
             {selectedCustomerIds.length > 0 && (
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+              <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <span className="text-sm font-medium text-blue-900">
@@ -5853,15 +6302,49 @@ export default function CustomersManagement() {
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleCreateQuickTask()}
-                      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                     >
                       <Plus className="w-4 h-4" />
                       <span>Tạo task nhanh</span>
                     </button>
+                    <div className="relative">
+                      <button
+                        onClick={() => setShowExportDropdown(!showExportDropdown)}
+                        className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
+                      >
+                        <Download className="w-4 h-4" />
+                        <span>Xuất dữ liệu</span>
+                        <ChevronDown className="w-4 h-4" />
+                      </button>
+                      {showExportDropdown && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-50">
+                          <button
+                            onClick={() => {
+                              // Handle Excel export
+                              setShowExportDropdown(false)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Xuất Excel</span>
+                          </button>
+                          <button
+                            onClick={() => {
+                              // Handle CSV export
+                              setShowExportDropdown(false)
+                            }}
+                            className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700 border-t border-gray-100"
+                          >
+                            <FileText className="w-4 h-4" />
+                            <span>Xuất CSV</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                     {/* Ẩn chức năng gửi email hàng loạt theo yêu cầu */}
                     {/* <button
                       onClick={() => handleBulkEmail()}
-                      className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                      className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                     >
                       <Mail className="w-4 h-4" />
                       <span>Gửi email hàng loạt</span>
@@ -5871,91 +6354,96 @@ export default function CustomersManagement() {
               </div>
             )}
 
-            <div className="overflow-x-auto border border-gray-200 rounded-lg">
+            {/* Thông tin hiển thị */}
+            <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+              <span>Hiển thị {filteredCustomers.length} trong tổng {customers.length} khách hàng</span>
+            </div>
+
+            <div className="overflow-x-auto border border-[#e6ebf1] rounded-[10px]">
               <table className="w-full border-collapse">
                 <thead className="bg-gray-50">
-                  <tr className="border-b border-gray-300">
+                  <tr className="border-b border-[#e6ebf1]">
                     {visibleColumns.checkbox && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">
+                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                          className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                           checked={selectAll}
                           onChange={handleSelectAll}
                         />
                       </th>
                     )}
                     {visibleColumns.no && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">STT</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">STT</th>
                     )}
                     {visibleColumns.customerName && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tên khách hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TÊN KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.phoneNumber && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số điện thoại</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ ĐIỆN THOẠI</th>
                     )}
                     {visibleColumns.email && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Email</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">EMAIL</th>
                     )}
                     {visibleColumns.company && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Công ty</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">CÔNG TY</th>
                     )}
                     {visibleColumns.address && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Địa chỉ</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">ĐỊA CHỈ</th>
                     )}
                     {visibleColumns.region && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Khu vực</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">KHU VỰC</th>
                     )}
                     {visibleColumns.customerType && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Loại khách hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LOẠI KHÁCH HÀNG</th>
                     )}
                     {visibleColumns.segment && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Phân loại</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">PHÂN LOẠI</th>
                     )}
                     {visibleColumns.tags && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tags</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-[180px]">TAGS</th>
                     )}
                     {visibleColumns.source && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Nguồn gốc</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NGUỒN</th>
                     )}
                     {visibleColumns.accountManager && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Sales phụ trách</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SALES PHỤ TRÁCH</th>
                     )}
                     {visibleColumns.status && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Trạng thái</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TRẠNG THÁI</th>
                     )}
                     {visibleColumns.lifecycleStage && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Lifecycle Stage</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LIFECYCLE STAGE</th>
                     )}
                     {visibleColumns.totalOrderValue && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Tổng giá trị đơn</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">TỔNG GIÁ TRỊ ĐỠN</th>
                     )}
                     {visibleColumns.orderCount && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số đơn hàng</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ ĐƠN HÀNG</th>
                     )}
                     {visibleColumns.lastOrderDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Đơn hàng gần nhất</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">ĐƠN HÀNG GẦN NHẤT</th>
                     )}
                     {visibleColumns.averageOrderValue && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Giá trị đơn TB</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">GIÁ TRỊ ĐƠN TB</th>
                     )}
                     {visibleColumns.lastContactDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Lần liên hệ cuối</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">LẦN LIÊN HỆ CUỐI</th>
                     )}
                     {visibleColumns.interactionCount && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Số lần tương tác</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">SỐ LẦN TƯƠNG TÁC</th>
                     )}
                     {visibleColumns.createdDate && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Ngày tạo</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NGÀY TẠO</th>
                     )}
                     {visibleColumns.customerScore && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">Customer Score</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">CUSTOMER SCORE</th>
                     )}
                     {visibleColumns.npsScore && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 border-r border-gray-200 whitespace-nowrap min-w-fit">NPS Score</th>
+                      <th className="text-left py-3 px-4 font-bold text-gray-700 border-r border-[#e6ebf1] whitespace-nowrap min-w-fit">NPS SCORE</th>
                     )}
                     {visibleColumns.actions && (
-                      <th className="text-left py-3 px-4 font-medium text-gray-700 whitespace-nowrap min-w-fit">Hành động</th>
+                      <th className="text-center py-3 px-4 font-bold text-gray-700 whitespace-nowrap min-w-fit sticky right-0 bg-gray-50 z-10 shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)]">THAO TÁC</th>
                     )}
                   </tr>
                 </thead>
@@ -5965,41 +6453,32 @@ export default function CustomersManagement() {
                       index % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
                     }`}>
                       {visibleColumns.checkbox && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <input
                             type="checkbox"
-                            className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
+                            className="w-4 h-4 text-blue-600 rounded focus:ring-[#3e79f7]"
                             checked={selectedCustomerIds.includes(customer.id.toString())}
                             onChange={() => handleSelectCustomer(customer.id.toString())}
                           />
                         </td>
                       )}
                       {visibleColumns.no && (
-                        <td className="py-3 px-4 border-r border-gray-200 text-sm text-gray-700">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1] text-sm text-gray-700">
                           {index + 1}
                         </td>
                       )}
                       {visibleColumns.customerName && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <button 
                             onClick={() => handleCustomerSelect(customer)}
-                            className="flex items-center space-x-3 hover:text-blue-600 transition-colors"
+                            className="omi-link font-semibold text-left"
                           >
-                            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium ${
-                              customer.status === 'vip' ? 'bg-purple-600' :
-                              customer.status === 'active' ? 'bg-green-600' :
-                              customer.status === 'at-risk' ? 'bg-red-600' : 'bg-gray-600'
-                            }`}>
-                              {customer.name.charAt(0)}
-                            </div>
-                            <div className="text-left">
-                              <div className="font-medium text-gray-900">{customer.name}</div>
-                            </div>
+                            {customer.name}
                           </button>
                         </td>
                       )}
                       {visibleColumns.phoneNumber && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.contact}</div>
                           {customer.phone2 && (
                             <div className="text-xs text-gray-500">{customer.phone2}</div>
@@ -6007,17 +6486,17 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.email && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.email}</div>
                         </td>
                       )}
                       {visibleColumns.company && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.company || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.address && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900 max-w-xs truncate" title={`${customer.address}, ${customer.city}`}>
                             {customer.address || '-'}
                           </div>
@@ -6027,12 +6506,12 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.region && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.city || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.customerType && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.company ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
                           }`}>
@@ -6041,7 +6520,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.segment && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.status === 'vip' ? 'bg-purple-100 text-purple-800' :
                             (customer.totalSpent || 0) > 50000000 ? 'bg-yellow-100 text-yellow-800' :
@@ -6055,14 +6534,15 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.tags && (
-                        <td className="py-3 px-4 border-r border-gray-200">
-                          <div className="flex flex-wrap gap-1">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1] min-w-[180px]">
+                          <div className="flex flex-nowrap gap-1 overflow-hidden">
                             {/* Tags đồng bộ từ sales management */}
                             {customer.tags && customer.tags.length > 0 ? (
                               customer.tags.slice(0, 2).map((tag, tagIndex) => (
                                 <span 
                                   key={tagIndex}
-                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${tag.color || 'bg-blue-100 text-blue-800'}`}
+                                  className={`inline-flex px-2 py-1 text-xs font-medium rounded-full whitespace-nowrap max-w-[80px] truncate ${tag.color || 'bg-blue-100 text-blue-800'}`}
+                                  title={tag.name}
                                 >
                                   {tag.name}
                                 </span>
@@ -6073,25 +6553,25 @@ export default function CustomersManagement() {
                             
                             {/* Hiển thị số tags còn lại */}
                             {customer.tags && customer.tags.length > 2 && (
-                              <span className="text-xs text-gray-500">+{customer.tags.length - 2}</span>
+                              <span className="text-xs text-gray-500 whitespace-nowrap">+{customer.tags.length - 2}</span>
                             )}
                           </div>
                         </td>
                       )}
                       {visibleColumns.source && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className="text-sm text-gray-900">
                             🌐 Website
                           </span>
                         </td>
                       )}
                       {visibleColumns.accountManager && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.assignedSalesRep || customer.accountManager || '-'}</div>
                         </td>
                       )}
                       {visibleColumns.status && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             customer.status === 'active' ? 'bg-green-100 text-green-800' :
                             customer.status === 'inactive' ? 'bg-gray-100 text-gray-800' :
@@ -6107,7 +6587,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.lifecycleStage && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
                             (customer.totalOrders || 0) > 5 ? 'bg-purple-100 text-purple-800' :
                             (customer.totalOrders || 0) > 1 ? 'bg-green-100 text-green-800' :
@@ -6123,17 +6603,17 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.totalOrderValue && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="font-medium text-gray-900">{formatCurrency((customer.totalSpent || 0).toString())}</div>
                         </td>
                       )}
                       {visibleColumns.orderCount && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.totalOrders || 0}</div>
                         </td>
                       )}
                       {visibleColumns.lastOrderDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.lastPurchaseDate)}</div>
                           {customer.lastPurchaseDate && (
                             <div className="text-xs text-gray-500">
@@ -6143,14 +6623,14 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.averageOrderValue && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">
                             {formatCurrency((customer.totalOrders ? (customer.totalSpent || 0) / customer.totalOrders : 0).toString())}
                           </div>
                         </td>
                       )}
                       {visibleColumns.lastContactDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.lastInteraction) || 'Chưa có'}</div>
                           {customer.daysSinceLastInteraction && (
                             <div className="text-xs text-gray-500">{customer.daysSinceLastInteraction} ngày trước</div>
@@ -6158,12 +6638,12 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.interactionCount && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{customer.interactions?.length || 0}</div>
                         </td>
                       )}
                       {visibleColumns.createdDate && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">{formatDate(customer.createdAt)}</div>
                           {customer.createdAt && (
                             <div className="text-xs text-gray-500">
@@ -6173,7 +6653,7 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.customerScore && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="flex items-center space-x-2">
                             <div className="text-sm font-medium text-gray-900">{customer.engagementScore || 0}</div>
                             <div className={`w-2 h-2 rounded-full ${
@@ -6185,34 +6665,92 @@ export default function CustomersManagement() {
                         </td>
                       )}
                       {visibleColumns.npsScore && (
-                        <td className="py-3 px-4 border-r border-gray-200">
+                        <td className="py-3 px-4 border-r border-[#e6ebf1]">
                           <div className="text-sm text-gray-900">-</div>
                         </td>
                       )}
                       {visibleColumns.actions && (
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1">
+                        <td className={`py-3 px-4 text-center sticky right-0 bg-white shadow-[-2px_0_5px_-2px_rgba(0,0,0,0.1)] ${openActionMenu === customer.id ? 'z-[1000]' : 'z-10'}`}>
+                          <div className="relative inline-block">
                             <button 
-                              onClick={() => handleCustomerSelect(customer)}
-                              className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
-                              title="👁️ Chi tiết & Chỉnh sửa"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setOpenActionMenu(openActionMenu === customer.id ? null : customer.id)
+                              }}
+                              className="p-2 text-slate-500 hover:text-slate-700 hover:bg-gray-100 rounded-[10px] transition-colors"
                             >
-                              <Eye className="w-3 h-3" />
+                              <Settings className="w-5 h-5" />
                             </button>
-                            <button 
-                              onClick={() => handleCreateOrder(customer)}
-                              className="p-1.5 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
-                              title="� Tạo đơn hàng"
-                            >
-                              <ShoppingCart className="w-3 h-3" />
-                            </button>
-                            <button 
-                              onClick={() => handleQuickInteraction(customer)}
-                              className="p-1.5 bg-orange-600 text-white rounded hover:bg-orange-700 transition-colors"
-                              title="�️ Thêm tương tác nhanh"
-                            >
-                              <StickyNote className="w-3 h-3" />
-                            </button>
+                            {openActionMenu === customer.id && (
+                              <>
+                                <div 
+                                  className="fixed inset-0 z-[998]" 
+                                  onClick={() => setOpenActionMenu(null)}
+                                />
+                                <div className="absolute right-0 mt-1 w-52 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-[999] py-2">
+                                  {/* THÔNG TIN */}
+                                  <div className="px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleCustomerSelect(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <Eye className="w-4 h-4 text-gray-500" />
+                                    <span>Xem chi tiết</span>
+                                  </button>
+
+                                  {/* THAO TÁC NHANH */}
+                                  <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thao tác nhanh</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleCreateOrder(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <ShoppingCart className="w-4 h-4 text-gray-500" />
+                                    <span>Tạo đơn hàng</span>
+                                  </button>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleQuickInteraction(customer)
+                                      setOpenActionMenu(null)
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                                  >
+                                    <StickyNote className="w-4 h-4 text-gray-500" />
+                                    <span>Ghi chú</span>
+                                  </button>
+
+                                  {/* THAO TÁC NGUY HIỂM */}
+                                  <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                                    <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Thao tác nguy hiểm</span>
+                                  </div>
+                                  <button 
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      if (confirm('Bạn có chắc chắn muốn xóa khách hàng này?')) {
+                                        // Handle delete customer
+                                        setOpenActionMenu(null)
+                                      }
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3"
+                                  >
+                                    <XCircle className="w-4 h-4 text-red-500" />
+                                    <span>Xóa khách hàng</span>
+                                  </button>
+                                </div>
+                              </>
+                            )}
                           </div>
                         </td>
                       )}
@@ -6222,12 +6760,15 @@ export default function CustomersManagement() {
               </table>
             </div>
           </div>
-        </div>
-      )}      {selectedView === 'analytics' && (
+          {/* End Section 4: Bảng danh sách khách hàng */}
+        </>
+      )}
+
+      {selectedView === 'analytics' && (
         <div className="space-y-6">
           {/* Overview Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tổng khách hàng</p>
@@ -6241,7 +6782,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tổng doanh thu</p>
@@ -6259,7 +6800,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Doanh thu trung bình/KH</p>
@@ -6277,7 +6818,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-gray-600">Tỷ lệ giữ chân</p>
@@ -6296,11 +6837,11 @@ export default function CustomersManagement() {
 
           {/* Status Distribution */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố theo trạng thái</h3>
               <div className="space-y-3">
                 {[
-                  { status: 'active', label: 'Hoạt động', color: 'bg-green-500', textColor: 'text-green-600', icon: '✅' },
+                  { status: 'active', label: 'Hoạt động', color: 'bg-[#2dc56a]', textColor: 'text-green-600', icon: '✅' },
                   { status: 'at-risk', label: 'Có nguy cơ', color: 'bg-red-500', textColor: 'text-red-600', icon: '⚠️' },
                   { status: 'inactive', label: 'Không hoạt động', color: 'bg-gray-500', textColor: 'text-gray-600', icon: '⏸️' },
                   { status: 'churned', label: 'Đã rời bỏ', color: 'bg-orange-500', textColor: 'text-orange-600', icon: '❌' },
@@ -6324,7 +6865,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân bố theo loại khách hàng</h3>
               <div className="space-y-3">
                 {[
@@ -6354,7 +6895,7 @@ export default function CustomersManagement() {
 
           {/* Performance Metrics */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Điểm tương tác</h3>
                 <Activity className="w-5 h-5 text-blue-600" />
@@ -6383,7 +6924,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Rủi ro Churn</h3>
                 <AlertTriangle className="w-5 h-5 text-red-600" />
@@ -6412,7 +6953,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold text-gray-900">Điểm trung thành</h3>
                 <Star className="w-5 h-5 text-yellow-600" />
@@ -6444,7 +6985,7 @@ export default function CustomersManagement() {
 
           {/* Industry & Geographic Analysis */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân tích theo ngành nghề</h3>
               <div className="space-y-3">
                 {(() => {
@@ -6458,7 +6999,7 @@ export default function CustomersManagement() {
                       .reduce((sum, c) => sum + parseInt(c.totalValue.replace(/,/g, '')), 0) / count || 0
                     
                     return (
-                      <div key={industry} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={industry} className="p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center justify-between">
                           <span className="text-sm font-medium text-gray-900">{industry}</span>
                           <span className="text-sm text-gray-600">{count} KH ({percentage}%)</span>
@@ -6473,7 +7014,7 @@ export default function CustomersManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Phân tích theo khu vực</h3>
               <div className="space-y-3">
                 {(() => {
@@ -6487,7 +7028,7 @@ export default function CustomersManagement() {
                       .reduce((sum, c) => sum + parseInt(c.totalValue.replace(/,/g, '')), 0) / count || 0
                     
                     return (
-                      <div key={city} className="p-3 bg-gray-50 rounded-lg">
+                      <div key={city} className="p-3 bg-gray-50 rounded-[10px]">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center space-x-2">
                             <MapPin className="w-4 h-4 text-gray-400" />
@@ -6507,7 +7048,7 @@ export default function CustomersManagement() {
           </div>
 
           {/* Communication Preferences */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Phản hồi và Tương tác</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="text-center">
@@ -6550,10 +7091,10 @@ export default function CustomersManagement() {
           </div>
 
           {/* Remarketing Insights */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin Remarketing</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-              <div className="text-center p-4 bg-orange-50 rounded-lg">
+              <div className="text-center p-4 bg-orange-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-orange-600">
                   {remarketingCustomers.length}
                 </div>
@@ -6562,21 +7103,21 @@ export default function CustomersManagement() {
                   {filteredCustomers.length > 0 ? ((remarketingCustomers.length / filteredCustomers.length) * 100).toFixed(1) : 0}% tổng KH
                 </div>
               </div>
-              <div className="text-center p-4 bg-red-50 rounded-lg">
+              <div className="text-center p-4 bg-red-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-red-600">
                   {remarketingCustomers.filter(c => c.remarketing.priority === 'high').length}
                 </div>
                 <div className="text-sm text-red-700 mt-1">Ưu tiên cao</div>
                 <div className="text-xs text-red-600 mt-1">Cần xử lý ngay</div>
               </div>
-              <div className="text-center p-4 bg-yellow-50 rounded-lg">
+              <div className="text-center p-4 bg-yellow-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-yellow-600">
                   {remarketingCustomers.filter(c => c.remarketing.priority === 'medium').length}
                 </div>
                 <div className="text-sm text-yellow-700 mt-1">Ưu tiên trung bình</div>
                 <div className="text-xs text-yellow-600 mt-1">Theo dõi thường xuyên</div>
               </div>
-              <div className="text-center p-4 bg-blue-50 rounded-lg">
+              <div className="text-center p-4 bg-blue-50 rounded-[10px]">
                 <div className="text-2xl font-bold text-blue-600">
                   {Math.round(
                     remarketingCustomers
@@ -6587,7 +7128,7 @@ export default function CustomersManagement() {
                       }, 0) / remarketingCustomers.filter(c => c.remarketing.campaigns.length > 0).length || 0
                   )}%
                 </div>
-                <div className="text-sm text-blue-700 mt-1">Tỷ lệ mở TB</div>
+                <div className="text-sm text-[#3e79f7] mt-1">Tỷ lệ mở TB</div>
                 <div className="text-xs text-blue-600 mt-1">Campaigns gần đây</div>
               </div>
             </div>
@@ -6599,7 +7140,7 @@ export default function CustomersManagement() {
     {/* Quick Task Modal */}
     {showQuickTaskModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-md mx-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Tạo task nhanh</h3>
             <button
@@ -6632,7 +7173,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={quickTaskData.title}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Gọi điện tư vấn sản phẩm mới"
               />
             </div>
@@ -6644,7 +7185,7 @@ export default function CustomersManagement() {
               <textarea
                 value={quickTaskData.description}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, description: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 rows={3}
                 placeholder="Mô tả chi tiết về task..."
               />
@@ -6658,7 +7199,7 @@ export default function CustomersManagement() {
                 <select
                   value={quickTaskData.priority}
                   onChange={(e) => setQuickTaskData(prev => ({ ...prev, priority: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 >
                   <option value="low">Thấp</option>
                   <option value="medium">Trung bình</option>
@@ -6675,7 +7216,7 @@ export default function CustomersManagement() {
                   type="date"
                   value={quickTaskData.dueDate}
                   onChange={(e) => setQuickTaskData(prev => ({ ...prev, dueDate: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
             </div>
@@ -6687,7 +7228,7 @@ export default function CustomersManagement() {
               <select
                 value={quickTaskData.assignedTo}
                 onChange={(e) => setQuickTaskData(prev => ({ ...prev, assignedTo: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="">Chọn người thực hiện</option>
                 <option value="me">Tôi</option>
@@ -6709,7 +7250,7 @@ export default function CustomersManagement() {
             <button
               onClick={handleSubmitQuickTask}
               disabled={!quickTaskData.title.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo task
             </button>
@@ -6719,16 +7260,27 @@ export default function CustomersManagement() {
     )}
 
     {/* Customer Detail Modal */}
-    {selectedCustomer && (
+    <CustomerDetailModal
+      isOpen={!!selectedCustomer}
+      onClose={handleCloseCustomerDetail}
+      customer={selectedCustomer}
+      onUpdate={(customerId, updates) => {
+        console.log('Update customer:', customerId, updates)
+        // In real app, call API to update customer
+      }}
+    />
+
+    {/* OLD Customer Detail Modal - REPLACED */}
+    {false as boolean && selectedCustomer && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg w-full max-w-6xl mx-4 h-[90vh] flex flex-col">
+        <div className="bg-white rounded-[10px] w-full max-w-6xl mx-4 h-[90vh] flex flex-col">
           {/* Modal Header */}
-          <div className="flex items-center justify-between p-6 border-b border-gray-200">
+          <div className="flex items-center justify-between p-6 border-b border-[#e6ebf1]">
             <div className="flex items-center space-x-3">
               <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white text-lg font-bold ${
                 selectedCustomer.status === 'vip' ? 'bg-purple-600' :
-                selectedCustomer.status === 'active' ? 'bg-green-600' :
-                selectedCustomer.status === 'at-risk' ? 'bg-red-600' : 'bg-gray-600'
+                selectedCustomer.status === 'active' ? 'bg-[#2dc56a]' :
+                selectedCustomer.status === 'at-risk' ? 'bg-[#ff6b72]' : 'bg-gray-600'
               }`}>
                 {selectedCustomer.name.charAt(0)}
               </div>
@@ -6742,14 +7294,14 @@ export default function CustomersManagement() {
                 <>
                   <button
                     onClick={handleSaveCustomer}
-                    className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
                   >
                     <Save className="w-4 h-4" />
                     <span>Lưu</span>
                   </button>
                   <button
                     onClick={() => setIsEditingCustomer(false)}
-                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                    className="px-4 py-2 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200 transition-colors"
                   >
                     Hủy
                   </button>
@@ -6757,7 +7309,7 @@ export default function CustomersManagement() {
               ) : (
                 <button
                   onClick={() => setIsEditingCustomer(true)}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                 >
                   <Edit className="w-4 h-4" />
                   <span>Chỉnh sửa</span>
@@ -6773,7 +7325,7 @@ export default function CustomersManagement() {
           </div>
 
           {/* Modal Tabs */}
-          <div className="border-b border-gray-200 px-6">
+          <div className="border-b border-[#e6ebf1] px-6">
             <nav className="flex space-x-8">
               {[
                 { id: 'details', label: 'Thông tin chi tiết', icon: User },
@@ -6787,7 +7339,7 @@ export default function CustomersManagement() {
                   className={`flex items-center space-x-2 py-3 px-1 border-b-2 text-sm font-medium transition-colors ${
                     activeTab === tab.id
                       ? 'border-blue-500 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                   }`}
                 >
                   <tab.icon className="w-4 h-4" />
@@ -6802,7 +7354,7 @@ export default function CustomersManagement() {
             {activeTab === 'details' && (
               <div className="space-y-6">
                 {/* Basic Information */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin cơ bản</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
@@ -6812,7 +7364,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.name || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, name: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.name || '-'}</p>
@@ -6833,7 +7385,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.company || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, company: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.company || '-'}</p>
@@ -6846,7 +7398,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.position || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, position: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.position || '-'}</p>
@@ -6862,7 +7414,7 @@ export default function CustomersManagement() {
                             const fullAddress = e.target.value
                             setEditCustomerData(prev => ({ ...prev, address: fullAddress }))
                           }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                           placeholder="Nhập địa chỉ đầy đủ..."
                         />
                       ) : (
@@ -6877,7 +7429,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Business Information */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thông tin kinh doanh</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
@@ -6887,7 +7439,7 @@ export default function CustomersManagement() {
                           type="text"
                           value={editCustomerData.industry || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, industry: e.target.value }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         />
                       ) : (
                         <p className="text-gray-900">{selectedCustomer.industry || '-'}</p>
@@ -6899,7 +7451,7 @@ export default function CustomersManagement() {
                         <select
                           value={editCustomerData.companySize || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, companySize: e.target.value as any }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="small">Nhỏ (1-50 nhân viên)</option>
                           <option value="medium">Trung bình (51-200 nhân viên)</option>
@@ -6921,7 +7473,7 @@ export default function CustomersManagement() {
                         <select
                           value={editCustomerData.status || ''}
                           onChange={(e) => setEditCustomerData(prev => ({ ...prev, status: e.target.value as any }))}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                         >
                           <option value="active">Hoạt động</option>
                           <option value="inactive">Không hoạt động</option>
@@ -6951,7 +7503,7 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Statistics */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Thống kê</h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                     <div className="text-center">
@@ -6979,7 +7531,7 @@ export default function CustomersManagement() {
                       <p className="text-sm text-gray-600">Tương tác gần nhất</p>
                     </div>
                     <div className="text-center">
-                      <p className="text-xl font-bold text-indigo-600">
+                      <p className="text-xl font-bold text-[#3e79f7]">
                         {selectedCustomer.lastPurchaseDate ? formatDate(selectedCustomer.lastPurchaseDate) : 'Chưa có'}
                       </p>
                       <p className="text-sm text-gray-600">Mua gần nhất</p>
@@ -6988,18 +7540,18 @@ export default function CustomersManagement() {
                 </div>
 
                 {/* Notes */}
-                <div className="bg-gray-50 rounded-lg p-6">
+                <div className="bg-gray-50 rounded-[10px] p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Ghi chú</h3>
                   {isEditingCustomer ? (
                     <textarea
-                      value={editCustomerData.notes || ''}
-                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value }))}
+                      value={(editCustomerData.notes as any) || ''}
+                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value as any }))}
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Nhập ghi chú về khách hàng..."
                     />
                   ) : (
-                    <p className="text-gray-900">{selectedCustomer.notes || 'Chưa có ghi chú'}</p>
+                    <p className="text-gray-900">{(selectedCustomer.notes as any) || 'Chưa có ghi chú'}</p>
                   )}
                 </div>
               </div>
@@ -7011,7 +7563,7 @@ export default function CustomersManagement() {
                   <h3 className="text-lg font-semibold text-gray-900">Lịch sử tương tác</h3>
                   <button
                     onClick={() => setShowAddInteractionModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors"
                   >
                     <Plus className="w-4 h-4" />
                     <span>Thêm tương tác</span>
@@ -7020,11 +7572,11 @@ export default function CustomersManagement() {
                 {selectedCustomer.interactions && selectedCustomer.interactions.length > 0 ? (
                   <div className="space-y-3">
                     {selectedCustomer.interactions.map((interaction, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center space-x-2">
                             <span className={`w-2 h-2 rounded-full ${
-                              interaction.status === 'success' ? 'bg-green-500' :
+                              interaction.status === 'success' ? 'bg-[#2dc56a]' :
                               interaction.status === 'pending' ? 'bg-yellow-500' : 'bg-red-500'
                             }`}></span>
                             <span className="font-medium text-gray-900">{interaction.title}</span>
@@ -7121,7 +7673,7 @@ export default function CustomersManagement() {
                 {selectedCustomer.products && selectedCustomer.products.length > 0 ? (
                   <div className="space-y-3">
                     {selectedCustomer.products.map((product, index) => (
-                      <div key={index} className="bg-white border border-gray-200 rounded-lg p-4">
+                      <div key={index} className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                         <div className="flex items-center justify-between mb-2">
                           <span className="font-medium text-gray-900">{product.name}</span>
                           <span className={`px-2 py-1 text-xs rounded-full ${
@@ -7162,28 +7714,28 @@ export default function CustomersManagement() {
             {activeTab === 'notes' && (
               <div className="space-y-4">
                 <h3 className="text-lg font-semibold text-gray-900">Ghi chú chi tiết</h3>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Ghi chú công khai</h4>
                   {isEditingCustomer ? (
                     <textarea
-                      value={editCustomerData.notes || ''}
-                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value }))}
+                      value={(editCustomerData.notes as any) || ''}
+                      onChange={(e) => setEditCustomerData(prev => ({ ...prev, notes: e.target.value as any }))}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Ghi chú có thể chia sẻ với team..."
                     />
                   ) : (
-                    <p className="text-gray-900">{selectedCustomer.notes || 'Chưa có ghi chú công khai'}</p>
+                    <p className="text-gray-900">{(selectedCustomer.notes as any) || 'Chưa có ghi chú công khai'}</p>
                   )}
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg p-4">
+                <div className="bg-white border border-[#e6ebf1] rounded-[10px] p-4">
                   <h4 className="font-medium text-gray-900 mb-2">Ghi chú nội bộ</h4>
                   {isEditingCustomer ? (
                     <textarea
                       value={editCustomerData.internalNotes || ''}
                       onChange={(e) => setEditCustomerData(prev => ({ ...prev, internalNotes: e.target.value }))}
                       rows={4}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                       placeholder="Ghi chú nội bộ (chỉ team bán hàng xem được)..."
                     />
                   ) : (
@@ -7200,7 +7752,7 @@ export default function CustomersManagement() {
     {/* Add Interaction Modal */}
     {showAddInteractionModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-md mx-4">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác mới</h3>
             <button
@@ -7219,7 +7771,7 @@ export default function CustomersManagement() {
               <select
                 value={newInteractionData.type}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, type: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="call">Cuộc gọi</option>
                 <option value="email">Email</option>
@@ -7238,7 +7790,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={newInteractionData.channel}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, channel: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Điện thoại, Zalo, Email, ..."
               />
             </div>
@@ -7251,7 +7803,7 @@ export default function CustomersManagement() {
                 type="text"
                 value={newInteractionData.title}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 placeholder="VD: Tư vấn sản phẩm mới"
               />
             </div>
@@ -7263,7 +7815,7 @@ export default function CustomersManagement() {
               <textarea
                 value={newInteractionData.summary}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, summary: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 rows={3}
                 placeholder="Mô tả chi tiết về cuộc tương tác..."
               />
@@ -7276,7 +7828,7 @@ export default function CustomersManagement() {
               <select
                 value={newInteractionData.status}
                 onChange={(e) => setNewInteractionData(prev => ({ ...prev, status: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="success">Thành công</option>
                 <option value="pending">Đang xử lý</option>
@@ -7295,7 +7847,7 @@ export default function CustomersManagement() {
             <button
               onClick={handleAddInteraction}
               disabled={!newInteractionData.title.trim() || !newInteractionData.channel.trim()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Thêm tương tác
             </button>
@@ -7307,279 +7859,501 @@ export default function CustomersManagement() {
     {/* Create Order Modal */}
     {showCreateOrderModal && selectedCustomerForOrder && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-[10px] p-6 w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng mới</h3>
-              <p className="text-sm text-gray-600">Khách hàng: {selectedCustomerForOrder.name}</p>
+              <h3 className="text-lg font-semibold text-gray-900">Tạo đơn hàng</h3>
             </div>
             <button
-              onClick={() => setShowCreateOrderModal(false)}
+              onClick={() => {
+                setShowCreateOrderModal(false)
+                setSelectedProducts([])
+                setSelectedPackages({})
+                setProductQuantities({})
+                setOrderNotes('')
+                setSelectedCategory('Tất cả')
+                setPaymentDeadline('')
+                setDiscountPercent(0)
+                setDiscountType('%')
+                setPaymentMethod('cash')
+                setPaymentMode('full')
+                setPaymentInstallments(1)
+                setInstallmentData([{amount: 0, date: ''}])
+                setTaxId('vat-10')
+                setTaxRate(10)
+              }}
               className="text-gray-400 hover:text-gray-600"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="space-y-4">
-            {/* Product Selection */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm</h4>
-              <div className="max-h-80 overflow-y-auto space-y-3">
-                {availableProducts.map((product) => (
-                  <div key={product.id} className="border border-gray-200 rounded-lg p-4 bg-white">
-                    {/* Product Selection */}
-                    <label className="flex items-start space-x-3 cursor-pointer mb-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedProducts.includes(product.id)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            setSelectedProducts(prev => [...prev, product.id])
-                            // Set default package to standard
-                            setSelectedPackages(prev => ({
-                              ...prev,
-                              [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
-                            }))
-                          } else {
-                            setSelectedProducts(prev => prev.filter(id => id !== product.id))
-                            // Remove package selection
-                            setSelectedPackages(prev => {
-                              const newPackages = { ...prev }
-                              delete newPackages[product.id]
-                              return newPackages
-                            })
-                          }
-                          // Recalculate totals after product change
-                          setTimeout(() => {
-                            handleOrderDiscountChange(newOrderData.discountPercent)
-                          }, 0)
-                        }}
-                        className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                      />
-                      <div className="flex-1">
-                        <div className="flex justify-between items-start">
-                          <div>
-                            <h6 className="font-medium text-gray-900">{product.name}</h6>
-                            <p className="text-sm text-gray-600">{product.description}</p>
-                          </div>
-                          <span className="font-medium text-blue-600">
-                            {formatCurrency(product.price.toString())} VNĐ
-                          </span>
-                        </div>
-                      </div>
-                    </label>
-
-                    {/* Package Selection Dropdown */}
-                    {selectedProducts.includes(product.id) && (
-                      <div className="ml-7 border-t border-gray-100 pt-3">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Chọn gói sản phẩm:
-                        </label>
-                        <select
-                          value={selectedPackages[product.id] || ''}
-                          onChange={(e) => {
-                            setSelectedPackages(prev => ({
-                              ...prev,
-                              [product.id]: e.target.value
-                            }))
-                            // Recalculate totals after package change
-                            setTimeout(() => {
-                              handleOrderDiscountChange(newOrderData.discountPercent)
-                            }, 0)
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                        >
-                          {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
-                            <option key={pkg.id} value={pkg.id}>
-                              {pkg.name} - {pkg.price > 0 ? `+${formatCurrency(pkg.price.toString())} VNĐ` : 'Miễn phí'} 
-                              {pkg.description && ` - ${pkg.description}`}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    )}
-                  </div>
-                ))}
+          {/* Customer Info */}
+          <div className="flex items-center gap-3 mb-4 p-3 rounded-[10px]">
+            <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
+              <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
+                <User className="h-6 w-6" />
+              </span>
+            </span>
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-slate-900">{selectedCustomerForOrder.name}</h3>
               </div>
+              <p className="text-sm text-slate-600">
+                {selectedCustomerForOrder.phone2 && <span className="mr-3">{selectedCustomerForOrder.phone2}</span>}
+                {selectedCustomerForOrder.email && <span>{selectedCustomerForOrder.email}</span>}
+              </p>
             </div>
+          </div>
 
+          <div className="space-y-4">
             {/* Order Notes */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Ghi chú đơn hàng</h4>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú đơn hàng</label>
               <textarea
-                value={newOrderData.notes}
-                onChange={(e) => setNewOrderData(prev => ({ ...prev, notes: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                rows={3}
-                placeholder="Ghi chú đặc biệt cho đơn hàng (không bắt buộc)..."
+                value={orderNotes}
+                onChange={(e) => setOrderNotes(e.target.value)}
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                rows={2}
+                placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
               />
             </div>
 
-            {/* Order Summary */}
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Tóm tắt đơn hàng</h4>
-              {selectedProducts.length > 0 ? (
-                <div className="space-y-3">
-                  <div className="text-sm font-medium text-gray-700 mb-2">
-                    Đã chọn {selectedProducts.length} sản phẩm:
-                  </div>
-                  <div className="space-y-2 max-h-40 overflow-y-auto">
-                    {selectedProducts.map(productId => {
-                      const product = availableProducts.find(p => p.id === productId)
-                      const selectedPackageId = selectedPackages[productId]
-                      const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
-                      const totalPrice = (product?.price || 0) + (selectedPackage?.price || 0)
-                      
-                      return product ? (
-                        <div key={productId} className="bg-white rounded p-3 shadow-sm">
-                          <div className="flex justify-between items-start mb-2">
-                            <div>
-                              <span className="font-medium text-gray-900">{product.name}</span>
-                              <div className="text-xs text-gray-500 mt-1">
-                                Sản phẩm: {formatCurrency(product.price.toString())} VNĐ
-                              </div>
-                            </div>
-                            <span className="font-medium text-blue-600">
-                              {formatCurrency(totalPrice.toString())} VNĐ
-                            </span>
+            {/* Category Filter */}
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Chọn thể loại sản phẩm</label>
+              <select
+                value={selectedCategory}
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+              >
+                <option value="Tất cả">Tất cả</option>
+                <option value="Sản phẩm">Sản phẩm</option>
+              </select>
+            </div>
+
+            {/* Product Selection - 2 Column Grid */}
+            <div className="bg-gray-50 rounded-[10px] p-4">
+              <h4 className="font-medium text-gray-900 mb-3">Chọn sản phẩm & gói sản phẩm <span className="text-red-500">*</span></h4>
+              <div className="max-h-80 overflow-y-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).map((product) => (
+                    <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
+                      {/* Product Selection */}
+                      <label className="flex items-start space-x-3 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={selectedProducts.includes(product.id)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setSelectedProducts(prev => [...prev, product.id])
+                              setSelectedPackages(prev => ({
+                                ...prev,
+                                [product.id]: availablePackages[product.id as keyof typeof availablePackages]?.[0]?.id || ''
+                              }))
+                              setProductQuantities(prev => ({
+                                ...prev,
+                                [product.id]: 1
+                              }))
+                            } else {
+                              setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                              setSelectedPackages(prev => {
+                                const newPackages = { ...prev }
+                                delete newPackages[product.id]
+                                return newPackages
+                              })
+                              setProductQuantities(prev => {
+                                const newQuantities = { ...prev }
+                                delete newQuantities[product.id]
+                                return newQuantities
+                              })
+                            }
+                          }}
+                          className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
+                            <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{product.category}</span>
                           </div>
-                          {selectedPackage && (
-                            <div className="text-sm border-t border-gray-100 pt-2">
-                              <div className="flex justify-between items-center">
-                                <span className="text-gray-600">
-                                  📦 {selectedPackage.name}
-                                </span>
-                                <span className="text-gray-600">
-                                  {selectedPackage.price > 0 ? `+${formatCurrency(selectedPackage.price.toString())} VNĐ` : 'Miễn phí'}
-                                </span>
-                              </div>
-                              {selectedPackage.description && (
-                                <div className="text-xs text-gray-500 mt-1">
-                                  {selectedPackage.description}
-                                </div>
-                              )}
-                            </div>
-                          )}
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                          <p className="text-sm font-semibold text-green-600 mt-1">{formatCurrency(product.price.toString())} VNĐ</p>
                         </div>
-                      ) : null
-                    })}
-                  </div>
-                  <div className="flex justify-between font-medium text-lg border-t border-blue-200 pt-3 mt-3">
-                    <span>Tổng cộng:</span>
-                    <span className="text-blue-600">
-                      {formatCurrency(
-                        selectedProducts.reduce((sum, productId) => {
+                      </label>
+
+                      {/* Package & Quantity Selection */}
+                      {selectedProducts.includes(product.id) && availablePackages[product.id as keyof typeof availablePackages] && (
+                        <div className="ml-7 mt-2 p-2 bg-gray-50 rounded">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Chọn gói:</label>
+                              <select
+                                value={selectedPackages[product.id] || ''}
+                                onChange={(e) => setSelectedPackages(prev => ({
+                                  ...prev,
+                                  [product.id]: e.target.value
+                                }))}
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
+                              >
+                                {availablePackages[product.id as keyof typeof availablePackages]?.map((pkg) => (
+                                  <option key={pkg.id} value={pkg.id}>
+                                    {pkg.name} {pkg.price > 0 ? `(+${formatCurrency(pkg.price.toString())} VNĐ)` : ''}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-700 mb-1">Số lượng:</label>
+                              <input
+                                type="number"
+                                min="1"
+                                value={productQuantities[product.id] || 1}
+                                onChange={(e) => setProductQuantities(prev => ({
+                                  ...prev,
+                                  [product.id]: Math.max(1, parseInt(e.target.value) || 1)
+                                }))}
+                                className="w-full text-sm border border-[#e6ebf1] rounded px-2 py-1"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                {availableProducts.filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory).length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">Không có sản phẩm nào trong thể loại này</p>
+                )}
+              </div>
+            </div>
+
+            {/* Payment & Discount Info */}
+            {selectedProducts.length > 0 && (
+              <div className="space-y-4">
+                {/* Selected Products Summary */}
+                {(() => {
+                  const subtotal = selectedProducts.reduce((sum, productId) => {
+                    const product = availableProducts.find(p => p.id === productId)
+                    const selectedPackageId = selectedPackages[productId]
+                    const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                    const quantity = productQuantities[productId] || 1
+                    return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                  }, 0)
+                  const totalBeforeDiscount = subtotal
+                  const discountAmount = discountType === '%' 
+                    ? totalBeforeDiscount * discountPercent / 100 
+                    : discountPercent
+                  const afterDiscount = totalBeforeDiscount - discountAmount
+                  const vatAmount = afterDiscount * (taxRate / 100)
+                  const grandTotal = afterDiscount + vatAmount
+                  
+                  return (
+                    <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
+                      <h5 className="text-sm font-medium text-green-800 mb-3">
+                        Đã chọn {selectedProducts.length} sản phẩm:
+                      </h5>
+                      <div className="space-y-2 text-sm">
+                        {selectedProducts.map(productId => {
                           const product = availableProducts.find(p => p.id === productId)
                           const selectedPackageId = selectedPackages[productId]
                           const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
-                          return sum + (product?.price || 0) + (selectedPackage?.price || 0)
-                        }, 0).toString()
-                      )} VNĐ
-                    </span>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-gray-400 mb-2">
-                    <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                    </svg>
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Vui lòng chọn sản phẩm
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Payment Information */}
-            {selectedProducts.length > 0 && (
-              <div className="p-4 border border-blue-200 rounded-lg bg-blue-50">
-                <h5 className="text-sm font-medium text-blue-900 mb-3">💰 Thông tin thanh toán</h5>
-                
-                {/* Discount */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Giảm giá (%)
-                  </label>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={newOrderData.discountPercent}
-                    onChange={(e) => handleOrderDiscountChange(Number(e.target.value))}
-                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0"
-                  />
-                </div>
-
-                {/* Payment Method */}
-                <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hình thức thanh toán
-                  </label>
-                  <div className="space-y-2">
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="orderPaymentMethod"
-                        value="cash"
-                        checked={newOrderData.paymentMethod === 'cash'}
-                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">💵 Tiền mặt</span>
-                    </label>
-                    <label className="flex items-center">
-                      <input
-                        type="radio"
-                        name="orderPaymentMethod"
-                        value="transfer"
-                        checked={newOrderData.paymentMethod === 'transfer'}
-                        onChange={(e) => handleOrderPaymentMethodChange(e.target.value)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
-                      />
-                      <span className="ml-2 text-sm text-gray-700">🏦 Chuyển khoản</span>
-                    </label>
-                  </div>
-                </div>
-
-                {/* Final Amount */}
-                <div className="bg-white rounded-md p-3 border border-blue-200">
-                  <div className="flex justify-between text-sm">
-                    <span>Tổng tiền hàng:</span>
-                    <span>{newOrderData.totalAmount.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                  {newOrderData.discountPercent > 0 && (
-                    <div className="flex justify-between text-sm text-red-600">
-                      <span>Giảm giá ({newOrderData.discountPercent}%):</span>
-                      <span>-{(newOrderData.totalAmount * newOrderData.discountPercent / 100).toLocaleString('vi-VN')} VND</span>
+                          const quantity = productQuantities[productId] || 1
+                          const productTotal = ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                          
+                          return product ? (
+                            <div key={productId} className="flex justify-between text-gray-700">
+                              <span>{product.name} ({selectedPackage?.name || 'Standard'}) x{quantity}</span>
+                              <span className="font-medium text-green-600">
+                                {formatCurrency(productTotal.toString())} VNĐ
+                              </span>
+                            </div>
+                          ) : null
+                        })}
+                        {discountAmount > 0 && (
+                          <div className="flex justify-between text-gray-600 border-t border-green-200 pt-2 mt-2">
+                            <span>Giảm giá {discountType === '%' ? `(${discountPercent}%)` : ''}:</span>
+                            <span className="font-medium text-red-500">-{formatCurrency(discountAmount.toString())} VNĐ</span>
+                          </div>
+                        )}
+                        <div className="flex justify-between text-gray-600 pt-1">
+                          <span>Phí VAT ({taxRate}%):</span>
+                          <span className="font-medium text-gray-700">+{formatCurrency(vatAmount.toString())} VNĐ</span>
+                        </div>
+                        <div className="flex justify-between font-semibold text-green-700 border-t border-green-300 pt-2 mt-2">
+                          <span>Tổng cộng:</span>
+                          <span className="text-lg">{formatCurrency(grandTotal.toString())} VNĐ</span>
+                        </div>
+                      </div>
                     </div>
+                  )
+                })()}
+
+                {/* Payment Info Section */}
+                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    {/* Tax Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Thuế GTGT <span className="text-red-500">*</span></label>
+                      <select
+                         value={taxId}
+                         onChange={(e) => {
+                           const tax = defaultTaxes.find(t => t.id === e.target.value)
+                           setTaxId(e.target.value)
+                           setTaxRate(tax ? tax.rate : 0)
+                         }}
+                         className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                         <option value="">Chọn mức thuế</option>
+                         {defaultTaxes.filter(t => t.isActive).map(tax => (
+                           <option key={tax.id} value={tax.id}>{tax.name} ({tax.rate}%)</option>
+                         ))}
+                      </select>
+                    </div>
+
+                    {/* Discount */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Giảm giá
+                      </label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max={discountType === '%' ? 100 : undefined}
+                          value={discountPercent}
+                          onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
+                          placeholder="0"
+                          className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                        />
+                        <select 
+                          value={discountType}
+                          onChange={(e) => {
+                            setDiscountType(e.target.value as '%' | 'VND')
+                            setDiscountPercent(0)
+                          }}
+                          className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                        >
+                          <option value="%">%</option>
+                          <option value="VND">VNĐ</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Payment Deadline */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Thời hạn TT <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={paymentDeadline}
+                        onChange={(e) => setPaymentDeadline(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      />
+                      {!paymentDeadline && (
+                        <p className="mt-1 text-xs text-red-500">Vui lòng chọn thời hạn thanh toán</p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Hình thức thanh toán</label>
+                      <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="cash">Tiền mặt</option>
+                        <option value="bank_transfer">Chuyển khoản</option>
+                        <option value="installment">Trả góp</option>
+                        <option value="momo">Momo</option>
+                        <option value="card">Thẻ</option>
+                        <option value="custom">Tùy chỉnh</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Payment Mode */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
+                      <div className="flex gap-3">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="customerOrderPaymentMode"
+                            value="full"
+                            checked={paymentMode === 'full'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
+                        </label>
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="customerOrderPaymentMode"
+                            value="installment"
+                            checked={paymentMode === 'installment'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Installments - Only show when installment mode selected */}
+                  {paymentMode === 'installment' && (
+                  <div className="border-t border-[#e6ebf1] pt-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số lần thanh toán
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={paymentInstallments}
+                        onChange={(e) => {
+                          const num = Math.max(1, Math.min(12, parseInt(e.target.value) || 1))
+                          setPaymentInstallments(num)
+                          const newInstallments = Array.from({length: num}, (_, i) => 
+                            installmentData[i] || {amount: 0, date: ''}
+                          )
+                          setInstallmentData(newInstallments)
+                        }}
+                        className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      />
+                    </div>
+
+                    {/* Installment Details */}
+                    {installmentData.map((installment, index) => {
+                      // Calculate grand total for validation (same as summary calculation)
+                      const subtotalCalc = selectedProducts.reduce((sum, productId) => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const quantity = productQuantities[productId] || 1
+                        return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                      }, 0)
+                      const totalBeforeDiscountCalc = subtotalCalc
+                      const discountAmountCalc = discountType === '%' 
+                        ? totalBeforeDiscountCalc * discountPercent / 100 
+                        : discountPercent
+                      const afterDiscountCalc = totalBeforeDiscountCalc - discountAmountCalc
+                      const grandTotalCalc = afterDiscountCalc + afterDiscountCalc * (taxRate / 100)
+                      
+                      // Calculate max allowed for this installment
+                      const otherInstallmentsTotal = installmentData.reduce((sum, inst, i) => 
+                        i !== index ? sum + inst.amount : sum, 0
+                      )
+                      const maxAllowed = Math.max(0, grandTotalCalc - otherInstallmentsTotal)
+                      const isOverLimit = installment.amount > maxAllowed
+                      
+                      return (
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formatCurrency(installment.amount.toString())}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+                              const validatedValue = Math.min(value, maxAllowed)
+                              const newData = [...installmentData]
+                              newData[index] = {...newData[index], amount: validatedValue}
+                              setInstallmentData(newData)
+                            }}
+                            placeholder="0"
+                            className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
+                          />
+                          {isOverLimit && (
+                            <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
+                          )}
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Ngày thanh toán đợt {index + 1}
+                            </label>
+                            <input
+                              type="date"
+                              value={installment.date}
+                              onChange={(e) => {
+                                const newData = [...installmentData]
+                                newData[index] = {...newData[index], date: e.target.value}
+                                setInstallmentData(newData)
+                              }}
+                              min={new Date().toISOString().split('T')[0]}
+                              placeholder="Thời gian thanh toán ..."
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                            />
+                          </div>
+                          {paymentInstallments > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (paymentInstallments > 1) {
+                                  const newData = installmentData.filter((_, i) => i !== index)
+                                  setInstallmentData(newData)
+                                  setPaymentInstallments(paymentInstallments - 1)
+                                }
+                              }}
+                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
+                              title="Xóa đợt thanh toán"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      )
+                    })}
+                  </div>
                   )}
-                  <div className="flex justify-between text-sm font-medium border-t border-gray-200 pt-2 mt-2">
-                    <span>Thành tiền:</span>
-                    <span className="text-green-600">{newOrderData.finalAmount.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                  <div className="text-xs text-gray-600 mt-1">
-                    Hình thức: {newOrderData.paymentMethod === 'cash' ? '💵 Tiền mặt' : '🏦 Chuyển khoản'}
-                  </div>
                 </div>
               </div>
             )}
+
+            <p className="text-sm text-gray-600 mt-4">
+              Khách hàng sẽ được tạo đơn hàng với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển sang &quot;Hoàn thành&quot;.
+            </p>
           </div>
 
           <div className="flex justify-end space-x-3 mt-6">
             <button
-              onClick={() => setShowCreateOrderModal(false)}
+              onClick={() => {
+                setShowCreateOrderModal(false)
+                setSelectedProducts([])
+                setSelectedPackages({})
+                setProductQuantities({})
+                setOrderNotes('')
+                setSelectedCategory('Tất cả')
+                setPaymentDeadline('')
+                setDiscountPercent(0)
+                setDiscountType('%')
+                setPaymentMethod('cash')
+                setPaymentMode('full')
+                setPaymentInstallments(1)
+                setInstallmentData([{amount: 0, date: ''}])
+              }}
               className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
             >
               Hủy
             </button>
             <button
               onClick={handleSubmitOrder}
-              disabled={selectedProducts.length === 0}
-              className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+              disabled={selectedProducts.length === 0 || !paymentDeadline}
+              className="px-4 py-2 bg-[#2dc56a] text-white rounded-md hover:bg-[#04d182] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
             >
               Tạo đơn hàng
             </button>
@@ -7591,7 +8365,7 @@ export default function CustomersManagement() {
     {/* Quick Interaction Modal */}
     {showQuickInteractionModal && selectedCustomerForInteraction && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+        <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
           <div className="flex items-center justify-between p-6 border-b">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Thêm tương tác nhanh</h3>
@@ -7626,10 +8400,10 @@ export default function CustomersManagement() {
                   <button
                     key={type.value}
                     onClick={() => setQuickInteractionType(type.value as any)}
-                    className={`p-2 text-xs font-medium rounded-lg border-2 transition-all ${
+                    className={`p-2 text-xs font-medium rounded-[10px] border-2 transition-all ${
                       quickInteractionType === type.value
                         ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                        : 'border-[#e6ebf1] hover:border-[#e6ebf1]'
                     } ${type.color}`}
                   >
                     {type.label}
@@ -7653,7 +8427,7 @@ export default function CustomersManagement() {
                   quickInteractionType === 'meeting' ? 'cuộc gặp' :
                   'ghi chú'
                 }...`}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
               />
             </div>
 
@@ -7672,7 +8446,7 @@ export default function CustomersManagement() {
                   'ghi chú'
                 }...`}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
@@ -7707,7 +8481,7 @@ export default function CustomersManagement() {
     {/* Edit Interaction Modal */}
     {showEditInteractionModal && editingInteraction && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+        <div className="bg-white rounded-[10px] shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-6 border-b">
             <div>
               <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa tương tác</h3>
@@ -7743,7 +8517,7 @@ export default function CustomersManagement() {
                 onChange={(e) => setEditReason(e.target.value)}
                 placeholder="Nhập lý do chỉnh sửa tương tác..."
                 rows={2}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
@@ -7757,7 +8531,7 @@ export default function CustomersManagement() {
                   type="text"
                   value={editInteractionData.title}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, title: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 />
               </div>
 
@@ -7769,7 +8543,7 @@ export default function CustomersManagement() {
                 <select
                   value={editInteractionData.type}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, type: e.target.value as CustomerInteraction['type'] }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 >
                   <option value="email">Email</option>
                   <option value="call">Gọi điện</option>
@@ -7789,7 +8563,7 @@ export default function CustomersManagement() {
                   type="text"
                   value={editInteractionData.channel}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, channel: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 />
               </div>
 
@@ -7801,7 +8575,7 @@ export default function CustomersManagement() {
                 <select
                   value={editInteractionData.status}
                   onChange={(e) => setEditInteractionData(prev => ({ ...prev, status: e.target.value as CustomerInteraction['status'] }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
                 >
                   <option value="success">Thành công</option>
                   <option value="pending">Đang xử lý</option>
@@ -7819,12 +8593,12 @@ export default function CustomersManagement() {
                 value={editInteractionData.summary}
                 onChange={(e) => setEditInteractionData(prev => ({ ...prev, summary: e.target.value }))}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent resize-none"
               />
             </div>
 
             {/* Original Data Preview */}
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 p-4 bg-gray-50 rounded-[10px]">
               <h4 className="text-sm font-medium text-gray-700 mb-2">Dữ liệu gốc:</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600">
                 <div><strong>Tiêu đề:</strong> {editingInteraction.title}</div>
@@ -7857,7 +8631,7 @@ export default function CustomersManagement() {
               <button
                 onClick={handleSubmitEditInteraction}
                 disabled={!editReason.trim()}
-                className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
               >
                 <Save className="w-4 h-4" />
                 Lưu thay đổi

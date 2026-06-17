@@ -1,6 +1,6 @@
-'use client'
+﻿'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { 
   Plus, 
   Search, 
@@ -26,6 +26,7 @@ import {
   Activity,
   FileText,
   MessageSquare,
+  MessageCircle,
   Tag,
   Upload,
   Download,
@@ -42,11 +43,17 @@ import {
   Bell,
   Settings,
   X,
-  Check
+  Check,
+  ChevronDown,
+  HelpCircle,
+  Info,
+  Receipt,
+  StickyNote
 } from 'lucide-react'
+import { defaultTaxes } from './settings/TaxManagement'
 
-import CreateOrderModal from './CreateOrderModal'
 import OrderDetailModal from './OrderDetailModal'
+import CustomerDetailModal from './CustomerDetailModal'
 
 // Interfaces
 interface Customer {
@@ -55,6 +62,8 @@ interface Customer {
   phone: string
   email: string
   company?: string
+  position?: string
+  address?: string
   type: 'lead' | 'customer'
 }
 
@@ -137,6 +146,15 @@ interface Reminder {
   isActive: boolean
 }
 
+interface InstallmentData {
+  id: number
+  plannedAmount: number
+  plannedDate: string
+  actualAmount: number
+  actualDate: string
+  status: 'pending' | 'partial' | 'completed'
+}
+
 interface Order {
   id: number
   orderNumber: string
@@ -147,9 +165,10 @@ interface Order {
   discount: number
   tax: number
   total: number
+  totalAmount: number
   status: 'draft' | 'pending' | 'confirmed' | 'processing' | 'completed' | 'cancelled' | 'refunded'
   paymentStatus: 'unpaid' | 'partial' | 'paid' | 'refunded'
-  paymentMethod: 'cash' | 'transfer' | 'installment' | 'momo' | 'custom'
+  paymentMethod: 'cash' | 'transfer' | 'card' | 'installment' | 'momo' | 'custom'
   notes: OrderNote[]
   invoices: Invoice[]
   tags: string[]
@@ -163,10 +182,134 @@ interface Order {
   isVip: boolean
   upsellSuggestions?: Product[]
   crosssellSuggestions?: Product[]
+  // Installment payment fields
+  paymentMode?: 'full' | 'installment'
+  installments?: InstallmentData[]
+  totalPaid?: number
+  remainingDebt?: number
+}
+
+// Helper function to convert order customer to CustomerDetailModal customer format
+const convertOrderCustomerToCustomer = (customer: Customer, orders: Order[]) => {
+  const customerOrders = orders.filter(o => o.customer.id === customer.id)
+  const totalSpent = customerOrders.reduce((sum, o) => sum + o.total, 0)
+  const successfulOrders = customerOrders.filter(o => o.status === 'completed').length
+  const lastOrder = customerOrders.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0]
+
+  const mapOrderStatus = (status: Order['status']) => {
+    switch (status) {
+      case 'completed': return 'completed' as const
+      case 'cancelled':
+      case 'refunded':
+        return 'cancelled' as const
+      case 'confirmed':
+      case 'processing':
+        return 'confirmed' as const
+      case 'draft':
+      case 'pending':
+      default:
+        return 'pending' as const
+    }
+  }
+
+  const mapPaymentMethod = (paymentMethod: Order['paymentMethod']) => {
+    switch (paymentMethod) {
+      case 'cash': return 'Tiền mặt'
+      case 'transfer': return 'Chuyển khoản'
+      case 'card': return 'Thẻ'
+      case 'installment': return 'Trả góp'
+      case 'momo': return 'MoMo'
+      default: return paymentMethod
+    }
+  }
+  
+  return {
+    id: customer.id,
+    name: customer.name,
+    contact: customer.phone,
+    email: customer.email,
+    company: customer.company || '',
+    position: customer.position || '',
+    address: customer.address || '',
+    customerType: customer.company ? 'business' : 'individual',
+    status: 'active',
+    totalOrders: customerOrders.length,
+    totalSpent: totalSpent,
+    lastOrderDate: lastOrder ? new Date(lastOrder.createdAt).toLocaleDateString('vi-VN') : undefined,
+    orders: customerOrders.map((order) => {
+      const items = Array.isArray(order.items)
+        ? order.items.map((item, index) => ({
+            id: Number(item.id) || index + 1,
+            productName: item.product?.name || `Sản phẩm ${index + 1}`,
+            productPackage: item.variant?.name || '1',
+            quantity: item.quantity || 1,
+            price: item.unitPrice || 0,
+            total: item.totalPrice || 0,
+            paymentStatus: (order.paymentStatus === 'paid'
+              ? 'paid'
+              : order.paymentStatus === 'partial'
+                ? 'partial'
+                : 'unpaid') as 'paid' | 'partial' | 'unpaid'
+          }))
+        : []
+      const subtotal = order.subtotal || items.reduce((sum, item) => sum + item.total, 0)
+      const discount = order.discount || 0
+      const vat = order.tax || Math.round(subtotal * 0.1)
+      const paid = typeof order.totalPaid === 'number'
+        ? order.totalPaid
+        : order.paymentStatus === 'paid'
+          ? order.total
+          : 0
+      const debt = typeof order.remainingDebt === 'number'
+        ? order.remainingDebt
+        : Math.max(order.total - paid, 0)
+
+      return {
+        id: order.id,
+        orderNumber: order.orderNumber,
+        customerName: customer.name,
+        products: items.map((item) => item.productName).join(', ') || '-',
+        total: order.total,
+        paymentCount: order.paymentMode === 'installment' ? order.installments?.length || 0 : paid > 0 ? 1 : 0,
+        paid,
+        debt,
+        paymentMethod: mapPaymentMethod(order.paymentMethod),
+        status: mapOrderStatus(order.status),
+        createdAt: order.createdAt,
+        dueDate: order.deadline,
+        label: order.tags?.[0],
+        subtotal,
+        discount,
+        vat,
+        items,
+        invoices: Array.isArray(order.invoices)
+          ? order.invoices.map((invoice, index) => ({
+              id: invoice.id?.toString() || `invoice-${order.id}-${index + 1}`,
+              fileName: invoice.number || `invoice-${index + 1}`,
+              fileSize: 0,
+              fileType: invoice.fileType === 'image' ? 'image/png' : invoice.fileType === 'pdf' ? 'application/pdf' : 'text/plain',
+              uploadedAt: invoice.date || order.updatedAt || order.createdAt,
+              thumbnailUrl: ''
+            }))
+          : [],
+        notes: Array.isArray(order.notes)
+          ? order.notes.map((note) => ({
+              id: note.id?.toString() || `note-${order.id}`,
+              content: note.content || '',
+              createdAt: note.createdAt || order.createdAt,
+              createdBy: note.createdBy || 'System'
+            }))
+          : []
+      }
+    }),
+    source: 'website',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  }
 }
 
 export default function OrderManagement() {
-  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'reminders'>('overview')
+  const [activeTab, setActiveTab] = useState<'overview' | 'orders' | 'products' | 'reminders'>('orders')
   const [showCreateModal, setShowCreateModal] = useState(false)
   const [showFilters, setShowFilters] = useState(false)
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null)
@@ -179,8 +322,22 @@ export default function OrderManagement() {
     search: '',
     tags: [] as string[]
   })
+  const [customDateRange, setCustomDateRange] = useState({ startDate: '', endDate: '' })
   const [notification, setNotification] = useState<{message: string, type: 'success' | 'error'} | null>(null)
   const [isLoading, setIsLoading] = useState(false)
+  const [showExportDropdown, setShowExportDropdown] = useState(false)
+  const [openActionMenu, setOpenActionMenu] = useState<number | null>(null)
+  const [showReminderTooltip, setShowReminderTooltip] = useState(false)
+  const [reminderFilters, setReminderFilters] = useState({
+    search: '',
+    status: 'all',
+    sortBy: 'deadline'
+  })
+  const [selectedReminderOrders, setSelectedReminderOrders] = useState<number[]>([])
+  const [showSendReminderDialog, setShowSendReminderDialog] = useState(false)
+  const [showCustomerDetail, setShowCustomerDetail] = useState(false)
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null)
+  const [customerDetailTab, setCustomerDetailTab] = useState<'info' | 'history' | 'orders' | 'notes'>('info')
   
   // Edit and Cancel Order states
   const [showEditModal, setShowEditModal] = useState(false)
@@ -188,6 +345,102 @@ export default function OrderManagement() {
   const [showCancelModal, setShowCancelModal] = useState(false)
   const [cancelingOrder, setCancelingOrder] = useState<Order | null>(null)
   const [cancelReason, setCancelReason] = useState('')
+  
+  // Dialog states for order actions
+  const [showRefundDialog, setShowRefundDialog] = useState(false)
+  const [showAddNoteDialog, setShowAddNoteDialog] = useState(false)
+  const [orderForAction, setOrderForAction] = useState<Order | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // New Order Modal states
+  const [selectedCustomerForNewOrder, setSelectedCustomerForNewOrder] = useState<Customer | null>(null)
+  const [selectedProducts, setSelectedProducts] = useState<string[]>([])
+  const [selectedPackages, setSelectedPackages] = useState<{[productId: string]: string}>({})
+  const [productQuantities, setProductQuantities] = useState<{[productId: string]: number}>({})
+  const [orderNotes, setOrderNotes] = useState('')
+  const [selectedCategory, setSelectedCategory] = useState('Tất cả')
+  const [paymentMethod, setPaymentMethod] = useState('cash')
+  const [paymentDeadline, setPaymentDeadline] = useState('')
+  const [discountPercent, setDiscountPercent] = useState(0)
+  const [discountType, setDiscountType] = useState<'%' | 'VND'>('%')
+  const [paymentMode, setPaymentMode] = useState<'full' | 'installment'>('full')
+  const [paymentInstallments, setPaymentInstallments] = useState(1)
+  const [installmentData, setInstallmentData] = useState([{amount: 0, date: ''}])
+  const [taxId, setTaxId] = useState('vat-10')
+  const [taxRate, setTaxRate] = useState(10)
+
+  // Available products for order creation
+  const availableProducts = [
+    { id: 'crm-basic', name: 'CRM Basic', category: 'Phần mềm', price: 500000, description: 'Hệ thống CRM cơ bản cho doanh nghiệp nhỏ' },
+    { id: 'crm-professional', name: 'CRM Professional', category: 'Phần mềm', price: 1200000, description: 'Hệ thống CRM chuyên nghiệp với nhiều tính năng nâng cao' },
+    { id: 'crm-enterprise', name: 'CRM Enterprise', category: 'Phần mềm', price: 2500000, description: 'Hệ thống CRM doanh nghiệp với đầy đủ tính năng' },
+    { id: 'ai-analytics', name: 'AI Analytics Module', category: 'Phần mềm', price: 800000, description: 'Module phân tích dữ liệu với AI' },
+    { id: 'mobile-app', name: 'Mobile App License', category: 'Phần mềm', price: 300000, description: 'Giấy phép sử dụng ứng dụng di động' },
+    { id: 'marketing-course', name: 'Khóa học Marketing Online', category: 'Khóa học', price: 2000000, description: 'Khóa học Marketing Digital toàn diện' },
+    { id: 'sales-course', name: 'Khóa học Kỹ năng bán hàng', category: 'Khóa học', price: 1500000, description: 'Đào tạo kỹ năng bán hàng chuyên nghiệp' },
+    { id: 'crm-training', name: 'Khóa đào tạo sử dụng CRM', category: 'Khóa học', price: 800000, description: 'Hướng dẫn sử dụng hệ thống CRM hiệu quả' },
+    { id: 'consulting-basic', name: 'Tư vấn triển khai cơ bản', category: 'Dịch vụ tư vấn', price: 5000000, description: 'Dịch vụ tư vấn triển khai CRM cơ bản' },
+    { id: 'consulting-advanced', name: 'Tư vấn chiến lược kinh doanh', category: 'Dịch vụ tư vấn', price: 10000000, description: 'Tư vấn chiến lược và tối ưu hóa quy trình' },
+    { id: 'support-package', name: 'Gói hỗ trợ kỹ thuật', category: 'Dịch vụ tư vấn', price: 3000000, description: 'Hỗ trợ kỹ thuật 24/7 trong 6 tháng' }
+  ]
+
+  const availablePackages: {[key: string]: {id: string, name: string, price: number, description: string}[]} = {
+    'crm-basic': [
+      { id: 'basic-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'basic-plus', name: 'Gói Plus', price: 200000, description: 'Thêm training cơ bản + support 3 tháng' },
+      { id: 'basic-premium', name: 'Gói Premium', price: 500000, description: 'Thêm training + support 6 tháng + customization' }
+    ],
+    'crm-professional': [
+      { id: 'pro-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'pro-plus', name: 'Gói Plus', price: 400000, description: 'Thêm AI Analytics + training nâng cao' },
+      { id: 'pro-premium', name: 'Gói Premium', price: 800000, description: 'Thêm full modules + premium support 1 năm' }
+    ],
+    'crm-enterprise': [
+      { id: 'ent-standard', name: 'Gói Standard', price: 0, description: 'Sản phẩm cơ bản' },
+      { id: 'ent-plus', name: 'Gói Plus', price: 1000000, description: 'Thêm full training + migration service' },
+      { id: 'ent-premium', name: 'Gói Premium', price: 2000000, description: 'Thêm custom development + premium support 2 năm' }
+    ],
+    'ai-analytics': [
+      { id: 'ai-standard', name: 'Gói Standard', price: 0, description: 'Module cơ bản' },
+      { id: 'ai-advanced', name: 'Gói Advanced', price: 300000, description: 'Thêm custom reports + training' }
+    ],
+    'mobile-app': [
+      { id: 'mobile-standard', name: 'Gói Standard', price: 0, description: 'License cơ bản' },
+      { id: 'mobile-unlimited', name: 'Gói Unlimited', price: 150000, description: 'Unlimited users + premium features' }
+    ],
+    'marketing-course': [
+      { id: 'marketing-course-standard', name: 'Gói Standard', price: 0, description: 'Khóa học cơ bản' },
+      { id: 'marketing-course-vip', name: 'Gói VIP', price: 1000000, description: 'Thêm 1-1 coaching + certificate' }
+    ],
+    'sales-course': [
+      { id: 'sales-course-standard', name: 'Gói Standard', price: 0, description: 'Khóa học cơ bản' },
+      { id: 'sales-course-vip', name: 'Gói VIP', price: 800000, description: 'Thêm practice sessions + mentoring' }
+    ],
+    'crm-training': [
+      { id: 'crm-training-standard', name: 'Gói Standard', price: 0, description: 'Đào tạo cơ bản' },
+      { id: 'crm-training-advanced', name: 'Gói Advanced', price: 400000, description: 'Thêm advanced features + certification' }
+    ],
+    'consulting-basic': [
+      { id: 'consulting-basic-standard', name: 'Gói Standard', price: 0, description: 'Tư vấn cơ bản' },
+      { id: 'consulting-basic-extended', name: 'Gói Extended', price: 2000000, description: 'Thêm follow-up 3 tháng' }
+    ],
+    'consulting-advanced': [
+      { id: 'consulting-advanced-standard', name: 'Gói Standard', price: 0, description: 'Tư vấn chiến lược' },
+      { id: 'consulting-advanced-premium', name: 'Gói Premium', price: 5000000, description: 'Thêm implementation support + 6 tháng theo dõi' }
+    ],
+    'support-package': [
+      { id: 'support-6month', name: 'Gói 6 tháng', price: 0, description: 'Hỗ trợ 6 tháng' },
+      { id: 'support-12month', name: 'Gói 12 tháng', price: 2000000, description: 'Hỗ trợ 12 tháng + priority support' }
+    ]
+  }
+
+  const productCategories = ['Tất cả', 'Phần mềm', 'Khóa học', 'Dịch vụ tư vấn']
+
+  // Format currency helper
+  const formatCurrency = (amount: string | number) => {
+    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount
+    return new Intl.NumberFormat('vi-VN').format(numAmount)
+  }
 
   // Sample data
   const [customers] = useState<Customer[]>([
@@ -240,60 +493,542 @@ export default function OrderManagement() {
   const [orders, setOrders] = useState<Order[]>([
     {
       id: 1,
-      orderNumber: 'DH20250611001',
+      orderNumber: 'DH20260127001',
       customerId: 1,
       customer: customers[0],
-      items: [
-        {
-          id: 1,
-          productId: 1,
-          product: products[0],
-          variantId: 2,
-          variant: products[0].variants[1],
-          quantity: 1,
-          unitPrice: 8000000,
-          totalPrice: 8000000,
-          notes: 'Khách yêu cầu tư vấn online'
-        }
-      ],
+      items: [{ id: 1, productId: 1, product: products[0], variantId: 2, variant: products[0].variants[1], quantity: 1, unitPrice: 8000000, totalPrice: 8000000, notes: 'Khách yêu cầu tư vấn online' }],
       subtotal: 8000000,
       discount: 800000,
       tax: 720000,
       total: 7920000,
+      totalAmount: 7920000,
       status: 'confirmed',
       paymentStatus: 'unpaid',
       paymentMethod: 'transfer',
-      notes: [
-        {
-          id: 1,
-          content: 'Khách hàng yêu cầu gửi hợp đồng qua Zalo',
-          type: 'customer_request',
-          createdAt: '2025-06-11T10:30:00',
-          createdBy: 'Nguyễn Sales',
-          isEditable: true
-        }
-      ],
+      notes: [{ id: 1, content: 'Khách hàng yêu cầu gửi hợp đồng qua Zalo', type: 'customer_request', createdAt: '2026-01-27T10:30:00', createdBy: 'Nguyễn Sales', isEditable: true }],
       invoices: [],
       tags: ['VIP', 'Khẩn cấp'],
-      createdAt: '2025-06-11T09:00:00',
+      createdAt: '2026-01-27T09:00:00',
       createdBy: 'Nguyễn Sales Manager',
-      updatedAt: '2025-06-11T10:30:00',
+      updatedAt: '2026-01-27T10:30:00',
       history: [],
-      zaloMessages: [
-        {
-          id: 1,
-          content: 'Chào anh, em muốn mua gói tư vấn CRM nâng cao',
-          direction: 'incoming',
-          timestamp: '2025-06-11T09:00:00',
-          sender: 'Nguyễn Văn A',
-          isRead: true
-        }
-      ],
-      deadline: '2025-06-14T23:59:59',
+      zaloMessages: [],
+      deadline: '2026-01-30T23:59:59',
       remindersSent: 0,
       isVip: true,
-      upsellSuggestions: [products[0]], // Gói cao cấp
-      crosssellSuggestions: [products[1]] // ERP
+      upsellSuggestions: [products[0]],
+      crosssellSuggestions: [products[1]]
+    },
+    {
+      id: 2,
+      orderNumber: 'DH20260127002',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 2, productId: 2, product: products[1], variantId: 4, variant: products[1].variants[0], quantity: 1, unitPrice: 15000000, totalPrice: 15000000 }],
+      subtotal: 15000000,
+      discount: 0,
+      tax: 1350000,
+      total: 16350000,
+      totalAmount: 16350000,
+      status: 'pending',
+      paymentStatus: 'partial',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Mới', 'Thanh toán một phần'],
+      createdAt: '2026-01-27T08:30:00',
+      createdBy: 'Trần Sales',
+      updatedAt: '2026-01-27T08:30:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-31T23:59:59',
+      remindersSent: 0,
+      isVip: false,
+      // Installment payment data - 2 phases
+      paymentMode: 'installment',
+      installments: [
+        { id: 1, plannedAmount: 8000000, plannedDate: '2026-01-30', actualAmount: 0, actualDate: '', status: 'pending' },
+        { id: 2, plannedAmount: 8350000, plannedDate: '2026-02-10', actualAmount: 0, actualDate: '', status: 'pending' }
+      ],
+      totalPaid: 0,
+      remainingDebt: 16350000
+    },
+    {
+      id: 3,
+      orderNumber: 'DH20260126003',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 3, productId: 1, product: products[0], variantId: 3, variant: products[0].variants[2], quantity: 2, unitPrice: 12000000, totalPrice: 24000000 }],
+      subtotal: 24000000,
+      discount: 2400000,
+      tax: 2160000,
+      total: 23760000,
+      totalAmount: 23760000,
+      status: 'completed',
+      paymentStatus: 'paid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['VIP', 'Hoàn thành'],
+      createdAt: '2026-01-26T14:00:00',
+      createdBy: 'Nguyễn Sales Manager',
+      updatedAt: '2026-01-27T09:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-29T23:59:59',
+      remindersSent: 1,
+      isVip: true
+    },
+    {
+      id: 4,
+      orderNumber: 'DH20260126004',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 4, productId: 2, product: products[1], variantId: 5, variant: products[1].variants[1], quantity: 1, unitPrice: 25000000, totalPrice: 25000000 }],
+      subtotal: 25000000,
+      discount: 1250000,
+      tax: 2250000,
+      total: 26000000,
+      totalAmount: 26000000,
+      status: 'processing',
+      paymentStatus: 'partial',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Quan trọng', 'Thanh toán một phần'],
+      createdAt: '2026-01-26T11:20:00',
+      createdBy: 'Lê Sales',
+      updatedAt: '2026-01-26T15:30:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-02T23:59:59',
+      remindersSent: 0,
+      isVip: false,
+      // Installment payment data
+      paymentMode: 'installment',
+      installments: [
+        { id: 1, plannedAmount: 10000000, plannedDate: '2026-01-28', actualAmount: 10000000, actualDate: '2026-01-28', status: 'completed' },
+        { id: 2, plannedAmount: 8000000, plannedDate: '2026-02-05', actualAmount: 0, actualDate: '', status: 'pending' },
+        { id: 3, plannedAmount: 8000000, plannedDate: '2026-02-15', actualAmount: 0, actualDate: '', status: 'pending' }
+      ],
+      totalPaid: 10000000,
+      remainingDebt: 16000000
+    },
+    {
+      id: 5,
+      orderNumber: 'DH20260125005',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 5, productId: 1, product: products[0], variantId: 1, variant: products[0].variants[0], quantity: 3, unitPrice: 5000000, totalPrice: 15000000 }],
+      subtotal: 15000000,
+      discount: 0,
+      tax: 1350000,
+      total: 16350000,
+      totalAmount: 16350000,
+      status: 'cancelled',
+      paymentStatus: 'refunded',
+      paymentMethod: 'card',
+      notes: [{ id: 2, content: 'Khách hủy vì thay đổi kế hoạch', type: 'internal', createdAt: '2026-01-26T10:00:00', createdBy: 'Admin', isEditable: false }],
+      invoices: [],
+      tags: ['Đã hủy'],
+      createdAt: '2026-01-25T16:45:00',
+      createdBy: 'Phạm Sales',
+      updatedAt: '2026-01-26T10:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-28T23:59:59',
+      remindersSent: 2,
+      isVip: true
+    },
+    {
+      id: 6,
+      orderNumber: 'DH20260125006',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 6, productId: 2, product: products[1], variantId: 6, variant: products[1].variants[2], quantity: 1, unitPrice: 50000000, totalPrice: 50000000 }],
+      subtotal: 50000000,
+      discount: 5000000,
+      tax: 4500000,
+      total: 49500000,
+      totalAmount: 49500000,
+      status: 'confirmed',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['VIP', 'Lớn'],
+      createdAt: '2026-01-25T10:15:00',
+      createdBy: 'Hoàng Sales',
+      updatedAt: '2026-01-25T14:20:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-05T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 7,
+      orderNumber: 'DH20260124007',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 7, productId: 1, product: products[0], variantId: 2, variant: products[0].variants[1], quantity: 1, unitPrice: 8000000, totalPrice: 8000000 }],
+      subtotal: 8000000,
+      discount: 400000,
+      tax: 720000,
+      total: 8320000,
+      totalAmount: 8320000,
+      status: 'draft',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Nháp'],
+      createdAt: '2026-01-24T09:30:00',
+      createdBy: 'Vũ Sales',
+      updatedAt: '2026-01-24T09:30:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-27T23:59:59',
+      remindersSent: 0,
+      isVip: false
+    },
+    {
+      id: 8,
+      orderNumber: 'DH20260124008',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 8, productId: 2, product: products[1], variantId: 4, variant: products[1].variants[0], quantity: 2, unitPrice: 15000000, totalPrice: 30000000 }],
+      subtotal: 30000000,
+      discount: 3000000,
+      tax: 2700000,
+      total: 29700000,
+      totalAmount: 29700000,
+      status: 'completed',
+      paymentStatus: 'paid',
+      paymentMethod: 'cash',
+      notes: [],
+      invoices: [],
+      tags: ['Hoàn thành'],
+      createdAt: '2026-01-24T08:00:00',
+      createdBy: 'Mai Sales',
+      updatedAt: '2026-01-26T16:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-30T23:59:59',
+      remindersSent: 0,
+      isVip: false
+    },
+    {
+      id: 9,
+      orderNumber: 'DH20260123009',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 9, productId: 1, product: products[0], variantId: 3, variant: products[0].variants[2], quantity: 1, unitPrice: 12000000, totalPrice: 12000000 }],
+      subtotal: 12000000,
+      discount: 600000,
+      tax: 1080000,
+      total: 12480000,
+      totalAmount: 12480000,
+      status: 'pending',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Chờ xác nhận'],
+      createdAt: '2026-01-23T15:20:00',
+      createdBy: 'Đức Sales',
+      updatedAt: '2026-01-23T15:20:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-29T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 10,
+      orderNumber: 'DH20260123010',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 10, productId: 2, product: products[1], variantId: 5, variant: products[1].variants[1], quantity: 1, unitPrice: 25000000, totalPrice: 25000000 }],
+      subtotal: 25000000,
+      discount: 0,
+      tax: 2250000,
+      total: 27250000,
+      totalAmount: 27250000,
+      status: 'processing',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'card',
+      notes: [],
+      invoices: [],
+      tags: ['Đang xử lý'],
+      createdAt: '2026-01-23T11:45:00',
+      createdBy: 'An Sales',
+      updatedAt: '2026-01-24T10:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-01T23:59:59',
+      remindersSent: 1,
+      isVip: false
+    },
+    {
+      id: 11,
+      orderNumber: 'DH20260122011',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 11, productId: 1, product: products[0], variantId: 1, variant: products[0].variants[0], quantity: 5, unitPrice: 5000000, totalPrice: 25000000 }],
+      subtotal: 25000000,
+      discount: 2500000,
+      tax: 2250000,
+      total: 24750000,
+      totalAmount: 24750000,
+      status: 'confirmed',
+      paymentStatus: 'partial',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['VIP', 'Số lượng lớn'],
+      createdAt: '2026-01-22T13:30:00',
+      createdBy: 'Bình Sales',
+      updatedAt: '2026-01-23T09:15:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-03T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 12,
+      orderNumber: 'DH20260122012',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 12, productId: 2, product: products[1], variantId: 6, variant: products[1].variants[2], quantity: 1, unitPrice: 50000000, totalPrice: 50000000 }],
+      subtotal: 50000000,
+      discount: 0,
+      tax: 4500000,
+      total: 54500000,
+      totalAmount: 54500000,
+      status: 'completed',
+      paymentStatus: 'paid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Hoàn thành', 'Lớn'],
+      createdAt: '2026-01-22T10:00:00',
+      createdBy: 'Chi Sales',
+      updatedAt: '2026-01-25T17:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-04T23:59:59',
+      remindersSent: 0,
+      isVip: false
+    },
+    {
+      id: 13,
+      orderNumber: 'DH20260121013',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 13, productId: 1, product: products[0], variantId: 2, variant: products[0].variants[1], quantity: 2, unitPrice: 8000000, totalPrice: 16000000 }],
+      subtotal: 16000000,
+      discount: 1600000,
+      tax: 1440000,
+      total: 15840000,
+      totalAmount: 15840000,
+      status: 'pending',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'cash',
+      notes: [],
+      invoices: [],
+      tags: ['Chờ'],
+      createdAt: '2026-01-21T14:25:00',
+      createdBy: 'Dũng Sales',
+      updatedAt: '2026-01-21T14:25:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-28T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 14,
+      orderNumber: 'DH20260121014',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 14, productId: 2, product: products[1], variantId: 4, variant: products[1].variants[0], quantity: 1, unitPrice: 15000000, totalPrice: 15000000 }],
+      subtotal: 15000000,
+      discount: 750000,
+      tax: 1350000,
+      total: 15600000,
+      totalAmount: 15600000,
+      status: 'processing',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Đang xử lý'],
+      createdAt: '2026-01-21T09:50:00',
+      createdBy: 'Giang Sales',
+      updatedAt: '2026-01-22T11:30:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-31T23:59:59',
+      remindersSent: 1,
+      isVip: false
+    },
+    {
+      id: 15,
+      orderNumber: 'DH20260120015',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 15, productId: 1, product: products[0], variantId: 3, variant: products[0].variants[2], quantity: 1, unitPrice: 12000000, totalPrice: 12000000 }],
+      subtotal: 12000000,
+      discount: 0,
+      tax: 1080000,
+      total: 13080000,
+      totalAmount: 13080000,
+      status: 'confirmed',
+      paymentStatus: 'paid',
+      paymentMethod: 'card',
+      notes: [],
+      invoices: [],
+      tags: ['VIP', 'Đã thanh toán'],
+      createdAt: '2026-01-20T16:10:00',
+      createdBy: 'Hà Sales',
+      updatedAt: '2026-01-21T10:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-30T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 16,
+      orderNumber: 'DH20260120016',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 16, productId: 2, product: products[1], variantId: 5, variant: products[1].variants[1], quantity: 2, unitPrice: 25000000, totalPrice: 50000000 }],
+      subtotal: 50000000,
+      discount: 5000000,
+      tax: 4500000,
+      total: 49500000,
+      totalAmount: 49500000,
+      status: 'draft',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Nháp', 'Lớn'],
+      createdAt: '2026-01-20T12:00:00',
+      createdBy: 'Khánh Sales',
+      updatedAt: '2026-01-20T12:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-02T23:59:59',
+      remindersSent: 0,
+      isVip: false
+    },
+    {
+      id: 17,
+      orderNumber: 'DH20260119017',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 17, productId: 1, product: products[0], variantId: 1, variant: products[0].variants[0], quantity: 4, unitPrice: 5000000, totalPrice: 20000000 }],
+      subtotal: 20000000,
+      discount: 2000000,
+      tax: 1800000,
+      total: 19800000,
+      totalAmount: 19800000,
+      status: 'completed',
+      paymentStatus: 'paid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Hoàn thành', 'VIP'],
+      createdAt: '2026-01-19T15:40:00',
+      createdBy: 'Linh Sales',
+      updatedAt: '2026-01-22T14:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-01-29T23:59:59',
+      remindersSent: 0,
+      isVip: true
+    },
+    {
+      id: 18,
+      orderNumber: 'DH20260119018',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 18, productId: 2, product: products[1], variantId: 6, variant: products[1].variants[2], quantity: 1, unitPrice: 50000000, totalPrice: 50000000 }],
+      subtotal: 50000000,
+      discount: 2500000,
+      tax: 4500000,
+      total: 52000000,
+      totalAmount: 52000000,
+      status: 'cancelled',
+      paymentStatus: 'refunded',
+      paymentMethod: 'transfer',
+      notes: [{ id: 3, content: 'Khách yêu cầu hủy do vượt ngân sách', type: 'internal', createdAt: '2026-01-20T09:00:00', createdBy: 'Manager', isEditable: false }],
+      invoices: [],
+      tags: ['Đã hủy'],
+      createdAt: '2026-01-19T11:20:00',
+      createdBy: 'Nam Sales',
+      updatedAt: '2026-01-20T09:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-05T23:59:59',
+      remindersSent: 1,
+      isVip: false
+    },
+    {
+      id: 19,
+      orderNumber: 'DH20260118019',
+      customerId: 1,
+      customer: customers[0],
+      items: [{ id: 19, productId: 1, product: products[0], variantId: 2, variant: products[0].variants[1], quantity: 3, unitPrice: 8000000, totalPrice: 24000000 }],
+      subtotal: 24000000,
+      discount: 1200000,
+      tax: 2160000,
+      total: 25000000,
+      totalAmount: 25000000,
+      status: 'processing',
+      paymentStatus: 'partial',
+      paymentMethod: 'card',
+      notes: [],
+      invoices: [],
+      tags: ['VIP', 'Đang xử lý'],
+      createdAt: '2026-01-18T13:15:00',
+      createdBy: 'Oanh Sales',
+      updatedAt: '2026-01-20T16:30:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-01T23:59:59',
+      remindersSent: 1,
+      isVip: true
+    },
+    {
+      id: 20,
+      orderNumber: 'DH20260118020',
+      customerId: 2,
+      customer: customers[1],
+      items: [{ id: 20, productId: 2, product: products[1], variantId: 4, variant: products[1].variants[0], quantity: 3, unitPrice: 15000000, totalPrice: 45000000 }],
+      subtotal: 45000000,
+      discount: 4500000,
+      tax: 4050000,
+      total: 44550000,
+      totalAmount: 44550000,
+      status: 'pending',
+      paymentStatus: 'unpaid',
+      paymentMethod: 'transfer',
+      notes: [],
+      invoices: [],
+      tags: ['Mới', 'Lớn'],
+      createdAt: '2026-01-18T10:00:00',
+      createdBy: 'Phương Sales',
+      updatedAt: '2026-01-18T10:00:00',
+      history: [],
+      zaloMessages: [],
+      deadline: '2026-02-03T23:59:59',
+      remindersSent: 0,
+      isVip: false
     }
   ])
 
@@ -336,18 +1071,14 @@ export default function OrderManagement() {
   }, [filters])
 
   // Helper functions
-  const formatCurrency = (amount: number) => {
-    return amount.toLocaleString('vi-VN') + ' đ'
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'draft':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'confirmed':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'processing':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'completed':
@@ -357,7 +1088,7 @@ export default function OrderManagement() {
       case 'refunded':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -372,7 +1103,7 @@ export default function OrderManagement() {
       case 'refunded':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -406,11 +1137,11 @@ export default function OrderManagement() {
       case 'khẩn cấp':
         return 'bg-red-100 text-red-800 border-red-200'
       case 'chờ ký hợp đồng':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'thanh toán trễ':
         return 'bg-orange-100 text-orange-800 border-orange-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -482,9 +1213,40 @@ export default function OrderManagement() {
   const handleSaveEditOrder = (updatedOrderData: any) => {
     if (!editingOrder) return
 
+    // Auto-manage tags for installment orders
+    let tags = [...(updatedOrderData.tags || editingOrder.tags || [])]
+    const hasInstallments = updatedOrderData.installments && updatedOrderData.installments.length > 1
+    const hasPartialTag = tags.includes('Thanh toán một phần')
+    
+    if (hasInstallments && !hasPartialTag) {
+      tags.push('Thanh toán một phần')
+    }
+    
+    // Check if fully paid - all installments completed
+    let finalStatus = updatedOrderData.status || editingOrder.status
+    let finalPaymentStatus = updatedOrderData.paymentStatus || editingOrder.paymentStatus
+    
+    if (updatedOrderData.installments) {
+      const allCompleted = updatedOrderData.installments.every((inst: InstallmentData) => inst.status === 'completed')
+      const totalPaid = updatedOrderData.installments.reduce((sum: number, inst: InstallmentData) => sum + inst.actualAmount, 0)
+      
+      if (allCompleted && totalPaid >= editingOrder.total) {
+        finalStatus = 'completed'
+        finalPaymentStatus = 'paid'
+        // Remove partial tag, add completed tag
+        tags = tags.filter(t => t !== 'Thanh toán một phần')
+        if (!tags.includes('Hoàn thành')) {
+          tags.push('Hoàn thành')
+        }
+      }
+    }
+
     const updatedOrder: Order = {
       ...editingOrder,
       ...updatedOrderData,
+      status: finalStatus,
+      paymentStatus: finalPaymentStatus,
+      tags,
       updatedAt: new Date().toISOString(),
       history: [
         ...editingOrder.history,
@@ -494,8 +1256,8 @@ export default function OrderManagement() {
           timestamp: new Date().toISOString(),
           performedBy: 'Nguyễn Sales Manager',
           oldValue: editingOrder.status,
-          newValue: updatedOrderData.status,
-          details: 'Chỉnh sửa thông tin đơn hàng'
+          newValue: finalStatus,
+          details: updatedOrderData.paymentStatus === 'paid' ? 'Thanh toán hoàn tất' : 'Chỉnh sửa thông tin đơn hàng'
         }
       ]
     }
@@ -505,7 +1267,9 @@ export default function OrderManagement() {
     ))
 
     setNotification({
-      message: `Đơn hàng ${editingOrder.orderNumber} đã được cập nhật thành công!`,
+      message: finalPaymentStatus === 'paid' && finalStatus === 'completed'
+        ? `Đơn hàng ${editingOrder.orderNumber} đã thanh toán hoàn tất và chuyển sang Hoàn thành!`
+        : `Đơn hàng ${editingOrder.orderNumber} đã được cập nhật thành công!`,
       type: 'success'
     })
     setTimeout(() => setNotification(null), 3000)
@@ -621,7 +1385,7 @@ Trân trọng,
 
   // Handle bulk operations
   const handleBulkOperation = async (operation: string) => {
-    if (selectedOrders.length === 0) return
+    if (selectedOrders.length === 0 && selectedReminderOrders.length === 0) return
     
     setIsLoading(true)
     
@@ -629,42 +1393,49 @@ Trân trọng,
       // Simulate API delay
       await new Promise(resolve => setTimeout(resolve, 1000))
       
+      // Use selectedReminderOrders if in reminder tab, otherwise use selectedOrders
+      const orderIds = selectedReminderOrders.length > 0 ? selectedReminderOrders : selectedOrders
+      
       switch (operation) {
         case 'mark_paid':
           setOrders(prev => prev.map(order => 
-            selectedOrders.includes(order.id) 
+            orderIds.includes(order.id) 
               ? { ...order, paymentStatus: 'paid' as const }
               : order
           ))
           setNotification({
-            message: `Đã đánh dấu ${selectedOrders.length} đơn hàng là đã thanh toán`,
+            message: `Đã đánh dấu ${orderIds.length} đơn hàng là đã thanh toán`,
             type: 'success'
           })
+          // Clear both selected arrays
+          setSelectedReminderOrders([])
           break
         case 'mark_completed':
           setOrders(prev => prev.map(order => 
-            selectedOrders.includes(order.id) 
+            orderIds.includes(order.id) 
               ? { ...order, status: 'completed' as const }
               : order
           ))
           setNotification({
-            message: `Đã hoàn thành ${selectedOrders.length} đơn hàng`,
+            message: `Đã hoàn thành ${orderIds.length} đơn hàng`,
             type: 'success'
           })
           break
         case 'send_reminder':
           setOrders(prev => prev.map(order => 
-            selectedOrders.includes(order.id) 
+            orderIds.includes(order.id) 
               ? { ...order, remindersSent: order.remindersSent + 1 }
               : order
           ))
           setNotification({
-            message: `Đã gửi nhắc nhở thanh toán cho ${selectedOrders.length} đơn hàng`,
+            message: `Đã gửi nhắc nhở thanh toán cho ${orderIds.length} đơn hàng`,
             type: 'success'
           })
+          // Clear reminder orders after sending
+          setSelectedReminderOrders([])
           break
         case 'export':
-          exportOrdersToCSV(orders.filter(order => selectedOrders.includes(order.id)))
+          exportOrdersToCSV(orders.filter(order => orderIds.includes(order.id)))
           break
       }
       setSelectedOrders([])
@@ -754,7 +1525,7 @@ Trân trọng,
     <div className="space-y-6">
       {/* Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Tổng đơn hàng</div>
@@ -764,7 +1535,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Tổng doanh thu</div>
@@ -774,7 +1545,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Chưa thanh toán</div>
@@ -784,7 +1555,7 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-lg shadow">
+        <div className="bg-gradient-to-br from-purple-50 to-white p-6 border border-purple-100 rounded-[10px] shadow">
           <div className="flex items-center justify-between">
             <div>
               <div className="text-sm text-gray-600">Đã thanh toán</div>
@@ -797,11 +1568,11 @@ Trân trọng,
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Đơn hàng cần chú ý</h3>
           <div className="space-y-3">
             {orders.filter(o => o.paymentStatus === 'unpaid' || (o.deadline && new Date(o.deadline) < new Date())).slice(0, 5).map(order => (
-              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div key={order.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
                 <div>
                   <div className="font-medium text-gray-900">{order.orderNumber}</div>
                   <div className="text-sm text-gray-500">{order.customer.name}</div>
@@ -821,24 +1592,24 @@ Trân trọng,
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Hoạt động gần đây</h3>
           <div className="space-y-3">
-            <div className="flex items-center p-3 bg-blue-50 rounded-lg">
+            <div className="flex items-center p-3 bg-blue-50 rounded-[10px]">
               <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Đơn mới được tạo</div>
                 <div className="text-xs text-gray-500">DH20250611001 - 2 giờ trước</div>
               </div>
             </div>
-            <div className="flex items-center p-3 bg-green-50 rounded-lg">
-              <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
+            <div className="flex items-center p-3 bg-green-50 rounded-[10px]">
+              <div className="w-2 h-2 bg-[#2dc56a] rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Thanh toán thành công</div>
                 <div className="text-xs text-gray-500">DH20250610005 - 4 giờ trước</div>
               </div>
             </div>
-            <div className="flex items-center p-3 bg-yellow-50 rounded-lg">
+            <div className="flex items-center p-3 bg-yellow-50 rounded-[10px]">
               <div className="w-2 h-2 bg-yellow-500 rounded-full mr-3"></div>
               <div>
                 <div className="text-sm font-medium text-gray-900">Nhắc thanh toán lần 2</div>
@@ -858,7 +1629,7 @@ Trân trọng,
       order.paymentStatus === 'unpaid' && 
       order.deadline && 
       new Date(order.deadline) < new Date()
-    )
+    ).map(order => ({ ...order, reminderStatus: 'overdue' as const }))
 
     // Get upcoming payment reminders (next 7 days)
     const upcomingReminders = orders.filter(order => 
@@ -866,291 +1637,333 @@ Trân trọng,
       order.deadline && 
       new Date(order.deadline) > new Date() &&
       new Date(order.deadline) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
-    )
+    ).map(order => ({ ...order, reminderStatus: 'upcoming' as const }))
+
+    // Combine all reminder orders
+    const allReminderOrders = [...overdueOrders, ...upcomingReminders]
+
+    // Apply filters and sorting
+    const filteredAndSortedOrders = allReminderOrders
+      .filter(order => {
+        // Search filter
+        if (reminderFilters.search) {
+          const searchLower = reminderFilters.search.toLowerCase()
+          const matchesSearch = 
+            order.orderNumber.toLowerCase().includes(searchLower) ||
+            order.customer.name.toLowerCase().includes(searchLower) ||
+            order.customer.phone.includes(searchLower)
+          if (!matchesSearch) return false
+        }
+
+        // Status filter
+        if (reminderFilters.status !== 'all') {
+          if (reminderFilters.status !== order.reminderStatus) return false
+        }
+
+        return true
+      })
+      .sort((a, b) => {
+        switch (reminderFilters.sortBy) {
+          case 'deadline':
+            return new Date(a.deadline!).getTime() - new Date(b.deadline!).getTime()
+          case 'amount':
+            return b.total - a.total
+          case 'reminderCount':
+            return b.remindersSent - a.remindersSent
+          default:
+            return 0
+        }
+      })
 
     // Get orders that have been reminded multiple times
     const multipleReminders = orders.filter(order => order.remindersSent >= 2)
 
     return (
       <div className="space-y-6">
-        {/* Header Explanation */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center space-x-3 mb-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-              <Bell className="w-4 h-4 text-white" />
-            </div>
-            <h3 className="text-lg font-semibold text-gray-900">Quản lý Nhắc thanh toán</h3>
-          </div>
-          <p className="text-sm text-gray-700 leading-relaxed">
-            Tính năng này giúp bạn tự động gửi nhắc thanh toán đến <strong>khách hàng</strong> (qua email/SMS) 
-            và thông báo cho <strong>người phụ trách</strong> để theo dõi các đơn hàng chưa thanh toán.
-          </p>
-        </div>
-
         {/* Reminder Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-gradient-to-br from-red-50 to-white p-6 border border-red-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Đơn quá hạn</div>
-                <div className="text-2xl font-bold text-red-600">{overdueOrders.length}</div>
-              </div>
-              <AlertTriangle className="w-8 h-8 text-red-600" />
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
+          {/* Header with Help Icon */}
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="text-lg font-semibold text-gray-900">Quản lý nhắc thanh toán</h3>
+            <div 
+              className="relative"
+              onMouseEnter={() => setShowReminderTooltip(true)}
+              onMouseLeave={() => setShowReminderTooltip(false)}
+            >
+              <HelpCircle className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
+              {showReminderTooltip && (
+                <div className="absolute left-0 top-6 z-50 w-80 bg-gray-900 text-white text-xs rounded-[10px] p-3 shadow-lg">
+                  <div className="absolute -top-1 left-4 w-2 h-2 bg-gray-900 transform rotate-45"></div>
+                  Tính năng này giúp bạn tự động gửi nhắc thanh toán đến khách hàng (qua email/SMS) và thông báo cho người phụ trách để theo dõi các đơn hàng chưa thanh toán.
+                </div>
+              )}
             </div>
           </div>
 
-          <div className="bg-gradient-to-br from-yellow-50 to-white p-6 border border-yellow-100 rounded-lg">
-            <div className="flex items-center justify-between">
-              <div>
-                <div className="text-sm text-gray-600">Sắp đến hạn</div>
-                <div className="text-2xl font-bold text-yellow-600">{upcomingReminders.length}</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+              <div className="absolute top-2 right-2">
+                <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
               </div>
-              <Clock className="w-8 h-8 text-yellow-600" />
-            </div>
-          </div>
-
-          <div className="bg-gradient-to-br from-blue-50 to-white p-6 border border-blue-100 rounded-lg">
-            <div className="flex items-center justify-between">
               <div>
-                <div className="text-sm text-gray-600">Đã nhắc nhiều lần</div>
-                <div className="text-2xl font-bold text-blue-600">{multipleReminders.length}</div>
+                <p className="text-base font-semibold text-white mb-2">Đơn quá hạn</p>
+                <p className="text-4xl font-extrabold text-white">{overdueOrders.length}</p>
               </div>
-              <Bell className="w-8 h-8 text-blue-600" />
             </div>
-          </div>
 
-          <div className="bg-gradient-to-br from-green-50 to-white p-6 border border-green-100 rounded-lg">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-yellow-600 to-yellow-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+              <div className="absolute top-2 right-2">
+                <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+              </div>
               <div>
-                <div className="text-sm text-gray-600">Tổng lần nhắc</div>
-                <div className="text-2xl font-bold text-green-600">
+                <p className="text-base font-semibold text-white mb-2">Sắp đến hạn</p>
+                <p className="text-4xl font-extrabold text-white">{upcomingReminders.length}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+              <div className="absolute top-2 right-2">
+                <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-white mb-2">Đã nhắc nhiều lần</p>
+                <p className="text-4xl font-extrabold text-white">{multipleReminders.length}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+              <div className="absolute top-2 right-2">
+                <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+              </div>
+              <div>
+                <p className="text-base font-semibold text-white mb-2">Tổng lần nhắc</p>
+                <p className="text-4xl font-extrabold text-white">
                   {orders.reduce((sum, order) => sum + order.remindersSent, 0)}
-                </div>
-              </div>
-              <Send className="w-8 h-8 text-green-600" />
-            </div>
-          </div>
-        </div>
-
-        {/* Bulk Actions */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Thao tác hàng loạt</h3>
-          
-          {/* Explanation for Payment Reminders */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-            <div className="flex items-start space-x-3">
-              <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                <Bell className="w-4 h-4 text-blue-600" />
-              </div>
-              <div>
-                <h4 className="font-medium text-blue-900 mb-2">💡 Về tính năng nhắc thanh toán</h4>
-                <p className="text-sm text-blue-800 leading-relaxed">
-                  Khi gửi nhắc thanh toán, hệ thống sẽ tự động gửi thông báo đến <strong>cả hai bên</strong>:
                 </p>
-                <ul className="text-sm text-blue-800 mt-2 space-y-1 ml-4">
-                  <li className="flex items-center space-x-2">
-                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-                    <span><strong>Khách hàng:</strong> Nhận email/SMS nhắc thanh toán với chi tiết đơn hàng và hướng dẫn thanh toán</span>
-                  </li>
-                  <li className="flex items-center space-x-2">
-                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>
-                    <span><strong>Người phụ trách:</strong> Nhận thông báo để theo dõi và liên hệ khách hàng nếu cần</span>
-                  </li>
-                </ul>
-                <div className="mt-2 text-xs text-blue-700 bg-blue-100 rounded px-2 py-1 inline-block">
-                  ⏰ Lưu ý: Tránh gửi nhắc liên tục để không làm phiền khách hàng
-                </div>
               </div>
             </div>
           </div>
+        </div>
 
-          <div className="flex flex-wrap gap-3">
-            <button 
-              onClick={() => handleBulkOperation('send_reminder')}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-              title="Gửi nhắc thanh toán cho khách hàng và thông báo cho người phụ trách"
-            >
-              <Send className="w-4 h-4" />
-              <span>Gửi nhắc thanh toán tất cả</span>
-            </button>
-            <button 
-              onClick={() => handleBulkOperation('mark_paid')}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors flex items-center space-x-2"
-            >
-              <Check className="w-4 h-4" />
-              <span>Đánh dấu đã thanh toán</span>
-            </button>
-            <button 
-              onClick={() => exportOrdersToCSV(overdueOrders)}
-              className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors flex items-center space-x-2"
-            >
-              <Download className="w-4 h-4" />
-              <span>Xuất danh sách quá hạn</span>
-            </button>
+        {/* Filter Section */}
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
+          <div className="flex items-center justify-between gap-4">
+            {/* Left side: Search and Filters */}
+            <div className="flex items-center gap-3 flex-1">
+              {/* Search Input */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Tìm kiếm khách hàng..."
+                  value={reminderFilters.search}
+                  onChange={(e) => setReminderFilters(prev => ({ ...prev, search: e.target.value }))}
+                  className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm"
+                />
+              </div>
+
+              {/* Status Dropdown */}
+              <select
+                value={reminderFilters.status}
+                onChange={(e) => setReminderFilters(prev => ({ ...prev, status: e.target.value }))}
+                className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm min-w-[160px]"
+              >
+                <option value="all">Tất cả trạng thái</option>
+                <option value="overdue">Quá hạn</option>
+                <option value="upcoming">Sắp đến hạn</option>
+              </select>
+
+              {/* Sort Dropdown */}
+              <select
+                value={reminderFilters.sortBy}
+                onChange={(e) => setReminderFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] text-sm min-w-[180px]"
+              >
+                <option value="deadline">Sắp xếp: Thời hạn</option>
+                <option value="amount">Sắp xếp: Giá trị đơn hàng</option>
+                <option value="reminderCount">Sắp xếp: Số lần nhắc</option>
+              </select>
+            </div>
           </div>
         </div>
 
-        {/* Overdue Orders */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-red-50">
-            <h3 className="text-lg font-semibold text-red-800">Đơn hàng quá hạn thanh toán</h3>
+        {/* Bulk Actions Bar for Reminders */}
+        {selectedReminderOrders.length > 0 && (
+          <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  Đã chọn {selectedReminderOrders.length} khách hàng
+                </span>
+                <button
+                  onClick={() => setSelectedReminderOrders([])}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Bỏ chọn tất cả
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowSendReminderDialog(true)}
+                  className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-2 text-sm"
+                >
+                  <Send className="w-4 h-4" />
+                  <span>Gửi nhắc hàng loạt</span>
+                </button>
+                <button
+                  onClick={() => handleBulkOperation('mark_paid')}
+                  className="px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors flex items-center space-x-2 text-sm"
+                >
+                  <Check className="w-4 h-4" />
+                  <span>Đánh dấu đã thanh toán</span>
+                </button>
+                <button
+                  onClick={() => exportOrdersToCSV(filteredAndSortedOrders)}
+                  className="px-4 py-2 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 transition-colors flex items-center space-x-2 text-sm"
+                >
+                  <Download className="w-4 h-4" />
+                  <span>Xuất dữ liệu</span>
+                </button>
+              </div>
+            </div>
           </div>
+        )}
+
+        {/* Unified Reminders Table */}
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quá hạn</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Lần nhắc</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
+                  <th className="px-4 py-3 text-left">
+                    <input
+                      type="checkbox"
+                      checked={selectedReminderOrders.length === filteredAndSortedOrders.length && filteredAndSortedOrders.length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedReminderOrders(filteredAndSortedOrders.map(order => order.id))
+                        } else {
+                          setSelectedReminderOrders([])
+                        }
+                      }}
+                      className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
+                    />
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Mã đơn
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Khách hàng
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Tổng tiền
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Trạng thái
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Thời hạn
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Lần nhắc
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {overdueOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{order.orderNumber}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="font-medium text-gray-900">{order.customer.name}</div>
-                        <div className="text-sm text-gray-500">{order.customer.phone}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-red-600">{formatCurrency(order.total)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-red-600">
-                        {order.deadline && Math.ceil((new Date().getTime() - new Date(order.deadline).getTime()) / (1000 * 60 * 60 * 24))} ngày
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        order.remindersSent >= 3 ? 'bg-red-100 text-red-800' :
-                        order.remindersSent >= 2 ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-blue-100 text-blue-800'
-                      }`}>
-                        {order.remindersSent} lần
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => {
-                            setOrders(prev => prev.map(o => 
-                              o.id === order.id ? { ...o, remindersSent: o.remindersSent + 1 } : o
-                            ))
-                            setNotification({
-                              message: `Đã gửi nhắc nhở cho đơn ${order.orderNumber}`,
-                              type: 'success'
-                            })
-                            setTimeout(() => setNotification(null), 3000)
-                          }}
-                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors" 
-                          title="Gửi nhắc nhở"
-                        >
-                          <Send className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => setSelectedOrder(order)}
-                          className="p-1 text-gray-400 hover:text-green-600 transition-colors" 
-                          title="Xem chi tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setOrders(prev => prev.map(o => 
-                              o.id === order.id ? { ...o, paymentStatus: 'paid' as const } : o
-                            ))
-                            setNotification({
-                              message: `Đã đánh dấu đơn ${order.orderNumber} là đã thanh toán`,
-                              type: 'success'
-                            })
-                            setTimeout(() => setNotification(null), 3000)
-                          }}
-                          className="p-1 text-gray-400 hover:text-purple-600 transition-colors" 
-                          title="Đánh dấu đã thanh toán"
-                        >
-                          <Check className="w-4 h-4" />
-                        </button>
-                      </div>
+                {filteredAndSortedOrders.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-8 text-center text-gray-500">
+                      <Bell className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                      <p>Không có đơn hàng cần nhắc thanh toán</p>
                     </td>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                ) : (
+                  filteredAndSortedOrders.map((order) => {
+                    const isOverdue = order.reminderStatus === 'overdue'
+                    const daysValue = order.deadline 
+                      ? Math.abs(Math.ceil((new Date().getTime() - new Date(order.deadline).getTime()) / (1000 * 60 * 60 * 24)))
+                      : 0
 
-        {/* Upcoming Reminders */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-yellow-50">
-            <h3 className="text-lg font-semibold text-yellow-800">Đơn hàng sắp đến hạn thanh toán</h3>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Mã đơn</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Khách hàng</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng tiền</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Còn lại</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Thao tác</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {upcomingReminders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900">{order.orderNumber}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="font-medium text-gray-900">{order.customer.name}</div>
-                        <div className="text-sm text-gray-500">{order.customer.phone}</div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-yellow-600">{formatCurrency(order.total)}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-yellow-600">
-                        {order.deadline && calculateTimeRemaining(order.deadline)}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center space-x-2">
-                        <button 
-                          onClick={() => {
-                            setOrders(prev => prev.map(o => 
-                              o.id === order.id ? { ...o, remindersSent: o.remindersSent + 1 } : o
-                            ))
-                            setNotification({
-                              message: `Đã gửi nhắc nhở sớm cho đơn ${order.orderNumber}`,
-                              type: 'success'
-                            })
-                            setTimeout(() => setNotification(null), 3000)
-                          }}
-                          className="p-1 text-gray-400 hover:text-blue-600 transition-colors" 
-                          title="Gửi nhắc nhở sớm"
-                        >
-                          <Send className="w-4 h-4" />
-                        </button>
-                        <button 
-                          onClick={() => setSelectedOrder(order)}
-                          className="p-1 text-gray-400 hover:text-green-600 transition-colors" 
-                          title="Xem chi tiết"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                    return (
+                      <tr key={order.id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-4 py-4 whitespace-nowrap">
+                          <input
+                            type="checkbox"
+                            checked={selectedReminderOrders.includes(order.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedReminderOrders([...selectedReminderOrders, order.id])
+                              } else {
+                                setSelectedReminderOrders(selectedReminderOrders.filter(id => id !== order.id))
+                              }
+                            }}
+                            className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="font-medium text-gray-900">{order.orderNumber}</div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div>
+                            <button 
+                              onClick={() => {
+                                setSelectedCustomer(order.customer)
+                                setShowCustomerDetail(true)
+                              }}
+                              className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+                            >
+                              {order.customer.name}
+                            </button>
+                            <div className="text-sm text-gray-500">{order.customer.phone}</div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`font-medium ${isOverdue ? 'text-red-600' : 'text-yellow-600'}`}>
+                            {formatCurrency(order.total)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            isOverdue 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {isOverdue ? 'Quá hạn' : 'Sắp đến hạn'}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className={`text-sm ${isOverdue ? 'text-red-600' : 'text-yellow-600'}`}>
+                            {isOverdue 
+                              ? `${daysValue} ngày` 
+                              : calculateTimeRemaining(order.deadline!)
+                            }
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                            order.remindersSent >= 3 ? 'bg-red-100 text-red-800' :
+                            order.remindersSent >= 2 ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-blue-100 text-blue-800'
+                          }`}>
+                            {order.remindersSent} lần
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <button 
+                            onClick={() => setSelectedOrder(order)}
+                            className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-blue-600 hover:text-[#3e79f7] hover:bg-blue-50 rounded-[10px] transition-colors"
+                          >
+                            <Eye className="w-4 h-4 mr-1" />
+                            Xem chi tiết
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })
+                )}
               </tbody>
             </table>
           </div>
@@ -1161,163 +1974,266 @@ Trân trọng,
 
   const renderOrders = () => (
     <div className="space-y-4">
-      {/* Header and filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Quản lý Đơn hàng</h2>
-        
-        {/* Inline Filters */}
-        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-          {/* Search Input */}
-          <div className="relative flex-1 lg:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm đơn hàng theo mã, khách hàng..."
-              value={filters.search}
-              onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
+      {/* Statistics Cards */}
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
+        {/* Tổng quan đơn hàng */}
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="text-lg font-semibold text-gray-900">Tổng quan đơn hàng</h3>
+          <div className="relative">
+            <HelpCircle className="w-4 h-4 text-gray-400 hover:text-blue-500 cursor-help transition-colors" />
           </div>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Status Filter */}
-            <select 
-              value={filters.status}
-              onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-              <option value="">Tất cả trạng thái</option>
-              <option value="draft">Nháp</option>
-              <option value="pending">Chờ xác nhận</option>
-              <option value="confirmed">Đã xác nhận</option>
-              <option value="processing">Đang xử lý</option>
-              <option value="completed">Hoàn thành</option>
-              <option value="cancelled">Đã hủy</option>
-            </select>
-            
-            {/* Payment Status Filter */}
-            <select 
-              value={filters.paymentStatus}
-              onChange={(e) => setFilters(prev => ({ ...prev, paymentStatus: e.target.value }))}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-              <option value="">Tình trạng thanh toán</option>
-              <option value="unpaid">Chưa thanh toán</option>
-              <option value="partial">Thanh toán một phần</option>
-              <option value="paid">Đã thanh toán</option>
-              <option value="refunded">Đã hoàn tiền</option>
-            </select>
-            
-            {/* Time Filter */}
-            <select 
-              value={filters.timeRange}
-              onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e.target.value }))}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
-              <option value="">Thời gian</option>
-              <option value="today">Hôm nay</option>
-              <option value="yesterday">Hôm qua</option>
-              <option value="thisWeek">Tuần này</option>
-              <option value="thisMonth">Tháng này</option>
-              <option value="lastMonth">Tháng trước</option>
-            </select>
-            
-            {/* Clear Filters Button */}
-            {(filters.status || filters.paymentStatus || filters.timeRange || filters.search) && (
-              <button
-                onClick={() => setFilters({ status: '', paymentStatus: '', timeRange: '', search: '', tags: [] })}
-                className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors flex items-center space-x-1"
-              >
-                <X className="w-4 h-4" />
-                <span>Xóa bộ lọc</span>
-              </button>
-            )}
-            
-            {/* Create Order Button */}
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo đơn hàng</span>
-            </button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Tổng đơn hàng</p>
+              <p className="text-4xl font-extrabold text-white">{orders.length}</p>
+            </div>
+          </div>
+        
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Tổng doanh thu</p>
+              <p className="text-4xl font-extrabold text-white">
+                {(orders.reduce((sum, order) => sum + order.totalAmount, 0) / 1000000).toFixed(0)}M
+              </p>
+            </div>
+          </div>
+        
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-red-600 to-red-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Chưa thanh toán</p>
+              <p className="text-4xl font-extrabold text-white">
+                {orders.filter(o => o.paymentStatus === 'unpaid').length}
+              </p>
+            </div>
+          </div>
+        
+          <div className="flex flex-col justify-center rounded-[10px] px-6 py-6 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl">
+            <div className="absolute top-2 right-2">
+              <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+            </div>
+            <div>
+              <p className="text-base font-semibold text-white mb-2">Đã thanh toán</p>
+              <p className="text-4xl font-extrabold text-white">
+                {orders.filter(o => o.paymentStatus === 'paid').length}
+              </p>
+            </div>
           </div>
         </div>
       </div>
+      
+      {/* Header and filters */}
+      <div className="bg-white rounded-[10px] shadow-sm border border-[#e6ebf1] p-6">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          {/* Inline Filters */}
+          <div className="flex flex-col lg:flex-row gap-3 lg:items-center flex-1">
+            {/* Search Input */}
+            <div className="relative flex-1 lg:w-80">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm đơn hàng theo mã, khách hàng..."
+                value={filters.search}
+                onChange={(e) => setFilters(prev => ({ ...prev, search: e.target.value }))}
+                className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
+              />
+            </div>
+          
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              {/* Status Filter */}
+              <select 
+                value={filters.status}
+                onChange={(e) => setFilters(prev => ({ ...prev, status: e.target.value }))}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
+                <option value="">Tất cả trạng thái</option>
+                <option value="draft">Nháp</option>
+                <option value="pending">Chờ xác nhận</option>
+                <option value="confirmed">Đã xác nhận</option>
+                <option value="processing">Đang xử lý</option>
+                <option value="completed">Hoàn thành</option>
+                <option value="cancelled">Đã hủy</option>
+              </select>
+            
+              {/* Payment Status Filter */}
+              <select 
+                value={filters.paymentStatus}
+                onChange={(e) => setFilters(prev => ({ ...prev, paymentStatus: e.target.value }))}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
+                <option value="">Tình trạng thanh toán</option>
+                <option value="unpaid">Chưa thanh toán</option>
+                <option value="partial">Thanh toán một phần</option>
+                <option value="paid">Đã thanh toán</option>
+                <option value="refunded">Đã hoàn tiền</option>
+              </select>
+            
+              {/* Custom Date Range Picker - hiển thị khi chọn custom */}
+              {filters.timeRange === 'custom' && (
+                <div className="relative">
+                  <div className="flex items-center border border-[#e6ebf1] rounded-md bg-white overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+                    <div className="flex items-center px-2 text-gray-400">
+                      <Calendar className="w-3.5 h-3.5" />
+                    </div>
+                    <input 
+                      className="flex-1 px-1 py-1.5 text-xs border-0 focus:ring-0 focus:outline-none" 
+                      type="date"
+                      value={customDateRange.startDate}
+                      onChange={(e) => setCustomDateRange(prev => ({ ...prev, startDate: e.target.value }))}
+                    />
+                    <span className="text-gray-400 text-xs">-</span>
+                    <input 
+                      className="flex-1 px-1 py-1.5 text-xs border-0 focus:ring-0 focus:outline-none" 
+                      type="date"
+                      value={customDateRange.endDate}
+                      onChange={(e) => setCustomDateRange(prev => ({ ...prev, endDate: e.target.value }))}
+                    />
+                  </div>
+                </div>
+              )}
 
-      {/* Filter Results Summary */}
-      <div className="flex items-center justify-between text-sm text-gray-600">
-        <span>
-          Hiển thị {getFilteredOrders().length} trong tổng {orders.length} đơn hàng
-          {(filters.status || filters.paymentStatus || filters.timeRange || filters.search) && (
-            <span className="ml-1 text-blue-600">(đã lọc)</span>
-          )}
-        </span>
-        <div className="flex items-center space-x-4">
+              {/* Time Filter */}
+              <select 
+                value={filters.timeRange}
+                onChange={(e) => setFilters(prev => ({ ...prev, timeRange: e.target.value }))}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]">
+                <option value="">Thời gian</option>
+                <option value="today">Hôm nay</option>
+                <option value="yesterday">Hôm qua</option>
+                <option value="thisWeek">Tuần này</option>
+                <option value="thisMonth">Tháng này</option>
+                <option value="lastMonth">Tháng trước</option>
+                <option value="custom">Tùy chọn</option>
+              </select>
+            
+              {/* Clear Filters Button */}
+              {(filters.status || filters.paymentStatus || filters.timeRange || filters.search) && (
+                <button
+                  onClick={() => {
+                    setFilters({ status: '', paymentStatus: '', timeRange: '', search: '', tags: [] })
+                    setCustomDateRange({ startDate: '', endDate: '' })
+                  }}
+                  className="px-3 py-2 text-sm text-gray-600 hover:text-gray-800 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors flex items-center space-x-1"
+                >
+                  <X className="w-4 h-4" />
+                  <span>Xóa bộ lọc</span>
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Create Order Button - chuyển về bên phải */}
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm whitespace-nowrap"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Tạo đơn hàng</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Table Container with white background and border */}
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
+        {/* Filter Results Summary */}
+        <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+          <span>
+            Hiển thị {getFilteredOrders().length} trong tổng {orders.length} đơn hàng
+            {(filters.status || filters.paymentStatus || filters.timeRange || filters.search) && (
+              <span className="ml-1 text-blue-600">(đã lọc)</span>
+            )}
+          </span>
           {selectedOrders.length > 0 && (
             <span className="text-blue-600 font-medium">
               Đã chọn {selectedOrders.length} đơn hàng
             </span>
           )}
-          <div className="text-xs text-gray-500">
-            Phím tắt: Ctrl+A (chọn tất cả), Esc (bỏ chọn)
-          </div>
         </div>
-      </div>
 
-      {/* Bulk Actions Bar */}
-      {selectedOrders.length > 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <span className="text-sm font-medium text-blue-900">
-                Đã chọn {selectedOrders.length} đơn hàng
-              </span>
-              <button
-                onClick={() => setSelectedOrders([])}
-                className="text-sm text-blue-600 hover:text-blue-800"
-              >
-                Bỏ chọn tất cả
-              </button>
-            </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => handleBulkOperation('mark_paid')}
-                disabled={isLoading}
-                className="px-3 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
-              >
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
-                <span>Đánh dấu đã thanh toán</span>
-              </button>
-              <button
-                onClick={() => handleBulkOperation('mark_completed')}
-                disabled={isLoading}
-                className="px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
-              >
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
-                <span>Hoàn thành</span>
-              </button>
-              <button
-                onClick={() => handleBulkOperation('send_reminder')}
-                disabled={isLoading}
-                className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
-              >
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                <span>Gửi nhắc nhở</span>
-              </button>
-              <button
-                onClick={() => handleBulkOperation('export')}
-                disabled={isLoading}
-                className="px-3 py-2 bg-gray-600 text-white text-sm rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
-              >
-                {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
-                <span>Xuất CSV</span>
-              </button>
+        {/* Bulk Actions Bar */}
+        {selectedOrders.length > 0 && (
+          <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <span className="text-sm font-medium text-blue-900">
+                  Đã chọn {selectedOrders.length} đơn hàng
+                </span>
+                <button
+                  onClick={() => setSelectedOrders([])}
+                  className="text-sm text-blue-600 hover:text-blue-800"
+                >
+                  Bỏ chọn tất cả
+                </button>
+              </div>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => handleBulkOperation('mark_paid')}
+                  disabled={isLoading}
+                  className="px-3 py-2 bg-[#2dc56a] text-white text-sm rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                >
+                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Check className="w-4 h-4" />}
+                  <span>Đánh dấu đã thanh toán</span>
+                </button>
+                <button
+                  onClick={() => handleBulkOperation('send_reminder')}
+                  disabled={isLoading}
+                  className="px-3 py-2 bg-yellow-600 text-white text-sm rounded-[10px] hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
+                >
+                  {isLoading ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                  <span>Gửi nhắc nhở</span>
+                </button>
+                <div className="relative">
+                  <button
+                    onClick={() => setShowExportDropdown(!showExportDropdown)}
+                    disabled={isLoading}
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>Xuất dữ liệu</span>
+                    <ChevronDown className="w-4 h-4" />
+                  </button>
+                  {showExportDropdown && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-50">
+                      <button
+                        onClick={() => {
+                          handleBulkOperation('export_excel')
+                          setShowExportDropdown(false)
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Xuất Excel</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          handleBulkOperation('export')
+                          setShowExportDropdown(false)
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-50 flex items-center space-x-2 text-sm text-gray-700 border-t border-gray-100"
+                      >
+                        <FileText className="w-4 h-4" />
+                        <span>Xuất CSV</span>
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        {/* Orders Table */}
+        <div className="rounded-[10px] border border-[#e6ebf1] overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200 text-sm">
             <thead className="bg-gray-50">
@@ -1333,18 +2249,21 @@ Trân trọng,
                         setSelectedOrders([])
                       }
                     }}
-                    className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                    className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                   />
                 </th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mã đơn</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Khách hàng</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">Sản phẩm</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tổng tiền</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Thanh toán</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">Thời hạn</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">Nhãn</th>
-                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thao tác</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Mã đơn</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Khách hàng</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden md:table-cell">Sản phẩm</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-blue-600 uppercase tracking-wider">Tổng tiền</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap hidden lg:table-cell">Số lần TT</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-green-600 uppercase tracking-wider hidden lg:table-cell">Thực tế</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-red-600 uppercase tracking-wider hidden lg:table-cell">Dư nợ</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Trạng thái</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Thanh toán</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Thời hạn</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden xl:table-cell">Nhãn</th>
+                <th className="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Thao tác</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -1361,7 +2280,7 @@ Trân trọng,
                           setSelectedOrders(prev => prev.filter(id => id !== order.id))
                         }
                       }}
-                      className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      className="w-4 h-4 text-blue-600 border-[#e6ebf1] rounded focus:ring-[#3e79f7]"
                     />
                   </td>
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -1373,7 +2292,15 @@ Trân trọng,
                   
                   <td className="px-4 py-4 whitespace-nowrap">
                     <div>
-                      <div className="font-medium text-gray-900">{order.customer.name}</div>
+                      <button 
+                        onClick={() => {
+                          setSelectedCustomer(order.customer)
+                          setShowCustomerDetail(true)
+                        }}
+                        className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+                      >
+                        {order.customer.name}
+                      </button>
                       <div className="text-sm text-gray-500">{order.customer.phone}</div>
                       {order.isVip && (
                         <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 mt-1">
@@ -1394,7 +2321,23 @@ Trân trọng,
                   </td>
                   
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900">{formatCurrency(order.total)}</div>
+                    <div className="font-medium text-blue-600">{formatCurrency(order.total)}</div>
+                  </td>
+                  
+                  <td className="px-4 py-4 whitespace-nowrap hidden lg:table-cell">
+                    <div className="text-sm text-gray-900">{order.installments?.length || 1}</div>
+                  </td>
+                  
+                  <td className="px-4 py-4 whitespace-nowrap hidden lg:table-cell">
+                    <div className="text-sm font-medium text-green-600">
+                      {formatCurrency(order.totalPaid || 0)}
+                    </div>
+                  </td>
+                  
+                  <td className="px-4 py-4 whitespace-nowrap hidden lg:table-cell">
+                    <div className="text-sm font-medium text-red-600">
+                      {formatCurrency(order.remainingDebt ?? order.total)}
+                    </div>
                   </td>
                   
                   <td className="px-4 py-4 whitespace-nowrap">
@@ -1433,43 +2376,137 @@ Trân trọng,
                   </td>
                   
                   <td className="px-4 py-4 whitespace-nowrap">
-                    <div className="flex items-center space-x-1">
+                    <div className="relative">
                       <button 
-                        onClick={() => setSelectedOrder(order)}
-                        className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                        title="Xem chi tiết"
+                        onClick={() => setOpenActionMenu(openActionMenu === order.id ? null : order.id)}
+                        className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                        title="Thao tác"
                       >
-                        <Eye className="w-4 h-4" />
+                        <Settings className="w-4 h-4" />
                       </button>
-                      <button 
-                        onClick={() => handleEditOrder(order)}
-                        className="p-1 text-gray-400 hover:text-green-600 transition-colors" 
-                        title="Chỉnh sửa đơn hàng"
-                        disabled={order.status === 'cancelled' || order.status === 'completed'}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleCancelOrder(order)}
-                        className="p-1 text-gray-400 hover:text-red-600 transition-colors" 
-                        title="Hủy đơn hàng"
-                        disabled={order.status === 'cancelled' || order.status === 'completed'}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleSendPaymentReminder(order)}
-                        className="p-1 text-gray-400 hover:text-orange-600 transition-colors" 
-                        title="Gửi nhắc nhở thanh toán"
-                        disabled={order.paymentStatus === 'paid' || order.status === 'cancelled'}
-                      >
-                        <Bell className="w-4 h-4" />
-                      </button>
+                      {openActionMenu === order.id && (
+                        <div className="absolute right-0 mt-1 w-52 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] z-[999] py-2">
+                          {/* Thông tin Section */}
+                          <div className="px-4 pb-1 text-left">
+                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              setSelectedOrder(order)
+                              setOpenActionMenu(null)
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                          >
+                            <Eye className="w-4 h-4 text-gray-500" />
+                            <span>Xem chi tiết</span>
+                          </button>
+                          
+                          {/* Thao tác nhanh Section */}
+                          <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                            <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider">Thao tác nhanh</span>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              handleEditOrder(order)
+                              setOpenActionMenu(null)
+                            }}
+                            disabled={order.status === 'cancelled' || order.status === 'completed'}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Edit className="w-4 h-4 text-gray-500" />
+                            <span>Thanh toán đơn hàng</span>
+                          </button>
+                          <button 
+                            onClick={() => {
+                              handleSendPaymentReminder(order)
+                              setOpenActionMenu(null)
+                            }}
+                            disabled={order.paymentStatus === 'paid' || order.status === 'cancelled'}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <Bell className="w-4 h-4 text-gray-500" />
+                            <span>Nhắc nhở thanh toán</span>
+                          </button>
+                          <button 
+                            onClick={() => {
+                              setOrderForAction(order)
+                              setShowAddNoteDialog(true)
+                              setOpenActionMenu(null)
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 flex items-center space-x-3"
+                          >
+                            <StickyNote className="w-4 h-4 text-gray-500" />
+                            <span>Thêm ghi chú</span>
+                          </button>
+                          
+                          {/* Thao tác nguy hiểm Section */}
+                          <div className="border-t border-gray-100 mt-2 pt-2 px-4 pb-1 text-left">
+                            <span className="text-xs font-semibold text-red-400 uppercase tracking-wider">Thao tác nguy hiểm</span>
+                          </div>
+                          <button 
+                            onClick={() => {
+                              setOrderForAction(order)
+                              setShowRefundDialog(true)
+                              setOpenActionMenu(null)
+                            }}
+                            disabled={order.paymentStatus === 'unpaid' || order.status === 'cancelled'}
+                            className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed"
+                          >
+                            <RefreshCw className="w-4 h-4 text-red-500" />
+                            <span>Hoàn tiền</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </td>
                 </tr>
               ))}
             </tbody>
+            {/* Summary Stats Row - aligned with table columns */}
+            {getFilteredOrders().length > 0 && (
+              <tfoot>
+                <tr className="bg-gray-50 border-t-2 border-[#e6ebf1]">
+                  {/* Checkbox column */}
+                  <td className="px-4 py-3"></td>
+                  {/* Mã đơn column */}
+                  <td className="px-4 py-3">
+                    <span className="text-sm text-gray-500">Tổng số bản ghi: </span>
+                    <span className="font-semibold text-gray-900">{getFilteredOrders().length}</span>
+                  </td>
+                  {/* Khách hàng column */}
+                  <td className="px-4 py-3"></td>
+                  {/* Sản phẩm column */}
+                  <td className="px-4 py-3 hidden md:table-cell"></td>
+                  {/* Tổng tiền column */}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    <div className="text-xs text-gray-500 mb-0.5">Tổng tiền</div>
+                    <div className="font-semibold text-blue-600">{formatCurrency(getFilteredOrders().reduce((sum, o) => sum + o.total, 0))} đ</div>
+                  </td>
+                  {/* Số lần TT column */}
+                  <td className="px-4 py-3 hidden lg:table-cell"></td>
+                  {/* Thực tế (Đã TT) column */}
+                  <td className="px-4 py-3 whitespace-nowrap hidden lg:table-cell">
+                    <div className="text-xs text-gray-500 mb-0.5">Đã TT</div>
+                    <div className="font-semibold text-green-600">{formatCurrency(getFilteredOrders().reduce((sum, o) => sum + (o.totalPaid || 0), 0))} đ</div>
+                  </td>
+                  {/* Dư nợ column */}
+                  <td className="px-4 py-3 whitespace-nowrap hidden lg:table-cell">
+                    <div className="text-xs text-gray-500 mb-0.5">Dư nợ</div>
+                    <div className="font-semibold text-red-600">{formatCurrency(getFilteredOrders().reduce((sum, o) => sum + (o.remainingDebt || o.total - (o.totalPaid || 0)), 0))} đ</div>
+                  </td>
+                  {/* Trạng thái column */}
+                  <td className="px-4 py-3"></td>
+                  {/* Thanh toán column */}
+                  <td className="px-4 py-3 hidden lg:table-cell"></td>
+                  {/* Thời hạn column */}
+                  <td className="px-4 py-3 hidden lg:table-cell"></td>
+                  {/* Nhãn column */}
+                  <td className="px-4 py-3 hidden xl:table-cell"></td>
+                  {/* Thao tác column */}
+                  <td className="px-4 py-3"></td>
+                </tr>
+              </tfoot>
+            )}
           </table>
           
           {/* Empty State */}
@@ -1499,7 +2536,7 @@ Trân trọng,
               ) : (
                 <button
                   onClick={() => setShowCreateModal(true)}
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-[#3e79f7] hover:bg-[#699dff]"
                 >
                   <Plus className="w-4 h-4 mr-2" />
                   Tạo đơn hàng đầu tiên
@@ -1508,6 +2545,7 @@ Trân trọng,
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   )
@@ -1521,11 +2559,10 @@ Trân trọng,
       </div>
 
       {/* Navigation Tabs */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-        <div className="border-b border-gray-200">
-          <nav className="flex space-x-8 px-6">
+      <div>
+        <div className="border-b border-[#e6ebf1]">
+          <nav className="flex space-x-8">
             {[
-              { id: 'overview', name: 'Tổng quan', icon: <Activity className="w-4 h-4" /> },
               { id: 'orders', name: 'Đơn hàng', icon: <ShoppingCart className="w-4 h-4" /> },
               { id: 'reminders', name: 'Nhắc thanh toán', icon: <Bell className="w-4 h-4" /> }
             ].map((tab) => (
@@ -1535,7 +2572,7 @@ Trân trọng,
                 className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
                 }`}
               >
                 <span className={activeTab === tab.id ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
@@ -1548,8 +2585,7 @@ Trân trọng,
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
-          {activeTab === 'overview' && renderOverview()}
+        <div className="mt-6">
           {activeTab === 'orders' && renderOrders()}
           {activeTab === 'reminders' && renderRemindersManagement()}
         </div>
@@ -1557,8 +2593,8 @@ Trân trọng,
 
       {/* Notifications */}
       {notification && (
-        <div className={`fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg ${
-          notification.type === 'success' ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+        <div className={`fixed top-4 right-4 px-4 py-2 rounded-[10px] shadow-lg ${
+          notification.type === 'success' ? 'bg-[#2dc56a] text-white' : 'bg-red-500 text-white'
         }`}>
           {notification.message}
         </div>
@@ -1566,13 +2602,605 @@ Trân trọng,
 
       {/* Modals */}
       {showCreateModal && (
-        <CreateOrderModal
-          isOpen={showCreateModal}
-          customers={customers}
-          products={products}
-          onClose={() => setShowCreateModal(false)}
-          onSave={handleCreateOrder}
-        />
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-4xl w-full max-h-[90vh] sm:max-h-[85vh] overflow-y-auto mx-4">
+            <div className="px-4 sm:px-6 py-4 border-b border-[#e6ebf1] relative">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setSelectedCustomerForNewOrder(null)
+                  setSelectedProducts([])
+                  setSelectedPackages({})
+                  setProductQuantities({})
+                  setOrderNotes('')
+                  setSelectedCategory('Tất cả')
+                  setPaymentMethod('cash')
+                  setPaymentDeadline('')
+                  setDiscountPercent(0)
+                  setDiscountType('%')
+                  setPaymentMode('full')
+                  setPaymentInstallments(1)
+                  setInstallmentData([{amount: 0, date: ''}])
+                  setTaxId('vat-10')
+                  setTaxRate(10)
+                }}
+                className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-[10px] transition-colors"
+                title="Đóng"
+              >
+                <X className="h-5 w-5" />
+              </button>
+              <h3 className="text-base sm:text-lg font-semibold text-gray-900 pr-8">Tạo đơn hàng mới</h3>
+            </div>
+            
+            <div className="px-4 sm:px-6 py-4">
+              {/* Customer Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Khách hàng <span className="text-red-500">*</span></label>
+                <select
+                  value={selectedCustomerForNewOrder?.id || ''}
+                  onChange={(e) => {
+                    const customerId = parseInt(e.target.value)
+                    const customer = customers.find(c => c.id === customerId)
+                    setSelectedCustomerForNewOrder(customer || null)
+                  }}
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                >
+                  <option value="">Chọn khách hàng</option>
+                  {customers.map(customer => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name} - {customer.phone} ({customer.type === 'lead' ? 'Lead' : 'Khách hàng'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Customer Info */}
+              {selectedCustomerForNewOrder && (
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="relative flex shrink-0 overflow-hidden rounded-full h-12 w-12 bg-blue-100">
+                    <span className="flex h-full w-full items-center justify-center rounded-full bg-blue-100 text-[#3e79f7] font-semibold">
+                      <User className="h-6 w-6" />
+                    </span>
+                  </span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-slate-900">{selectedCustomerForNewOrder.name}</h3>
+                    </div>
+                    <p className="text-sm text-slate-600">
+                      {selectedCustomerForNewOrder.email && <span>{selectedCustomerForNewOrder.email}</span>}
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Order Notes */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú đơn hàng</label>
+                <textarea
+                  value={orderNotes}
+                  onChange={(e) => setOrderNotes(e.target.value)}
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                  rows={2}
+                  placeholder="Nhập ghi chú cho đơn hàng (không bắt buộc)..."
+                />
+              </div>
+
+              {/* Category Filter */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Chọn thể loại sản phẩm</label>
+                <select
+                  value={selectedCategory}
+                  onChange={(e) => setSelectedCategory(e.target.value)}
+                  className="w-full sm:w-64 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                >
+                  {productCategories.map(category => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Product Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Chọn sản phẩm và gói sản phẩm <span className="text-red-500">*</span>
+                </label>
+                <div className="max-h-72 overflow-y-auto border border-[#e6ebf1] rounded-[10px] p-3">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {availableProducts
+                      .filter(product => selectedCategory === 'Tất cả' || product.category === selectedCategory)
+                      .map((product) => (
+                      <div key={product.id} className="border border-[#e6ebf1] rounded-[10px] p-3 bg-white hover:border-blue-300 transition-colors">
+                        <label className="flex items-start space-x-3 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedProducts.includes(product.id)}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setSelectedProducts(prev => [...prev, product.id])
+                                setSelectedPackages(prev => ({
+                                  ...prev,
+                                  [product.id]: availablePackages[product.id]?.[0]?.id || ''
+                                }))
+                                setProductQuantities(prev => ({
+                                  ...prev,
+                                  [product.id]: 1
+                                }))
+                              } else {
+                                setSelectedProducts(prev => prev.filter(id => id !== product.id))
+                                setSelectedPackages(prev => {
+                                  const newPackages = {...prev}
+                                  delete newPackages[product.id]
+                                  return newPackages
+                                })
+                                setProductQuantities(prev => {
+                                  const newQuantities = {...prev}
+                                  delete newQuantities[product.id]
+                                  return newQuantities
+                                })
+                              }
+                            }}
+                            className="mt-1 h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1] rounded"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-medium text-gray-900 text-sm">{product.name}</h4>
+                              <span className="text-xs px-2 py-0.5 bg-gray-100 text-gray-600 rounded">{product.category}</span>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-1 line-clamp-2">{product.description}</p>
+                            <p className="text-sm font-semibold text-green-600 mt-1">{formatCurrency(product.price.toString())} VNĐ</p>
+                          </div>
+                        </label>
+                        
+                        {/* Package & Quantity Selection */}
+                        {selectedProducts.includes(product.id) && availablePackages[product.id] && (
+                          <div className="ml-7 mt-2 p-2 bg-gray-50 rounded">
+                            <div className="grid grid-cols-2 gap-2">
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Chọn gói:</label>
+                                <select
+                                  value={selectedPackages[product.id] || ''}
+                                  onChange={(e) => {
+                                    setSelectedPackages(prev => ({
+                                      ...prev,
+                                      [product.id]: e.target.value
+                                    }))
+                                  }}
+                                  className="w-full text-xs border border-[#e6ebf1] rounded px-2 py-1"
+                                >
+                                  {availablePackages[product.id]?.map((pkg) => (
+                                    <option key={pkg.id} value={pkg.id}>
+                                      {pkg.name} {pkg.price > 0 ? `(+${formatCurrency(pkg.price.toString())} VNĐ)` : ''}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                                <label className="block text-xs font-medium text-gray-700 mb-1">Số lượng:</label>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  value={productQuantities[product.id] || 1}
+                                  onChange={(e) => {
+                                    setProductQuantities(prev => ({
+                                      ...prev,
+                                      [product.id]: Math.max(1, parseInt(e.target.value) || 1)
+                                    }))
+                                  }}
+                                  className="w-full text-xs border border-[#e6ebf1] rounded px-2 py-1"
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary */}
+              {selectedProducts.length > 0 && (() => {
+                const subtotal = selectedProducts.reduce((sum, productId) => {
+                  const product = availableProducts.find(p => p.id === productId)
+                  const selectedPackageId = selectedPackages[productId]
+                  const selectedPackage = availablePackages[productId]?.find(pkg => pkg.id === selectedPackageId)
+                  const quantity = productQuantities[productId] || 1
+                  return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                }, 0)
+                const discountAmount = discountType === '%' 
+                  ? subtotal * discountPercent / 100 
+                  : discountPercent
+                const afterDiscount = subtotal - discountAmount
+                const vatAmount = afterDiscount * (taxRate / 100)
+                const grandTotal = afterDiscount + vatAmount
+                
+                return (
+                  <div className="bg-green-50 border border-green-200 rounded-[10px] p-4 mb-4">
+                    <h5 className="text-sm font-medium text-green-800 mb-3">
+                      Đã chọn {selectedProducts.length} sản phẩm:
+                    </h5>
+                    <div className="space-y-2 text-sm">
+                      {selectedProducts.map(productId => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId]?.find(pkg => pkg.id === selectedPackageId)
+                        const quantity = productQuantities[productId] || 1
+                        const productTotal = ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                        
+                        return product ? (
+                          <div key={productId} className="flex justify-between text-gray-700">
+                            <span>{product.name} ({selectedPackage?.name || 'Standard'}) x{quantity}</span>
+                            <span className="font-medium text-green-600">
+                              {formatCurrency(productTotal.toString())} VNĐ
+                            </span>
+                          </div>
+                        ) : null
+                      })}
+                      {discountAmount > 0 && (
+                        <div className="flex justify-between text-gray-600 border-t border-green-200 pt-2 mt-2">
+                          <span>Giảm giá {discountType === '%' ? `(${discountPercent}%)` : ''}:</span>
+                          <span className="font-medium text-red-500">-{formatCurrency(discountAmount.toString())} VNĐ</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between text-gray-600 pt-1">
+                        <span>Phí VAT ({taxRate}%):</span>
+                        <span className="font-medium text-gray-700">+{formatCurrency(vatAmount.toString())} VNĐ</span>
+                      </div>
+                      <div className="flex justify-between font-semibold text-green-700 border-t border-green-300 pt-2 mt-2">
+                        <span>Tổng cộng:</span>
+                        <span className="text-lg">{formatCurrency(grandTotal.toString())} VNĐ</span>
+                      </div>
+                    </div>
+                  </div>
+                )
+              })()}
+
+              {/* Payment Info Section */}
+              {selectedProducts.length > 0 && (
+                <div className="bg-gray-50 border border-[#e6ebf1] rounded-[10px] p-4 mb-4">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    {/* Tax Selection */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Thuế GTGT <span className="text-red-500">*</span></label>
+                      <select
+                         value={taxId}
+                         onChange={(e) => {
+                           const tax = defaultTaxes.find(t => t.id === e.target.value)
+                           setTaxId(e.target.value)
+                           setTaxRate(tax ? tax.rate : 0)
+                         }}
+                         className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                         <option value="">Chọn mức thuế</option>
+                         {defaultTaxes.filter(t => t.isActive).map(tax => (
+                           <option key={tax.id} value={tax.id}>{tax.name} ({tax.rate}%)</option>
+                         ))}
+                      </select>
+                    </div>
+
+                    {/* Discount */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Giảm giá</label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="number"
+                          min="0"
+                          max={discountType === '%' ? 100 : undefined}
+                          value={discountPercent}
+                          onChange={(e) => setDiscountPercent(Math.max(0, discountType === '%' ? Math.min(100, parseInt(e.target.value) || 0) : parseInt(e.target.value) || 0))}
+                          placeholder="0"
+                          className="flex-1 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                        />
+                        <select 
+                          value={discountType}
+                          onChange={(e) => {
+                            setDiscountType(e.target.value as '%' | 'VND')
+                            setDiscountPercent(0)
+                          }}
+                          className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+                        >
+                          <option value="%">%</option>
+                          <option value="VND">VNĐ</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Payment Deadline */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Thời hạn TT <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="date"
+                        value={paymentDeadline}
+                        onChange={(e) => setPaymentDeadline(e.target.value)}
+                        min={new Date().toISOString().split('T')[0]}
+                        className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Payment Method */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Hình thức thanh toán</label>
+                      <select
+                        value={paymentMethod}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="w-auto px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      >
+                        <option value="cash">Tiền mặt</option>
+                        <option value="bank_transfer">Chuyển khoản</option>
+                        <option value="installment">Trả góp</option>
+                        <option value="momo">Momo</option>
+                        <option value="card">Thẻ</option>
+                        <option value="custom">Tùy chỉnh</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Payment Mode */}
+                  <div className="mb-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                      <label className="text-sm font-medium text-gray-700 whitespace-nowrap">Thực hiện thanh toán</label>
+                      <div className="flex gap-3">
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="newOrderPaymentMode"
+                            value="full"
+                            checked={paymentMode === 'full'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Toàn bộ</span>
+                        </label>
+                        <label className="flex items-center px-3 py-2 border border-[#e6ebf1] rounded-[10px] cursor-pointer hover:bg-white transition-colors bg-white">
+                          <input
+                            type="radio"
+                            name="newOrderPaymentMode"
+                            value="installment"
+                            checked={paymentMode === 'installment'}
+                            onChange={(e) => setPaymentMode(e.target.value as 'full' | 'installment')}
+                            className="h-4 w-4 text-blue-600 focus:ring-[#3e79f7] border-[#e6ebf1]"
+                          />
+                          <span className="ml-2 text-sm text-gray-700">Theo giai đoạn</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Installments - Only show when installment mode selected */}
+                  {paymentMode === 'installment' && (
+                  <div className="border-t border-[#e6ebf1] pt-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số lần thanh toán
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="12"
+                        value={paymentInstallments}
+                        onChange={(e) => {
+                          const num = Math.max(1, Math.min(12, parseInt(e.target.value) || 1))
+                          setPaymentInstallments(num)
+                          // Update installment data array
+                          const newInstallments = Array.from({length: num}, (_, i) => 
+                            installmentData[i] || {amount: 0, date: ''}
+                          )
+                          setInstallmentData(newInstallments)
+                        }}
+                        className="w-32 px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                      />
+                    </div>
+
+                    {/* Installment Details */}
+                    {installmentData.map((installment, index) => {
+                      // Calculate grand total for validation (same as summary calculation)
+                      const subtotalCalc = selectedProducts.reduce((sum, productId) => {
+                        const product = availableProducts.find(p => p.id === productId)
+                        const selectedPackageId = selectedPackages[productId]
+                        const selectedPackage = availablePackages[productId as keyof typeof availablePackages]?.find(pkg => pkg.id === selectedPackageId)
+                        const quantity = productQuantities[productId] || 1
+                        return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                      }, 0)
+                      const totalBeforeDiscountCalc = subtotalCalc
+                      const discountAmountCalc = discountType === '%' 
+                        ? totalBeforeDiscountCalc * discountPercent / 100 
+                        : discountPercent
+                      const afterDiscountCalc = totalBeforeDiscountCalc - discountAmountCalc
+                      const grandTotalCalc = afterDiscountCalc + afterDiscountCalc * (taxRate / 100)
+                      
+                      // Calculate max allowed for this installment
+                      const otherInstallmentsTotal = installmentData.reduce((sum, inst, i) => 
+                        i !== index ? sum + inst.amount : sum, 0
+                      )
+                      const maxAllowed = Math.max(0, grandTotalCalc - otherInstallmentsTotal)
+                      const isOverLimit = installment.amount > maxAllowed
+                      
+                      return (
+                      <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 p-3 bg-white rounded-[10px] border border-gray-100">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Số tiền thanh toán <span className="text-xs text-gray-500">(Tối đa: {formatCurrency(maxAllowed.toString())} VNĐ)</span>
+                          </label>
+                          <input
+                            type="text"
+                            value={formatCurrency(installment.amount.toString())}
+                            onChange={(e) => {
+                              const value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+                              const validatedValue = Math.min(value, maxAllowed)
+                              const newData = [...installmentData]
+                              newData[index] = {...newData[index], amount: validatedValue}
+                              setInstallmentData(newData)
+                            }}
+                            placeholder="0"
+                            className={`w-full px-3 py-2 border rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] ${isOverLimit ? 'border-red-500 bg-red-50' : 'border-[#e6ebf1]'}`}
+                          />
+                          {isOverLimit && (
+                            <p className="mt-1 text-xs text-red-500">Số tiền vượt quá giới hạn cho phép</p>
+                          )}
+                        </div>
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Ngày thanh toán đợt {index + 1}
+                            </label>
+                            <input
+                              type="date"
+                              value={installment.date}
+                              onChange={(e) => {
+                                const newData = [...installmentData]
+                                newData[index] = {...newData[index], date: e.target.value}
+                                setInstallmentData(newData)
+                              }}
+                              min={new Date().toISOString().split('T')[0]}
+                              placeholder="Thời gian thanh toán ..."
+                              className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                            />
+                          </div>
+                          {paymentInstallments > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (paymentInstallments > 1) {
+                                  const newData = installmentData.filter((_, i) => i !== index)
+                                  setInstallmentData(newData)
+                                  setPaymentInstallments(paymentInstallments - 1)
+                                }
+                              }}
+                              className="px-3 py-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-[10px] transition-colors"
+                              title="Xóa đợt thanh toán"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                      )
+                    })}
+                  </div>
+                  )}
+                </div>
+              )}
+
+              <p className="text-sm text-gray-600 mt-4">
+                Khách hàng sẽ được tạo đơn hàng với các sản phẩm đã chọn. Sau khi xác nhận thanh toán thành công, sẽ tự động chuyển sang &quot;Hoàn thành&quot;.
+              </p>
+            </div>
+
+            <div className="px-4 sm:px-6 py-4 border-t border-[#e6ebf1] flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-3">
+              <button
+                onClick={() => {
+                  setShowCreateModal(false)
+                  setSelectedCustomerForNewOrder(null)
+                  setSelectedProducts([])
+                  setSelectedPackages({})
+                  setProductQuantities({})
+                  setOrderNotes('')
+                  setSelectedCategory('Tất cả')
+                  setPaymentMethod('cash')
+                  setPaymentDeadline('')
+                  setDiscountPercent(0)
+                  setDiscountType('%')
+                  setPaymentMode('full')
+                }}
+                className="w-full sm:w-auto px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 border border-slate-300 rounded-[10px] hover:bg-slate-200 hover:text-slate-700 transition-all duration-200 shadow-sm hover:shadow-md"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  if (!selectedCustomerForNewOrder || selectedProducts.length === 0 || !paymentDeadline) {
+                    setNotification({ message: 'Vui lòng điền đầy đủ thông tin bắt buộc', type: 'error' })
+                    setTimeout(() => setNotification(null), 3000)
+                    return
+                  }
+                  
+                  // Build order data
+                  const subtotal = selectedProducts.reduce((sum, productId) => {
+                    const product = availableProducts.find(p => p.id === productId)
+                    const selectedPackageId = selectedPackages[productId]
+                    const selectedPackage = availablePackages[productId]?.find(pkg => pkg.id === selectedPackageId)
+                    const quantity = productQuantities[productId] || 1
+                    return sum + ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity
+                  }, 0)
+                  const discountAmount = discountType === '%' ? subtotal * discountPercent / 100 : discountPercent
+                  const afterDiscount = subtotal - discountAmount
+                  const vatAmount = afterDiscount * 0.1
+                  const grandTotal = afterDiscount + vatAmount
+                  
+                  const orderData = {
+                    orderNumber: `DH${new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14)}${Math.floor(Math.random() * 1000).toString().padStart(3, '0')}`,
+                    customerId: selectedCustomerForNewOrder.id,
+                    items: selectedProducts.map(productId => {
+                      const product = availableProducts.find(p => p.id === productId)
+                      const selectedPackageId = selectedPackages[productId]
+                      const selectedPackage = availablePackages[productId]?.find(pkg => pkg.id === selectedPackageId)
+                      const quantity = productQuantities[productId] || 1
+                      return {
+                        id: Date.now() + Math.random(),
+                        productId,
+                        product: product,
+                        variantId: selectedPackageId,
+                        variant: selectedPackage,
+                        quantity,
+                        unitPrice: (product?.price || 0) + (selectedPackage?.price || 0),
+                        totalPrice: ((product?.price || 0) + (selectedPackage?.price || 0)) * quantity,
+                        notes: orderNotes
+                      }
+                    }),
+                    subtotal,
+                    discount: discountAmount,
+                    tax: vatAmount,
+                    total: grandTotal,
+                    totalAmount: grandTotal,
+                    status: 'pending',
+                    paymentStatus: 'unpaid',
+                    paymentMethod,
+                    paymentMode,
+                    notes: orderNotes ? [{ id: Date.now(), content: orderNotes, type: 'customer_request', createdAt: new Date().toISOString(), createdBy: 'Nguyễn Sales Manager', isEditable: true }] : [],
+                    invoices: [],
+                    tags: [],
+                    createdAt: new Date().toISOString(),
+                    updatedAt: new Date().toISOString(),
+                    zaloMessages: [],
+                    deadline: paymentDeadline,
+                    isVip: false
+                  }
+                  
+                  handleCreateOrder(orderData)
+                  
+                  // Reset form
+                  setShowCreateModal(false)
+                  setSelectedCustomerForNewOrder(null)
+                  setSelectedProducts([])
+                  setSelectedPackages({})
+                  setProductQuantities({})
+                  setOrderNotes('')
+                  setSelectedCategory('Tất cả')
+                  setPaymentMethod('cash')
+                  setPaymentDeadline('')
+                  setDiscountPercent(0)
+                  setDiscountType('%')
+                  setPaymentMode('full')
+                }}
+                disabled={!selectedCustomerForNewOrder || selectedProducts.length === 0 || !paymentDeadline}
+                className={`w-full sm:w-auto px-4 py-2 text-sm font-medium border border-transparent rounded-[10px] transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-[1.02] flex items-center justify-center gap-2 ${
+                  selectedCustomerForNewOrder && selectedProducts.length > 0 && paymentDeadline
+                    ? 'text-white bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
+                    : 'text-gray-400 bg-gray-300 cursor-not-allowed'
+                }`}
+              >
+                <CheckCircle className="w-4 h-4" />
+                <span className="truncate">{selectedCustomerForNewOrder && selectedProducts.length > 0 && paymentDeadline ? 'Tạo đơn hàng' : 'Chọn sản phẩm để tiếp tục'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {selectedOrder && (
@@ -1580,20 +3208,16 @@ Trân trọng,
           isOpen={true}
           order={selectedOrder}
           onClose={() => setSelectedOrder(null)}
-          onUpdate={(orderId, updates) => {
-            setOrders(prev => prev.map(o => o.id === orderId ? { ...o, ...updates } : o))
-            setSelectedOrder(null)
-          }}
         />
       )}
 
       {/* Edit Order Modal */}
       {showEditModal && editingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className={`bg-white rounded-[10px] shadow-xl ${editingOrder.paymentStatus === 'partial' || editingOrder.paymentMode === 'installment' ? 'max-w-5xl' : 'max-w-md'} w-full mx-4 max-h-[90vh] overflow-y-auto`}>
             <div className="flex items-center justify-between p-6 border-b">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Chỉnh sửa đơn hàng</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Thanh toán đơn hàng</h3>
                 <p className="text-sm text-gray-600 mt-1">Đơn hàng: {editingOrder.orderNumber}</p>
               </div>
               <button
@@ -1608,100 +3232,360 @@ Trân trọng,
             </div>
             
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Order Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Trạng thái đơn hàng
-                  </label>
-                  <select
-                    defaultValue={editingOrder.status}
-                    onChange={(e) => {
-                      setEditingOrder(prev => prev ? {...prev, status: e.target.value as Order['status']} : null)
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="draft">Nháp</option>
-                    <option value="pending">Chờ xử lý</option>
-                    <option value="confirmed">Đã xác nhận</option>
-                    <option value="processing">Đang xử lý</option>
-                    <option value="completed">Hoàn thành</option>
-                  </select>
-                </div>
-
-                {/* Payment Status */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Trạng thái thanh toán
-                  </label>
-                  <select
-                    defaultValue={editingOrder.paymentStatus}
-                    onChange={(e) => {
-                      setEditingOrder(prev => prev ? {...prev, paymentStatus: e.target.value as Order['paymentStatus']} : null)
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="unpaid">Chưa thanh toán</option>
-                    <option value="partial">Thanh toán một phần</option>
-                    <option value="paid">Đã thanh toán</option>
-                    <option value="refunded">Đã hoàn tiền</option>
-                  </select>
-                </div>
-
-                {/* Payment Method */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phương thức thanh toán
-                  </label>
-                  <select
-                    defaultValue={editingOrder.paymentMethod}
-                    onChange={(e) => {
-                      setEditingOrder(prev => prev ? {...prev, paymentMethod: e.target.value as Order['paymentMethod']} : null)
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  >
-                    <option value="cash">Tiền mặt</option>
-                    <option value="transfer">Chuyển khoản</option>
-                    <option value="installment">Trả góp</option>
-                    <option value="momo">MoMo</option>
-                    <option value="custom">Khác</option>
-                  </select>
-                </div>
-
-                {/* Deadline */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Hạn hoàn thành
-                  </label>
-                  <input
-                    type="date"
-                    defaultValue={editingOrder.deadline?.split('T')[0] || ''}
-                    onChange={(e) => {
-                      setEditingOrder(prev => prev ? {...prev, deadline: e.target.value} : null)
-                    }}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  />
-                </div>
+              {/* Payment Status - Full Width */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Trạng thái thanh toán <span className="text-red-500">*</span>
+                </label>
+                <select
+                  value={editingOrder.paymentStatus}
+                  onChange={(e) => {
+                    const newPaymentStatus = e.target.value as Order['paymentStatus']
+                    setEditingOrder(prev => {
+                      if (!prev) return null
+                      // Auto-fill paid amount when changing to "paid"
+                      if (newPaymentStatus === 'paid') {
+                        const today = new Date().toISOString().split('T')[0]
+                        const updatedInstallments = prev.installments?.map(inst => ({
+                          ...inst,
+                          status: 'completed' as const,
+                          actualAmount: inst.actualAmount || inst.plannedAmount,
+                          actualDate: inst.actualDate || today
+                        })) || []
+                        return {
+                          ...prev,
+                          paymentStatus: newPaymentStatus,
+                          totalPaid: prev.total,
+                          remainingDebt: 0,
+                          installments: updatedInstallments
+                        }
+                      }
+                      return {...prev, paymentStatus: newPaymentStatus}
+                    })
+                  }}
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-[#3e79f7] focus:border-transparent"
+                >
+                  <option value="unpaid">Chưa thanh toán</option>
+                  <option value="partial">Thanh toán một phần</option>
+                  <option value="paid">Đã thanh toán</option>
+                  <option value="refunded">Đã hoàn tiền</option>
+                </select>
               </div>
 
+              {/* Installment Payment UI - Show when partial payment selected */}
+              {(editingOrder.paymentStatus === 'partial' || editingOrder.paymentMode === 'installment') && editingOrder.installments && editingOrder.installments.length > 0 && (
+                <div className="mt-6 border-t pt-6">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-4">Chi tiết thanh toán theo giai đoạn</h4>
+                  
+                  <div className="flex gap-6">
+                    {/* Installments List */}
+                    <div className="flex-1">
+                      <div className="space-y-3">
+                        {editingOrder.installments.map((installment, index) => {
+                          const isCompleted = installment.status === 'completed'
+                          const isOverPaid = installment.actualAmount > installment.plannedAmount
+                          const isLastInstallment = index === (editingOrder.installments?.length || 1) - 1
+                          
+                          // Check if all previous installments are completed (for sequential payment)
+                          const previousInstallments = editingOrder.installments?.slice(0, index) || []
+                          const allPreviousCompleted = previousInstallments.every(inst => inst.status === 'completed')
+                          
+                          // Calculate previous installments deficit
+                          const previousDeficit = previousInstallments.reduce((sum, inst) => {
+                            return sum + Math.max(0, inst.plannedAmount - inst.actualAmount)
+                          }, 0)
+                          
+                          // For last installment, minimum required = planned + all previous deficits
+                          const minRequiredForLast = isLastInstallment ? installment.plannedAmount + previousDeficit : 0
+                          const isLastInstallmentShort = isLastInstallment && installment.actualAmount > 0 && installment.actualAmount < minRequiredForLast && !isCompleted
+                          
+                          // Current remaining debt for validation
+                          const currentRemainingDebt = editingOrder.remainingDebt ?? (editingOrder.total - (editingOrder.totalPaid || 0))
+                          
+                          // For last installment: the actual debt to pay = remaining debt + this installment's current value
+                          // (because remainingDebt already subtracted this installment's actualAmount)
+                          const actualDebtForThisInstallment = isLastInstallment 
+                            ? currentRemainingDebt + installment.actualAmount 
+                            : currentRemainingDebt
+                          
+                          return (
+                            <div 
+                              key={installment.id} 
+                              className={`p-4 rounded-[10px] border ${isCompleted ? 'bg-gray-50 border-[#e6ebf1] opacity-70' : 'bg-white border-[#e6ebf1]'}`}
+                            >
+                              {/* Header with Phase Label and Submit Button */}
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-700">Đợt {index + 1}</span>
+                                  {isCompleted && (
+                                    <span className="px-2 py-0.5 text-xs bg-green-100 text-green-700 rounded-full">Đã thanh toán</span>
+                                  )}
+                                </div>
+                                
+                                {/* Submit Payment Button - Top Right */}
+                                {!isCompleted && (() => {
+                                  // For last installment, check if actual amount equals the debt to pay
+                                  const isLastInstallmentAmountValid = isLastInstallment && installment.actualAmount === actualDebtForThisInstallment
+                                  
+                                  // Can only submit if: has amount, previous completed, and valid amount
+                                  const canSubmitPayment = installment.actualAmount > 0 && 
+                                    allPreviousCompleted && 
+                                    (!isLastInstallment || isLastInstallmentAmountValid) &&
+                                    (isLastInstallment || installment.actualAmount <= installment.plannedAmount)
+                                  
+                                  return (
+                                    <div className="flex flex-col items-end">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          if (installment.actualAmount <= 0) {
+                                            setNotification({ message: 'Vui lòng nhập số tiền thanh toán', type: 'error' })
+                                            return
+                                          }
+                                          // For last installment, must pay exactly remaining debt
+                                          if (isLastInstallment && installment.actualAmount !== actualDebtForThisInstallment) {
+                                            setNotification({ message: `Đây là giai đoạn thanh toán cuối, bạn phải thanh toán đúng ${actualDebtForThisInstallment.toLocaleString('vi-VN')} VNĐ`, type: 'error' })
+                                            return
+                                          }
+                                          if (!isLastInstallment && installment.actualAmount > installment.plannedAmount) {
+                                            setNotification({ message: 'Số tiền không được vượt quá số tiền dự kiến', type: 'error' })
+                                            return
+                                          }
+                                          // Mark as completed
+                                          const newInstallments = [...(editingOrder.installments || [])]
+                                          newInstallments[index] = {
+                                            ...newInstallments[index],
+                                            status: 'completed',
+                                            actualDate: installment.actualDate || new Date().toISOString().split('T')[0]
+                                          }
+                                          // Calculate totals
+                                          const totalPaid = newInstallments.reduce((sum, inst) => sum + inst.actualAmount, 0)
+                                          const remainingDebt = editingOrder.total - totalPaid
+                                          // Check if fully paid
+                                          const allCompleted = newInstallments.every(inst => inst.status === 'completed')
+                                          const newPaymentStatus = allCompleted ? 'paid' : 'partial'
+                                          const newStatus = allCompleted ? 'completed' : editingOrder.status
+                                          
+                                          setEditingOrder(prev => prev ? {
+                                            ...prev, 
+                                            installments: newInstallments,
+                                            totalPaid,
+                                            remainingDebt,
+                                            paymentStatus: newPaymentStatus,
+                                            status: newStatus
+                                          } : null)
+                                          
+                                          setNotification({ 
+                                            message: allCompleted 
+                                              ? 'Đã thanh toán hoàn tất! Đơn hàng chuyển sang trạng thái Hoàn thành.' 
+                                              : `Đã ghi nhận thanh toán đợt ${index + 1}`, 
+                                            type: 'success' 
+                                          })
+                                        }}
+                                        disabled={!canSubmitPayment}
+                                        className={`px-3 py-1.5 rounded-md transition-colors text-sm ${
+                                          !canSubmitPayment
+                                            ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                                            : 'bg-[#2dc56a] text-white hover:bg-[#04d182]'
+                                        }`}
+                                        title={!allPreviousCompleted 
+                                          ? 'Vui lòng hoàn thành thanh toán các đợt trước' 
+                                          : isLastInstallment && !isLastInstallmentAmountValid 
+                                            ? `Thanh toán đúng ${actualDebtForThisInstallment.toLocaleString('vi-VN')} VNĐ` 
+                                            : 'Nộp tiền'}
+                                      >
+                                        Nộp tiền
+                                      </button>
+                                      {!allPreviousCompleted && (
+                                        <p className="text-xs text-orange-500 mt-1">Hoàn thành đợt trước</p>
+                                      )}
+                                    </div>
+                                  )
+                                })()}
+                              </div>
+                              
+                              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 items-end">
+                                {/* Planned Amount */}
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Số tiền thanh toán</label>
+                                  <input
+                                    type="text"
+                                    value={installment.plannedAmount.toLocaleString('vi-VN')}
+                                    disabled
+                                    className="w-full px-3 py-2 bg-gray-100 border border-[#e6ebf1] rounded-md text-sm text-gray-700"
+                                  />
+                                </div>
+                                
+                                {/* Planned Date */}
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Ngày thanh toán đợt {index + 1}</label>
+                                  <input
+                                    type="text"
+                                    value={installment.plannedDate ? new Date(installment.plannedDate).toLocaleDateString('vi-VN') : 'Thời gian thanh toán ...'}
+                                    disabled
+                                    className="w-full px-3 py-2 bg-gray-100 border border-[#e6ebf1] rounded-md text-sm text-gray-500"
+                                  />
+                                </div>
+                                
+                                {/* Actual Amount */}
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Số tiền thanh toán thực tế</label>
+                                  <input
+                                    type="text"
+                                    value={installment.actualAmount.toLocaleString('vi-VN')}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault()
+                                      }
+                                    }}
+                                    onChange={(e) => {
+                                      if (isCompleted || !allPreviousCompleted) return
+                                      let value = parseInt(e.target.value.replace(/\D/g, '')) || 0
+                                      
+                                      // For last installment: allow entering up to the actual debt for this installment
+                                      // For other installments: limit to remaining debt and planned amount
+                                      if (isLastInstallment) {
+                                        value = Math.min(value, actualDebtForThisInstallment)
+                                      } else {
+                                        value = Math.min(value, currentRemainingDebt, installment.plannedAmount)
+                                      }
+                                      
+                                      const newInstallments = [...(editingOrder.installments || [])]
+                                      newInstallments[index] = {
+                                        ...newInstallments[index],
+                                        actualAmount: value
+                                        // Status NOT changed here - only changed when clicking "Nộp tiền" button
+                                      }
+                                      // Calculate totals for display only
+                                      const totalPaid = newInstallments.reduce((sum, inst) => sum + inst.actualAmount, 0)
+                                      const remainingDebt = editingOrder.total - totalPaid
+                                      
+                                      setEditingOrder(prev => prev ? {
+                                        ...prev, 
+                                        installments: newInstallments,
+                                        totalPaid,
+                                        remainingDebt
+                                      } : null)
+                                    }}
+                                    disabled={isCompleted || !allPreviousCompleted}
+                                    placeholder="0"
+                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] ${
+                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-[#e6ebf1] text-gray-500' : 
+                                      isOverPaid ? 'border-red-500 bg-red-50 text-red-700' : 
+                                      isLastInstallmentShort ? 'border-red-500 bg-red-50 text-red-700' : 'border-[#e6ebf1]'
+                                    }`}
+                                  />
+                                  {!allPreviousCompleted && !isCompleted && (
+                                    <p className="mt-1 text-xs text-orange-500">Hoàn thành đợt trước</p>
+                                  )}
+                                  {allPreviousCompleted && isOverPaid && !isCompleted && (
+                                    <p className="mt-1 text-xs text-red-500">Số tiền vượt quá số tiền dự kiến</p>
+                                  )}
+                                  {allPreviousCompleted && isLastInstallment && installment.actualAmount > 0 && installment.actualAmount !== actualDebtForThisInstallment && (
+                                    <p className="mt-1 text-xs text-red-500">Thanh toán đúng {actualDebtForThisInstallment.toLocaleString('vi-VN')} VNĐ</p>
+                                  )}
+                                </div>
+                                
+                                {/* Actual Date */}
+                                <div>
+                                  <label className="block text-xs text-gray-500 mb-1">Ngày thanh toán thực tế đợt {index + 1}</label>
+                                  <input
+                                    type="date"
+                                    value={installment.actualDate || ''}
+                                    onKeyDown={(e) => {
+                                      if (e.key === 'Enter') {
+                                        e.preventDefault()
+                                      }
+                                    }}
+                                    onChange={(e) => {
+                                      if (isCompleted || !allPreviousCompleted) return
+                                      const newInstallments = [...(editingOrder.installments || [])]
+                                      newInstallments[index] = {...newInstallments[index], actualDate: e.target.value}
+                                      setEditingOrder(prev => prev ? {...prev, installments: newInstallments} : null)
+                                    }}
+                                    disabled={isCompleted || !allPreviousCompleted}
+                                    className={`w-full px-3 py-2 border rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] ${
+                                      isCompleted || !allPreviousCompleted ? 'bg-gray-100 border-[#e6ebf1] text-gray-500' : 'border-[#e6ebf1]'
+                                    }`}
+                                  />
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                    
+                    {/* Statistics Container */}
+                    <div className="w-64 shrink-0">
+                      <div className="bg-gray-50 rounded-[10px] p-4 space-y-4 sticky top-0">
+                        {/* Total Planned */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Tổng số Tiền thanh toán</label>
+                          <div className={`px-3 py-2 border rounded-md text-sm font-medium ${
+                            (editingOrder.totalPaid || 0) !== editingOrder.total ? 'border-red-500 bg-red-50 text-red-700' : 'border-[#e6ebf1] bg-white'
+                          }`}>
+                            {editingOrder.total.toLocaleString('vi-VN')}
+                          </div>
+                          {(editingOrder.totalPaid || 0) !== editingOrder.total && (
+                            <p className="mt-1 text-xs text-red-500"></p>
+                          )}
+                        </div>
+                        
+                        {/* Total Actual Paid */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Tổng tiền thực tế thanh toán</label>
+                          <div className="px-3 py-2 bg-green-50 border border-green-300 rounded-md text-sm font-medium text-green-700">
+                            {(editingOrder.totalPaid || 0).toLocaleString('vi-VN')}
+                          </div>
+                        </div>
+                        
+                        {/* Remaining Debt */}
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Dư nợ</label>
+                          <div className={`px-3 py-2 border rounded-md text-sm font-medium ${
+                            (editingOrder.remainingDebt || 0) > 0 ? 'bg-orange-50 border-orange-300 text-orange-700' : 'bg-green-50 border-green-300 text-green-700'
+                          }`}>
+                            {(editingOrder.remainingDebt ?? editingOrder.total).toLocaleString('vi-VN')}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Hint for non-installment */}
+              {editingOrder.paymentStatus === 'partial' && (!editingOrder.installments || editingOrder.installments.length === 0) && editingOrder.paymentMode !== 'installment' && (
+                <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-[10px]">
+                  <p className="text-sm text-yellow-700">
+                    Đơn hàng này chưa có thông tin thanh toán theo giai đoạn. 
+                    Vui lòng chọn trạng thái thanh toán khác.
+                  </p>
+                </div>
+              )}
+
               {/* Actions */}
-              <div className="flex justify-end space-x-3 mt-6">
-                <button
-                  onClick={() => {
-                    setShowEditModal(false)
-                    setEditingOrder(null)
-                  }}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
-                >
-                  Hủy
-                </button>
-                <button
-                  onClick={() => handleSaveEditOrder(editingOrder)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors flex items-center gap-2"
-                >
-                  <Check className="w-4 h-4" />
-                  Lưu thay đổi
-                </button>
+              <div className="flex items-center justify-between mt-6 pt-4 border-t">
+                <p className="text-xs text-gray-500"></p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => {
+                      setShowEditModal(false)
+                      setEditingOrder(null)
+                    }}
+                    className="px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <button
+                    onClick={() => handleSaveEditOrder(editingOrder)}
+                    disabled={editingOrder.paymentStatus === 'partial' && (!editingOrder.installments || editingOrder.installments.length === 0) && editingOrder.paymentMode !== 'installment'}
+                    className="px-4 py-2 bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  >
+                    Lưu thay đổi
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -1711,7 +3595,7 @@ Trân trọng,
       {/* Cancel Order Modal */}
       {showCancelModal && cancelingOrder && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full mx-4">
             <div className="flex items-center justify-between p-6 border-b">
               <div>
                 <h3 className="text-lg font-semibold text-gray-900">Hủy đơn hàng</h3>
@@ -1750,7 +3634,7 @@ Trân trọng,
                   onChange={(e) => setCancelReason(e.target.value)}
                   placeholder="Nhập lý do hủy đơn hàng..."
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:ring-2 focus:ring-red-500 focus:border-transparent resize-none"
                 />
               </div>
 
@@ -1769,12 +3653,223 @@ Trân trọng,
                 <button
                   onClick={handleConfirmCancelOrder}
                   disabled={!cancelReason.trim()}
-                  className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+                  className="px-4 py-2 bg-[#ff6b72] text-white rounded-md hover:bg-[#d9505c] disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                 >
                   <Trash2 className="w-4 h-4" />
                   Xác nhận hủy
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Reminder Confirmation Dialog */}
+      {showSendReminderDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full">
+            <div className="p-6">
+              <div className="flex items-start space-x-3 mb-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                  <Send className="w-5 h-5 text-blue-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    Xác nhận gửi nhắc thanh toán
+                  </h3>
+                  <div className="text-sm text-gray-600 space-y-3">
+                    <p>Khi gửi nhắc thanh toán, hệ thống sẽ tự động gửi thông báo đến cả hai bên:</p>
+                    <div className="bg-gray-50 rounded-[10px] p-3 space-y-2">
+                      <div className="flex items-start space-x-2">
+                        <div className="w-1.5 h-1.5 bg-[#3e79f7] rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-gray-900">Khách hàng:</p>
+                          <p className="text-gray-600">Nhận email/SMS nhắc thanh toán với chi tiết đơn hàng và hướng dẫn thanh toán</p>
+                        </div>
+                      </div>
+                      <div className="flex items-start space-x-2">
+                        <div className="w-1.5 h-1.5 bg-[#3e79f7] rounded-full mt-1.5 flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-gray-900">Người phụ trách:</p>
+                          <p className="text-gray-600">Nhận thông báo để theo dõi và liên hệ khách hàng nếu cần</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-gray-50 px-6 py-4 flex items-center justify-end space-x-3 rounded-b-lg">
+              <button
+                onClick={() => setShowSendReminderDialog(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  handleBulkOperation('send_reminder')
+                  setShowSendReminderDialog(false)
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff] transition-colors flex items-center space-x-2"
+              >
+                <Send className="w-4 h-4" />
+                <span>Gửi</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Customer Detail Modal */}
+      <CustomerDetailModal
+        isOpen={showCustomerDetail}
+        onClose={() => setShowCustomerDetail(false)}
+        customer={selectedCustomer ? convertOrderCustomerToCustomer(selectedCustomer, orders) : null}
+      />
+
+      {/* Hidden file input for invoice attachment */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        multiple
+        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+        className="hidden"
+        onChange={(e) => {
+          if (e.target.files && e.target.files.length > 0 && orderForAction) {
+            console.log('Invoice files attached:', Array.from(e.target.files).map(f => f.name), 'for order:', orderForAction.id)
+            setNotification({ message: `Đã gắn ${e.target.files.length} hóa đơn cho đơn hàng ${orderForAction.orderNumber}`, type: 'success' })
+            setOrderForAction(null)
+          }
+          e.target.value = ''
+        }}
+      />
+
+      {/* Add Note Dialog */}
+      {showAddNoteDialog && orderForAction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
+              <div className="flex items-center gap-2">
+                <StickyNote className="w-5 h-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-900">Thêm ghi chú - {orderForAction.orderNumber}</h3>
+              </div>
+              <button onClick={() => { setShowAddNoteDialog(false); setOrderForAction(null) }} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                Nội dung ghi chú <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                id="order-note-content"
+                rows={4}
+                placeholder="Nhập nội dung ghi chú cho đơn hàng..."
+                className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none"
+              />
+              <p className="text-sm text-red-500 mt-1">Vui lòng nhập nội dung ghi chú</p>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => { setShowAddNoteDialog(false); setOrderForAction(null) }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  const textarea = document.getElementById('order-note-content') as HTMLTextAreaElement
+                  if (textarea && textarea.value.trim()) {
+                    console.log('Note added:', textarea.value, 'for order:', orderForAction.id)
+                    setNotification({ message: 'Đã thêm ghi chú cho đơn hàng', type: 'success' })
+                    setShowAddNoteDialog(false)
+                    setOrderForAction(null)
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
+              >
+                Lưu ghi chú
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Refund Dialog */}
+      {showRefundDialog && orderForAction && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[60]">
+          <div className="bg-white rounded-[10px] w-full max-w-md mx-4 shadow-2xl">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
+              <div className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-blue-500" />
+                <h3 className="font-semibold text-gray-900">Hoàn tiền/Hủy đơn</h3>
+              </div>
+              <button onClick={() => { setShowRefundDialog(false); setOrderForAction(null) }} className="text-gray-400 hover:text-gray-600">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Số tiền hoàn (VND) <span className="text-red-500">*</span>
+                </label>
+                <input
+                  id="refund-amount"
+                  type="text"
+                  placeholder="Nhập số tiền hoàn..."
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Phương thức hoàn <span className="text-red-500">*</span>
+                </label>
+                <select
+                  id="refund-method"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] bg-white"
+                >
+                  <option value="custom">Tùy chỉnh</option>
+                  <option value="bank_transfer">Chuyển khoản</option>
+                  <option value="cash">Tiền mặt</option>
+                  <option value="voucher">Voucher</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1.5">
+                  Lý do hoàn/hủy <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  id="refund-reason"
+                  rows={3}
+                  placeholder="Khách hủy, sai hợp đồng, chưa thanh toán..."
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] resize-none"
+                />
+              </div>
+            </div>
+            <div className="flex items-center justify-end gap-3 p-4 border-t border-[#e6ebf1] bg-gray-50 rounded-b-xl">
+              <button
+                onClick={() => { setShowRefundDialog(false); setOrderForAction(null) }}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
+              >
+                Hủy
+              </button>
+              <button
+                onClick={() => {
+                  const amount = (document.getElementById('refund-amount') as HTMLInputElement)?.value
+                  const reason = (document.getElementById('refund-reason') as HTMLTextAreaElement)?.value
+                  if (amount && reason?.trim()) {
+                    console.log('Refund processed:', { amount, reason }, 'for order:', orderForAction.id)
+                    setNotification({ message: 'Đã xử lý hoàn tiền cho đơn hàng', type: 'success' })
+                    setShowRefundDialog(false)
+                    setOrderForAction(null)
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium text-white bg-[#3e79f7] rounded-[10px] hover:bg-[#699dff]"
+              >
+                Đồng ý
+              </button>
             </div>
           </div>
         </div>

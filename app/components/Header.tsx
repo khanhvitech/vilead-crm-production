@@ -1,7 +1,7 @@
-'use client'
+﻿'use client'
 
-import { useState } from 'react'
-import { Search, Bell, User, LogOut, Crown, Mail, Phone, Camera, Eye, EyeOff, Upload, Save, X } from 'lucide-react'
+import { useState, useEffect } from 'react'
+import { Search, Bell, User, LogOut, Crown, Mail, Phone, Camera, Eye, EyeOff, Upload, Save, X, Settings, Sparkles, Download } from 'lucide-react'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,77 +35,129 @@ import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { defaultTaxes } from './settings/TaxManagement'
+
+// Sample system updates data
+const systemUpdates = [
+  {
+    id: 1,
+    date: "04-03-2026",
+    time: "9:30 am",
+    title: "Cập nhật trải nghiệm Người dùng & Tối ưu hóa UI",
+    description: "Phiên bản này mang đến một giao diện tươi mới, tập trung vào khả năng truy cập nhanh và giảm sự phân tâm cho người dùng.",
+    items: [
+      "Thêm nút 'Cập nhật hệ thống' trên thanh Header để dễ theo dõi Changelog",
+      "Giao diện chuẩn hóa theo tone màu Blue / Orange mới của ViLead",
+      "Khắc phục triệt để lỗi Hydration liên quan đến đồng hồ máy khách",
+      "Hợp nhất các Filter chọn Pipeline thành một component duy nhất"
+    ]
+  },
+  {
+    id: 2,
+    date: "03-15-2026",
+    time: "2:15 pm",
+    title: "Ra mắt tính năng Email Marketing B2B",
+    description: "Bộ công cụ mới giúp tự động hóa quy trình nuôi dưỡng Leads, thiết kế Email Drag & Drop thông minh.",
+    items: [
+      "Tích hợp trình kéo thả thiết kế Template Email",
+      "Gửi email hàng loạt theo điều kiện tệp khách hàng",
+      "Báo cáo chuyên sâu: On-time delivery, Open rate, Click-through rate",
+      "A/B Testing các chiến dịch nhỏ"
+    ]
+  },
+  {
+    id: 3,
+    date: "02-02-2026",
+    time: "10:00 am",
+    title: "Cải tiến module Báo cáo Doanh thu",
+    description: "Cung cấp cái nhìn đa chiều về dòng tiền và hiệu suất thực tế của đội ngũ kinh doanh.",
+    items: [
+      "Báo cáo hiệu suất theo cấp độ: Phòng ban > Đội nhóm > Cá nhân",
+      "Bộ lọc thời gian linh hoạt trực tiếp trên biểu đồ",
+      "Bổ sung chỉ số Growth (Tăng trưởng so với tháng trước)"
+    ]
+  }
+];
 
 // Sample notifications data
 const notifications = [
   {
     id: 1,
     type: "urgent",
-    category: "leads",
-    message: "Lead Nguyễn Văn A không tương tác 3 ngày",
-    time: "10 phút trước",
+    category: "customer",
+    title: "Chuyển tiếp nhận khách hàng",
+    message: "Khách hàng Phạm Thị Thơm - 0989595927 ...",
+    time: "9 giờ trước",
     read: false,
   },
   {
     id: 2,
     type: "important", 
-    category: "customer",
-    message: "Đơn #123 Chưa thanh toán 3 ngày",
-    time: "1 giờ trước",
+    category: "orders",
+    title: "Tạo mới đơn hàng",
+    message: "Đơn hàng DH-001 của sản phẩm Đào tạo k...",
+    time: "12 giờ trước",
     read: false,
   },
   {
     id: 3,
     type: "normal",
-    category: "leads",
-    message: "Lead Trần Thị B từ Fanpage",
-    time: "30 phút trước",
+    category: "orders",
+    title: "Tạo mới đơn hàng",
+    message: "Đơn hàng DH-26-0000003 của sản phẩm ...",
+    time: "1 ngày trước",
     read: true,
   },
   {
     id: 4,
     type: "urgent",
     category: "customer",
-    message: "Khách hàng VIP yêu cầu gọi lại ngay",
-    time: "5 phút trước", 
+    title: "Yêu cầu tiếp nhận khách hàng",
+    message: "Bạn có yêu cầu tiếp nhận khách hàng Trần ...",
+    time: "4 ngày trước", 
     read: false,
   },
   {
     id: 5,
-    type: "important",
-    category: "tasks",
-    message: "Báo cáo tuần cần phê duyệt",
-    time: "2 giờ trước",
+    type: "normal",
+    category: "customer",
+    title: "Yêu cầu tiếp nhận khách hàng",
+    message: "Bạn có yêu cầu tiếp nhận khách hàng Nguy...",
+    time: "4 ngày trước",
     read: false,
   },
   {
     id: 6,
     type: "normal",
-    category: "tasks",
-    message: "Task follow-up khách hàng ABC đến hạn",
-    time: "4 giờ trước",
+    category: "orders",
+    title: "Tạo mới đơn hàng",
+    message: "Đơn hàng DH-26-0000002 của sản phẩm ...",
+    time: "5 ngày trước",
     read: false,
   },
   {
     id: 7,
     type: "normal",
-    category: "leads",
-    message: "Lead mới từ website",
-    time: "hôm qua",
+    category: "customer",
+    title: "Yêu cầu tiếp nhận khách hàng",
+    message: "Bạn có yêu cầu tiếp nhận khách hàng ...",
+    time: "5 ngày trước",
     read: true,
   },
   {
     id: 8,
     type: "important",
-    category: "customer",
-    message: "Khách hàng yêu cầu hỗ trợ kỹ thuật",
-    time: "hôm qua",
+    category: "leads",
+    title: "Lead mới từ Website",
+    message: "Lead Nguyễn Văn A quan tâm gói dịch vụ",
+    time: "30 phút trước",
     read: false,
   },
   {
     id: 9,
     type: "normal",
     category: "tasks",
+    title: "Task đến hạn",
     message: "Hoàn thành báo cáo doanh số tháng",
     time: "2 ngày trước",
     read: true,
@@ -114,14 +166,16 @@ const notifications = [
     id: 10,
     type: "urgent",
     category: "leads",
-    message: "Lead hot cần xử lý trong ngày",
-    time: "3 ngày trước",
+    title: "Lead hot cần xử lý",
+    message: "Lead cần xử lý trong ngày hôm nay",
+    time: "3 giờ trước",
     read: false,
   },
   {
     id: 11,
     type: "important",
     category: "orders",
+    title: "Đơn hàng cần xác nhận",
     message: "Đơn hàng #DH001 cần xác nhận thanh toán",
     time: "15 phút trước",
     read: false,
@@ -130,6 +184,7 @@ const notifications = [
     id: 12,
     type: "normal", 
     category: "orders",
+    title: "Giao hàng thành công",
     message: "Đơn hàng #DH002 đã được giao thành công",
     time: "2 giờ trước",
     read: true,
@@ -138,6 +193,7 @@ const notifications = [
     id: 13,
     type: "urgent",
     category: "kpi",
+    title: "Cảnh báo KPI",
     message: "KPI doanh số tháng này đang thấp hơn mục tiêu 20%",
     time: "1 giờ trước",
     read: false,
@@ -146,6 +202,7 @@ const notifications = [
     id: 14,
     type: "important",
     category: "kpi", 
+    title: "Báo cáo KPI",
     message: "Báo cáo KPI tuần cần được cập nhật",
     time: "hôm qua",
     read: false,
@@ -154,22 +211,64 @@ const notifications = [
     id: 15,
     type: "normal",
     category: "orders",
+    title: "Đơn hàng VIP",
     message: "Đơn hàng mới từ khách hàng VIP",
     time: "6 giờ trước",
     read: true,
+  },
+  {
+    id: 16,
+    type: "important",
+    category: "system",
+    title: "TikTok sắp hết cửa sổ phản hồi",
+    message: "Hội thoại Linh Beauty Official sắp hết cửa sổ phản hồi (còn khoảng 2 giờ).",
+    time: "20 phút trước",
+    read: false,
+  },
+  {
+    id: 17,
+    type: "urgent",
+    category: "system",
+    title: "Kênh TikTok mất kết nối",
+    message: "Kênh TikTok Beauty House mất kết nối. Vui lòng kiểm tra và kết nối lại.",
+    time: "10 phút trước",
+    read: false,
+    actionLabel: "Xử lý ngay",
+    actionType: "open_tiktok_connections"
+  },
+  {
+    id: 18,
+    type: "urgent",
+    category: "system",
+    title: "Phiên TikTok đã hết hạn",
+    message: "Refresh token TikTok đã hết hạn. Cần kết nối lại để tiếp tục nhận tin nhắn.",
+    time: "5 phút trước",
+    read: false,
+    actionLabel: "Xử lý ngay",
+    actionType: "open_tiktok_connections"
   }
 ]
 
 export default function Header() {
   const [searchQuery, setSearchQuery] = useState('')
-  const [unreadCount, setUnreadCount] = useState(4)
+  const [unreadCount, setUnreadCount] = useState(notifications.filter(notification => !notification.read).length)
+  const [updateUnreadCount, setUpdateUnreadCount] = useState(systemUpdates.length)
+  const [showUpdateModal, setShowUpdateModal] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   
   // Notification tab state
   const [activeNotificationTab, setActiveNotificationTab] = useState('all')
+  const [showMoreTabsDropdown, setShowMoreTabsDropdown] = useState(false)
+  const [showNotificationSettings, setShowNotificationSettings] = useState(false)
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false)
+  const [showUnreadOnly, setShowUnreadOnly] = useState(false)
+  
+  // Notifications state - make it stateful so we can update read status
+  const [notificationsList, setNotificationsList] = useState(notifications)
   
   // Notifications modal states
   const [showNotificationsModal, setShowNotificationsModal] = useState(false)
+  const [showAllNotificationsModal, setShowAllNotificationsModal] = useState(false)
   const [notificationDateFilter, setNotificationDateFilter] = useState('')
   const [notificationTypeFilter, setNotificationTypeFilter] = useState('all')
   
@@ -181,6 +280,8 @@ export default function Header() {
   const [showCreateReportModal, setShowCreateReportModal] = useState(false)
   const [showCreateCustomerModal, setShowCreateCustomerModal] = useState(false)
   const [showEmailCampaignModal, setShowEmailCampaignModal] = useState(false)
+  const [taxId, setTaxId] = useState('vat-10')
+  const [taxRate, setTaxRate] = useState(10)
 
   // Profile modal states
   const [showProfileModal, setShowProfileModal] = useState(false)
@@ -281,24 +382,51 @@ export default function Header() {
     setShowPasswordModal(false)
   }
 
-  // Filter notifications based on active tab (currently disabled, shows all)
+  // Filter notifications based on active tab
   const getFilteredNotifications = () => {
-    return notifications // Always show all notifications since tabs are hidden
-    // if (activeNotificationTab === 'all') {
-    //   return notifications
-    // }
-    // return notifications.filter(notification => notification.category === activeNotificationTab)
+    let filtered = notificationsList
+    
+    // Filter by category
+    if (activeNotificationTab !== 'all') {
+      filtered = filtered.filter(notification => notification.category === activeNotificationTab)
+    }
+    
+    // Filter by unread status
+    if (showUnreadOnly) {
+      filtered = filtered.filter(notification => !notification.read)
+    }
+    
+    return filtered
+  }
+  
+  // Handle notification click - mark as read
+  const handleNotificationClick = (notificationId: number) => {
+    setNotificationsList(notificationsList.map(n => 
+      n.id === notificationId ? { ...n, read: true } : n
+    ))
+    // Update unread count
+    const newUnreadCount = notificationsList.filter(n => !n.read && n.id !== notificationId).length
+    setUnreadCount(newUnreadCount)
+  }
+
+  const handleNotificationAction = (actionType?: string) => {
+    if (actionType === 'open_tiktok_connections') {
+      window.dispatchEvent(new CustomEvent('open-omnichat-connections', {
+        detail: { platform: 'tiktok' }
+      }))
+    }
   }
 
   // Filter notifications for modal popup
+  // Filter notifications for modal popup
   const getFilteredNotificationsForModal = () => {
-    let filtered = notifications
+    let filtered = notificationsList
 
     // Filter by type/category
     if (notificationTypeFilter !== 'all') {
       filtered = filtered.filter(notification => {
         // If filtering by category (leads, customer, tasks, orders, kpi)
-        if (['leads', 'customer', 'tasks', 'orders', 'kpi'].includes(notificationTypeFilter)) {
+        if (['leads', 'customer', 'tasks', 'orders', 'kpi', 'system'].includes(notificationTypeFilter)) {
           return notification.category === notificationTypeFilter
         }
         // If filtering by priority (urgent, important, normal)
@@ -351,6 +479,88 @@ export default function Header() {
     }
   }
 
+  // Live clock state - initialize null to avoid hydration mismatch
+  const [currentTime, setCurrentTime] = useState<Date | null>(null)
+  
+  useEffect(() => {
+    setCurrentTime(new Date())
+    const timer = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  // Get time-based greeting with icon
+  const getGreeting = () => {
+    const hour = currentTime ? currentTime.getHours() : new Date().getHours()
+    if (hour >= 5 && hour < 10) {
+      return {
+        text: 'Chào buổi sáng',
+        icon: (
+          <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none">
+            <circle cx="12" cy="8" r="4" fill="#FBBF24" />
+            <path d="M12 1v2M12 14v2M4.93 4.93l1.41 1.41M17.66 6.34l1.41-1.41M1 12h2M21 12h2M4.93 19.07l1.41-1.41M17.66 17.66l1.41 1.41" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" />
+            <path d="M2 20h20" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" />
+            <path d="M4 18c0-4.418 3.582-8 8-8s8 3.582 8 8" stroke="#FBBF24" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </svg>
+        ),
+        gradient: 'from-amber-500 to-orange-400'
+      }
+    } else if (hour >= 10 && hour < 13) {
+      return {
+        text: 'Chào buổi sáng',
+        icon: (
+          <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none">
+            <circle cx="12" cy="12" r="5" fill="#FBBF24" />
+            <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ),
+        gradient: 'from-yellow-400 to-amber-500'
+      }
+    } else if (hour >= 13 && hour < 17) {
+      return {
+        text: 'Chào buổi chiều',
+        icon: (
+          <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none">
+            <circle cx="12" cy="12" r="5" fill="#FB923C" />
+            <path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="#F97316" strokeWidth="2" strokeLinecap="round" />
+          </svg>
+        ),
+        gradient: 'from-orange-400 to-amber-500'
+      }
+    } else if (hour >= 17 && hour < 20) {
+      return {
+        text: 'Chào buổi tối',
+        icon: (
+          <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none">
+            <circle cx="12" cy="10" r="5" fill="#FB923C" />
+            <path d="M12 1v2M4.22 4.22l1.41 1.41M1 12h2M4.22 19.78l1.41-1.41M19.78 4.22l-1.41 1.41M23 12h-2M19.78 19.78l-1.41-1.41" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" />
+            <path d="M2 20h20" stroke="#EA580C" strokeWidth="2" strokeLinecap="round" />
+            <path d="M3 18c2-3 5-6 9-6s7 3 9 6" stroke="#F97316" strokeWidth="2" strokeLinecap="round" fill="none" />
+          </svg>
+        ),
+        gradient: 'from-orange-500 to-red-400'
+      }
+    } else {
+      return {
+        text: 'Chào buổi tối',
+        icon: (
+          <svg viewBox="0 0 24 24" className="w-7 h-7" fill="none">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="#FCD34D" stroke="#F59E0B" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            <circle cx="8" cy="6" r="1" fill="#FEF3C7" opacity="0.9" />
+            <circle cx="18" cy="4" r="0.7" fill="#FEF3C7" opacity="0.7" />
+            <circle cx="16" cy="9" r="0.5" fill="#FEF3C7" opacity="0.6" />
+            <circle cx="5" cy="15" r="0.6" fill="#FEF3C7" opacity="0.5" />
+            <circle cx="20" cy="16" r="0.8" fill="#FEF3C7" opacity="0.8" />
+          </svg>
+        ),
+        gradient: 'from-indigo-500 to-purple-500'
+      }
+    }
+  }
+
+  const greeting = getGreeting()
+
   const currentDate = new Date().toLocaleDateString('vi-VN', {
     weekday: 'long',
     year: 'numeric',
@@ -364,16 +574,56 @@ export default function Header() {
   }
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-end">
+    <header className="bg-white border-b border-[#e6ebf1] px-6 py-4">
+      <div className="flex items-center justify-between">
+        {/* Greeting Section */}
+        <div className="flex items-center space-x-3">
+          <div className="flex-shrink-0">
+            {greeting.icon}
+          </div>
+          <div>
+            <h2 className="text-lg font-bold text-gray-900">
+              {greeting.text}, {profileData.name}
+            </h2>
+            <p className="text-sm text-gray-500">
+              {currentTime ? currentTime.toLocaleDateString('vi-VN', { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' }) : ''}
+              {' | '}
+              {currentTime ? currentTime.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) : '--:--:--'}
+            </p>
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="flex items-center space-x-4">
           
-          {/* Notifications */}
-          <Popover>
+          <div className="flex items-center gap-1">
+            {/* Updates */}
+            <button 
+              className="relative p-2 text-gray-400 hover:text-blue-500 transition-colors"
+              onClick={() => {
+                setShowUpdateModal(true)
+                setUpdateUnreadCount(0)
+              }}
+              title="Cập nhật hệ thống"
+            >
+              <Download className="w-[22px] h-[22px]" />
+              {updateUnreadCount > 0 && (
+                <Badge 
+                  variant="destructive" 
+                  className="absolute -top-1 -right-1 w-5 h-5 text-xs flex items-center justify-center"
+                >
+                  {updateUnreadCount}
+                </Badge>
+              )}
+            </button>
+
+            {/* Notifications */}
+            <Popover>
             <PopoverTrigger asChild>
               <Button variant="ghost" size="sm" className="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
-                <Bell className="w-5 h-5" />
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-6 h-6">
+                  <path d="M12 22C13.1 22 14 21.1 14 20H10C10 21.1 10.9 22 12 22ZM18 16V11C18 7.93 16.37 5.36 13.5 4.68V4C13.5 3.17 12.83 2.5 12 2.5C11.17 2.5 10.5 3.17 10.5 4V4.68C7.64 5.36 6 7.92 6 11V16L4 18V19H20V18L18 16Z" fill="currentColor"/>
+                </svg>
                 {unreadCount > 0 && (
                   <Badge 
                     variant="destructive" 
@@ -384,146 +634,285 @@ export default function Header() {
                 )}
               </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96" align="end">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b pb-3">
-                  <h3 className="font-semibold text-lg text-gray-800">🔔 Thông báo</h3>
-                  <div className="flex items-center space-x-2">
-                    <Button variant="ghost" size="sm" className="hidden text-xs hover:bg-gray-100">
-                      🔽 Lọc
+            <PopoverContent className="w-[450px] p-0" align="end">
+              <div className="flex flex-col h-full">
+                {/* Header */}
+                <div className="flex items-center justify-between px-4 py-3 border-b">
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-base text-gray-800">Thông Báo</h3>
+                    <div className="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
+                      <button 
+                        className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                          !showUnreadOnly ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-800'
+                        }`}
+                        onClick={() => setShowUnreadOnly(false)}
+                      >
+                        Tất cả
+                      </button>
+                      <button 
+                        className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                          showUnreadOnly ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-800'
+                        }`}
+                        onClick={() => setShowUnreadOnly(true)}
+                      >
+                        Chưa đọc
+                      </button>
+                    </div>
+                  </div>
+                  <div className="relative">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-8 w-8 p-0"
+                      onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+                    >
+                      <Settings className="w-4 h-4" />
                     </Button>
-                    <Button variant="ghost" size="sm" className="text-xs hover:bg-gray-100">
-                      ✅ Đánh dấu đã đọc
-                    </Button>
+                    
+                    {showNotificationSettings && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setShowNotificationSettings(false)}
+                        />
+                        <div className="absolute top-full right-0 mt-1 w-40 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-1 z-20">
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              // Mark all as read
+                              setNotificationsList(notificationsList.map(n => ({ ...n, read: true })))
+                              setUnreadCount(0)
+                              setShowNotificationSettings(false)
+                            }}
+                          >
+                            Đánh dấu đọc tất cả
+                          </button>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setShowNotificationSettings(false)
+                              setShowAllNotificationsModal(true)
+                            }}
+                          >
+                            Xem tất cả
+                          </button>
+                          <button
+                            className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+                            onClick={() => {
+                              setShowNotificationSettings(false)
+                              setShowDeleteConfirmation(true)
+                            }}
+                          >
+                            Xóa tất cả
+                          </button>
+                        </div>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="hidden flex space-x-1 bg-gray-100 p-1 rounded-lg">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className={`flex-1 text-xs rounded-md ${
+                {/* Tabs */}
+                <div className="flex items-center gap-0 px-4 border-b">
+                  <button 
+                    className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
                       activeNotificationTab === 'all' 
-                        ? 'bg-white shadow-sm' 
-                        : 'hover:bg-gray-200'
+                        ? 'border-[#3e79f7] text-blue-600' 
+                        : 'border-transparent text-gray-600 hover:text-gray-800'
                     }`}
                     onClick={() => setActiveNotificationTab('all')}
                   >
                     Tất cả
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 text-xs hover:bg-gray-200 rounded-md">
-                    � Leads
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 text-xs hover:bg-gray-200 rounded-md">
-                    � Khách hàng
-                  </Button>
-                  <Button variant="ghost" size="sm" className="flex-1 text-xs hover:bg-gray-200 rounded-md">
-                    📋 Công việc
-                  </Button>
+                  </button>
+                  <button 
+                    className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                      activeNotificationTab === 'orders' 
+                        ? 'border-[#3e79f7] text-blue-600' 
+                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveNotificationTab('orders')}
+                  >
+                    Đơn hàng
+                  </button>
+                  <button 
+                    className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                      activeNotificationTab === 'customer' 
+                        ? 'border-[#3e79f7] text-blue-600' 
+                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveNotificationTab('customer')}
+                  >
+                    Khách hàng
+                  </button>
+                  <button 
+                    className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                      activeNotificationTab === 'tasks' 
+                        ? 'border-[#3e79f7] text-blue-600' 
+                        : 'border-transparent text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setActiveNotificationTab('tasks')}
+                  >
+                    Công việc
+                  </button>
+                  
+                  {/* More tabs dropdown */}
+                  <div className="relative">
+                    <button 
+                      className="px-3 py-3 text-xs font-bold text-gray-600 hover:text-gray-800 border-b-2 border-transparent"
+                      onClick={() => setShowMoreTabsDropdown(!showMoreTabsDropdown)}
+                    >
+                      ...
+                    </button>
+                    
+                    {showMoreTabsDropdown && (
+                      <>
+                        <div 
+                          className="fixed inset-0 z-10" 
+                          onClick={() => setShowMoreTabsDropdown(false)}
+                        />
+                        <div className="absolute top-full right-0 mt-1 w-40 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-2 z-20">
+                          <button
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setActiveNotificationTab('products')
+                              setShowMoreTabsDropdown(false)
+                            }}
+                          >
+                            Sản phẩm
+                          </button>
+                          <button
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setActiveNotificationTab('payment')
+                              setShowMoreTabsDropdown(false)
+                            }}
+                          >
+                            Thanh toán
+                          </button>
+                          <button
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setActiveNotificationTab('events')
+                              setShowMoreTabsDropdown(false)
+                            }}
+                          >
+                            Sự kiện
+                          </button>
+                          <button
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setActiveNotificationTab('link-notifications')
+                              setShowMoreTabsDropdown(false)
+                            }}
+                          >
+                            Thông báo link
+                          </button>
+                          <button
+                            className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                            onClick={() => {
+                              setActiveNotificationTab('system')
+                              setShowMoreTabsDropdown(false)
+                            }}
+                          >
+                            Hệ thống
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="space-y-3 max-h-80 overflow-y-auto">
+
+                {/* Notifications List */}
+                <div className="flex-1 overflow-y-auto max-h-[400px]">
                   {getFilteredNotifications().length === 0 ? (
-                    <div className="text-center py-8">
+                    <div className="text-center py-12">
                       <p className="text-gray-500 text-sm">Không có thông báo nào</p>
                     </div>
                   ) : (
-                    <>
-                      {/* Urgent Notifications */}
-                      {getFilteredNotifications().filter(n => n.type === 'urgent').length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-red-600 mb-3 flex items-center gap-2">
-                            🚨 Khẩn cấp - Cần xử lý ngay
-                          </h4>
-                          {getFilteredNotifications().filter(n => n.type === 'urgent').map((notification) => (
-                            <div key={notification.id} className="p-3 rounded-lg border-l-4 border-l-red-500 bg-red-50 mb-2 hover:bg-red-100 transition-colors">
-                              <div className="flex items-start justify-between">
+                    <div className="divide-y divide-gray-100">
+                      {getFilteredNotifications().map((notification) => (
+                        <div 
+                          key={notification.id} 
+                          className={`relative px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
+                            !notification.read ? 'bg-blue-50/30' : ''
+                          }`}
+                          onClick={() => handleNotificationClick(notification.id)}
+                        >
+                          <div className="flex items-start gap-3">
+                            {/* Avatar */}
+                            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <User className="w-5 h-5 text-white" />
+                            </div>
+                            
+                            {/* Content */}
+                            <div className="flex-1 min-w-0 pr-6">
+                              <div className="flex items-start justify-between gap-2">
                                 <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-900">
+                                  <p className="text-sm font-medium leading-relaxed">
+                                    <span className="text-blue-600">
+                                      {notification.category === 'customer' && 'Khách hàng'}
+                                      {notification.category === 'orders' && 'Đơn hàng'}
+                                      {notification.category === 'leads' && 'Cơ hội'}
+                                      {notification.category === 'tasks' && 'Công việc'}
+                                      {notification.category === 'kpi' && 'KPI'}
+                                      {notification.category === 'calendar' && 'Lịch hẹn'}
+                                      {notification.category === 'quote' && 'Báo giá'}
+                                      {notification.category === 'system' && 'Hệ thống'}
+                                    </span>
+                                    <span className="text-gray-400 mx-1">•</span>
+                                    <span className="text-gray-900">{notification.title}</span>
+                                  </p>
+                                  <p className="text-xs text-gray-600 mt-1 line-clamp-1">
                                     {notification.message}
                                   </p>
-                                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    🕐 {notification.time}
+                                  {'actionLabel' in notification && notification.actionLabel && (
+                                    <button
+                                      className="mt-2 inline-flex items-center rounded-md bg-gray-900 px-2.5 py-1 text-xs font-medium text-white hover:bg-black"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        handleNotificationClick(notification.id)
+                                        handleNotificationAction(notification.actionType)
+                                      }}
+                                    >
+                                      {notification.actionLabel}
+                                    </button>
+                                  )}
+                                  <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {notification.time}
                                   </p>
                                 </div>
-                                <Button size="sm" variant="outline" className="ml-2 text-xs border-red-200 text-red-600 hover:bg-red-100">
-                                  👁️ Xem
-                                </Button>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                      )}
 
-                      {/* Important Notifications */}
-                      {getFilteredNotifications().filter(n => n.type === 'important').length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-yellow-600 mb-3 flex items-center gap-2">
-                            ⚠️ Quan trọng - Cần chú ý
-                          </h4>
-                          {getFilteredNotifications().filter(n => n.type === 'important').map((notification) => (
-                            <div key={notification.id} className="p-3 rounded-lg border-l-4 border-l-yellow-500 bg-yellow-50 mb-2 hover:bg-yellow-100 transition-colors">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {notification.message}
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    🕐 {notification.time}
-                                  </p>
-                                </div>
-                                <Button size="sm" variant="outline" className="ml-2 text-xs border-yellow-200 text-yellow-600 hover:bg-yellow-100">
-                                  👁️ Xem
-                                </Button>
+                            {/* Close button */}
+                            <button 
+                              className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-gray-600 transition-colors p-1 flex-shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                // Handle remove notification
+                              }}
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                            
+                            {/* Unread indicator dot */}
+                            {!notification.read && (
+                              <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                               </div>
-                            </div>
-                          ))}
+                            )}
+                          </div>
                         </div>
-                      )}
-
-                      {/* Normal Notifications */}
-                      {getFilteredNotifications().filter(n => n.type === 'normal').length > 0 && (
-                        <div>
-                          <h4 className="text-sm font-semibold text-blue-600 mb-3 flex items-center gap-2">
-                            ℹ️ Thông thường
-                          </h4>
-                          {getFilteredNotifications().filter(n => n.type === 'normal').map((notification) => (
-                            <div key={notification.id} className="p-3 rounded-lg border-l-4 border-l-blue-500 bg-blue-50 mb-2 hover:bg-blue-100 transition-colors">
-                              <div className="flex items-start justify-between">
-                                <div className="flex-1">
-                                  <p className="text-sm font-medium text-gray-900">
-                                    {notification.message}
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                    🕐 {notification.time}
-                                  </p>
-                                </div>
-                                <Button size="sm" variant="outline" className="ml-2 text-xs border-blue-200 text-blue-600 hover:bg-blue-100">
-                                  👁️ Xem
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </>
+                      ))}
+                    </div>
                   )}
-                </div>
-                
-                <div className="border-t pt-3">
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="w-full text-sm text-blue-600 hover:bg-blue-50 font-medium"
-                    onClick={() => setShowNotificationsModal(true)}
-                  >
-                    📋 Xem tất cả thông báo →
-                  </Button>
                 </div>
               </div>
             </PopoverContent>
           </Popover>
+          </div>
 
           {/* User Profile Dropdown */}
           <DropdownMenu>
@@ -549,7 +938,7 @@ export default function Header() {
                     </AvatarFallback>
                   </Avatar>
                   <div className="absolute -bottom-1 -right-1">
-                    <div className="w-4 h-4 bg-green-500 border-2 border-white rounded-full"></div>
+                    <div className="w-4 h-4 bg-[#2dc56a] border-2 border-white rounded-full"></div>
                   </div>
                 </div>
                 <div className="flex-1">
@@ -569,7 +958,7 @@ export default function Header() {
               </div>
 
               {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-gray-50 rounded-lg">
+              <div className="grid grid-cols-3 gap-2 mb-4 p-3 bg-gray-50 rounded-[10px]">
                 <div className="text-center">
                   <div className="font-semibold text-blue-600">45</div>
                   <div className="text-xs text-gray-600">Leads</div>
@@ -621,7 +1010,7 @@ export default function Header() {
       {/* Create Lead Modal */}
       {showCreateLeadModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-[600px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-2xl p-8 w-[600px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 👤 Tạo Lead mới
@@ -643,23 +1032,23 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">📋 Thông tin cơ bản</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Họ và tên *</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Nguyễn Văn A" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="Nguyễn Văn A" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Số điện thoại *</label>
-                  <input type="tel" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="0901234567" />
+                  <input type="tel" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="0901234567" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Email *</label>
-                  <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="email@example.com" />
+                  <input type="email" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="email@example.com" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Công ty/Tổ chức</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Công ty ABC" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="Công ty ABC" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Chức vụ</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Giám đốc, Trưởng phòng..." />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="Giám đốc, Trưởng phòng..." />
                 </div>
               </div>
 
@@ -668,7 +1057,7 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">🎯 Phân loại & Nguồn</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nguồn lead *</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chọn nguồn</option>
                     <option value="website">Website</option>
                     <option value="facebook">Facebook</option>
@@ -681,7 +1070,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại khách hàng</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="individual">Cá nhân</option>
                     <option value="business">Doanh nghiệp</option>
                     <option value="enterprise">Tập đoàn</option>
@@ -689,7 +1078,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Sản phẩm quan tâm</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chọn sản phẩm</option>
                     <option value="basic">Gói Basic</option>
                     <option value="premium">Gói Premium</option>
@@ -699,7 +1088,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mức độ quan tâm</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="hot">🔥 Nóng - Cần liên hệ ngay</option>
                     <option value="warm">🟡 Ấm - Quan tâm</option>
                     <option value="cold">❄️ Lạnh - Tìm hiểu</option>
@@ -707,7 +1096,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Budget dự kiến</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chưa xác định</option>
                     <option value="under_10m">Dưới 10 triệu</option>
                     <option value="10_50m">10-50 triệu</option>
@@ -723,11 +1112,11 @@ export default function Header() {
               <h4 className="font-semibold text-gray-800 border-b pb-2">📝 Thông tin bổ sung</h4>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú</label>
-                <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={3} placeholder="Ghi chú về khách hàng, yêu cầu đặc biệt..."></textarea>
+                <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={3} placeholder="Ghi chú về khách hàng, yêu cầu đặc biệt..."></textarea>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian dự kiến quyết định</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                   <option value="">Chưa xác định</option>
                   <option value="immediate">Ngay lập tức</option>
                   <option value="week">Trong tuần</option>
@@ -744,7 +1133,7 @@ export default function Header() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Assign cho Sales</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Auto assign</option>
                     <option value="sales1">Nguyễn Văn Sales</option>
                     <option value="sales2">Trần Thị Sale</option>
@@ -753,7 +1142,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ưu tiên xử lý</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="normal">Bình thường</option>
                     <option value="high">Cao</option>
                     <option value="urgent">Khẩn cấp</option>
@@ -763,15 +1152,15 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 pt-6 border-t mt-6">
-              <button className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button className="flex-1 px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors font-medium">
                 ✅ Tạo Lead & Assign
               </button>
-              <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium">
+              <button className="px-6 py-3 bg-gray-100 text-gray-700 rounded-[10px] hover:bg-gray-200 transition-colors font-medium">
                 📝 Tạo & Tạo tiếp
               </button>
               <button 
                 onClick={() => setShowCreateLeadModal(false)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -783,14 +1172,18 @@ export default function Header() {
       {/* Create Order Modal */}
       {showCreateOrderModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-[700px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-2xl p-8 w-[700px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 🛒 Tạo đơn hàng mới
                 <span className="text-sm font-normal text-gray-500">| Đơn bán hàng</span>
               </h3>
               <button 
-                onClick={() => setShowCreateOrderModal(false)}
+                onClick={() => {
+                  setShowCreateOrderModal(false)
+                  setTaxId('vat-10')
+                  setTaxRate(10)
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-1"
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -805,7 +1198,7 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">👤 Thông tin khách hàng</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Khách hàng *</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Tìm và chọn khách hàng</option>
                     <option value="kh1">Nguyễn Văn A - 0901234567</option>
                     <option value="kh2">Trần Thị B - 0987654321</option>
@@ -815,7 +1208,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại đơn hàng</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="product">Bán sản phẩm</option>
                     <option value="service">Cung cấp dịch vụ</option>
                     <option value="subscription">Đăng ký định kỳ</option>
@@ -824,7 +1217,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Salesperson phụ trách</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="me">Tôi</option>
                     <option value="sales1">Nguyễn Văn Sales</option>
                     <option value="sales2">Trần Thị Sale</option>
@@ -833,26 +1226,45 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày giao hàng dự kiến</label>
-                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <input type="date" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                 </div>
               </div>
 
               {/* Thông tin thanh toán */}
               <div className="space-y-4">
                 <h4 className="font-semibold text-gray-800 border-b pb-2">💳 Thanh toán & Giao hàng</h4>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Phương thức thanh toán</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                    <option value="cash">Tiền mặt</option>
-                    <option value="transfer">Chuyển khoản</option>
-                    <option value="credit">Thẻ tín dụng</option>
-                    <option value="installment">Trả góp</option>
-                    <option value="cod">COD</option>
-                  </select>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Thuế GTGT *</label>
+                    <select 
+                      value={taxId}
+                      onChange={(e) => {
+                        const tax = defaultTaxes.find(t => t.id === e.target.value)
+                        setTaxId(e.target.value)
+                        setTaxRate(tax ? tax.rate : 0)
+                      }}
+                      className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+                    >
+                      <option value="">Chọn mức thuế</option>
+                      {defaultTaxes.filter(t => t.isActive).map(tax => (
+                        <option key={tax.id} value={tax.id}>{tax.name} ({tax.rate}%)</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Phương thức thanh toán</label>
+                    <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
+                      <option value="cash">Tiền mặt</option>
+                      <option value="transfer">Chuyển khoản</option>
+                      <option value="credit">Thẻ tín dụng</option>
+                      <option value="installment">Trả góp</option>
+                      <option value="cod">COD</option>
+                    </select>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Điều khoản thanh toán</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="immediate">Thanh toán ngay</option>
                     <option value="deposit">Đặt cọc 50%</option>
                     <option value="net15">Net 15 ngày</option>
@@ -862,11 +1274,11 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ giao hàng</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={2} placeholder="Nhập địa chỉ giao hàng"></textarea>
+                  <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={2} placeholder="Nhập địa chỉ giao hàng"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ghi chú đơn hàng</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={2} placeholder="Yêu cầu đặc biệt, ghi chú..."></textarea>
+                  <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={2} placeholder="Yêu cầu đặc biệt, ghi chú..."></textarea>
                 </div>
               </div>
             </div>
@@ -874,11 +1286,11 @@ export default function Header() {
             {/* Sản phẩm/Dịch vụ */}
             <div className="mt-6 space-y-4">
               <h4 className="font-semibold text-gray-800 border-b pb-2">📦 Sản phẩm/Dịch vụ</h4>
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-50 p-4 rounded-[10px]">
                 <div className="grid grid-cols-12 gap-3 mb-3">
                   <div className="col-span-4">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Sản phẩm/Dịch vụ</label>
-                    <select className="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500">
+                    <select className="w-full px-2 py-2 text-sm border border-[#e6ebf1] rounded focus:ring-1 focus:ring-[#3e79f7]">
                       <option value="">Chọn sản phẩm</option>
                       <option value="basic">Gói Basic - 5,000,000 VNĐ</option>
                       <option value="premium">Gói Premium - 10,000,000 VNĐ</option>
@@ -888,27 +1300,27 @@ export default function Header() {
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Số lượng</label>
-                    <input type="number" className="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500" defaultValue="1" min="1" />
+                    <input type="number" className="w-full px-2 py-2 text-sm border border-[#e6ebf1] rounded focus:ring-1 focus:ring-[#3e79f7]" defaultValue="1" min="1" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Đơn giá</label>
-                    <input type="text" className="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500" placeholder="5,000,000" />
+                    <input type="text" className="w-full px-2 py-2 text-sm border border-[#e6ebf1] rounded focus:ring-1 focus:ring-[#3e79f7]" placeholder="5,000,000" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Giảm giá (%)</label>
-                    <input type="number" className="w-full px-2 py-2 text-sm border border-gray-300 rounded focus:ring-1 focus:ring-blue-500" placeholder="0" min="0" max="100" />
+                    <input type="number" className="w-full px-2 py-2 text-sm border border-[#e6ebf1] rounded focus:ring-1 focus:ring-[#3e79f7]" placeholder="0" min="0" max="100" />
                   </div>
                   <div className="col-span-2">
                     <label className="block text-xs font-medium text-gray-600 mb-1">Thành tiền</label>
-                    <input type="text" className="w-full px-2 py-2 text-sm border border-gray-300 rounded bg-gray-100" value="5,000,000" readOnly />
+                    <input type="text" className="w-full px-2 py-2 text-sm border border-[#e6ebf1] rounded bg-gray-100" value="5,000,000" readOnly />
                   </div>
                 </div>
-                <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">+ Thêm sản phẩm/dịch vụ</button>
+                <button className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium">+ Thêm sản phẩm/dịch vụ</button>
               </div>
             </div>
 
             {/* Tổng kết */}
-            <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+            <div className="mt-6 bg-blue-50 p-4 rounded-[10px]">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <h5 className="font-semibold text-gray-800">💰 Tổng kết đơn hàng</h5>
@@ -922,12 +1334,12 @@ export default function Header() {
                       <span>-0 VNĐ</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>VAT (10%):</span>
-                      <span>500,000 VNĐ</span>
+                      <span>VAT ({taxRate}%):</span>
+                      <span>{(5000000 * taxRate / 100).toLocaleString()} VNĐ</span>
                     </div>
                     <div className="flex justify-between font-bold text-lg border-t pt-1">
                       <span>Tổng cộng:</span>
-                      <span className="text-blue-600">5,500,000 VNĐ</span>
+                      <span className="text-blue-600">{(5000000 * (1 + taxRate / 100)).toLocaleString()} VNĐ</span>
                     </div>
                   </div>
                 </div>
@@ -936,11 +1348,11 @@ export default function Header() {
                   <div className="space-y-2">
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Mã đơn hàng</label>
-                      <input type="text" className="w-full px-2 py-1 text-sm border border-gray-300 rounded" placeholder="Auto generate" />
+                      <input type="text" className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded" placeholder="Auto generate" />
                     </div>
                     <div>
                       <label className="block text-xs font-medium text-gray-600 mb-1">Ưu tiên xử lý</label>
-                      <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                      <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                         <option value="normal">Bình thường</option>
                         <option value="high">Cao</option>
                         <option value="urgent">Khẩn cấp</option>
@@ -952,18 +1364,18 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 pt-6 border-t mt-6">
-              <button className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+              <button className="flex-1 px-6 py-3 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors font-medium">
                 💾 Lưu đơn hàng
               </button>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors font-medium">
                 📄 Lưu & In
               </button>
-              <button className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+              <button className="px-6 py-3 bg-yellow-500 text-white rounded-[10px] hover:bg-yellow-600 transition-colors font-medium">
                 📧 Lưu & Gửi
               </button>
               <button 
                 onClick={() => setShowCreateOrderModal(false)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -975,7 +1387,7 @@ export default function Header() {
       {/* Create Task Modal */}
       {showCreateTaskModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-[600px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-2xl p-8 w-[600px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 ✅ Tạo nhiệm vụ mới
@@ -997,11 +1409,11 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">📋 Thông tin nhiệm vụ</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề nhiệm vụ *</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="VD: Gọi điện tư vấn khách hàng ABC" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="VD: Gọi điện tư vấn khách hàng ABC" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại nhiệm vụ</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="call">📞 Gọi điện</option>
                     <option value="email">📧 Gửi email</option>
                     <option value="meeting">🤝 Meeting</option>
@@ -1013,7 +1425,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Liên quan đến</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chọn đối tượng liên quan</option>
                     <option value="lead_1">Lead: Nguyễn Văn A - 0901234567</option>
                     <option value="customer_1">Khách hàng: Công ty ABC</option>
@@ -1023,7 +1435,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mức độ ưu tiên</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="low">🟢 Thấp</option>
                     <option value="normal">🟡 Bình thường</option>
                     <option value="high">🟠 Cao</option>
@@ -1037,7 +1449,7 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">👥 Phân công & Thời gian</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Assign cho</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="me">Tôi</option>
                     <option value="team_member_1">Nguyễn Văn Sales</option>
                     <option value="team_member_2">Trần Thị Sale</option>
@@ -1048,26 +1460,26 @@ export default function Header() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Ngày bắt đầu</label>
-                    <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="date" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Hạn hoàn thành *</label>
-                    <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="date" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Giờ bắt đầu</label>
-                    <input type="time" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="time" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian dự kiến (phút)</label>
-                    <input type="number" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="30" />
+                    <input type="number" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="30" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nhắc nhở trước</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="none">Không nhắc nhở</option>
                     <option value="15min">15 phút trước</option>
                     <option value="30min">30 phút trước</option>
@@ -1083,46 +1495,46 @@ export default function Header() {
               <h4 className="font-semibold text-gray-800 border-b pb-2">📝 Mô tả & Checklist</h4>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Mô tả chi tiết</label>
-                <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={4} placeholder="Mô tả chi tiết nhiệm vụ, các bước cần thực hiện..."></textarea>
+                <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={4} placeholder="Mô tả chi tiết nhiệm vụ, các bước cần thực hiện..."></textarea>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Checklist (tùy chọn)</label>
                 <div className="space-y-2">
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                    <input type="text" className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Bước 1: Chuẩn bị tài liệu" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
+                    <input type="text" className="flex-1 px-2 py-1 border border-[#e6ebf1] rounded text-sm" placeholder="Bước 1: Chuẩn bị tài liệu" />
                   </div>
                   <div className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
-                    <input type="text" className="flex-1 px-2 py-1 border border-gray-300 rounded text-sm" placeholder="Bước 2: Gọi điện khách hàng" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
+                    <input type="text" className="flex-1 px-2 py-1 border border-[#e6ebf1] rounded text-sm" placeholder="Bước 2: Gọi điện khách hàng" />
                   </div>
-                  <button className="text-blue-600 hover:text-blue-700 text-sm">+ Thêm bước</button>
+                  <button className="text-blue-600 hover:text-[#3e79f7] text-sm">+ Thêm bước</button>
                 </div>
               </div>
             </div>
 
             {/* Tự động hóa */}
-            <div className="mt-6 bg-blue-50 p-4 rounded-lg">
+            <div className="mt-6 bg-blue-50 p-4 rounded-[10px]">
               <h4 className="font-semibold text-gray-800 mb-3">⚡ Tự động hóa & Theo dõi</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Tự động tạo task tiếp theo khi hoàn thành</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Gửi email thông báo cho khách hàng</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Cập nhật trạng thái lead/deal tự động</span>
                   </label>
                 </div>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Template task tiếp theo</label>
-                    <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                    <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                       <option value="">Không có</option>
                       <option value="follow_up">Follow up sau 3 ngày</option>
                       <option value="demo">Lên lịch demo</option>
@@ -1131,7 +1543,7 @@ export default function Header() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Cập nhật stage</label>
-                    <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                    <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                       <option value="">Không thay đổi</option>
                       <option value="contacted">Đã liên hệ</option>
                       <option value="qualified">Qualified</option>
@@ -1143,18 +1555,18 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 pt-6 border-t mt-6">
-              <button className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors font-medium">
+              <button className="flex-1 px-6 py-3 bg-orange-600 text-white rounded-[10px] hover:bg-orange-700 transition-colors font-medium">
                 ✅ Tạo nhiệm vụ
               </button>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors font-medium">
                 📅 Tạo & Lên lịch
               </button>
-              <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors font-medium">
                 🔄 Tạo & Tạo tiếp
               </button>
               <button 
                 onClick={() => setShowCreateTaskModal(false)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -1166,7 +1578,7 @@ export default function Header() {
       {/* Create Appointment Modal */}
       {showCreateAppointmentModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-[650px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-2xl p-8 w-[650px] max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 📅 Tạo cuộc hẹn mới
@@ -1188,11 +1600,11 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">📋 Thông tin cuộc hẹn</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề cuộc hẹn *</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="VD: Demo sản phẩm cho khách hàng ABC" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="VD: Demo sản phẩm cho khách hàng ABC" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại cuộc hẹn</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="consultation">💼 Tư vấn</option>
                     <option value="demo">🖥️ Demo sản phẩm</option>
                     <option value="negotiation">🤝 Đàm phán</option>
@@ -1205,7 +1617,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Khách hàng/Lead *</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chọn khách hàng</option>
                     <option value="lead_1">Lead: Nguyễn Văn A - 0901234567</option>
                     <option value="customer_1">Khách hàng: Công ty ABC</option>
@@ -1215,7 +1627,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Người tham gia nội bộ</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" multiple>
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" multiple>
                     <option value="me">Tôi</option>
                     <option value="sales1">Nguyễn Văn Sales</option>
                     <option value="sales2">Trần Thị Sale</option>
@@ -1232,16 +1644,16 @@ export default function Header() {
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Ngày hẹn *</label>
-                    <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="date" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Giờ bắt đầu *</label>
-                    <input type="time" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                    <input type="time" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian dự kiến (phút)</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="30">30 phút</option>
                     <option value="60">1 giờ</option>
                     <option value="90">1.5 giờ</option>
@@ -1251,7 +1663,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Hình thức</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="office">🏢 Tại văn phòng công ty</option>
                     <option value="customer_place">🏪 Tại văn phòng khách hàng</option>
                     <option value="online">💻 Online (Zoom/Teams)</option>
@@ -1262,21 +1674,21 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Địa chỉ/Link meeting</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={2} placeholder="Nhập địa chỉ hoặc link Zoom/Teams..."></textarea>
+                  <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={2} placeholder="Nhập địa chỉ hoặc link Zoom/Teams..."></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nhắc nhở trước</label>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" defaultChecked />
                       <span className="text-sm">15 phút trước</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" />
                       <span className="text-sm">1 ngày trước</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" />
                       <span className="text-sm">Gửi email nhắc nhở khách hàng</span>
                     </label>
                   </div>
@@ -1289,42 +1701,42 @@ export default function Header() {
               <h4 className="font-semibold text-gray-800 border-b pb-2">📝 Nội dung & Chuẩn bị</h4>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Mục đích cuộc hẹn</label>
-                <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={2} placeholder="Mô tả mục đích, nội dung chính của cuộc hẹn..."></textarea>
+                <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={2} placeholder="Mô tả mục đích, nội dung chính của cuộc hẹn..."></textarea>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Agenda/Nội dung</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={3} placeholder="1. Giới thiệu công ty&#10;2. Demo sản phẩm&#10;3. Q&A&#10;4. Thảo luận giá cả"></textarea>
+                  <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={3} placeholder="1. Giới thiệu công ty&#10;2. Demo sản phẩm&#10;3. Q&A&#10;4. Thảo luận giá cả"></textarea>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tài liệu cần chuẩn bị</label>
-                  <textarea className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows={3} placeholder="- Brochure sản phẩm&#10;- Bảng giá&#10;- Hợp đồng mẫu&#10;- Laptop demo"></textarea>
+                  <textarea className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" rows={3} placeholder="- Brochure sản phẩm&#10;- Bảng giá&#10;- Hợp đồng mẫu&#10;- Laptop demo"></textarea>
                 </div>
               </div>
             </div>
 
             {/* Tự động hóa */}
-            <div className="mt-6 bg-purple-50 p-4 rounded-lg">
+            <div className="mt-6 bg-purple-50 p-4 rounded-[10px]">
               <h4 className="font-semibold text-gray-800 mb-3">⚡ Tự động hóa</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Gửi calendar invite cho khách hàng</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Tạo task chuẩn bị trước cuộc hẹn</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Tạo task follow-up sau cuộc hẹn</span>
                   </label>
                 </div>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Template email invite</label>
-                    <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                    <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                       <option value="formal">Formal business</option>
                       <option value="friendly">Thân thiện</option>
                       <option value="demo">Demo sản phẩm</option>
@@ -1333,7 +1745,7 @@ export default function Header() {
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Follow-up sau</label>
-                    <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                    <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                       <option value="1hour">1 giờ</option>
                       <option value="1day">1 ngày</option>
                       <option value="3days">3 ngày</option>
@@ -1345,18 +1757,18 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 pt-6 border-t mt-6">
-              <button className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors font-medium">
+              <button className="flex-1 px-6 py-3 bg-purple-600 text-white rounded-[10px] hover:bg-purple-700 transition-colors font-medium">
                 📅 Tạo cuộc hẹn
               </button>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors font-medium">
                 📧 Tạo & Gửi invite
               </button>
-              <button className="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors font-medium">
                 📋 Tạo & Chuẩn bị
               </button>
               <button 
                 onClick={() => setShowCreateAppointmentModal(false)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -1368,7 +1780,7 @@ export default function Header() {
       {/* Email Campaign Modal */}
       {showEmailCampaignModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-8 w-[750px] max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-[10px] shadow-2xl p-8 w-[750px] max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
                 📧 Tạo chiến dịch Email
@@ -1390,11 +1802,11 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">📋 Thông tin chiến dịch</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tên chiến dịch *</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="VD: Flash Sale Tháng 7 2025" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="VD: Flash Sale Tháng 7 2025" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại chiến dịch</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="promotion">🎯 Khuyến mãi/Sale</option>
                     <option value="newsletter">📰 Newsletter</option>
                     <option value="welcome">👋 Welcome series</option>
@@ -1406,7 +1818,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Mục tiêu</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="sales">💰 Tăng doanh số</option>
                     <option value="leads">👥 Thu thập leads</option>
                     <option value="engagement">💬 Tăng tương tác</option>
@@ -1416,7 +1828,7 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Độ ưu tiên</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="normal">🟡 Bình thường</option>
                     <option value="high">🟠 Cao</option>
                     <option value="urgent">🔴 Khẩn cấp</option>
@@ -1429,7 +1841,7 @@ export default function Header() {
                 <h4 className="font-semibold text-gray-800 border-b pb-2">🎯 Đối tượng gửi</h4>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Nhóm đối tượng *</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="">Chọn nhóm đối tượng</option>
                     <option value="all_leads">📋 Tất cả leads (2,450 người)</option>
                     <option value="hot_leads">🔥 Leads nóng (156 người)</option>
@@ -1442,13 +1854,13 @@ export default function Header() {
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Bộ lọc bổ sung</label>
                   <div className="space-y-2">
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                       <option value="">Nguồn leads</option>
                       <option value="website">Website</option>
                       <option value="facebook">Facebook</option>
                       <option value="google">Google Ads</option>
                     </select>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                       <option value="">Sản phẩm quan tâm</option>
                       <option value="basic">Gói Basic</option>
                       <option value="premium">Gói Premium</option>
@@ -1460,20 +1872,20 @@ export default function Header() {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Loại trừ</label>
                   <div className="space-y-2">
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" />
                       <span className="text-sm">Đã unsubscribe</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" />
                       <span className="text-sm">Email bounce</span>
                     </label>
                     <label className="flex items-center space-x-2">
-                      <input type="checkbox" className="rounded border-gray-300" />
+                      <input type="checkbox" className="rounded border-[#e6ebf1]" />
                       <span className="text-sm">Đã mua trong 30 ngày</span>
                     </label>
                   </div>
                 </div>
-                <div className="bg-blue-50 p-3 rounded-lg">
+                <div className="bg-blue-50 p-3 rounded-[10px]">
                   <p className="text-sm font-medium text-blue-800">Dự kiến gửi: 1,450 emails</p>
                   <p className="text-xs text-blue-600">Chi phí ước tính: 145,000 VNĐ</p>
                 </div>
@@ -1486,21 +1898,21 @@ export default function Header() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tiêu đề email *</label>
-                  <input type="text" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="🔥 Flash Sale 50% - Chỉ còn 24h!" />
+                  <input type="text" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="🔥 Flash Sale 50% - Chỉ còn 24h!" />
                   <p className="text-xs text-gray-500 mt-1">Độ dài tối ưu: 30-50 ký tự</p>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tên người gửi</label>
                   <div className="grid grid-cols-2 gap-2">
-                    <input type="text" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="ViLead Team" />
-                    <input type="email" className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="sales@vilead.com" />
+                    <input type="text" className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="ViLead Team" />
+                    <input type="email" className="px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" placeholder="sales@vilead.com" />
                   </div>
                 </div>
               </div>
               
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Template email</label>
-                <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                   <option value="">Chọn template có sẵn</option>
                   <option value="promotion">🎯 Khuyến mãi sản phẩm</option>
                   <option value="newsletter">📰 Newsletter tháng</option>
@@ -1513,25 +1925,25 @@ export default function Header() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">Nội dung email</label>
-                <div className="border border-gray-300 rounded-lg p-4 bg-gray-50 min-h-[200px]">
+                <div className="border border-[#e6ebf1] rounded-[10px] p-4 bg-gray-50 min-h-[200px]">
                   <div className="mb-3 text-sm text-gray-600">
                     🎨 Email Editor - Kéo thả các thành phần
                   </div>
                   <div className="space-y-2">
-                    <div className="p-3 bg-white border border-dashed border-gray-300 rounded">
+                    <div className="p-3 bg-white border border-dashed border-[#e6ebf1] rounded">
                       <strong>Header:</strong> Logo + Banner khuyến mãi
                     </div>
-                    <div className="p-3 bg-white border border-dashed border-gray-300 rounded">
+                    <div className="p-3 bg-white border border-dashed border-[#e6ebf1] rounded">
                       <strong>Hero:</strong> Tiêu đề chính + CTA button
                     </div>
-                    <div className="p-3 bg-white border border-dashed border-gray-300 rounded">
+                    <div className="p-3 bg-white border border-dashed border-[#e6ebf1] rounded">
                       <strong>Content:</strong> Mô tả sản phẩm + Ưu đãi
                     </div>
-                    <div className="p-3 bg-white border border-dashed border-gray-300 rounded">
+                    <div className="p-3 bg-white border border-dashed border-[#e6ebf1] rounded">
                       <strong>Footer:</strong> Thông tin liên hệ + Unsubscribe
                     </div>
                   </div>
-                  <button className="mt-3 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                  <button className="mt-3 text-blue-600 hover:text-[#3e79f7] text-sm font-medium">
                     🎨 Mở Email Builder
                   </button>
                 </div>
@@ -1544,7 +1956,7 @@ export default function Header() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Thời gian gửi</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="now">Gửi ngay</option>
                     <option value="schedule">Lập lịch</option>
                     <option value="optimal">Tự động tối ưu</option>
@@ -1552,11 +1964,11 @@ export default function Header() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Ngày gửi</label>
-                  <input type="date" className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" />
+                  <input type="date" className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]" />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Giờ gửi</label>
-                  <select className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                  <select className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]">
                     <option value="09:00">09:00 (Tỷ lệ mở cao)</option>
                     <option value="14:00">14:00 (Tỷ lệ click cao)</option>
                     <option value="19:00">19:00 (Thời gian rảnh)</option>
@@ -1567,39 +1979,39 @@ export default function Header() {
             </div>
 
             {/* Cài đặt nâng cao */}
-            <div className="mt-6 bg-green-50 p-4 rounded-lg">
+            <div className="mt-6 bg-green-50 p-4 rounded-[10px]">
               <h4 className="font-semibold text-gray-800 mb-3">⚙️ Cài đặt nâng cao</h4>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" defaultChecked />
                     <span className="text-sm">A/B test tiêu đề (2 phiên bản)</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Theo dõi mở email</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" defaultChecked />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" defaultChecked />
                     <span className="text-sm">Theo dõi click links</span>
                   </label>
                   <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-[#e6ebf1]" />
                     <span className="text-sm">Tự động follow up sau 3 ngày</span>
                   </label>
                 </div>
                 <div className="space-y-2">
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">UTM Campaign</label>
-                    <input type="text" className="w-full px-2 py-1 text-sm border border-gray-300 rounded" placeholder="flash_sale_july_2025" />
+                    <input type="text" className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded" placeholder="flash_sale_july_2025" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Landing page</label>
-                    <input type="url" className="w-full px-2 py-1 text-sm border border-gray-300 rounded" placeholder="https://vilead.com/flash-sale" />
+                    <input type="url" className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded" placeholder="https://vilead.com/flash-sale" />
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-600 mb-1">Tỷ lệ gửi mục tiêu</label>
-                    <select className="w-full px-2 py-1 text-sm border border-gray-300 rounded">
+                    <select className="w-full px-2 py-1 text-sm border border-[#e6ebf1] rounded">
                       <option value="100">100%/giờ (Nhanh)</option>
                       <option value="50">50%/giờ (Vừa)</option>
                       <option value="25">25%/giờ (Từ từ)</option>
@@ -1610,21 +2022,21 @@ export default function Header() {
             </div>
 
             <div className="flex gap-3 pt-6 border-t mt-6">
-              <button className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
+              <button className="flex-1 px-6 py-3 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors font-medium">
                 🚀 Tạo & Gửi ngay
               </button>
-              <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-colors font-medium">
                 📅 Lập lịch gửi
               </button>
-              <button className="px-6 py-3 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors font-medium">
+              <button className="px-6 py-3 bg-yellow-500 text-white rounded-[10px] hover:bg-yellow-600 transition-colors font-medium">
                 🧪 Test gửi
               </button>
-              <button className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
+              <button className="px-6 py-3 bg-gray-600 text-white rounded-[10px] hover:bg-gray-700 transition-colors font-medium">
                 💾 Lưu draft
               </button>
               <button 
                 onClick={() => setShowEmailCampaignModal(false)}
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="px-6 py-3 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors"
               >
                 Hủy
               </button>
@@ -1664,7 +2076,7 @@ export default function Header() {
                   </Avatar>
                   <label 
                     htmlFor="avatar-upload"
-                    className="absolute -bottom-1 -right-1 bg-blue-600 text-white p-2 rounded-full cursor-pointer hover:bg-blue-700 transition-colors"
+                    className="absolute -bottom-1 -right-1 bg-[#3e79f7] text-white p-2 rounded-full cursor-pointer hover:bg-[#699dff] transition-colors"
                   >
                     <Camera className="w-3 h-3" />
                   </label>
@@ -1734,8 +2146,8 @@ export default function Header() {
                   </div>
                 </div>
                 
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                  <p className="text-sm text-blue-700">
+                <div className="mt-4 p-3 bg-blue-50 border border-[#c7d9fd] rounded-[10px]">
+                  <p className="text-sm text-[#3e79f7]">
                     <span className="font-medium">📝 Lưu ý:</span> Chỉ có thể thay đổi avatar. Các thông tin khác cần liên hệ bộ phận HR để cập nhật.
                   </p>
                 </div>
@@ -1860,7 +2272,7 @@ export default function Header() {
                 id="date-filter"
                 value={notificationDateFilter}
                 onChange={(e) => setNotificationDateFilter(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="">Tất cả thời gian</option>
                 <option value="today">Hôm nay</option>
@@ -1875,7 +2287,7 @@ export default function Header() {
                 id="type-filter"
                 value={notificationTypeFilter}
                 onChange={(e) => setNotificationTypeFilter(e.target.value)}
-                className="w-full mt-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="w-full mt-1 px-3 py-2 border border-[#e6ebf1] rounded-md text-sm focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
               >
                 <option value="all">Tất cả loại</option>
                 <option value="leads">📈 Lead</option>
@@ -1913,7 +2325,7 @@ export default function Header() {
               getFilteredNotificationsForModal().map((notification) => (
                 <div 
                   key={notification.id} 
-                  className={`p-4 rounded-lg border transition-colors hover:bg-gray-50 ${
+                  className={`p-4 rounded-[10px] border transition-colors hover:bg-gray-50 ${
                     notification.type === 'urgent' ? 'border-l-4 border-l-red-500 bg-red-50' :
                     notification.type === 'important' ? 'border-l-4 border-l-yellow-500 bg-yellow-50' :
                     'border-l-4 border-l-blue-500 bg-blue-50'
@@ -1937,6 +2349,7 @@ export default function Header() {
                           notification.category === 'orders' ? 'bg-blue-100 text-blue-800' :
                           notification.category === 'kpi' ? 'bg-red-100 text-red-800' :
                           notification.category === 'tasks' ? 'bg-orange-100 text-orange-800' :
+                          notification.category === 'system' ? 'bg-gray-900 text-white' :
                           'bg-gray-100 text-gray-800'
                         }`}>
                           {notification.category === 'leads' ? '📈 Leads' :
@@ -1944,10 +2357,11 @@ export default function Header() {
                            notification.category === 'orders' ? '� Đơn hàng' :
                            notification.category === 'kpi' ? '📊 KPI' :
                            notification.category === 'tasks' ? '�📋 Công việc' :
+                           notification.category === 'system' ? 'TT TikTok/System' :
                            '📋 Khác'}
                         </span>
                         {!notification.read && (
-                          <span className="w-2 h-2 bg-blue-600 rounded-full"></span>
+                          <span className="w-2 h-2 bg-[#3e79f7] rounded-full"></span>
                         )}
                       </div>
                       <p className="text-gray-900 mb-1">{notification.message}</p>
@@ -1972,7 +2386,7 @@ export default function Header() {
           {/* Footer */}
           <div className="flex items-center justify-between pt-4 border-t">
             <p className="text-sm text-gray-600">
-              Hiển thị {getFilteredNotificationsForModal().length} trong tổng số {notifications.length} thông báo
+              Hiển thị {getFilteredNotificationsForModal().length} trong tổng số {notificationsList.length} thông báo
             </p>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => setShowNotificationsModal(false)}>
@@ -1981,6 +2395,337 @@ export default function Header() {
               <Button>
                 ✅ Đánh dấu tất cả đã đọc
               </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* View All Notifications Modal */}
+      <Dialog open={showAllNotificationsModal} onOpenChange={setShowAllNotificationsModal}>
+        <DialogContent className="max-w-[800px] max-h-[90vh] rounded-[10px] p-0">
+          <div className="flex flex-col h-full">
+            {/* Header */}
+            <div className="flex items-center justify-between px-4 py-3 border-b">
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-base text-gray-800">Thông Báo</h3>
+                <div className="flex items-center gap-1 bg-gray-100 rounded-full p-0.5">
+                  <button 
+                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                      showUnreadOnly ? 'text-gray-600 hover:text-gray-800' : 'bg-blue-500 text-white'
+                    }`}
+                    onClick={() => setShowUnreadOnly(false)}
+                  >
+                    Tất cả
+                  </button>
+                  <button 
+                    className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                      showUnreadOnly ? 'bg-blue-500 text-white' : 'text-gray-600 hover:text-gray-800'
+                    }`}
+                    onClick={() => setShowUnreadOnly(true)}
+                  >
+                    Chưa đọc
+                  </button>
+                </div>
+              </div>
+              <div className="relative">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[#455560] hover:bg-[#fafafb] rounded-[10px] text-[13px] h-8 w-8 p-0"
+                  onClick={() => setShowNotificationSettings(!showNotificationSettings)}
+                >
+                  <Settings className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex items-center gap-0 px-4 border-b">
+              <button 
+                className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                  activeNotificationTab === 'all' 
+                    ? 'border-[#3e79f7] text-blue-600' 
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+                onClick={() => setActiveNotificationTab('all')}
+              >
+                Tất cả
+              </button>
+              <button 
+                className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                  activeNotificationTab === 'orders' 
+                    ? 'border-[#3e79f7] text-blue-600' 
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+                onClick={() => setActiveNotificationTab('orders')}
+              >
+                Đơn hàng
+              </button>
+              <button 
+                className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                  activeNotificationTab === 'customer' 
+                    ? 'border-[#3e79f7] text-blue-600' 
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+                onClick={() => setActiveNotificationTab('customer')}
+              >
+                Khách hàng
+              </button>
+              <button 
+                className={`px-4 py-3 text-xs font-bold whitespace-nowrap border-b-2 transition-colors ${
+                  activeNotificationTab === 'tasks' 
+                    ? 'border-[#3e79f7] text-blue-600' 
+                    : 'border-transparent text-gray-600 hover:text-gray-800'
+                }`}
+                onClick={() => setActiveNotificationTab('tasks')}
+              >
+                Công việc
+              </button>
+              
+              {/* More tabs dropdown */}
+              <div className="relative">
+                <button 
+                  className="px-3 py-3 text-xs font-bold text-gray-600 hover:text-gray-800 border-b-2 border-transparent"
+                  onClick={() => setShowMoreTabsDropdown(!showMoreTabsDropdown)}
+                >
+                  ...
+                </button>
+                
+                {showMoreTabsDropdown && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-10" 
+                      onClick={() => setShowMoreTabsDropdown(false)}
+                    />
+                    <div className="absolute top-full right-0 mt-1 w-40 bg-white rounded-[10px] shadow-lg border border-[#e6ebf1] py-2 z-20">
+                      <button
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setActiveNotificationTab('products')
+                          setShowMoreTabsDropdown(false)
+                        }}
+                      >
+                        Sản phẩm
+                      </button>
+                      <button
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setActiveNotificationTab('payment')
+                          setShowMoreTabsDropdown(false)
+                        }}
+                      >
+                        Thanh toán
+                      </button>
+                      <button
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setActiveNotificationTab('events')
+                          setShowMoreTabsDropdown(false)
+                        }}
+                      >
+                        Sự kiện
+                      </button>
+                      <button
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setActiveNotificationTab('link-notifications')
+                          setShowMoreTabsDropdown(false)
+                        }}
+                      >
+                        Thông báo link
+                      </button>
+                      <button
+                        className="w-full px-4 py-2.5 text-left text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                        onClick={() => {
+                          setActiveNotificationTab('system')
+                          setShowMoreTabsDropdown(false)
+                        }}
+                      >
+                        Hệ thống
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Notifications List */}
+            <div className="flex-1 overflow-y-auto max-h-[600px]">
+              <div className="divide-y divide-gray-100">
+                {notificationsList
+                  .filter(n => activeNotificationTab === 'all' || n.category === activeNotificationTab)
+                  .filter(n => !showUnreadOnly || !n.read)
+                  .map((notification) => (
+                    <div 
+                      key={notification.id}
+                      className={`relative px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer ${
+                        !notification.read ? 'bg-blue-50/30' : ''
+                      }`}
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 flex items-center justify-center flex-shrink-0 shadow-sm">
+                          <User className="w-5 h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0 pr-6">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex-1">
+                              <p className="text-sm font-medium leading-relaxed">
+                                <span className="text-blue-600">
+                                  {notification.category === 'leads' ? 'Cơ hội' :
+                                   notification.category === 'customer' ? 'Khách hàng' :
+                                   notification.category === 'orders' ? 'Đơn hàng' :
+                                   notification.category === 'kpi' ? 'KPI' :
+                                   notification.category === 'tasks' ? 'Công việc' :
+                                   notification.category === 'system' ? 'Hệ thống' : 'Khác'}
+                                </span>
+                                <span className="text-gray-400 mx-1">•</span>
+                                <span className="text-gray-900">{notification.title}</span>
+                              </p>
+                              <p className="text-xs text-gray-600 mt-1 line-clamp-1">
+                                {notification.message}
+                              </p>
+                              <p className="text-xs text-gray-400 mt-1.5 flex items-center gap-1">
+                                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                {notification.time}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <button 
+                          className="absolute top-1/2 -translate-y-1/2 right-3 text-gray-400 hover:text-gray-600 transition-colors p-1 flex-shrink-0"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setNotificationsList(prev => prev.filter(n => n.id !== notification.id))
+                          }}
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        {!notification.read && (
+                          <div className="absolute right-10 top-1/2 -translate-y-1/2">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between px-4 py-3 border-t">
+              <p className="text-sm text-gray-600">
+                Hiển thị {notificationsList.filter(n => activeNotificationTab === 'all' || n.category === activeNotificationTab).filter(n => !showUnreadOnly || !n.read).length} thông báo
+              </p>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => setShowAllNotificationsModal(false)}
+                >
+                  Đóng
+                </Button>
+                <Button
+                  onClick={() => {
+                    setNotificationsList(prev => prev.map(n => ({ ...n, read: true })))
+                    setUnreadCount(0)
+                  }}
+                >
+                  Đánh dấu đọc tất cả
+                </Button>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete All Notifications Confirmation Dialog */}
+      <Dialog open={showDeleteConfirmation} onOpenChange={setShowDeleteConfirmation}>
+        <DialogContent className="max-w-sm rounded-[10px]">
+          <DialogHeader className="border-b border-[#e6ebf1] pb-4">
+            <DialogTitle className="text-lg font-semibold text-[#1a3353]">
+              Xác nhận xóa
+            </DialogTitle>
+          </DialogHeader>
+          <div className="px-6 py-4">
+            <p className="text-sm text-gray-600">
+              Bạn có muốn xóa tất cả thông báo không?
+            </p>
+          </div>
+          <DialogFooter className="border-t border-[#e6ebf1] pt-4 flex-row justify-end gap-2">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteConfirmation(false)}
+              className="border-[#e6ebf1] text-[#455560] hover:bg-[#f0f7ff] hover:border-[#699dff] hover:text-[#699dff]"
+            >
+              Hủy
+            </Button>
+            <Button 
+              onClick={() => {
+                setNotificationsList([])
+                setUnreadCount(0)
+                setShowDeleteConfirmation(false)
+              }}
+              className="bg-[#ff6b72] text-white border border-[#ff6b72] hover:bg-[#ff9496] hover:border-[#ff9496] active:bg-[#d9505c] active:border-[#d9505c]"
+            >
+              Xóa
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* System Updates Timeline Modal */}
+      <Dialog open={showUpdateModal} onOpenChange={setShowUpdateModal}>
+        <DialogContent className="max-w-[960px] p-0 overflow-hidden rounded-[10px] sm:rounded-[10px] border-none shadow-2xl">
+          {/* Header */}
+          <div className="bg-white px-10 py-4 border-b border-gray-100 relative">
+            <h2 className="text-[20px] font-bold text-[#1a3353] tracking-tight">Lịch sử cập nhật hệ thống</h2>
+          </div>
+          
+          <div className="bg-[#f8f9fc] px-10 py-8 max-h-[75vh] overflow-y-auto w-full">
+            <div className="relative">
+              {/* Timeline continuous line */}
+              <div className="absolute left-[156px] top-4 bottom-8 w-[2px] border-l-[1.5px] border-dashed border-[#c3d9fb]"></div>
+
+              {systemUpdates.map((update, index) => (
+                <div key={update.id} className="relative pl-[200px] pb-10 group">
+                  {/* Left side Date */}
+                  <div className="absolute left-0 top-0.5 w-[130px] flex justify-end mt-0.5 whitespace-nowrap">
+                    <span className="text-[#5f6e7c] font-medium text-[13px] flex gap-2">
+                       <span>{update.date}</span>
+                       <span className="w-[60px] text-left">{update.time}</span>
+                    </span>
+                  </div>
+
+                  {/* Timeline node */}
+                  <div className="absolute left-[150px] top-1.5 flex items-center justify-center w-[13px] h-[13px] bg-white border-[2px] border-[#397cf6] rounded-full z-10 transition-transform group-hover:scale-110">
+                     <div className="w-[4px] h-[4px] bg-[#397cf6] rounded-full"></div>
+                  </div>
+
+                  {/* Content right */}
+                  <div>
+                    <div className="flex items-center justify-between gap-3 mb-3 mt-0.5">
+                      <h3 className="text-[16.5px] font-bold text-[#1a3353]">{update.title}</h3>
+                    </div>
+                    
+                    <div className="text-sm text-gray-600 mb-2 bg-white p-5 rounded-[12px] shadow-sm border border-[#e6ebf1]">
+                      <p className="font-medium text-gray-700 mb-4 italic text-[13.5px]">
+                        {update.description}
+                      </p>
+                      <div className="space-y-3.5">
+                        {update.items.map((item, idx) => (
+                          <div key={idx} className="flex items-start">
+                            <span className="text-[#397cf6] mr-2.5 mt-[5px] text-[7px] flex-shrink-0">●</span>
+                            <span className="text-[#5f6e7c] leading-relaxed block text-[13.5px]">{item}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+              {/* End of timeline arrow */}
+              <div className="absolute left-[153px] bottom-[-5px] w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[8px] border-t-[#c3d9fb]"></div>
             </div>
           </div>
         </DialogContent>

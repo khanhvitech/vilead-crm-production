@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useEffect } from 'react'
 import { 
@@ -228,7 +228,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
       case 'low':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -272,7 +272,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
           <p className="text-gray-600">Insights và khuyến nghị thông minh dựa trên AI</p>
         </div>
         <div className="flex items-center space-x-3">
-          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-[10px] hover:bg-primary-700">
             <RefreshCw className="w-4 h-4" />
             <span>Làm mới insights</span>
           </button>
@@ -396,7 +396,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
                   
                   {/* Metrics */}
                   {insight.metrics && (
-                    <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-lg">
+                    <div className="grid grid-cols-3 gap-4 mb-4 p-3 bg-gray-50 rounded-[10px]">
                       <div>
                         <div className="text-xs text-gray-500">Giá trị hiện tại</div>
                         <div className="font-medium text-gray-900">{formatCurrency(insight.metrics.currentValue)}</div>
@@ -451,7 +451,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
                     <>
                       <button 
                         onClick={() => handleInsightAction(insight.id, 'apply')}
-                        className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                        className="px-3 py-1 bg-[#2dc56a] text-white text-sm rounded hover:bg-[#04d182]"
                       >
                         Áp dụng
                       </button>
@@ -473,8 +473,8 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
       {/* Insight Detail Modal */}
       {showInsightModal && selectedInsight && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            <div className="p-6 border-b border-[#e6ebf1]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center ${getTypeColor(selectedInsight.type)}`}>
@@ -536,7 +536,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
                   <h3 className="text-lg font-semibold text-gray-900 mb-4">Action Plan</h3>
                   <div className="space-y-3">
                     {selectedInsight.recommendations.map((rec, index) => (
-                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                      <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-[10px]">
                         <div className="w-6 h-6 bg-primary-100 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
                           <span className="text-xs font-medium text-primary-600">{index + 1}</span>
                         </div>
@@ -553,7 +553,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
               </div>
             </div>
 
-            <div className="p-6 border-t border-gray-200 bg-gray-50">
+            <div className="p-6 border-t border-[#e6ebf1] bg-gray-50">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-500">
                   Tạo lúc: {new Date(selectedInsight.createdAt).toLocaleString()}
@@ -564,11 +564,11 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
                       handleInsightAction(selectedInsight.id, 'dismiss')
                       setShowInsightModal(false)
                     }}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    className="px-4 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50"
                   >
                     Bỏ qua
                   </button>
-                  <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                  <button className="px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff]">
                     Tạo campaign
                   </button>
                   <button 
@@ -576,7 +576,7 @@ export default function CustomerAIInsights({ customers }: CustomerAIInsightsProp
                       handleInsightAction(selectedInsight.id, 'apply')
                       setShowInsightModal(false)
                     }}
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+                    className="px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182]"
                   >
                     Áp dụng ngay
                   </button>

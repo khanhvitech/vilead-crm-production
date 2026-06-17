@@ -1,9 +1,10 @@
-'use client'
+﻿'use client'
 
 import React, { useState, useEffect } from 'react'
 import CreateTaskModalSimple from './CreateTaskModalSimple'
 import TaskDetailModal from './TaskDetailModal'
 import CreateEventModalSimple from './CreateEventModalSimple'
+import TaskImportModal from './TaskImportModal'
 import { 
   Plus, 
   Search, 
@@ -53,7 +54,9 @@ import {
   PieChart,
   ArrowRight,
   TrendingDown,
-  MousePointer
+  MousePointer,
+  Info,
+  StickyNote
 } from 'lucide-react'
 
 // Interfaces
@@ -242,8 +245,10 @@ export default function TaskManagement() {
   
   // Modals
   const [showCreateModal, setShowCreateModal] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showCreateEventModal, setShowCreateEventModal] = useState(false)
+  const [showImportModal, setShowImportModal] = useState(false)
   const [selectedTask, setSelectedTask] = useState<Task | null>(null)
   const [selectedEventDate, setSelectedEventDate] = useState<Date | null>(null)
 
@@ -251,6 +256,7 @@ export default function TaskManagement() {
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
   const [priorityFilter, setPriorityFilter] = useState('')
+  const [relatedTypeFilter, setRelatedTypeFilter] = useState('')
   const [assigneeFilter, setAssigneeFilter] = useState('')
   const [tagFilter, setTagFilter] = useState('')
   const [dueDateFilter, setDueDateFilter] = useState('')
@@ -260,6 +266,7 @@ export default function TaskManagement() {
     preset: '' // 'today', 'tomorrow', 'this_week', 'next_week', 'this_month', 'custom'
   })
   const [selectedStatsFilter, setSelectedStatsFilter] = useState<string>('')
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([])
   const [showCreateViewModal, setShowCreateViewModal] = useState(false)
   const [customViews, setCustomViews] = useState<CustomView[]>([])
   const [activeViewType, setActiveViewType] = useState<string>('all') // 'all', 'leads', 'customers', 'team_a', 'team_b', 'other', hoặc custom view id
@@ -295,6 +302,9 @@ export default function TaskManagement() {
     createdDate: true,
     actions: true
   })
+
+  // Dropdown state
+  const [openDropdownTaskId, setOpenDropdownTaskId] = useState<string | null>(null)
   
   const [showColumnSelector, setShowColumnSelector] = useState(false)
 
@@ -696,7 +706,7 @@ export default function TaskManagement() {
       {
         id: 'cv5',
         name: 'Team A Tasks',
-        description: 'Công việc được giao cho Team A',
+        description: 'Công việc được  Team A',
         color: '#6B7280',
         filters: {
           priority: 'medium'
@@ -773,7 +783,7 @@ export default function TaskManagement() {
       case 'low':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -795,11 +805,11 @@ export default function TaskManagement() {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800 border-yellow-200'
       case 'in_progress':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'completed':
         return 'bg-green-100 text-green-800 border-green-200'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -819,13 +829,13 @@ export default function TaskManagement() {
   const getCategoryColor = (category?: string) => {
     switch (category) {
       case 'lead':
-        return 'bg-blue-100 text-blue-800 border-blue-200'
+        return 'bg-blue-100 text-blue-800 border-[#c7d9fd]'
       case 'customer':
         return 'bg-purple-100 text-purple-800 border-purple-200'
       case 'general':
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
       default:
-        return 'bg-gray-100 text-gray-800 border-gray-200'
+        return 'bg-gray-100 text-gray-800 border-[#e6ebf1]'
     }
   }
 
@@ -1158,18 +1168,25 @@ export default function TaskManagement() {
           <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Tổng quan & Báo cáo Công việc</h2>
           
           <div className="flex flex-wrap gap-2">
-          <button 
+          <button
             onClick={() => setShowCreateModal(true)}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
+            className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Tạo công việc</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm">
+          <button
+            onClick={() => setShowImportModal(true)}
+            className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
+          >
+            <Upload className="w-4 h-4" />
+            <span>Import Excel</span>
+          </button>
+          <button className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors text-sm">
             <Download className="w-4 h-4" />
             <span>Xuất Excel</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <button className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm">
             <FileText className="w-4 h-4" />
             <span>Xuất PDF</span>
           </button>
@@ -1179,9 +1196,9 @@ export default function TaskManagement() {
       {/* Detailed Priority Insights */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {/* Priority Tasks Analysis */}
-        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-lg border border-red-200 p-6">
+        <div className="bg-gradient-to-br from-red-50 to-orange-50 rounded-[10px] border border-red-200 p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-red-100 rounded-lg">
+            <div className="p-2 bg-red-100 rounded-[10px]">
               <Target className="w-5 h-5 text-red-600" />
             </div>
             <div>
@@ -1191,7 +1208,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-red-100">
+            <div className="bg-white rounded-[10px] p-4 border border-red-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Quá hạn</span>
                 <span className="text-lg font-bold text-red-600">
@@ -1204,7 +1221,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
+            <div className="bg-white rounded-[10px] p-4 border border-orange-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Hết hạn hôm nay</span>
                 <span className="text-lg font-bold text-orange-600">
@@ -1220,7 +1237,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-yellow-100">
+            <div className="bg-white rounded-[10px] p-4 border border-yellow-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Hết hạn ngày mai</span>
                 <span className="text-lg font-bold text-yellow-600">
@@ -1239,9 +1256,9 @@ export default function TaskManagement() {
         </div>
 
         {/* Customer Related Tasks */}
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-200 p-6">
+        <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-[10px] border border-[#c7d9fd] p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-blue-100 rounded-lg">
+            <div className="p-2 bg-blue-100 rounded-[10px]">
               <User className="w-5 h-5 text-blue-600" />
             </div>
             <div>
@@ -1251,7 +1268,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
+            <div className="bg-white rounded-[10px] p-4 border border-blue-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tổng CV khách hàng</span>
                 <span className="text-lg font-bold text-blue-600">
@@ -1264,7 +1281,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-purple-100">
+            <div className="bg-white rounded-[10px] p-4 border border-purple-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">KH ưu tiên cao</span>
                 <span className="text-lg font-bold text-purple-600">
@@ -1276,7 +1293,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-green-100">
+            <div className="bg-white rounded-[10px] p-4 border border-green-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Follow-up cần làm</span>
                 <span className="text-lg font-bold text-green-600">
@@ -1295,9 +1312,9 @@ export default function TaskManagement() {
         </div>
 
         {/* Lead Related Tasks */}
-        <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-lg border border-teal-200 p-6">
+        <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-[10px] border border-teal-200 p-6">
           <div className="flex items-center space-x-3 mb-4">
-            <div className="p-2 bg-teal-100 rounded-lg">
+            <div className="p-2 bg-teal-100 rounded-[10px]">
               <Users className="w-5 h-5 text-teal-600" />
             </div>
             <div>
@@ -1307,7 +1324,7 @@ export default function TaskManagement() {
           </div>
           
           <div className="space-y-3">
-            <div className="bg-white rounded-lg p-4 border border-teal-100">
+            <div className="bg-white rounded-[10px] p-4 border border-teal-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tổng CV leads</span>
                 <span className="text-lg font-bold text-teal-600">
@@ -1320,7 +1337,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-orange-100">
+            <div className="bg-white rounded-[10px] p-4 border border-orange-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Leads nóng</span>
                 <span className="text-lg font-bold text-orange-600">
@@ -1335,7 +1352,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg p-4 border border-blue-100">
+            <div className="bg-white rounded-[10px] p-4 border border-blue-100">
               <div className="flex items-center justify-between mb-2">
                 <span className="text-sm font-medium text-gray-700">Tư vấn & Demo</span>
                 <span className="text-lg font-bold text-blue-600">
@@ -1360,10 +1377,10 @@ export default function TaskManagement() {
       {/* Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Task Type Distribution Chart - Split into 2 horizontal tables */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-blue-100 rounded-lg">
+              <div className="p-2 bg-blue-100 rounded-[10px]">
                 <PieChart className="w-5 h-5 text-blue-600" />
               </div>
               <div>
@@ -1380,7 +1397,7 @@ export default function TaskManagement() {
               <h4 className="text-sm font-medium text-gray-700 mb-3">Theo loại công việc</h4>
               <div className="space-y-3">
                 {/* Lead & Customer Tasks */}
-                <div className="bg-blue-50 rounded-lg p-3">
+                <div className="bg-blue-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-blue-500 rounded-full"></div>
@@ -1393,10 +1410,10 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Order Tasks */}
-                <div className="bg-green-50 rounded-lg p-3">
+                <div className="bg-green-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
-                      <div className="w-4 h-4 bg-green-500 rounded-full"></div>
+                      <div className="w-4 h-4 bg-[#2dc56a] rounded-full"></div>
                       <span className="text-sm font-medium text-gray-700">Công việc chung</span>
                     </div>
                     <span className="text-lg font-bold text-green-600 min-w-[2rem]">
@@ -1406,7 +1423,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* General Tasks */}
-                <div className="bg-purple-50 rounded-lg p-3">
+                <div className="bg-purple-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-purple-500 rounded-full"></div>
@@ -1425,7 +1442,7 @@ export default function TaskManagement() {
               <h4 className="text-sm font-medium text-gray-700 mb-3">Theo mức độ ưu tiên</h4>
               <div className="space-y-3">
                 {/* High Priority */}
-                <div className="bg-red-50 rounded-lg p-3">
+                <div className="bg-red-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-red-500 rounded-full"></div>
@@ -1438,7 +1455,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Medium Priority */}
-                <div className="bg-yellow-50 rounded-lg p-3">
+                <div className="bg-yellow-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-yellow-500 rounded-full"></div>
@@ -1451,7 +1468,7 @@ export default function TaskManagement() {
                 </div>
 
                 {/* Low Priority */}
-                <div className="bg-gray-50 rounded-lg p-3">
+                <div className="bg-gray-50 rounded-[10px] p-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                       <div className="w-4 h-4 bg-gray-500 rounded-full"></div>
@@ -1468,10 +1485,10 @@ export default function TaskManagement() {
         </div>
 
         {/* Recent Tasks */}
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] overflow-hidden">
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-center space-x-2">
-              <div className="p-2 bg-green-100 rounded-lg">
+              <div className="p-2 bg-green-100 rounded-[10px]">
                 <Clock className="w-5 h-5 text-green-600" />
               </div>
               <div>
@@ -1703,8 +1720,9 @@ export default function TaskManagement() {
     }
     
     return (
-      <div className="h-full bg-white">
+      <div className="h-full">
         {/* Lark-style Header */}
+        <div className="rounded-[10px] border border-[#e6ebf1] mb-6">
         <div className="border-b border-gray-100 bg-white sticky top-0 z-10">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
@@ -1723,7 +1741,7 @@ export default function TaskManagement() {
                     : currentDate.toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' })
                   }
                 </h1>
-                <div className="flex items-center space-x-1 bg-gray-50 rounded-lg p-1">
+                <div className="flex items-center space-x-1 bg-gray-50 rounded-[10px] p-1">
                   <button
                     onClick={() => navigateMonth('prev')}
                     className="p-2 hover:bg-white hover:shadow-sm rounded-md transition-all duration-200"
@@ -1752,7 +1770,7 @@ export default function TaskManagement() {
               {/* Right section - Actions */}
               <div className="flex items-center space-x-3">
                 {/* View toggle */}
-                <div className="flex items-center bg-gray-50 rounded-lg p-1">
+                <div className="flex items-center bg-gray-50 rounded-[10px] p-1">
                   <button
                     onClick={() => setCalendarView('day')}
                     className={`px-3 py-2 text-sm rounded-md transition-all duration-200 font-medium ${
@@ -1791,7 +1809,7 @@ export default function TaskManagement() {
                     setSelectedEventDate(new Date())
                     setShowCreateEventModal(true)
                   }}
-                  className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium shadow-sm"
+                  className="flex items-center space-x-2 px-4 py-2 bg-[#3e79f7] text-white rounded-[10px] hover:bg-[#699dff] transition-all duration-200 font-medium shadow-sm"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Tạo sự kiện</span>
@@ -1799,6 +1817,7 @@ export default function TaskManagement() {
               </div>
             </div>
           </div>
+        </div>
         </div>
 
         {calendarView === 'day' ? (
@@ -1849,7 +1868,7 @@ export default function TaskManagement() {
                               setSelectedTask(task)
                               setShowDetailModal(true)
                             }}
-                            className={`p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm ${
+                            className={`p-3 rounded-[10px] border-l-4 cursor-pointer transition-all hover:shadow-sm ${
                               task.priority === 'high' 
                                 ? 'bg-red-50 border-red-400 text-red-700 hover:bg-red-100' 
                                 : task.priority === 'medium'
@@ -1885,7 +1904,7 @@ export default function TaskManagement() {
                         {hourEvents.map(event => (
                           <div
                             key={`event-${event.id}`}
-                            className="p-3 rounded-lg border-l-4 cursor-pointer transition-all hover:shadow-sm"
+                            className="p-3 rounded-[10px] border-l-4 cursor-pointer transition-all hover:shadow-sm"
                             style={{ 
                               backgroundColor: event.color + '15', 
                               borderLeftColor: event.color,
@@ -2032,7 +2051,8 @@ export default function TaskManagement() {
         ) : calendarView === 'month' ? (
           <div className="flex-1">
             {/* Calendar Grid */}
-            <div className="bg-white">
+            <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
+            <div>
               {/* Weekday headers - Lark style */}
               <div className="grid grid-cols-7 border-b border-gray-100">
                 {['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'].map((day, index) => (
@@ -2070,7 +2090,7 @@ export default function TaskManagement() {
                         <div className="flex items-center space-x-2">
                           <div className={`flex items-center justify-center w-7 h-7 rounded-full text-sm font-medium transition-colors ${
                             dayIsToday
-                              ? 'bg-blue-600 text-white'
+                              ? 'bg-[#3e79f7] text-white'
                               : !dayIsCurrentMonth
                               ? 'text-gray-400'
                               : holiday
@@ -2181,8 +2201,9 @@ export default function TaskManagement() {
                       </div>
                     </div>
                   )
-                })}
+                })}  
               </div>
+            </div>
             </div>
           </div>
         ) : (
@@ -2196,7 +2217,7 @@ export default function TaskManagement() {
         )}
 
         {/* Bottom toolbar - Lark style */}
-        <div className="border-t border-gray-100 bg-white px-6 py-4">
+        <div className="border-t border-gray-100 px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Left side - Quick templates */}
             <div className="flex items-center space-x-2">
@@ -2205,7 +2226,7 @@ export default function TaskManagement() {
                 <button
                   key={template.id}
                   onClick={() => handleQuickEvent(template, new Date())}
-                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-2 text-sm border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50 transition-colors"
                   style={{ borderLeftColor: template.color, borderLeftWidth: '3px' }}
                 >
                   {template.type === 'meeting' && <Users className="w-4 h-4" />}
@@ -2223,7 +2244,7 @@ export default function TaskManagement() {
                   type="checkbox"
                   checked={showLunar}
                   onChange={(e) => setShowLunar(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <Moon className="w-4 h-4" />
                 <span>Âm lịch</span>
@@ -2233,7 +2254,7 @@ export default function TaskManagement() {
                   type="checkbox"
                   checked={showHolidays}
                   onChange={(e) => setShowHolidays(e.target.checked)}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
                 />
                 <TreePine className="w-4 h-4" />
                 <span>Lễ tết</span>
@@ -2248,528 +2269,413 @@ export default function TaskManagement() {
   const renderTasks = () => (
     <div className="space-y-4">
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <div 
-          className={`p-4 border border-blue-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'total' 
-              ? 'bg-gradient-to-br from-blue-100 to-blue-50 border-blue-300 transform scale-105' 
-              : 'bg-gradient-to-br from-blue-50 to-white hover:from-blue-100 hover:to-blue-50 hover:border-blue-200'
+              ? 'bg-gradient-to-br from-blue-700 to-blue-500 transform scale-105 ring-4 ring-blue-300' 
+              : 'bg-gradient-to-br from-blue-600 to-blue-400'
           }`}
           onClick={() => handleStatsCardClick('total')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Tổng công việc</div>
-              <div className="text-2xl font-bold text-blue-600">{tasks.length}</div>
-              <div className="text-xs text-blue-500 mt-1">
-                {tasks.length > 15 ? '+' : ''}
-                {Math.abs(tasks.length - 15)} so với tháng trước
-              </div>
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Tổng công việc</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{tasks.length}</p>
+            <div className="mt-3">
+              <p className="text-sm text-white/90">T.trước: 15</p>
             </div>
-            <FileText className="w-8 h-8 text-blue-600" />
           </div>
         </div>
 
         <div 
-          className={`p-4 border border-gray-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'pending' 
-              ? 'bg-gradient-to-br from-gray-100 to-gray-50 border-gray-300 transform scale-105' 
-              : 'bg-gradient-to-br from-gray-50 to-white hover:from-gray-100 hover:to-gray-50 hover:border-gray-200'
+              ? 'bg-gradient-to-br from-gray-700 to-gray-500 transform scale-105 ring-4 ring-gray-300' 
+              : 'bg-gradient-to-br from-gray-600 to-gray-400'
           }`}
           onClick={() => handleStatsCardClick('pending')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Chưa làm</div>
-              <div className="text-2xl font-bold text-gray-600">{tasks.filter(t => t.status === 'pending').length}</div>
-              <div className="text-xs text-gray-500 mt-1">
-                {tasks.filter(t => t.status === 'pending').length > 3 ? '+' : ''}
-                {Math.abs(tasks.filter(t => t.status === 'pending').length - 3)} so với tuần trước
-              </div>
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Chưa làm</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{tasks.filter(t => t.status === 'pending').length}</p>
+            <div className="mt-3">
+              <p className="text-sm text-white/90">T.trước: 3</p>
             </div>
-            <Circle className="w-8 h-8 text-gray-600" />
           </div>
         </div>
 
         <div 
-          className={`p-4 border border-yellow-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'in_progress' 
-              ? 'bg-gradient-to-br from-yellow-100 to-yellow-50 border-yellow-300 transform scale-105' 
-              : 'bg-gradient-to-br from-yellow-50 to-white hover:from-yellow-100 hover:to-yellow-50 hover:border-yellow-200'
+              ? 'bg-gradient-to-br from-yellow-700 to-yellow-500 transform scale-105 ring-4 ring-yellow-300' 
+              : 'bg-gradient-to-br from-yellow-600 to-yellow-400'
           }`}
           onClick={() => handleStatsCardClick('in_progress')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Đang làm</div>
-              <div className="text-2xl font-bold text-yellow-600">{tasks.filter(t => t.status === 'in_progress').length}</div>
-              <div className="text-xs text-yellow-500 mt-1">
-                {tasks.filter(t => t.status === 'in_progress').length > 5 ? '+' : ''}
-                {Math.abs(tasks.filter(t => t.status === 'in_progress').length - 5)} so với tuần trước
-              </div>
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Đang làm</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{tasks.filter(t => t.status === 'in_progress').length}</p>
+            <div className="mt-3">
+              <p className="text-sm text-white/90">T.trước: 5</p>
             </div>
-            <Play className="w-8 h-8 text-yellow-600" />
           </div>
         </div>
 
         <div 
-          className={`p-4 border border-green-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'completed' 
-              ? 'bg-gradient-to-br from-green-100 to-green-50 border-green-300 transform scale-105' 
-              : 'bg-gradient-to-br from-green-50 to-white hover:from-green-100 hover:to-green-50 hover:border-green-200'
+              ? 'bg-gradient-to-br from-green-700 to-green-500 transform scale-105 ring-4 ring-green-300' 
+              : 'bg-gradient-to-br from-green-600 to-green-400'
           }`}
           onClick={() => handleStatsCardClick('completed')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Hoàn tất</div>
-              <div className="text-2xl font-bold text-green-600">{tasks.filter(t => t.status === 'completed').length}</div>
-              <div className="text-xs text-green-500 mt-1">
-                +{Math.max(0, tasks.filter(t => t.status === 'completed').length - 8)} so với tuần trước
-              </div>
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Hoàn tất</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{tasks.filter(t => t.status === 'completed').length}</p>
+            <div className="mt-3">
+              <p className="text-sm text-white/90">T.trước: 8</p>
             </div>
-            <CheckCircle className="w-8 h-8 text-green-600" />
           </div>
         </div>
 
         <div 
-          className={`p-4 border border-red-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'overdue' 
-              ? 'bg-gradient-to-br from-red-100 to-red-50 border-red-300 transform scale-105' 
-              : 'bg-gradient-to-br from-red-50 to-white hover:from-red-100 hover:to-red-50 hover:border-red-200'
+              ? 'bg-gradient-to-br from-red-700 to-red-500 transform scale-105 ring-4 ring-red-300' 
+              : 'bg-gradient-to-br from-red-600 to-red-400'
           }`}
           onClick={() => handleStatsCardClick('overdue')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Quá hạn</div>
-              <div className="text-2xl font-bold text-red-600">{tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length}</div>
-              <div className="text-xs text-red-500 mt-1">
-                {tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length > 2 ? '+' : '-'}
-                {Math.abs(tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length - 2)} so với tuần trước
-              </div>
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
+          </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Quá hạn</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{tasks.filter(t => new Date(t.dueDate) < new Date() && t.status !== 'completed').length}</p>
+            <div className="mt-3">
+              <p className="text-sm text-white/90">T.trước: 2</p>
             </div>
-            <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
         </div>
 
         <div 
-          className={`p-4 border border-orange-100 rounded-lg cursor-pointer transition-all duration-200 ${
+          className={`flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl ${
             selectedStatsFilter === 'urgent_priority' 
-              ? 'bg-gradient-to-br from-orange-100 to-orange-50 border-orange-300 transform scale-105' 
-              : 'bg-gradient-to-br from-orange-50 to-white hover:from-orange-100 hover:to-orange-50 hover:border-orange-200'
+              ? 'bg-gradient-to-br from-orange-700 to-orange-500 transform scale-105 ring-4 ring-orange-300' 
+              : 'bg-gradient-to-br from-orange-600 to-orange-400'
           }`}
           onClick={() => handleStatsCardClick('urgent_priority')}
         >
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="text-sm text-gray-600">Cần ưu tiên</div>
-              <div className="text-2xl font-bold text-orange-600">
-                {tasks.filter(t => 
-                  (t.priority === 'high') || 
-                  (new Date(t.dueDate) <= new Date(Date.now() + 24*60*60*1000) && t.status !== 'completed')
-                ).length}
-              </div>
-              <div className="text-xs text-orange-500 mt-1">
-                Khẩn cấp + hết hạn sớm
-              </div>
-            </div>
-            <Zap className="w-8 h-8 text-orange-600" />
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
+          <div>
+            <p className="text-base font-semibold text-white mb-2">Cần ưu tiên</p>
+            <p className="text-4xl font-extrabold text-white mb-1">
+              {tasks.filter(t => 
+                (t.priority === 'high') || 
+                (new Date(t.dueDate) <= new Date(Date.now() + 24*60*60*1000) && t.status !== 'completed')
+              ).length}
+            </p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-white/90">Khẩn cấp + hết hạn sớm</p>
+            </div>
+          </div>
+        </div>
         </div>
       </div>
 
       {/* Header and filters */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-gray-900">Danh sách Công việc</h2>
-          
-          {/* View Toggle */}
-          <div className="flex items-center bg-gray-100 rounded-lg p-1">
-            <button
-              onClick={() => setTaskView('table')}
-              className={`flex items-center space-x-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
-                taskView === 'table' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <List className="w-4 h-4" />
-              <span>Bảng</span>
-            </button>
-            <button
-              onClick={() => setTaskView('kanban')}
-              className={`flex items-center space-x-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
-                taskView === 'kanban' 
-                  ? 'bg-white shadow-sm text-blue-600' 
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              <Grid3X3 className="w-4 h-4" />
-              <span>Kanban</span>
-            </button>
-          </div>
-        </div>
-        
-        <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
-          {/* Search */}
-          <div className="relative flex-1 lg:w-80">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Tìm kiếm công việc, mô tả, lead..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-            />
-          </div>
-          
-          {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2">
-            <select 
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Tất cả trạng thái</option>
-              <option value="pending">Chưa làm</option>
-              <option value="in_progress">Đang làm</option>
-              <option value="completed">Hoàn tất</option>
-            </select>
-            
-            <select 
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Tất cả ưu tiên</option>
-              <option value="high">Cao</option>
-              <option value="medium">Trung bình</option>
-              <option value="low">Thấp</option>
-            </select>
-            
-            <select 
-              value={assigneeFilter}
-              onChange={(e) => setAssigneeFilter(e.target.value)}
-              className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-            >
-              <option value="">Tất cả nhân viên</option>
-              {employees.map(emp => (
-                <option key={emp.id} value={emp.id}>{emp.name}</option>
-              ))}
-            </select>
-            
-            {/* Date Range Filter */}
-            <div className="flex items-center gap-2 border border-gray-300 rounded px-3 py-2 bg-white">
-              <Calendar className="w-4 h-4 text-gray-400" />
-              <select 
-                value={dateRangeFilter.preset}
-                onChange={(e) => setDateRangeFilter(prev => ({
-                  ...prev,
-                  preset: e.target.value,
-                  startDate: e.target.value === 'custom' ? prev.startDate : '',
-                  endDate: e.target.value === 'custom' ? prev.endDate : ''
-                }))}
-                className="text-sm bg-transparent focus:outline-none min-w-[120px]"
+      <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            {/* View Toggle */}
+            <div className="flex items-center bg-gray-100 rounded-[10px] p-1">
+              <button
+                onClick={() => setTaskView('table')}
+                className={`flex items-center space-x-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  taskView === 'table' 
+                    ? 'bg-white shadow-sm text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
               >
-                <option value="">Tất cả ngày</option>
-                <option value="today">Hôm nay</option>
-                <option value="tomorrow">Ngày mai</option>
-                <option value="this_week">Tuần này</option>
-                <option value="next_week">Tuần sau</option>
-                <option value="this_month">Tháng này</option>
-                <option value="custom">Tùy chọn</option>
-              </select>
+                <List className="w-4 h-4" />
+                <span>Bảng</span>
+              </button>
+              <button
+                onClick={() => setTaskView('kanban')}
+                className={`flex items-center space-x-1 px-3 py-1.5 text-sm rounded-md transition-colors ${
+                  taskView === 'kanban' 
+                    ? 'bg-white shadow-sm text-blue-600' 
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                <Grid3X3 className="w-4 h-4" />
+                <span>Kanban</span>
+              </button>
+            </div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row gap-3 lg:items-center">
+            {/* Search */}
+            <div className="relative flex-1 lg:w-80">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Tìm kiếm công việc..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7] text-sm"
+              />
             </div>
             
-            {/* Custom Date Range Inputs */}
-            {dateRangeFilter.preset === 'custom' && (
-              <>
-                <input
-                  type="date"
-                  value={dateRangeFilter.startDate}
-                  onChange={(e) => setDateRangeFilter(prev => ({
-                    ...prev,
-                    startDate: e.target.value
-                  }))}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="Từ ngày"
-                />
-                <input
-                  type="date"
-                  value={dateRangeFilter.endDate}
-                  onChange={(e) => setDateRangeFilter(prev => ({
-                    ...prev,
-                    endDate: e.target.value
-                  }))}
-                  className="border border-gray-300 rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-                  placeholder="Đến ngày"
-                />
-              </>
-            )}
-            
-            <button 
-              onClick={() => setShowCreateModal(true)}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium flex items-center space-x-2 text-sm"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Tạo mới</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Quick View Selection */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <h3 className="text-sm font-medium text-gray-900 mb-3">Chọn chế độ xem</h3>
-        <div className="flex flex-wrap gap-2">
-          {/* Nút Tất cả */}
-          <button 
-            onClick={() => {
-              setAssigneeFilter('')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
-              setSelectedStatsFilter('')
-              setActiveViewType('all')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'all' 
-                ? 'bg-blue-100 border-blue-300 text-blue-800' 
-                : 'border-gray-300 hover:bg-blue-50 hover:border-blue-300'
-            }`}
-            style={{ borderLeftColor: '#1E40AF', borderLeftWidth: '3px' }}
-          >
-            <Grid3X3 className="w-4 h-4" />
-            <span>Tất cả</span>
-          </button>
-
-          <button 
-            onClick={() => {
-              setAssigneeFilter('')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
-              setSelectedStatsFilter('leads')
-              setActiveViewType('leads')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'leads' 
-                ? 'bg-blue-100 border-blue-300 text-blue-800' 
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            style={{ borderLeftColor: '#3B82F6', borderLeftWidth: '3px' }}
-          >
-            <Users className="w-4 h-4" />
-            <span>Công việc Leads</span>
-          </button>
-          
-          <button 
-            onClick={() => {
-              setAssigneeFilter('')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
-              setSelectedStatsFilter('customers')
-              setActiveViewType('customers')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'customers' 
-                ? 'bg-purple-100 border-purple-300 text-purple-800' 
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            style={{ borderLeftColor: '#8B5CF6', borderLeftWidth: '3px' }}
-          >
-            <User className="w-4 h-4" />
-            <span>Công việc Khách hàng</span>
-          </button>
-          
-          <button 
-            onClick={() => {
-              setAssigneeFilter('1')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setSelectedStatsFilter('')
-              setActiveViewType('team_a')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'team_a' 
-                ? 'bg-green-100 border-green-300 text-green-800' 
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            style={{ borderLeftColor: '#10B981', borderLeftWidth: '3px' }}
-          >
-            <Building className="w-4 h-4" />
-            <span>Của Team A</span>
-          </button>
-          
-          <button 
-            onClick={() => {
-              setAssigneeFilter('2')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setSelectedStatsFilter('')
-              setActiveViewType('team_b')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'team_b' 
-                ? 'bg-yellow-100 border-yellow-300 text-yellow-800' 
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            style={{ borderLeftColor: '#F59E0B', borderLeftWidth: '3px' }}
-          >
-            <Building className="w-4 h-4" />
-            <span>Của Team B</span>
-          </button>
-          
-          <button 
-            onClick={() => {
-              setAssigneeFilter('')
-              setStatusFilter('')
-              setPriorityFilter('')
-              setTagFilter('')
-              setDueDateFilter('')
-              setDateRangeFilter({ preset: '', startDate: '', endDate: '' })
-              setSelectedStatsFilter('other')
-              setActiveViewType('other')
-            }}
-            className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors ${
-              activeViewType === 'other' 
-                ? 'bg-gray-100 border-gray-400 text-gray-800' 
-                : 'border-gray-300 hover:bg-gray-50'
-            }`}
-            style={{ borderLeftColor: '#6B7280', borderLeftWidth: '3px' }}
-          >
-            <MoreVertical className="w-4 h-4" />
-            <span>Khác</span>
-          </button>
-
-          {/* Custom Views - Hiển thị các chế độ xem đã tạo */}
-          {customViews.map((view) => {
-            const isActive = activeViewType === view.id
-            const bgColor = isActive ? `${view.color}20` : ''
-            const borderColor = isActive ? view.color : '#d1d5db'
-            const textColor = isActive ? view.color : ''
-            
-            return (
-              <button 
-                key={view.id}
-                onClick={() => {
-                  // Apply custom view filters
-                  setStatusFilter(view.filters.status || '')
-                  setPriorityFilter(view.filters.priority || '')
-                  setAssigneeFilter(view.filters.assignee || '')
-                  setTagFilter('')
-                  setDueDateFilter('')
-                  setSelectedStatsFilter(view.filters.relatedType || '')
-                  setActiveViewType(view.id)
-                }}
-                className={`flex items-center space-x-2 px-3 py-2 text-sm border rounded-md transition-colors group ${
-                  isActive ? 'font-medium' : 'hover:bg-gray-50'
-                }`}
-                style={{ 
-                  borderLeftColor: view.color, 
-                  borderLeftWidth: '3px',
-                  backgroundColor: bgColor,
-                  borderColor: borderColor,
-                  color: textColor
-                }}
-                title={view.description}
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-2">
+              <select 
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
               >
-                <Eye className="w-4 h-4" />
-                <span className="flex-1 text-left">{view.name}</span>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    setCustomViews(views => views.filter(v => v.id !== view.id))
-                    if (activeViewType === view.id) {
-                      setActiveViewType('all')
-                    }
-                  }}
-                  className="opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 transition-all"
-                  title="Xóa chế độ xem"
+                <option value="">Tất cả trạng thái</option>
+                <option value="pending">Chưa làm</option>
+                <option value="in_progress">Đang làm</option>
+                <option value="completed">Hoàn tất</option>
+              </select>
+              
+              <select 
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
+              >
+                <option value="">Tất cả ưu tiên</option>
+                <option value="high">Cao</option>
+                <option value="medium">Trung bình</option>
+                <option value="low">Thấp</option>
+              </select>
+              
+              <select 
+                value={relatedTypeFilter}
+                onChange={(e) => setRelatedTypeFilter(e.target.value)}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
+              >
+                <option value="">Tất cả phân loại</option>
+                <option value="lead">Leads</option>
+                <option value="customer">Khách hàng</option>
+                <option value="general">Công việc chung</option>
+              </select>
+              
+              <select 
+                value={assigneeFilter}
+                onChange={(e) => setAssigneeFilter(e.target.value)}
+                className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
+              >
+                <option value="">Tất cả nhân viên</option>
+                {employees.map(emp => (
+                  <option key={emp.id} value={emp.id}>{emp.name}</option>
+                ))}
+              </select>
+              
+              {/* Date Range Filter */}
+              <div className="flex items-center gap-2 border border-[#e6ebf1] rounded px-3 py-2 bg-white">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <select 
+                  value={dateRangeFilter.preset}
+                  onChange={(e) => setDateRangeFilter(prev => ({
+                    ...prev,
+                    preset: e.target.value,
+                    startDate: e.target.value === 'custom' ? prev.startDate : '',
+                    endDate: e.target.value === 'custom' ? prev.endDate : ''
+                  }))}
+                  className="text-sm bg-transparent focus:outline-none min-w-[120px]"
                 >
-                  <Trash2 className="w-3 h-3" />
-                </button>
+                  <option value="">Tất cả ngày</option>
+                  <option value="today">Hôm nay</option>
+                  <option value="tomorrow">Ngày mai</option>
+                  <option value="this_week">Tuần này</option>
+                  <option value="next_week">Tuần sau</option>
+                  <option value="this_month">Tháng này</option>
+                  <option value="custom">Tùy chọn</option>
+                </select>
+              </div>
+              
+              {/* Custom Date Range Inputs */}
+              {dateRangeFilter.preset === 'custom' && (
+                <>
+                  <input
+                    type="date"
+                    value={dateRangeFilter.startDate}
+                    onChange={(e) => setDateRangeFilter(prev => ({
+                      ...prev,
+                      startDate: e.target.value
+                    }))}
+                    className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
+                    placeholder="Từ ngày"
+                  />
+                  <input
+                    type="date"
+                    value={dateRangeFilter.endDate}
+                    onChange={(e) => setDateRangeFilter(prev => ({
+                      ...prev,
+                      endDate: e.target.value
+                    }))}
+                    className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#3e79f7]"
+                    placeholder="Đến ngày"
+                  />
+                </>
+              )}
+              
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="bg-[#3e79f7] text-white px-4 py-2 rounded-[10px] hover:bg-[#699dff] transition-colors font-medium flex items-center space-x-2 text-sm"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Tạo công việc mới</span>
               </button>
-            )
-          })}
-
-          {/* Nút Tạo chế độ xem */}
-          <button 
-            onClick={() => setShowCreateViewModal(true)}
-            className="flex items-center space-x-2 px-3 py-2 text-sm border border-dashed border-gray-400 rounded-md hover:bg-green-50 hover:border-green-400 transition-colors text-gray-600 hover:text-green-700"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Tạo chế độ xem</span>
-          </button>
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] text-gray-700 rounded-[10px] hover:bg-gray-50 transition-colors text-sm"
+              >
+                <Upload className="w-4 h-4" />
+                <span>Import Excel</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* Tasks Content - Table or Kanban */}
       {taskView === 'table' ? (
-        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-6">
+          {/* Selection Bar */}
+          {selectedTasks.length > 0 && (
+            <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4 mb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm font-medium text-blue-900">
+                    Đã chọn {selectedTasks.length} công việc
+                  </span>
+                  <button 
+                    onClick={() => setSelectedTasks([])}
+                    className="text-xs text-blue-600 hover:text-blue-800 underline"
+                  >
+                    Bỏ chọn tất cả
+                  </button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <button 
+                    onClick={() => {
+                      setTasks(tasks.map(task => 
+                        selectedTasks.includes(task.id) 
+                          ? { ...task, status: 'completed' }
+                          : task
+                      ))
+                      setSelectedTasks([])
+                    }}
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#2dc56a] text-white rounded-[10px] hover:bg-[#04d182] transition-colors"
+                  >
+                    <CheckCircle className="w-4 h-4" />
+                    <span>Đánh dấu đã làm</span>
+                  </button>
+                  <button 
+                    onClick={() => {
+                      if (confirm(`Bạn có chắc chắn muốn xóa ${selectedTasks.length} công việc đã chọn?`)) {
+                        setTasks(tasks.filter(task => !selectedTasks.includes(task.id)))
+                        setSelectedTasks([])
+                      }
+                    }}
+                    className="flex items-center space-x-2 px-4 py-2 bg-[#ff6b72] text-white rounded-[10px] hover:bg-[#d9505c] transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    <span>Xóa công việc</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Display count */}
+          <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
+            <span>Hiển thị {displayTasks.length} trong tổng {tasks.length} công việc</span>
+          </div>
+
+          <div className="overflow-x-auto rounded-[10px] border border-[#e6ebf1]">
+            <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] focus:ring-2"
+                    checked={selectedTasks.length === displayTasks.length && displayTasks.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedTasks(displayTasks.map(task => task.id))
+                      } else {
+                        setSelectedTasks([])
+                      }
+                    }}
+                  />
+                </th>
                 {visibleColumns.task && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Công việc
                   </th>
                 )}
                 {visibleColumns.category && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Phân loại
                   </th>
                 )}
                 {visibleColumns.related && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Liên quan
                   </th>
                 )}
                 {visibleColumns.assignee && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Người phụ trách
                   </th>
                 )}
                 {visibleColumns.dueDate && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Thời hạn
                   </th>
                 )}
                 {visibleColumns.priority && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Ưu tiên
                   </th>
                 )}
                 {visibleColumns.status && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Trạng thái
                   </th>
                 )}
                 {visibleColumns.tags && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Tags
                   </th>
                 )}
                 {visibleColumns.createdDate && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Ngày tạo
                   </th>
                 )}
                 {visibleColumns.actions && (
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider whitespace-nowrap">
                     Thao tác
                   </th>
                 )}
@@ -2782,6 +2688,20 @@ export default function TaskManagement() {
                 
                 return (
                   <tr key={task.id} className={`hover:bg-gray-50 ${isOverdue ? 'bg-red-50' : ''}`}>
+                    <td className="px-4 py-4">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 text-blue-600 bg-gray-100 border-[#e6ebf1] rounded focus:ring-[#3e79f7] focus:ring-2"
+                        checked={selectedTasks.includes(task.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedTasks([...selectedTasks, task.id])
+                          } else {
+                            setSelectedTasks(selectedTasks.filter(id => id !== task.id))
+                          }
+                        }}
+                      />
+                    </td>
                     {visibleColumns.task && (
                       <td className="px-4 py-4">
                         <div>
@@ -2861,7 +2781,7 @@ export default function TaskManagement() {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-1">
                           {task.tags.map(tag => (
-                            <span key={tag} className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 border border-blue-200">
+                            <span key={tag} className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800 border border-[#c7d9fd]">
                               {tag}
                             </span>
                           ))}
@@ -2883,20 +2803,71 @@ export default function TaskManagement() {
                     
                     {visibleColumns.actions && (
                       <td className="px-4 py-4 whitespace-nowrap">
-                        <div className="flex items-center space-x-1">
+                        <div className="relative flex justify-center">
                           <button 
-                            onClick={() => {
-                              setSelectedTask(task)
-                              setShowDetailModal(true)
-                            }}
-                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors"
-                            title="Xem chi tiết"
+                            onClick={() => setOpenDropdownTaskId(openDropdownTaskId === task.id ? null : task.id)}
+                            className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
                           >
-                            <Eye className="w-4 h-4" />
+                            <Settings className="w-4 h-4" />
                           </button>
-                          <button className="p-1 text-gray-400 hover:text-gray-600 transition-colors">
-                            <MoreVertical className="w-4 h-4" />
-                          </button>
+                          
+                          {openDropdownTaskId === task.id && (
+                            <>
+                              <div 
+                                className="fixed inset-0 z-[999]" 
+                                onClick={() => setOpenDropdownTaskId(null)}
+                              />
+                              <div className="absolute right-0 top-full mt-1 w-56 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] z-[1000] py-2 text-left">
+                                {/* Thông tin Section */}
+                                <div className="px-3 py-1.5">
+                                  <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Thông tin</span>
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    setSelectedTask(task)
+                                    setShowDetailModal(true)
+                                    setOpenDropdownTaskId(null)
+                                  }}
+                                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  <Eye className="w-4 h-4 text-gray-400" />
+                                  <span>Xem chi tiết</span>
+                                </button>
+                                <button 
+                                  onClick={() => {
+                                    setSelectedTask(task)
+                                    setShowEditModal(true)
+                                    setOpenDropdownTaskId(null)
+                                  }}
+                                  className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                                >
+                                  <svg className="w-4 h-4 text-gray-400" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="currentColor" />
+                                  </svg>
+                                  <span>Chỉnh sửa</span>
+                                </button>
+
+                                {/* Thao tác nguy hiểm Section */}
+                                <div className="border-t border-gray-100 mt-1 pt-1">
+                                  <div className="px-3 py-1.5">
+                                    <span className="text-[11px] font-semibold text-red-400 uppercase tracking-wider">Thao tác nguy hiểm</span>
+                                  </div>
+                                  <button 
+                                    onClick={() => {
+                                      if (confirm('Bạn có chắc chắn muốn xóa công việc này?')) {
+                                        setTasks(tasks.filter(t => t.id !== task.id))
+                                        setOpenDropdownTaskId(null)
+                                      }
+                                    }}
+                                    className="w-full flex items-center gap-3 px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    <span>Xóa công việc</span>
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          )}
                         </div>
                       </td>
                     )}
@@ -2906,14 +2877,14 @@ export default function TaskManagement() {
             </tbody>
           </table>
         </div>
-      </div>
+        </div>
       ) : (
         /* Kanban Board */
-        <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <div className="bg-white rounded-[10px] border border-[#e6ebf1] p-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {/* Chưa làm Column */}
             <div 
-              className={`bg-slate-50 rounded-lg p-4 transition-colors ${
+              className={`bg-slate-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'pending' ? 'bg-slate-100 ring-2 ring-gray-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'pending')}
@@ -2939,7 +2910,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-gray-300'
                       } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
@@ -3004,7 +2975,7 @@ export default function TaskManagement() {
 
             {/* Đang làm Column */}
             <div 
-              className={`bg-blue-50 rounded-lg p-4 transition-colors ${
+              className={`bg-blue-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'in_progress' ? 'bg-blue-100 ring-2 ring-blue-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'in_progress')}
@@ -3016,7 +2987,7 @@ export default function TaskManagement() {
                   <div className="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
                   Đang làm
                 </h3>
-                <span className="bg-blue-200 text-blue-700 text-xs px-2 py-1 rounded-full">
+                <span className="bg-blue-200 text-[#3e79f7] text-xs px-2 py-1 rounded-full">
                   {displayTasks.filter(task => task.status === 'in_progress').length}
                 </span>
               </div>
@@ -3030,7 +3001,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 hover:shadow-md transition-all cursor-move ${
                         isOverdue ? 'border-l-red-500 bg-red-50' : 'border-l-blue-300'
                       } ${draggedTask?.id === task.id ? 'opacity-50 transform scale-95' : ''}`}
                       onClick={() => {
@@ -3061,7 +3032,7 @@ export default function TaskManagement() {
                         {assignee && (
                           <div className="flex items-center space-x-2">
                             <div className="w-6 h-6 bg-blue-300 rounded-full flex items-center justify-center">
-                              <span className="text-xs text-blue-700">{assignee.name.charAt(0)}</span>
+                              <span className="text-xs text-[#3e79f7]">{assignee.name.charAt(0)}</span>
                             </div>
                             <span className="text-xs text-gray-600">{assignee.name}</span>
                           </div>
@@ -3095,7 +3066,7 @@ export default function TaskManagement() {
 
             {/* Hoàn tất Column */}
             <div 
-              className={`bg-green-50 rounded-lg p-4 transition-colors ${
+              className={`bg-green-50 rounded-[10px] p-4 transition-colors ${
                 dragOverColumn === 'completed' ? 'bg-green-100 ring-2 ring-green-400 ring-dashed' : ''
               }`}
               onDragOver={(e) => handleDragOver(e, 'completed')}
@@ -3104,7 +3075,7 @@ export default function TaskManagement() {
             >
               <div className="flex items-center justify-between mb-4">
                 <h3 className="font-semibold text-gray-900 flex items-center">
-                  <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                  <div className="w-3 h-3 bg-[#2dc56a] rounded-full mr-2"></div>
                   Hoàn tất
                 </h3>
                 <span className="bg-green-200 text-green-700 text-xs px-2 py-1 rounded-full">
@@ -3120,7 +3091,7 @@ export default function TaskManagement() {
                       key={task.id} 
                       draggable
                       onDragStart={(e) => handleDragStart(e, task)}
-                      className={`bg-white p-3 rounded-lg shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-all cursor-move opacity-90 ${
+                      className={`bg-white p-3 rounded-[10px] shadow-sm border-l-4 border-l-green-300 hover:shadow-md transition-all cursor-move opacity-90 ${
                         draggedTask?.id === task.id ? 'opacity-30 transform scale-95' : ''
                       }`}
                       onClick={() => {
@@ -3187,34 +3158,43 @@ export default function TaskManagement() {
   )
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Quản lý Công việc</h1>
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Quản lý Công việc</h1>
+          <p className="text-gray-600">Quản lý toàn bộ công việc và lên lịch</p>
+        </div>
       </div>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto">
+      <div className="border-b border-[#e6ebf1]">
+        <nav className="flex space-x-8 px-6">
           <button
             onClick={() => setActiveTab('tasks')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+            className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'tasks'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
             }`}
           >
-            Danh sách
+            <span className={activeTab === 'tasks' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
+              <List className="w-4 h-4" />
+            </span>
+            <span>Danh sách</span>
           </button>
           <button
             onClick={() => setActiveTab('calendar')}
-            className={`py-2 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
+            className={`group inline-flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm ${
               activeTab === 'calendar'
                 ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-[#e6ebf1]'
             }`}
           >
-            Lịch
+            <span className={activeTab === 'calendar' ? 'text-blue-600' : 'text-gray-400 group-hover:text-gray-500'}>
+              <Calendar className="w-4 h-4" />
+            </span>
+            <span>Lịch</span>
           </button>
         </nav>
       </div>
@@ -3227,8 +3207,8 @@ export default function TaskManagement() {
       {/* Create View Modal */}
       {showCreateViewModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="bg-white rounded-[10px] shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between p-4 border-b border-[#e6ebf1]">
               <h3 className="text-lg font-semibold text-gray-900">Tạo chế độ xem mới</h3>
               <button
                 onClick={() => setShowCreateViewModal(false)}
@@ -3248,7 +3228,7 @@ export default function TaskManagement() {
                   value={newViewForm.name}
                   onChange={(e) => setNewViewForm(prev => ({ ...prev, name: e.target.value }))}
                   placeholder="Ví dụ: Công việc urgent của tôi"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
 
@@ -3261,7 +3241,7 @@ export default function TaskManagement() {
                   value={newViewForm.description}
                   onChange={(e) => setNewViewForm(prev => ({ ...prev, description: e.target.value }))}
                   placeholder="Mô tả ngắn gọn về chế độ xem này"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-md focus:outline-none focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
 
@@ -3278,7 +3258,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, status: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="pending">Chờ xử lý</option>
@@ -3295,7 +3275,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, priority: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="high">Cao</option>
@@ -3312,7 +3292,7 @@ export default function TaskManagement() {
                         ...prev, 
                         filters: { ...prev.filters, relatedType: e.target.value }
                       }))}
-                      className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded"
+                      className="flex-1 px-2 py-1 text-sm border border-[#e6ebf1] rounded"
                     >
                       <option value="">Tất cả</option>
                       <option value="leads">Leads</option>
@@ -3342,7 +3322,7 @@ export default function TaskManagement() {
               </div>
             </div>
 
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
+            <div className="flex items-center justify-end space-x-3 p-4 border-t border-[#e6ebf1]">
               <button
                 onClick={() => {
                   setShowCreateViewModal(false)
@@ -3404,7 +3384,7 @@ export default function TaskManagement() {
                   }
                 }}
                 disabled={!newViewForm.name.trim()}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm bg-[#3e79f7] text-white rounded-md hover:bg-[#699dff] transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
               >
                 Tạo chế độ xem
               </button>
@@ -3418,6 +3398,29 @@ export default function TaskManagement() {
         onClose={() => setShowCreateModal(false)}
         onSave={handleCreateTask}
         employees={employees}
+      />
+
+      <CreateTaskModalSimple
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false)
+          setSelectedTask(null)
+        }}
+        onSave={(taskData) => {
+          if (selectedTask) {
+            const updatedTask: Task = {
+              ...selectedTask,
+              ...taskData,
+              updatedAt: new Date().toISOString()
+            }
+            handleUpdateTask(updatedTask)
+          }
+          setShowEditModal(false)
+          setSelectedTask(null)
+        }}
+        employees={employees}
+        initialTask={selectedTask || undefined}
+        isEditMode={true}
       />
 
       <TaskDetailModal
@@ -3434,6 +3437,33 @@ export default function TaskManagement() {
         onSave={handleCreateEvent}
         selectedDate={selectedEventDate}
         employees={employees}
+      />
+
+      <TaskImportModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onImport={(importedTasks) => {
+          importedTasks.forEach((taskData: any) => {
+            const newTask = {
+              ...taskData,
+              id: `task-import-${Date.now()}-${Math.random().toString(36).slice(2)}`,
+              status: 'pending' as const,
+              progress: 0,
+              tags: [],
+              internalNotes: taskData.internalNotes || '',
+              progressNotes: [],
+              isAutoCreated: false,
+              reminders: [],
+              customReminders: [],
+              createdAt: new Date().toISOString(),
+              createdBy: 'Import',
+              updatedAt: new Date().toISOString(),
+              history: [],
+            }
+            setTasks(prev => [...prev, newTask])
+          })
+        }}
+        existingTasks={tasks.map(t => ({ title: t.title, dueDate: t.dueDate.split('T')[0] }))}
       />
     </div>
   )

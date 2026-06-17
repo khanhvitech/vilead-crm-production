@@ -1,0 +1,567 @@
+﻿'use client'
+
+import React, { useState, useRef, useEffect } from 'react'
+import {
+  MoreHorizontal, Pencil, Copy, Trash2,
+  ChevronUp, ChevronDown, ExternalLink,
+  CheckCircle2, Clock, Archive, FolderInput,
+  Check, X, Type
+} from 'lucide-react'
+import { Flow, FlowStatus, Folder } from './types'
+import { cn } from '@/lib/utils'
+import { formatDistanceToNow } from 'date-fns'
+import { vi } from 'date-fns/locale'
+
+interface FlowTableProps {
+  flows: Flow[]
+  loading: boolean
+  onEdit: (id: string) => void
+  onDuplicate: (id: string) => void
+  onDelete: (id: string) => void
+  onRename: (id: string, newName: string) => void
+  onUpdateShortcut: (id: string, shortcut: string | null) => void
+  onMoveToFolder: (ids: string[], folderId: string) => void
+  onBulkDelete: (ids: string[]) => void
+  onBulkDuplicate: (ids: string[]) => void
+  folders: Folder[]
+  sortField: string
+  sortOrder: 'asc' | 'desc'
+  onSort: (field: string) => void
+  // Pagination
+  currentPage: number
+  totalPages: number
+  pageSize: number
+  totalCount: number
+  onPageChange: (page: number) => void
+  onPageSizeChange: (size: number) => void
+}
+
+function StatusBadge({ status }: { status: FlowStatus }) {
+  if (status === 'published') return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+      <CheckCircle2 className="w-3 h-3" />
+      Đã xuất bản
+    </span>
+  )
+  if (status === 'draft') return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 border border-[#e6ebf1]">
+      <Clock className="w-3 h-3" />
+      Bản nháp
+    </span>
+  )
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-50 text-red-600 border border-red-200">
+      <Archive className="w-3 h-3" />
+      Thùng rác
+    </span>
+  )
+}
+
+function SortHeader({
+  label, field, currentField, currentOrder, onSort
+}: { label: string; field: string; currentField: string; currentOrder: string; onSort: (f: string) => void }) {
+  const isActive = currentField === field
+  return (
+    <button
+      onClick={() => onSort(field)}
+      className={cn(
+        'flex items-center gap-1 text-xs font-semibold uppercase tracking-wider transition-colors',
+        isActive ? 'text-blue-600' : 'text-gray-500 hover:text-gray-700'
+      )}
+    >
+      {label}
+      <span className="flex flex-col ml-0.5">
+        <ChevronUp className={cn('w-3 h-3 -mb-1', isActive && currentOrder === 'asc' ? 'text-blue-600' : 'text-gray-300')} />
+        <ChevronDown className={cn('w-3 h-3', isActive && currentOrder === 'desc' ? 'text-blue-600' : 'text-gray-300')} />
+      </span>
+    </button>
+  )
+}
+
+export default function FlowTable({
+  flows, loading, onEdit, onDuplicate, onDelete, onRename, onUpdateShortcut,
+  onMoveToFolder, onBulkDelete, onBulkDuplicate,
+  folders,
+  sortField, sortOrder, onSort,
+  currentPage, totalPages, pageSize, totalCount, onPageChange, onPageSizeChange,
+}: FlowTableProps) {
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+
+  // Rename inline state
+  const [renamingId, setRenamingId] = useState<string | null>(null)
+  const [renameValue, setRenameValue] = useState('')
+  const renameInputRef = useRef<HTMLInputElement>(null)
+
+  // Shortcut inline edit state
+  const [editingShortcutId, setEditingShortcutId] = useState<string | null>(null)
+  const [shortcutValue, setShortcutValue] = useState('')
+  const shortcutInputRef = useRef<HTMLInputElement>(null)
+
+  // Move to folder dropdown
+  const [moveFolderOpen, setMoveFolderOpen] = useState(false)
+  const moveFolderRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (renamingId && renameInputRef.current) {
+      renameInputRef.current.focus()
+      renameInputRef.current.select()
+    }
+  }, [renamingId])
+
+  useEffect(() => {
+    if (editingShortcutId && shortcutInputRef.current) {
+      shortcutInputRef.current.focus()
+      shortcutInputRef.current.select()
+    }
+  }, [editingShortcutId])
+
+  // Close move-folder dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (moveFolderRef.current && !moveFolderRef.current.contains(e.target as Node)) {
+        setMoveFolderOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [])
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === flows.length) setSelectedIds(new Set())
+    else setSelectedIds(new Set(flows.map(f => f.id)))
+  }
+
+  const selectAllVisible = () => setSelectedIds(new Set(flows.map(f => f.id)))
+  const clearSelection = () => setSelectedIds(new Set())
+
+  const formatTime = (dateStr: string) => {
+    try {
+      return formatDistanceToNow(new Date(dateStr), { addSuffix: true, locale: vi })
+    } catch {
+      return dateStr
+    }
+  }
+
+  // Rename handlers
+  const startRename = (flow: Flow) => {
+    setRenamingId(flow.id)
+    setRenameValue(flow.name)
+    setMenuOpenId(null)
+  }
+
+  const commitRename = () => {
+    if (renamingId && renameValue.trim()) {
+      onRename(renamingId, renameValue.trim())
+    }
+    setRenamingId(null)
+    setRenameValue('')
+  }
+
+  const cancelRename = () => {
+    setRenamingId(null)
+    setRenameValue('')
+  }
+
+  // Shortcut handlers
+  const startEditShortcut = (flow: Flow) => {
+    setEditingShortcutId(flow.id)
+    setShortcutValue(flow.shortcut || '')
+  }
+
+  const commitShortcut = () => {
+    if (editingShortcutId) {
+      const val = shortcutValue.trim()
+      onUpdateShortcut(editingShortcutId, val || null)
+    }
+    setEditingShortcutId(null)
+    setShortcutValue('')
+  }
+
+  const cancelShortcut = () => {
+    setEditingShortcutId(null)
+    setShortcutValue('')
+  }
+
+  if (loading) return (
+    <div className="flex-1 flex items-center justify-center py-20">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        <p className="text-sm text-gray-500">Đang tải...</p>
+      </div>
+    </div>
+  )
+
+  if (flows.length === 0) return (
+    <div className="flex-1 flex flex-col items-center justify-center py-16 text-center">
+      <div className="w-16 h-16 bg-gray-100 rounded-[10px] flex items-center justify-center mb-4">
+        <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        </svg>
+      </div>
+      <h3 className="font-semibold text-gray-800 mb-1">Chưa có luồng tin nhắn nào</h3>
+      <p className="text-sm text-gray-500">Tạo luồng đầu tiên để bắt đầu tự động hóa</p>
+    </div>
+  )
+
+  const selectedCount = selectedIds.size
+
+  return (
+    <div className="flex flex-col flex-1 min-h-0">
+      {/* ── Bulk Action Bar ─────────────────────────────────── */}
+      {selectedCount > 0 && (
+        <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] mx-4 mt-3 px-4 py-2.5 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <span className="text-sm font-medium text-blue-900">
+              Đã chọn <strong>{selectedCount}</strong> luồng
+            </span>
+            <button
+              onClick={clearSelection}
+              className="text-xs text-blue-600 hover:text-blue-800 underline"
+            >
+              Bỏ chọn tất cả
+            </button>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Select all visible */}
+            {selectedCount < flows.length && (
+              <button
+                onClick={selectAllVisible}
+                className="px-3 py-1.5 bg-white border border-blue-300 text-[#3e79f7] text-sm rounded-md hover:bg-blue-50 transition-colors flex items-center gap-1.5"
+              >
+                <Check className="w-3.5 h-3.5" />
+                Chọn tất cả ({flows.length})
+              </button>
+            )}
+
+            {/* Move to folder */}
+            <div className="relative" ref={moveFolderRef}>
+              <button
+                onClick={() => setMoveFolderOpen(v => !v)}
+                className="px-3 py-1.5 bg-[#3e79f7] text-white text-sm rounded-md hover:bg-[#699dff] transition-colors flex items-center gap-1.5"
+              >
+                <FolderInput className="w-3.5 h-3.5" />
+                Chuyển thư mục
+              </button>
+              {moveFolderOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setMoveFolderOpen(false)} />
+                  <div className="absolute right-0 top-9 z-20 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] py-1.5 min-w-44 overflow-hidden">
+                    {folders.map(folder => (
+                      <button
+                        key={folder.id}
+                        onClick={() => {
+                          onMoveToFolder(Array.from(selectedIds), folder.id)
+                          setMoveFolderOpen(false)
+                          clearSelection()
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                        </svg>
+                        {folder.name}
+                      </button>
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Duplicate */}
+            <button
+              onClick={() => {
+                onBulkDuplicate(Array.from(selectedIds))
+                clearSelection()
+              }}
+              className="px-3 py-1.5 bg-orange-500 text-white text-sm rounded-md hover:bg-orange-600 transition-colors flex items-center gap-1.5"
+            >
+              <Copy className="w-3.5 h-3.5" />
+              Nhân bản
+            </button>
+
+            {/* Delete */}
+            <button
+              onClick={() => {
+                onBulkDelete(Array.from(selectedIds))
+                clearSelection()
+              }}
+              className="px-3 py-1.5 bg-[#ff6b72] text-white text-sm rounded-md hover:bg-[#d9505c] transition-colors flex items-center gap-1.5"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              Xóa
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-auto">
+        <table className="w-full text-sm">
+          <thead className="sticky top-0 bg-gray-50 z-10">
+            <tr className="border-b border-[#e6ebf1]">
+              <th className="w-10 px-4 py-3">
+                <input
+                  type="checkbox"
+                  checked={flows.length > 0 && selectedIds.size === flows.length}
+                  onChange={toggleSelectAll}
+                  className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
+                />
+              </th>
+              <th className="px-4 py-3 text-left">
+                <SortHeader label="Tên luồng" field="name" currentField={sortField} currentOrder={sortOrder} onSort={onSort} />
+              </th>
+              <th className="px-4 py-3 text-left">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Thư mục</span>
+              </th>
+              <th className="px-4 py-3 text-left">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Shortcut</span>
+              </th>
+              <th className="px-4 py-3 text-left">
+                <span className="text-xs font-semibold uppercase tracking-wider text-gray-500">Trạng thái</span>
+              </th>
+              <th className="px-4 py-3 text-left">
+                <SortHeader label="Cập nhật" field="updatedAt" currentField={sortField} currentOrder={sortOrder} onSort={onSort} />
+              </th>
+              <th className="w-10 px-4 py-3" />
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100">
+            {flows.map((flow) => (
+              <tr
+                key={flow.id}
+                className={cn(
+                  'group transition-colors hover:bg-blue-50/40',
+                  selectedIds.has(flow.id) && 'bg-blue-50'
+                )}
+              >
+                <td className="px-4 py-3">
+                  <input
+                    type="checkbox"
+                    checked={selectedIds.has(flow.id)}
+                    onChange={() => toggleSelect(flow.id)}
+                    className="rounded border-[#e6ebf1] text-blue-600 focus:ring-[#3e79f7]"
+                    onClick={e => e.stopPropagation()}
+                  />
+                </td>
+
+                {/* Name cell – inline rename */}
+                <td className="px-4 py-3">
+                  {renamingId === flow.id ? (
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <input
+                        ref={renameInputRef}
+                        value={renameValue}
+                        onChange={e => setRenameValue(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') commitRename()
+                          if (e.key === 'Escape') cancelRename()
+                        }}
+                        onBlur={commitRename}
+                        className="flex-1 px-2 py-1 text-sm border border-[#699dff] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#3e79f7] bg-white"
+                        placeholder="Tên luồng..."
+                      />
+                      <button onClick={commitRename} className="p-1 text-green-600 hover:text-green-700">
+                        <Check className="w-3.5 h-3.5" />
+                      </button>
+                      <button onClick={cancelRename} className="p-1 text-gray-400 hover:text-gray-600">
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => onEdit(flow.id)}
+                      className="flex items-center gap-2 font-medium text-gray-800 hover:text-blue-600 transition-colors group/name"
+                    >
+                      <div className="w-7 h-7 rounded-[10px] bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center shrink-0">
+                        <svg className="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                      </div>
+                      <span>{flow.name}</span>
+                      <ExternalLink className="w-3.5 h-3.5 text-blue-400 opacity-0 group-hover/name:opacity-100 transition-opacity ml-0.5" />
+                    </button>
+                  )}
+                </td>
+
+                <td className="px-4 py-3">
+                  <span className="inline-flex items-center gap-1 text-gray-600">
+                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>
+                    {flow.folder.name}
+                  </span>
+                </td>
+
+                {/* Shortcut cell – inline edit */}
+                <td className="px-4 py-3">
+                  {editingShortcutId === flow.id ? (
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-xs text-gray-400 font-mono">/</span>
+                      <input
+                        ref={shortcutInputRef}
+                        value={shortcutValue.startsWith('/') ? shortcutValue.slice(1) : shortcutValue}
+                        onChange={e => setShortcutValue(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') commitShortcut()
+                          if (e.key === 'Escape') cancelShortcut()
+                        }}
+                        onBlur={commitShortcut}
+                        placeholder="shortcut"
+                        className="w-24 px-2 py-0.5 text-xs font-mono border border-purple-400 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-200 bg-purple-50 text-purple-700"
+                      />
+                    </div>
+                  ) : flow.shortcut ? (
+                    <div className="flex items-center gap-1 group/sc">
+                      <code
+                        onClick={() => startEditShortcut(flow)}
+                        className="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs font-mono border border-purple-200 cursor-pointer hover:bg-purple-100 transition-colors"
+                        title="Click để sửa shortcut"
+                      >
+                        {flow.shortcut}
+                      </code>
+                      <button
+                        onClick={() => startEditShortcut(flow)}
+                        className="opacity-0 group-hover/sc:opacity-100 p-0.5 text-gray-400 hover:text-purple-600 transition-all"
+                        title="Sửa shortcut"
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => startEditShortcut(flow)}
+                      className="opacity-0 group-hover:opacity-100 p-1 rounded-[10px] text-gray-400 hover:text-purple-600 hover:bg-purple-50 transition-all"
+                      title="Thêm shortcut"
+                    >
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </td>
+
+                <td className="px-4 py-3">
+                  <StatusBadge status={flow.status} />
+                </td>
+                <td className="px-4 py-3 text-gray-500 text-xs">
+                  {formatTime(flow.updatedAt)}
+                </td>
+
+                {/* Actions (3-dot menu) */}
+                <td className="px-4 py-3 relative">
+                  <div className="relative">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setMenuOpenId(menuOpenId === flow.id ? null : flow.id) }}
+                      className="p-1.5 rounded-[10px] text-gray-400 hover:text-gray-600 hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-all"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </button>
+
+                    {menuOpenId === flow.id && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setMenuOpenId(null)} />
+                        <div className="absolute right-0 top-8 z-20 bg-white rounded-[10px] shadow-xl border border-[#e6ebf1] py-1.5 min-w-40 overflow-hidden">
+                          {/* Đổi tên */}
+                          <button
+                            onClick={() => startRename(flow)}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Type className="w-3.5 h-3.5 text-gray-400" />
+                            Đổi tên
+                          </button>
+                          <button
+                            onClick={() => { onEdit(flow.id); setMenuOpenId(null) }}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Pencil className="w-3.5 h-3.5 text-gray-400" />
+                            Chỉnh sửa
+                          </button>
+                          <button
+                            onClick={() => { onDuplicate(flow.id); setMenuOpenId(null) }}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                          >
+                            <Copy className="w-3.5 h-3.5 text-gray-400" />
+                            Nhân bản
+                          </button>
+                          <div className="border-t border-gray-100 my-1" />
+                          <button
+                            onClick={() => { onDelete(flow.id); setMenuOpenId(null) }}
+                            className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            Xóa
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Pagination */}
+      <div className="flex items-center justify-between px-4 py-3 border-t border-[#e6ebf1] bg-white shrink-0">
+        <div className="flex items-center gap-2 text-sm text-gray-600">
+          <span>Hiển thị</span>
+          <select
+            value={pageSize}
+            onChange={e => onPageSizeChange(Number(e.target.value))}
+            className="border border-[#e6ebf1] rounded-[10px] px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-[#3e79f7]"
+          >
+            {[10, 20, 50].map(s => (
+              <option key={s} value={s}>{s}</option>
+            ))}
+          </select>
+          <span>/ {totalCount} luồng</span>
+        </div>
+
+        <div className="flex items-center gap-1">
+          <button
+            disabled={currentPage <= 1}
+            onClick={() => onPageChange(currentPage - 1)}
+            className="px-3 py-1.5 text-sm rounded-[10px] border border-[#e6ebf1] text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            ← Trước
+          </button>
+          {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(page => (
+            <button
+              key={page}
+              onClick={() => onPageChange(page)}
+              className={cn(
+                'w-8 h-8 text-sm rounded-[10px] transition-colors',
+                currentPage === page
+                  ? 'bg-[#3e79f7] text-white font-medium'
+                  : 'text-gray-600 hover:bg-gray-100'
+              )}
+            >
+              {page}
+            </button>
+          ))}
+          <button
+            disabled={currentPage >= totalPages}
+            onClick={() => onPageChange(currentPage + 1)}
+            className="px-3 py-1.5 text-sm rounded-[10px] border border-[#e6ebf1] text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Sau →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}

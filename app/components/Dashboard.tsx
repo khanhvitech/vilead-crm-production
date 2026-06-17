@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { 
@@ -11,19 +11,51 @@ import {
   MoreVertical,
   BarChart3,
   Plus,
-  Minus
+  Minus,
+  Info,
+  Calendar,
+  ChevronDown,
+  FileText
 } from 'lucide-react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ComposedChart } from 'recharts'
-import EnhancedDashboardFilters from './EnhancedDashboardFilters'
-// import VileadRevenueChart from './VileadRevenueChart'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, ComposedChart, ReferenceLine } from 'recharts'
+import ReportEmployeeFilter, { getFilterMultiplier } from './reports/ReportEmployeeFilter'
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }: { onNavigate?: (view: string) => void } = {}) {
   // State for time period selection
-  const [selectedPeriod, setSelectedPeriod] = useState<'thismonth' | '6months' | '12months' | 'custom'>('thismonth')
+  const [selectedPeriod, setSelectedPeriod] = useState<'thismonth' | 'this_week' | 'this_quarter' | 'this_year' | 'custom'>('thismonth')
   const [showCustomModal, setShowCustomModal] = useState(false)
   const [customStartDate, setCustomStartDate] = useState('')
   const [customEndDate, setCustomEndDate] = useState('')
   
+  // Filter state (pending, not yet applied)
+  const [filterDepartment, setFilterDepartment] = useState('')
+  const [filterTeam, setFilterTeam] = useState('')
+  const [filterEmployee, setFilterEmployee] = useState('')
+  const [filtersChanged, setFiltersChanged] = useState(false)
+  // Applied filter state - only updates data when user clicks 'Áp dụng bộ lọc'
+  const [appliedDepartment, setAppliedDepartment] = useState('')
+  const [appliedTeam, setAppliedTeam] = useState('')
+  const [appliedEmployee, setAppliedEmployee] = useState('')
+
+  // (Department/Team/Employee options are managed by ReportEmployeeFilter component)
+
+  // Mock data per department for metric cards
+  const mockMetrics: Record<string, {revenue: string; revPrev: string; revChange: string; leads: number; leadsPrev: number; leadsChange: string; conversion: string; convPrev: string; convChange: string; tasks: number; tasksPrev: number; tasksChange: string}> = {
+    '': { revenue: '2.8B', revPrev: '2.5B', revChange: '+12%', leads: 245, leadsPrev: 207, leadsChange: '+18.5%', conversion: '18.5%', convPrev: '16.2%', convChange: '+2.3%', tasks: 68, tasksPrev: 72, tasksChange: '-5.2%' },
+    phong_kinh_doanh: { revenue: '1.8B', revPrev: '1.5B', revChange: '+20%', leads: 165, leadsPrev: 140, leadsChange: '+17.9%', conversion: '22.1%', convPrev: '19.5%', convChange: '+2.6%', tasks: 42, tasksPrev: 38, tasksChange: '+10.5%' },
+    phong_marketing: { revenue: '680M', revPrev: '620M', revChange: '+9.7%', leads: 55, leadsPrev: 45, leadsChange: '+22.2%', conversion: '12.3%', convPrev: '11.0%', convChange: '+1.3%', tasks: 18, tasksPrev: 22, tasksChange: '-18.2%' },
+  }
+
+  // Get current metrics based on APPLIED filter (only after clicking 'Áp dụng bộ lọc')
+  // Apply multiplier based on team/employee filter
+  const baseMetrics = mockMetrics[appliedDepartment] || mockMetrics['']
+  const filterMult = getFilterMultiplier(appliedDepartment, appliedTeam, appliedEmployee)
+  const currentMetrics = appliedTeam || appliedEmployee ? {
+    ...baseMetrics,
+    leads: Math.round(baseMetrics.leads * filterMult * (Object.keys(mockMetrics).length)),
+    tasks: Math.round(baseMetrics.tasks * filterMult * (Object.keys(mockMetrics).length)),
+  } : baseMetrics
+
   // Tooltip state
   const [hoveredBottleneck, setHoveredBottleneck] = useState<string | null>(null)
   const [showCalculationGuide, setShowCalculationGuide] = useState(false)
@@ -114,48 +146,14 @@ export default function Dashboard() {
     { month: '30/07', revenue: 0.31, target: 0.15 },
   ]
 
-  const revenueData6Months = [
-    { month: 'T1', revenue: 2.8, target: 3.0 },
-    { month: 'T2', revenue: 3.2, target: 3.5 },
-    { month: 'T3', revenue: 2.9, target: 3.2 },
-    { month: 'T4', revenue: 3.8, target: 4.0 },
-    { month: 'T5', revenue: 4.2, target: 4.2 },
-    { month: 'T6', revenue: 3.9, target: 4.1 },
-  ]
-
-  const revenueData12Months = [
-    { month: 'T1/2024', revenue: 2.1, target: 2.5 },
-    { month: 'T2/2024', revenue: 2.3, target: 2.7 },
-    { month: 'T3/2024', revenue: 2.6, target: 2.8 },
-    { month: 'T4/2024', revenue: 2.4, target: 2.9 },
-    { month: 'T5/2024', revenue: 2.7, target: 3.0 },
-    { month: 'T6/2024', revenue: 2.9, target: 3.1 },
-    { month: 'T7/2024', revenue: 2.8, target: 3.0 },
-    { month: 'T8/2024', revenue: 3.2, target: 3.5 },
-    { month: 'T9/2024', revenue: 2.9, target: 3.2 },
-    { month: 'T10/2024', revenue: 3.8, target: 4.0 },
-    { month: 'T11/2024', revenue: 4.2, target: 4.2 },
-    { month: 'T12/2024', revenue: 3.9, target: 4.1 },
-  ]
-
-  // Get current data based on selected period
-  const getCurrentRevenueData = () => {
-    switch (selectedPeriod) {
-      case 'thismonth':
-        return revenueDataThisMonth
-      case '6months':
-        return revenueData6Months
-      case '12months':
-        return revenueData12Months
-      case 'custom':
-        // For custom, we'll use 6months data as fallback
-        return revenueData6Months
-      default:
-        return revenueData6Months
-    }
-  }
-
-  const revenueData = getCurrentRevenueData()
+  // Revenue chart data is NOT affected by date filters, only by department/team/employee
+  // Always shows the current month's daily data
+  const revenueDataMultiplier = getFilterMultiplier(appliedDepartment, appliedTeam, appliedEmployee)
+  const revenueData = revenueDataThisMonth.map(d => ({
+    ...d,
+    revenue: Math.round(d.revenue * revenueDataMultiplier * 100) / 100,
+    target: Math.round(d.target * revenueDataMultiplier * 100) / 100,
+  }))
 
   // Calculate summary stats based on current data
   const calculateSummaryStats = () => {
@@ -202,9 +200,9 @@ export default function Dashboard() {
   const conversionData = [
     { stage: 'Lead mới', count: 254, percentage: 100 },
     { stage: 'Đang tư vấn', count: 186, percentage: 73.2 },
-    { stage: 'Đã gửi ĐX', count: 132, percentage: 52.0 },
+    { stage: 'Đã gửi đề xuất', count: 132, percentage: 52.0 },
     { stage: 'Đàm phán', count: 124, percentage: 48.8 },
-    { stage: 'Chờ thanh toán', count: 89, percentage: 35.0 },
+    { stage: 'Chuyển đổi - chờ thanh toán', count: 89, percentage: 35.0 },
     { stage: 'Chuyển đổi thành công', count: 42, percentage: 16.5 },
   ]
 
@@ -320,7 +318,7 @@ export default function Dashboard() {
         bg: 'bg-blue-50',
         dot: 'bg-blue-500',
         text: 'text-blue-900',
-        subtext: 'text-blue-700',
+        subtext: 'text-[#3e79f7]',
         badge: 'bg-blue-100 text-blue-800'
       }
     }
@@ -338,7 +336,7 @@ export default function Dashboard() {
         bg: 'bg-blue-50',
         iconBg: 'bg-blue-500',
         text: 'text-blue-900',
-        subtext: 'text-blue-700'
+        subtext: 'text-[#3e79f7]'
       },
       icon: (
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,7 +352,7 @@ export default function Dashboard() {
       type: 'demo',
       color: {
         bg: 'bg-green-50',
-        iconBg: 'bg-green-500',
+        iconBg: 'bg-[#2dc56a]',
         text: 'text-green-900',
         subtext: 'text-green-700'
       },
@@ -389,10 +387,10 @@ export default function Dashboard() {
       location: 'Zoom Meeting',
       type: 'review',
       color: {
-        bg: 'bg-indigo-50',
-        iconBg: 'bg-indigo-500',
+        bg: 'bg-[#f0f7ff]',
+        iconBg: 'bg-[#f0f7ff]0',
         text: 'text-indigo-900',
-        subtext: 'text-indigo-700'
+        subtext: 'text-[#3e79f7]'
       },
       icon: (
         <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -405,186 +403,155 @@ export default function Dashboard() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Tổng quan</h1>
-          <p className="text-gray-600">Theo dõi hiệu suất kinh doanh của bạn</p>
-        </div>
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Tổng quan</h1>
+        <p className="text-gray-600">Theo dõi hiệu suất kinh doanh của bạn</p>
       </div>
 
-      {/* Dashboard Filters */}
-      <EnhancedDashboardFilters onFilterChange={(filters) => console.log('Filters changed:', filters)} />
+      {/* Filter Bar - Report Style */}
+      <div className="flex items-center space-x-3">
+        {/* Time select */}
+        <select
+          value={selectedPeriod}
+          onChange={(e) => { setSelectedPeriod(e.target.value as any); setFiltersChanged(true) }}
+          className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+        >
+          <option value="today">Hôm nay</option>
+          <option value="this_week">Tuần này</option>
+          <option value="thismonth">Tháng này</option>
+          <option value="this_quarter">Quý này</option>
+          <option value="this_year">Năm này</option>
+          <option value="custom">Chọn thời gian</option>
+        </select>
+
+        {/* Date range inputs - only show when 'Chọn thời gian' is selected */}
+        {selectedPeriod === 'custom' && (
+        <div className="flex items-center space-x-2">
+          <input
+            type="date"
+            value={customStartDate}
+            onChange={(e) => { setCustomStartDate(e.target.value); setFiltersChanged(true) }}
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+          />
+          <span className="text-gray-500 text-sm">đến</span>
+          <input
+            type="date"
+            value={customEndDate}
+            onChange={(e) => { setCustomEndDate(e.target.value); setFiltersChanged(true) }}
+            className="border border-[#e6ebf1] rounded px-3 py-2 text-sm bg-white focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
+          />
+        </div>
+        )}
+
+        {/* Department > Team > Employee progressive filter */}
+        <ReportEmployeeFilter
+          selectedDepartment={filterDepartment}
+          onDepartmentChange={(val) => { setFilterDepartment(val); setFilterTeam(''); setFilterEmployee(''); setFiltersChanged(true) }}
+          selectedTeam={filterTeam}
+          onTeamChange={(val) => { setFilterTeam(val); setFilterEmployee(''); setFiltersChanged(true) }}
+          selectedEmployee={filterEmployee}
+          onEmployeeChange={(val) => { setFilterEmployee(val); setFiltersChanged(true) }}
+        />
+
+        {/* Áp dụng bộ lọc button */}
+        <button
+          onClick={() => {
+            setAppliedDepartment(filterDepartment)
+            setAppliedTeam(filterTeam)
+            setAppliedEmployee(filterEmployee)
+            setFiltersChanged(false)
+          }}
+          className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium transition-all duration-200 h-10 px-4 py-2 bg-[#2dc56a] hover:bg-[#04d182] text-white rounded-[10px] shadow-sm"
+        >
+          <FileText className="w-4 h-4" />
+          Áp dụng bộ lọc
+        </button>
+      </div>
 
       {/* Metric Cards */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-gradient-to-br from-blue-50 to-white p-4 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <TrendingUp className="w-5 h-5 text-blue-600" />
-            </div>
-            <h3 className="text-gray-600 text-sm font-medium">Doanh thu</h3>
+        <div 
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          onClick={() => {
+            onNavigate?.('reports')
+            setTimeout(() => {
+              const event = new CustomEvent('setReportTab', { detail: { tab: 'sales' } })
+              window.dispatchEvent(event)
+            }, 100)
+          }}
+        >
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
           <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <h2 className="text-[#151D48] text-[24px] font-semibold">2.800.000.000</h2>
-              <div className="group relative">
-                <div className="flex items-center text-sm font-medium">
-                  <span className="text-green-600">
-                    <ArrowUpRight className="w-3 h-3 mr-1" />12.0%
-                  </span>
-                  <span className="text-gray-400 mx-1">|</span>
-                  <span className="text-gray-500 text-xs">2.500.000.000</span>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 right-0 bg-gray-900 text-white text-xs p-2 rounded whitespace-nowrap">
-                  <div className="mb-1">So với tháng trước:</div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng này:</span>
-                    <span className="font-medium">2.800.000.000</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng trước:</span>
-                    <span className="font-medium">2.500.000.000</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-500 font-medium">KPI</span>
-                <span className="text-gray-900 font-semibold">85%</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-                <div className="h-full bg-blue-600 rounded-full transition-all duration-300" style={{width: '85%'}}></div>
-              </div>
+            <p className="text-base font-semibold text-white mb-2">Doanh thu</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{currentMetrics.revenue}</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-white/90">T.trước: {currentMetrics.revPrev}</p>
+              <p className="text-sm text-white/90 font-semibold">{currentMetrics.revChange}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-white p-4 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="p-2 bg-purple-100 rounded-lg">
-              <Users className="w-5 h-5 text-purple-600" />
-            </div>
-            <h3 className="text-gray-600 text-sm font-medium">Số lượng leads</h3>
+        <div 
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          onClick={() => {
+            onNavigate?.('reports')
+            setTimeout(() => {
+              const event = new CustomEvent('setReportTab', { detail: { tab: 'sources' } })
+              window.dispatchEvent(event)
+            }, 100)
+          }}
+        >
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
           <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <h2 className="text-2xl font-semibold text-gray-900">245</h2>
-              <div className="group relative">
-                <div className="flex items-center text-sm font-medium">
-                  <span className="text-green-600">
-                    <ArrowUpRight className="w-3 h-3 mr-1" />18.5%
-                  </span>
-                  <span className="text-gray-400 mx-1">|</span>
-                  <span className="text-gray-500 text-xs">207</span>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 right-0 bg-gray-900 text-white text-xs p-2 rounded whitespace-nowrap">
-                  <div className="mb-1">So với tháng trước:</div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng này:</span>
-                    <span className="font-medium">245</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng trước:</span>
-                    <span className="font-medium">207</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-500 font-medium">KPI</span>
-                <span className="text-gray-900 font-semibold">92%</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-                <div className="h-full bg-purple-600 rounded-full transition-all duration-300" style={{width: '92%'}}></div>
-              </div>
+            <p className="text-base font-semibold text-white mb-2">Số lượng leads</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{currentMetrics.leads}</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-white/90">T.trước: {currentMetrics.leadsPrev}</p>
+              <p className="text-sm text-white/90 font-semibold">{currentMetrics.leadsChange}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-orange-50 to-white p-4 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="p-2 bg-orange-100 rounded-lg">
-              <Percent className="w-5 h-5 text-orange-600" />
-            </div>
-            <h3 className="text-gray-600 text-sm font-medium">Tỷ lệ chuyển đổi</h3>
+        <div 
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-orange-600 to-orange-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          onClick={() => {
+            onNavigate?.('reports')
+            setTimeout(() => {
+              const event = new CustomEvent('setReportTab', { detail: { tab: 'sales' } })
+              window.dispatchEvent(event)
+            }, 100)
+          }}
+        >
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
           <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <h2 className="text-2xl font-semibold text-gray-900">18.5%</h2>
-              <div className="group relative">
-                <div className="flex items-center text-sm font-medium">
-                  <span className="text-green-600">
-                    <ArrowUpRight className="w-3 h-3 mr-1" />2.3%
-                  </span>
-                  <span className="text-gray-400 mx-1">|</span>
-                  <span className="text-gray-500 text-xs">16.2%</span>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 right-0 bg-gray-900 text-white text-xs p-2 rounded whitespace-nowrap">
-                  <div className="mb-1">So với tháng trước:</div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng này:</span>
-                    <span className="font-medium">18.5%</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng trước:</span>
-                    <span className="font-medium">16.2%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-500 font-medium">KPI</span>
-                <span className="text-gray-900 font-semibold">95%</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-                <div className="h-full bg-orange-600 rounded-full transition-all duration-300" style={{width: '95%'}}></div>
-              </div>
+            <p className="text-base font-semibold text-white mb-2">Tỷ lệ chuyển đổi</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{currentMetrics.conversion}</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-white/90">T.trước: {currentMetrics.convPrev}</p>
+              <p className="text-sm text-white/90 font-semibold">{currentMetrics.convChange}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-white p-4 rounded-lg shadow hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
-          <div className="flex items-center space-x-2 mb-3">
-            <div className="p-2 bg-green-100 rounded-lg">
-              <Target className="w-5 h-5 text-green-600" />
-            </div>
-            <h3 className="text-gray-600 text-sm font-medium">Số lượng công việc</h3>
+        <div 
+          className="flex flex-col justify-between rounded-[10px] px-6 py-5 min-w-[180px] bg-gradient-to-br from-green-600 to-green-400 text-white shadow-lg cursor-pointer relative transition-all hover:shadow-xl"
+          onClick={() => onNavigate?.('tasks')}
+        >
+          <div className="absolute top-2 right-2">
+            <Info className="w-3.5 h-3.5 text-white/70 hover:text-white cursor-help transition-colors" />
           </div>
           <div>
-            <div className="flex items-baseline justify-between mb-3">
-              <h2 className="text-2xl font-semibold text-gray-900">68</h2>
-              <div className="group relative">
-                <div className="flex items-center text-sm font-medium">
-                  <span className="text-red-600">
-                    <ArrowDownRight className="w-3 h-3 mr-1" />5.2%
-                  </span>
-                  <span className="text-gray-400 mx-1">|</span>
-                  <span className="text-gray-500 text-xs">72</span>
-                </div>
-                <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute -top-10 right-0 bg-gray-900 text-white text-xs p-2 rounded whitespace-nowrap">
-                  <div className="mb-1">So với tháng trước:</div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng này:</span>
-                    <span className="font-medium">68</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span>Tháng trước:</span>
-                    <span className="font-medium">72</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="relative">
-              <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-500 font-medium">KPI</span>
-                <span className="text-gray-900 font-semibold">88%</span>
-              </div>
-              <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden cursor-pointer">
-                <div className="h-full bg-green-600 rounded-full transition-all duration-300" style={{width: '88%'}}></div>
-              </div>
+            <p className="text-base font-semibold text-white mb-2">Số lượng công việc</p>
+            <p className="text-4xl font-extrabold text-white mb-1">{currentMetrics.tasks}</p>
+            <div className="flex items-center justify-between mt-3">
+              <p className="text-sm text-white/90">T.trước: {currentMetrics.tasksPrev}</p>
+              <p className="text-sm text-white/90 font-semibold">{currentMetrics.tasksChange}</p>
             </div>
           </div>
         </div>
@@ -593,206 +560,162 @@ export default function Dashboard() {
       {/* Main Content Grid - Charts and Insights */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Enhanced Revenue Chart */}
-        <div className="lg:col-span-2 bg-gradient-to-br from-white via-blue-50/30 to-blue-100/20 p-8 rounded-2xl shadow-xl border border-blue-100/60 backdrop-blur-sm">
-          <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-4">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg">
-                <TrendingUp className="w-6 h-6 text-white" />
+        <div className="lg:col-span-2 bg-white p-6 rounded-[10px] shadow border border-[#e6ebf1]">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="p-2.5 bg-gradient-to-br from-blue-500 to-blue-600 rounded-[10px] shadow">
+                <TrendingUp className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h3 className="text-2xl font-black text-gray-900 tracking-tight">
-                  Doanh thu theo {selectedPeriod === 'thismonth' ? 'ngày' : selectedPeriod === '12months' ? 'tháng (năm)' : 'tháng'}
+                <h3 className="text-lg font-bold text-gray-900">
+                  Doanh thu theo ngày
                 </h3>
-                <p className="text-sm text-gray-600 font-medium">
-                  Theo dõi xu hướng {selectedPeriod === 'thismonth' ? 'hàng ngày' : 'tăng trưởng'} • Cập nhật realtime
+                <p className="text-sm text-gray-500">
+                  Theo dõi xu hướng tăng trưởng • Cập nhật realtime
                 </p>
               </div>
             </div>
-
           </div>
           
-          {/* Enhanced Summary Cards */}
+          {/* Summary Cards */}
           <div className="grid grid-cols-3 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-white to-blue-50/50 p-5 rounded-xl shadow-md border border-blue-100/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full shadow-md"></div>
-                  <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">Doanh thu hôm nay</span>
+            <div 
+              className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-blue-600 to-blue-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg"
+              onClick={() => {
+                onNavigate?.('reports')
+                setTimeout(() => {
+                  const event = new CustomEvent('setReportTab', { detail: { tab: 'sales', filter: 'today' } })
+                  window.dispatchEvent(event)
+                }, 100)
+              }}
+            >
+              <div>
+                <p className="text-sm font-semibold text-white/90 mb-1">Doanh thu hôm nay</p>
+                <p className="text-3xl font-extrabold text-white">310M</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-white/80">H.qua: 294M</p>
+                  <p className="text-xs text-white/90 font-semibold">+5.5%</p>
                 </div>
-                <div className="p-1.5 bg-blue-100 rounded-full">
-                  <TrendingUp className="w-3 h-3 text-blue-600" />
-                </div>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-[#151D48] text-[24px] font-semibold">310.000.000</span>
-              </div>
-              <div className="flex items-center space-x-1 mt-1">
-                <ArrowUpRight className="w-3 h-3 text-green-600" />
-                <span className="text-sm font-semibold text-green-600">+5.5%</span>
-                <span className="text-xs text-gray-500">so với hôm qua</span>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-green-50/50 p-5 rounded-xl shadow-md border border-green-100/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-green-500 to-green-600 rounded-full shadow-md"></div>
-                  <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">
-                    KPI hôm nay
-                  </span>
+            <div className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-green-600 to-green-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
+              <div>
+                <p className="text-sm font-semibold text-white/90 mb-1">KPI hôm nay</p>
+                <p className="text-3xl font-extrabold text-white">150M</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-white/80">Mục tiêu: 150M</p>
+                  <p className="text-xs text-white/90 font-semibold">206.7%</p>
                 </div>
-                <div className="p-1.5 bg-green-100 rounded-full">
-                  <Target className="w-3 h-3 text-green-600" />
-                </div>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-[#151D48] text-[24px] font-semibold">150.000.000</span>
-              </div>
-              <div className="flex items-center space-x-1 mt-1">
-                <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                <span className="text-sm font-semibold text-green-600">206.7% hoàn thành</span>
               </div>
             </div>
             
-            <div className="bg-gradient-to-br from-white to-purple-50/50 p-5 rounded-xl shadow-md border border-purple-100/50 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-gradient-to-r from-purple-500 to-purple-600 rounded-full shadow-md"></div>
-                  <span className="text-xs text-gray-600 font-bold tracking-wide uppercase">Tăng trưởng TB</span>
+            <div className="flex flex-col justify-between rounded-[10px] px-5 py-4 bg-gradient-to-br from-purple-600 to-purple-400 text-white shadow cursor-pointer relative transition-all hover:shadow-lg">
+              <div>
+                <p className="text-sm font-semibold text-white/90 mb-1">Tăng trưởng TB</p>
+                <p className="text-3xl font-extrabold text-white">+5.5%</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-white/80">Trung bình hàng ngày</p>
                 </div>
-                <div className="p-1.5 bg-purple-100 rounded-full">
-                  <BarChart3 className="w-3 h-3 text-purple-600" />
-                </div>
-              </div>
-              <div className="flex items-baseline space-x-2">
-                <span className="text-2xl font-black text-gray-900">+5.5</span>
-                <span className="text-lg font-semibold text-gray-600">%</span>
-              </div>
-              <div className="flex items-center space-x-1 mt-1">
-                <span className="text-xs text-gray-500">Trung bình hàng ngày</span>
               </div>
             </div>
           </div>
 
-            <div className="relative">
-            <div className="h-80 bg-gradient-to-br from-white via-blue-50/20 to-blue-100/30 rounded-xl p-6 border border-blue-100/40 shadow-inner">
-              <ResponsiveContainer width="100%" height="100%">
-                <ComposedChart data={revenueData} margin={{ top: 20, right: 30, left: 20, bottom: 20 }}>
-                  <defs>
-                    <linearGradient id="barGradient" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3b82f6" stopOpacity={0.8} />
-                      <stop offset="100%" stopColor="#93c5fd" stopOpacity={0.3} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid 
-                    strokeDasharray="3 3" 
-                    stroke="#e2e8f0" 
-                    strokeOpacity={0.5}
-                  />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="#64748b" 
-                    fontSize={12}
-                    fontWeight="500"
-                    tickLine={false}
-                    axisLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
-                  />
-                  <YAxis 
-                    stroke="#64748b" 
-                    fontSize={12}
-                    fontWeight="500"
-                    tickLine={false}
-                    axisLine={{ stroke: '#cbd5e1', strokeWidth: 1 }}
-                    tickFormatter={(value) => `${(Number(value) * 1000000000).toLocaleString('vi-VN')}`}
-                    width={120}
-                  />
-                  <Tooltip 
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.95)',
-                      border: 'none',
-                      borderRadius: '12px',
-                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
-                      padding: '12px'
-                    }}
-                    labelStyle={{ 
-                      color: '#1f2937', 
-                      fontWeight: '600', 
-                      fontSize: '14px',
-                      marginBottom: '4px'
-                    }}
-                    formatter={(value, name) => {
-                      if (name === 'revenue') {
-                        const kpiValue = revenueData[0]?.target || 0.15;
-                        return [
-                          <div key="tooltip-content" className="space-y-1">
-                            <div>
-                              <span className="text-[#151D48] text-[16px] font-semibold">
-                                {`${(Number(value) * 1000000000).toLocaleString('vi-VN')} VND`}
-                              </span>
-                              <span className="block font-medium text-blue-600">💰 Doanh thu</span>
-                            </div>
-                            <div className="pt-1 border-t border-gray-200">
-                              <span className="text-[14px] font-medium text-green-600">
-                                🎯 KPI: {`${(kpiValue * 1000000000).toLocaleString('vi-VN')} VND`}
-                              </span>
-                            </div>
-                          </div>,
-                          ""
-                        ];
-                      }
-                      return [
-                        <span key="value" className="text-[14px] font-medium text-green-600">
-                          {`${(Number(value) * 1000000000).toLocaleString('vi-VN')} VND`}
-                        </span>,
-                        <span key="label" className="font-medium text-green-600">
-                          🎯 KPI
-                        </span>
-                      ];
-                    }}
-                    labelFormatter={(label) => `📅 ${label}`}
-                  />
-                  {/* KPI Reference Line */}
-                  <Line 
-                    type="monotone"
-                    dataKey="target" 
-                    stroke="#10b981" 
-                    strokeWidth={3}
-                    strokeDasharray="8 4"
-                    dot={false}
-                    activeDot={{ r: 6, fill: '#10b981', stroke: '#fff', strokeWidth: 2 }}
-                    name="target"
-                  />
-                  <Bar 
-                    dataKey="revenue" 
-                    fill="url(#barGradient)"
-                    radius={[4, 4, 0, 0]}
-                    stroke="#3b82f6"
-                    strokeWidth={1}
-                    name="revenue"
-                  />
-                </ComposedChart>
-              </ResponsiveContainer>
-              
-              {/* Enhanced Legend */}
-              <div className="absolute bottom-4 left-6 flex items-center space-x-6 bg-white/90 px-4 py-2 rounded-full shadow-md backdrop-blur-sm">
-                <div className="flex items-center space-x-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded"></div>
-                  <span className="text-xs font-semibold text-gray-700">Doanh thu</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <div className="w-6 h-0.5 bg-green-500 rounded" style={{borderStyle: 'dashed', borderTop: '2px dashed #10b981', backgroundColor: 'transparent'}}></div>
-                  <span className="text-xs font-semibold text-gray-700">KPI</span>
-                </div>
-              </div>
+          {/* Chart area - taller, no inner card */}
+          <div style={{ width: '100%', height: 400 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <ComposedChart data={revenueData.map(d => ({ ...d, remaining: Math.max(d.target - d.revenue, 0) }))} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke="#e2e8f0" 
+                  strokeOpacity={0.5}
+                  vertical={false}
+                />
+                <XAxis 
+                  dataKey="month" 
+                  stroke="#94a3b8" 
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={{ stroke: '#e2e8f0', strokeWidth: 1 }}
+                />
+                <YAxis 
+                  stroke="#94a3b8" 
+                  fontSize={11}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${(Number(value) * 1000000000).toLocaleString('vi-VN')}`}
+                  width={110}
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(59,130,246,0.06)' }}
+                  content={({ active, payload, label }) => {
+                    if (!active || !payload || !payload.length) return null;
+                    const revenueVal = payload.find(p => p.dataKey === 'revenue');
+                    const remainingVal = payload.find(p => p.dataKey === 'remaining');
+                    const rev = Number(revenueVal?.value || 0) * 1000000000;
+                    const rem = Number(remainingVal?.value || 0) * 1000000000;
+                    const kpi = rev + rem;
+                    return (
+                      <div className="bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg px-4 py-3 text-sm">
+                        <p className="font-semibold text-gray-800 mb-2">Ngày: {label}</p>
+                        <p className="text-gray-600">Doanh thu: <span className="font-semibold text-gray-900">{rev.toLocaleString('vi-VN')} VND</span></p>
+                        <p className="text-gray-600">KPI: <span className="font-semibold text-gray-900">{kpi.toLocaleString('vi-VN')} VND</span></p>
+                        <p className="text-gray-600">Còn lại so với KPI: <span className="font-semibold text-blue-600">{rem.toLocaleString('vi-VN')} VND</span></p>
+                      </div>
+                    );
+                  }}
+                />
+                {/* KPI target dashed line */}
+                <ReferenceLine
+                  y={revenueData[0]?.target || 0.15}
+                  stroke="#94a3b8"
+                  strokeWidth={1.5}
+                  strokeDasharray="6 4"
+                  label={{ value: 'KPI T', position: 'right', fill: '#94a3b8', fontSize: 10, fontWeight: 600 }}
+                />
+                {/* Actual revenue - medium blue */}
+                <Bar 
+                  dataKey="revenue" 
+                  stackId="stack"
+                  fill="#2563EB"
+                  radius={[0, 0, 0, 0]}
+                  name="revenue"
+                />
+                {/* Remaining to KPI - light blue */}
+                <Bar 
+                  dataKey="remaining" 
+                  stackId="stack"
+                  fill="#93C5FD"
+                  radius={[2, 2, 0, 0]}
+                  name="remaining"
+                />
+              </ComposedChart>
+            </ResponsiveContainer>
+          </div>
+          
+          {/* Legend */}
+          <div className="flex items-center space-x-6 mt-3 pl-2">
+            <div className="flex items-center space-x-2">
+              <div className="w-3 h-3 rounded" style={{ backgroundColor: '#2563EB' }}></div>
+              <span className="text-xs font-medium text-gray-600">Doanh thu</span>
+            </div>
+            <div className="flex items-center space-x-2">
+              <div className="w-6 h-0.5" style={{borderTop: '2px dashed #94a3b8'}}></div>
+              <span className="text-xs font-medium text-gray-600">KPI</span>
             </div>
           </div>
         </div>
 
         {/* Important Tasks & Schedule */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Công việc quan trọng</h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Xem tất cả</button>
+            <button 
+              className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium"
+              onClick={() => onNavigate?.('tasks')}
+            >
+              Xem tất cả
+            </button>
           </div>
           
           <div className="space-y-3">
@@ -816,13 +739,13 @@ export default function Dashboard() {
           </div>
 
           {/* Upcoming Schedule */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
-            <h4 className="text-md font-semibold text-gray-900 mb-3">Lịch quan trọng hôm nay</h4>
+          <div className="mt-6 pt-4 border-t border-[#e6ebf1]">
+            <h4 className="text-md font-semibold text-gray-900 mb-3">Lịch quan trọng</h4>
             <div className="space-y-3">
               {/* Today's Schedule - Display up to 4 */}
               {todaySchedule.slice(0, 4).map((schedule) => (
-                <div key={schedule.id} className={`flex items-center space-x-3 p-2 ${schedule.color.bg} rounded-lg`}>
-                  <div className={`w-8 h-8 ${schedule.color.iconBg} rounded-lg flex items-center justify-center`}>
+                <div key={schedule.id} className={`flex items-center space-x-3 p-2 ${schedule.color.bg} rounded-[10px]`}>
+                  <div className={`w-8 h-8 ${schedule.color.iconBg} rounded-[10px] flex items-center justify-center`}>
                     {schedule.icon}
                   </div>
                   <div className="flex-1">
@@ -839,7 +762,7 @@ export default function Dashboard() {
       {/* Conversion Funnel and Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Conversion Funnel */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <h3 className="text-lg font-semibold mb-6">Phễu chuyển đổi</h3>
           <div className="space-y-4">
             {conversionData.map((stage, index) => {
@@ -852,7 +775,7 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className={`w-3 h-3 rounded-full ${
-                        index === 0 ? 'bg-blue-600' :
+                        index === 0 ? 'bg-[#3e79f7]' :
                         index === 1 ? 'bg-blue-500' :
                         index === 2 ? 'bg-blue-400' :
                         index === 3 ? 'bg-blue-300' :
@@ -874,7 +797,7 @@ export default function Dashboard() {
                   {/* Funnel visualization */}
                   <div className="relative mb-4">
                     <div 
-                      className={`h-12 rounded-lg shadow-sm transition-all duration-500 flex items-center justify-between px-4 ${
+                      className={`h-12 rounded-[10px] shadow-sm transition-all duration-500 flex items-center justify-between px-4 ${
                         index === 0 ? 'bg-gradient-to-r from-blue-600 to-blue-500' :
                         index === 1 ? 'bg-gradient-to-r from-blue-500 to-blue-400' :
                         index === 2 ? 'bg-gradient-to-r from-blue-400 to-blue-300' :
@@ -905,7 +828,7 @@ export default function Dashboard() {
                   </div>
                   
                   {/* Conversion rate tooltip */}
-                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-0 right-0 bg-gray-900 text-white text-xs p-3 rounded-lg shadow-lg z-10 min-w-48">
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity absolute top-0 right-0 bg-gray-900 text-white text-xs p-3 rounded-[10px] shadow-lg z-10 min-w-48">
                     <div className="space-y-1">
                       <div className="font-semibold">{stage.stage}</div>
                       <div className="flex justify-between">
@@ -930,7 +853,7 @@ export default function Dashboard() {
           </div>
           
           {/* Summary */}
-          <div className="mt-6 pt-4 border-t border-gray-200">
+          <div className="mt-6 pt-4 border-t border-[#e6ebf1]">
             <div className="grid grid-cols-3 gap-4 text-center">
               <div>
                 <div className="text-lg font-bold text-blue-600">
@@ -955,86 +878,84 @@ export default function Dashboard() {
         </div>
 
         {/* Lead Sources Analysis */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg">
-                <Users className="w-4 h-4 text-white" />
-              </div>
-              <h3 className="text-lg font-semibold">Nguồn Leads & Phân tích</h3>
-            </div>
-            <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">Chi tiết</button>
+            <h3 className="text-lg font-semibold">Nguồn Leads & Phân tích</h3>
+            <button 
+              className="text-blue-600 hover:text-[#3e79f7] text-sm font-medium"
+              onClick={() => {
+                onNavigate?.('reports')
+                setTimeout(() => {
+                  const event = new CustomEvent('setReportTab', { detail: { tab: 'sources' } })
+                  window.dispatchEvent(event)
+                }, 100)
+              }}
+            >
+              Xem báo cáo đầy đủ
+            </button>
           </div>
           
           {/* Lead Sources Performance */}
-          <div className="space-y-4 mb-6">
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg border border-blue-200">
+          <div className="space-y-3 mb-6">
+            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-[10px] border border-blue-100 hover:bg-blue-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
+                <div className="p-2 bg-blue-500 rounded-[10px]">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
                   </svg>
                 </div>
                 <div>
-                  <div className="font-semibold text-blue-900">Facebook Ads</div>
-                  <div className="text-sm text-blue-700">245 leads • 24.5%</div>
+                  <div className="text-sm font-medium text-gray-900">Facebook Ads</div>
+                  <div className="text-xs text-gray-500">24.5% tổng leads</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-blue-900">92%</div>
-                <div className="text-xs text-green-600">Chất lượng cao</div>
+                <div className="text-2xl font-bold text-gray-900">245</div>
+                <div className="text-xs text-green-600 font-semibold">92% chuyển đổi</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border border-green-200">
+            <div className="flex items-center justify-between p-4 bg-green-50 rounded-[10px] border border-green-100 hover:bg-green-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                <div className="p-2 bg-[#2dc56a] rounded-[10px]">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12.48 10.92v3.28h7.84c-.24 1.84-.853 3.187-1.787 4.133-1.147 1.147-2.933 2.4-6.053 2.4-4.827 0-8.6-3.893-8.6-8.72s3.773-8.72 8.6-8.72c2.6 0 4.507 1.027 5.907 2.347l2.307-2.307C18.747 1.44 16.133 0 12.48 0 5.867 0 .307 5.387.307 12s5.56 12 12.173 12c3.573 0 6.267-1.173 8.373-3.36 2.16-2.16 2.84-5.213 2.84-7.667 0-.76-.053-1.467-.173-2.053H12.48z"/>
                   </svg>
                 </div>
                 <div>
-                  <div className="font-semibold text-green-900">Google Ads</div>
-                  <div className="text-sm text-green-700">182 leads • 18.2%</div>
+                  <div className="text-sm font-medium text-gray-900">Google Ads</div>
+                  <div className="text-xs text-gray-500">18.2% tổng leads</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-green-900">88%</div>
-                <div className="text-xs text-green-600">Ổn định</div>
+                <div className="text-2xl font-bold text-gray-900">182</div>
+                <div className="text-xs text-green-600 font-semibold">88% chuyển đổi</div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gradient-to-r from-orange-50 to-orange-100 rounded-lg border border-orange-200">
+            <div className="flex items-center justify-between p-4 bg-orange-50 rounded-[10px] border border-orange-100 hover:bg-orange-100 transition-colors cursor-pointer">
               <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-orange-600 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M7.8 2.4L6.4 1L1 6.4l1.4 1.4L7.8 2.4zM12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c3.86 0 7 3.14 7 7s-3.14 7-7 7-7-3.14-7-7 3.14-7 7-7z"/>
+                <div className="p-2 bg-orange-500 rounded-[10px]">
+                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.894 15.287c-.678 2.034-2.525 3.467-4.989 3.871a6.79 6.79 0 01-5.524-1.384 6.801 6.801 0 01-2.485-4.755c-.078-1.875.611-3.683 1.901-4.989a6.79 6.79 0 014.755-2.113c1.875-.078 3.683.611 4.989 1.901a6.801 6.801 0 012.485 4.755c.156 1.094-.078 2.189-.611 3.127l-.521.587z"/>
                   </svg>
                 </div>
                 <div>
-                  <div className="font-semibold text-orange-900">Zalo Business</div>
-                  <div className="text-sm text-orange-700">153 leads • 15.3%</div>
+                  <div className="text-sm font-medium text-gray-900">Zalo Business</div>
+                  <div className="text-xs text-gray-500">15.3% tổng leads</div>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-lg font-bold text-orange-900">95%</div>
-                <div className="text-xs text-orange-600">ROI cao</div>
+                <div className="text-2xl font-bold text-gray-900">153</div>
+                <div className="text-xs text-green-600 font-semibold">95% chuyển đổi</div>
               </div>
             </div>
           </div>
 
           {/* Bottleneck Analysis */}
           <div className="border-t pt-4">
-            <h4 className="font-semibold text-gray-900 mb-3 flex items-center justify-between">
-              <div className="flex items-center">
-                <svg className="w-4 h-4 text-red-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                </svg>
-                Điểm tắc nghẽn
-              </div>
+            <h4 className="text-lg font-semibold text-gray-900 mb-3 flex items-center justify-between">
+              <span>Điểm tắc nghẽn</span>
               <button 
                 onClick={() => setShowCalculationGuide(!showCalculationGuide)}
                 className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition-colors"
@@ -1048,7 +969,7 @@ export default function Dashboard() {
             
             {/* Calculation Guide */}
             {showCalculationGuide && (
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <div className="mb-4 p-4 bg-blue-50 rounded-[10px] border border-[#c7d9fd]">
                 <h5 className="font-semibold text-blue-900 mb-3 flex items-center">
                   <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -1065,9 +986,9 @@ export default function Dashboard() {
                         Thời gian phản hồi
                       </h6>
                       <div className="text-xs text-gray-600 space-y-1">
-                        <div className="bg-blue-50 p-2 rounded mb-2 border-l-2 border-blue-400">
+                        <div className="bg-blue-50 p-2 rounded mb-2 border-l-2 border-[#699dff]">
                           <p className="font-medium text-blue-800 mb-1">📋 Định nghĩa:</p>
-                          <p className="text-blue-700">Thời gian từ khi <strong>nhận lead</strong> cho tới khi <strong>liên hệ</strong> (gọi điện, nhắn tin, email) lần đầu tiên</p>
+                          <p className="text-[#3e79f7]">Thời gian từ khi <strong>nhận lead</strong> cho tới khi <strong>liên hệ</strong> (gọi điện, nhắn tin, email) lần đầu tiên</p>
                         </div>
                         <p><strong>Công thức:</strong></p>
                         <p>Tổng thời gian phản hồi ÷ Số leads</p>
@@ -1115,7 +1036,7 @@ export default function Dashboard() {
 
                     {/* Assignment Calculation */}
                     <div className="bg-white p-3 rounded border border-blue-100">
-                      <h6 className="font-medium text-blue-700 mb-2 flex items-center">
+                      <h6 className="font-medium text-[#3e79f7] mb-2 flex items-center">
                         <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
                         Phân bổ leads
                       </h6>
@@ -1181,7 +1102,7 @@ export default function Dashboard() {
             )}
             <div className="space-y-3">
               <div 
-                className="relative flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-red-100"
+                className="relative flex items-center justify-between p-3 bg-red-50 rounded-[10px] border border-red-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-red-100"
                 onMouseEnter={() => setHoveredBottleneck('response_time')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1190,13 +1111,13 @@ export default function Dashboard() {
                   <span className="text-sm font-medium text-red-900">Thời gian phản hồi leads</span>
                 </div>
                 <div className="text-right">
-                  <div className="text-sm font-bold text-red-900">3.2 giờ</div>
-                  <div className="text-xs text-red-600">+25% so với tháng trước</div>
+                  <div className="text-sm font-bold text-red-900">3.2h</div>
+                  <div className="text-xs text-red-600">Tăng 25% so với tuần trước</div>
                 </div>
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'response_time' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.response_time.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.response_time.explanation}</p>
                     
@@ -1223,7 +1144,7 @@ export default function Dashboard() {
               </div>
 
               <div 
-                className="relative flex items-center justify-between p-3 bg-yellow-50 rounded-lg border border-yellow-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-yellow-100"
+                className="relative flex items-center justify-between p-3 bg-yellow-50 rounded-[10px] border border-yellow-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-yellow-100"
                 onMouseEnter={() => setHoveredBottleneck('negotiation')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1238,7 +1159,7 @@ export default function Dashboard() {
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'negotiation' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.negotiation.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.negotiation.explanation}</p>
                     
@@ -1265,7 +1186,7 @@ export default function Dashboard() {
               </div>
 
               <div 
-                className="relative flex items-center justify-between p-3 bg-blue-50 rounded-lg border border-blue-200 cursor-help transition-all duration-200 hover:shadow-md hover:bg-blue-100"
+                className="relative flex items-center justify-between p-3 bg-blue-50 rounded-[10px] border border-[#c7d9fd] cursor-help transition-all duration-200 hover:shadow-md hover:bg-blue-100"
                 onMouseEnter={() => setHoveredBottleneck('assignment')}
                 onMouseLeave={() => setHoveredBottleneck(null)}
               >
@@ -1280,7 +1201,7 @@ export default function Dashboard() {
                 
                 {/* Tooltip */}
                 {hoveredBottleneck === 'assignment' && (
-                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50">
+                  <div className="absolute left-0 top-full mt-2 w-80 bg-white border border-[#e6ebf1] rounded-[10px] shadow-lg p-4 z-50">
                     <h4 className="font-semibold text-gray-900 mb-2">{bottleneckExplanations.assignment.title}</h4>
                     <p className="text-sm text-gray-600 mb-3">{bottleneckExplanations.assignment.explanation}</p>
                     
@@ -1315,10 +1236,21 @@ export default function Dashboard() {
       {/* Top Performers and Products */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Sales Performers */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Top nhân viên kinh doanh</h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm">Xem báo cáo đầy đủ</button>
+            <button 
+              className="text-blue-600 hover:text-[#3e79f7] text-sm"
+              onClick={() => {
+                onNavigate?.('reports')
+                setTimeout(() => {
+                  const event = new CustomEvent('setReportTab', { detail: { tab: 'sales' } })
+                  window.dispatchEvent(event)
+                }, 100)
+              }}
+            >
+              Xem báo cáo đầy đủ
+            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -1360,10 +1292,21 @@ export default function Dashboard() {
         </div>
 
         {/* Top Products */}
-        <div className="bg-white p-6 rounded-lg shadow">
+        <div className="bg-white p-6 rounded-[10px] shadow">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Top sản phẩm</h3>
-            <button className="text-blue-600 hover:text-blue-700 text-sm">Xem báo cáo đầy đủ</button>
+            <button 
+              className="text-blue-600 hover:text-[#3e79f7] text-sm"
+              onClick={() => {
+                onNavigate?.('reports')
+                setTimeout(() => {
+                  const event = new CustomEvent('setReportTab', { detail: { tab: 'sales' } })
+                  window.dispatchEvent(event)
+                }, 100)
+              }}
+            >
+              Xem báo cáo đầy đủ
+            </button>
           </div>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -1380,7 +1323,7 @@ export default function Dashboard() {
                   <tr key={index} className="border-b hover:bg-gray-50">
                     <td className="py-3">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-lg flex items-center justify-center text-white text-xs font-bold">
+                        <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-[10px] flex items-center justify-center text-white text-xs font-bold">
                           {product.name.charAt(0)}
                         </div>
                         <div>
@@ -1411,7 +1354,7 @@ export default function Dashboard() {
       {/* Custom Date Range Modal */}
       {showCustomModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-96 max-w-md mx-4">
+          <div className="bg-white rounded-[10px] shadow-2xl p-6 w-96 max-w-md mx-4">
             <div className="flex items-center justify-between mb-6">
               <h3 className="text-lg font-bold text-gray-900">Chọn khoảng thời gian</h3>
               <button 
@@ -1433,7 +1376,7 @@ export default function Dashboard() {
                   type="date"
                   value={customStartDate}
                   onChange={(e) => setCustomStartDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
               
@@ -1445,7 +1388,7 @@ export default function Dashboard() {
                   type="date"
                   value={customEndDate}
                   onChange={(e) => setCustomEndDate(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 border border-[#e6ebf1] rounded-[10px] focus:ring-2 focus:ring-[#3e79f7] focus:border-[#3e79f7]"
                 />
               </div>
               
@@ -1460,7 +1403,7 @@ export default function Dashboard() {
                       setCustomStartDate(lastMonth.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     30 ngày qua
                   </button>
@@ -1471,7 +1414,7 @@ export default function Dashboard() {
                       setCustomStartDate(last3Months.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     3 tháng qua
                   </button>
@@ -1482,7 +1425,7 @@ export default function Dashboard() {
                       setCustomStartDate(startOfYear.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     Từ đầu năm
                   </button>
@@ -1493,7 +1436,7 @@ export default function Dashboard() {
                       setCustomStartDate(lastYear.toISOString().split('T')[0])
                       setCustomEndDate(today.toISOString().split('T')[0])
                     }}
-                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="px-3 py-2 text-sm text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
                   >
                     1 năm qua
                   </button>
@@ -1504,14 +1447,14 @@ export default function Dashboard() {
             <div className="flex space-x-3 mt-6">
               <button
                 onClick={() => setShowCustomModal(false)}
-                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                className="flex-1 px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-[10px] transition-colors"
               >
                 Hủy
               </button>
               <button
                 onClick={applyCustomPeriod}
                 disabled={!customStartDate || !customEndDate}
-                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex-1 px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-[10px] hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Áp dụng
               </button>

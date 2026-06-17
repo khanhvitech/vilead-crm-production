@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 
 import { useState, useMemo } from 'react'
 import { 
@@ -229,11 +229,11 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
             <option value="90d">90 ngày qua</option>
             <option value="1y">1 năm qua</option>
           </select>
-          <button className="flex items-center space-x-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
+          <button className="flex items-center space-x-2 px-4 py-2 border border-[#e6ebf1] rounded-[10px] hover:bg-gray-50">
             <Download className="w-4 h-4" />
             <span>Xuất báo cáo</span>
           </button>
-          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+          <button className="flex items-center space-x-2 px-4 py-2 bg-primary-600 text-white rounded-[10px] hover:bg-primary-700">
             <RefreshCw className="w-4 h-4" />
             <span>Cập nhật</span>
           </button>
@@ -299,7 +299,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-blue-600 h-2 rounded-full" 
+                  className="bg-[#3e79f7] h-2 rounded-full" 
                   style={{ 
                     width: `${Math.round(customers.reduce((sum, c) => sum + c.emailOpenRate, 0) / customers.length)}%` 
                   }}
@@ -315,7 +315,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2">
                 <div 
-                  className="bg-green-600 h-2 rounded-full" 
+                  className="bg-[#2dc56a] h-2 rounded-full" 
                   style={{ 
                     width: `${Math.round(customers.reduce((sum, c) => sum + c.clickRate, 0) / customers.length)}%` 
                   }}
@@ -343,7 +343,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
             Cơ hội kinh doanh
           </h3>
           <div className="space-y-4">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+            <div className="bg-green-50 border border-green-200 rounded-[10px] p-3">
               <div className="flex items-center space-x-2 mb-1">
                 <TrendingUp className="w-4 h-4 text-green-600" />
                 <span className="font-medium text-green-800">Upsell Potential</span>
@@ -354,7 +354,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               <div className="text-sm text-green-600">khách hàng có tiềm năng cao</div>
             </div>
             
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-3">
               <div className="flex items-center space-x-2 mb-1">
                 <Star className="w-4 h-4 text-blue-600" />
                 <span className="font-medium text-blue-800">VIP Candidates</span>
@@ -365,7 +365,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               <div className="text-sm text-blue-600">ứng viên VIP tiềm năng</div>
             </div>
 
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
+            <div className="bg-orange-50 border border-orange-200 rounded-[10px] p-3">
               <div className="flex items-center space-x-2 mb-1">
                 <AlertTriangle className="w-4 h-4 text-orange-600" />
                 <span className="font-medium text-orange-800">Recovery Potential</span>
@@ -385,7 +385,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
             Xu hướng theo thời gian
           </h3>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
               <div>
                 <div className="font-medium text-gray-900">Khách hàng mới</div>
                 <div className="text-sm text-gray-500">Tuần này</div>
@@ -396,7 +396,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
               <div>
                 <div className="font-medium text-gray-900">Churn Rate</div>
                 <div className="text-sm text-gray-500">Tháng này</div>
@@ -407,7 +407,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               </div>
             </div>
 
-            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+            <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[10px]">
               <div>
                 <div className="font-medium text-gray-900">Revenue Growth</div>
                 <div className="text-sm text-gray-500">So với tháng trước</div>
@@ -428,7 +428,7 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
           Insights & Khuyến nghị
         </h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <div className="bg-red-50 border border-red-200 rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <AlertTriangle className="w-5 h-5 text-red-600" />
               <span className="font-medium text-red-800">Cảnh báo</span>
@@ -437,12 +437,12 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               {analytics.atRiskCustomers} khách hàng có nguy cơ rời bỏ cao, 
               cần chăm sóc khẩn cấp.
             </p>
-            <button className="text-sm bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700">
+            <button className="text-sm bg-[#ff6b72] text-white px-3 py-1 rounded hover:bg-[#d9505c]">
               Xem chi tiết
             </button>
           </div>
 
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+          <div className="bg-green-50 border border-green-200 rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <TrendingUp className="w-5 h-5 text-green-600" />
               <span className="font-medium text-green-800">Cơ hội</span>
@@ -451,21 +451,21 @@ export default function CustomerAnalytics({ customers }: CustomerAnalyticsProps)
               {customers.filter(c => c.upsellScore >= 70).length} khách hàng 
               có tiềm năng upsell cao.
             </p>
-            <button className="text-sm bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700">
+            <button className="text-sm bg-[#2dc56a] text-white px-3 py-1 rounded hover:bg-[#04d182]">
               Tạo campaign
             </button>
           </div>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-[#c7d9fd] rounded-[10px] p-4">
             <div className="flex items-center space-x-2 mb-2">
               <Target className="w-5 h-5 text-blue-600" />
               <span className="font-medium text-blue-800">Tối ưu</span>
             </div>
-            <p className="text-sm text-blue-700 mb-3">
+            <p className="text-sm text-[#3e79f7] mb-3">
               Tỷ lệ mở email trung bình {Math.round(customers.reduce((sum, c) => sum + c.emailOpenRate, 0) / customers.length)}%, 
               có thể cải thiện nội dung.
             </p>
-            <button className="text-sm bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700">
+            <button className="text-sm bg-[#3e79f7] text-white px-3 py-1 rounded hover:bg-[#699dff]">
               Xem gợi ý
             </button>
           </div>
